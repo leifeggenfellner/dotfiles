@@ -1,0 +1,99 @@
+## brew
+alias brewin="brew install"
+alias brewupg="brew upgrade"
+alias brewupd="brew update"
+alias brewrm="brew remove"
+
+## spotifyd
+alias rspt="brew services restart spotifyd"
+
+## ls
+alias ls="ls --color=auto"
+alias ll="ls -lAh --color=auto"
+alias l.="ls -A --color=auto"
+
+## nvim
+alias vi="nvim"
+alias vim="nvim"
+alias svi="sudo nvim"
+alias svi="nvim '+set si'"
+alias edit="nvim"
+
+## zshrc
+alias szrc="source ~/.zshrc"
+alias ezrc="nvim ~/.zshrc"
+alias ealias="nvim ~/.aliases"
+
+## cbonasi
+alias cbonsai="cbonsai -l"
+
+## top
+alias top="vtop -t nord"
+alias oldtop="/usr/bin/top"
+
+## weather
+alias weather="curl wttr.in"
+
+## grep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+## mkdir create parents
+alias mkdir="mkdir -pv"
+
+## mount
+alias mount="mount | column -t"
+
+## history
+alias h="history"
+
+## jobs
+alias j="jobs -l"
+
+## exit
+alias x="exit"
+
+## custom commands
+alias now="date +'%T'"
+alias nowtime=now
+alias nowdate="date +'%d-%m-%Y'"
+
+## ping
+alias ping="ping -c 5"
+alias fastping="ping -c 100 -s.2"
+
+## netstat
+alias ports="netstat -tulanp"
+
+## root
+alias root="sudo -i"
+alias su="sudo -i"
+
+## reboot / halt / poweroff
+alias reboot="sudo /sbin/reboot"
+alias poweroff="sudo /sbin/poweroff"
+alias halt="sudo /sbin/halt"
+alias off="sudo /sbin/shutdown -h now"
+
+## system info
+alias meminfo="free -mlt"
+
+alias psmem="ps aux | sort -nr -k 4"
+alias psmem10="ps aux | sort -nr -k 4 | head -10"
+
+alias pscpu="ps aux | sort -nr -k 3"
+alias pscpu10="ps aux | sort -nr -k 4 | head -10"
+
+alias cpuinfo="sysctl -a hw machdep.cpu"
+
+## wget
+alias wget="wget -c"
+
+## confirmation
+alias mv="mv -iv"
+alias cp="cp -iv"
+alias ln="ln -i"
+alias rm="rm -iv"
+alias pip=/Users/leif/.pyenv/shims/pip3
+alias config='/usr/bin/git --git-dir=/Users/leif/.cfg/ --work-tree=/Users/leif'
