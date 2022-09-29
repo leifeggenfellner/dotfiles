@@ -26,7 +26,7 @@ gum style \
 	--margin "1" \
 	--padding "1" \
 	--border-foreground "$GIT_COLOR" \
-	"$(git_color_text ' Git') Branch Manager"
+	"$(git_color_text ' Git')  Commit"
 
 TYPE=$(gum choose "fix" "feat" "docs" "style" "refactor" "test" "chore" "revert")
 SCOPE=$(gum input --placeholder "scope")
