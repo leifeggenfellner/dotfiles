@@ -4,14 +4,14 @@ alias brewupg="brew upgrade"
 alias brewupd="brew update"
 alias brewrm="brew remove"
 
-## spotifyd
-alias rspt="brew services restart spotifyd"
-
 ## ls
-alias ls="ls --color=auto"
-alias ll="ls -lAh --color=auto"
-alias l.="ls -A --color=auto"
+alias ls="exa"
+alias ll="exa -lah --color=auto"
+alias l.="exa -a --color=auto"
 
+## pip
+alias pip="pip3"
+alias pipin="pip install"
 ## nvim
 alias vi="nvim"
 alias vim="nvim"
@@ -20,7 +20,7 @@ alias svi="nvim '+set si'"
 alias edit="nvim"
 
 ## zshrc
-alias szrc="source ~/.zshrc"
+alias src="source ~/.zshrc"
 alias ezrc="nvim ~/.zshrc"
 alias ealias="nvim ~/.aliases"
 
@@ -95,5 +95,8 @@ alias mv="mv -iv"
 alias cp="cp -iv"
 alias ln="ln -i"
 alias rm="rm -iv"
-alias pip=/Users/leif/.pyenv/shims/pip3
 alias config='/usr/bin/git --git-dir=/Users/leif/.cfg/ --work-tree=/Users/leif'
+
+## Scripts
+alias cm="commit"
+alias bm="branch-manager"
