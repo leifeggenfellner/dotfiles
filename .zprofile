@@ -10,10 +10,20 @@ export DEFAULT_USER="$USER"
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
-    export EDITOR='vim'
+	export EDITOR=$(which vim)
 else
-    export EDITOR='nvim'
+	export EDITOR=$(which nvim)
 fi
+
+# Make Python use UTF-8 encoding for output to stdin, stdout, and stderr.
+export PYTHONIOENCODING='UTF-8'
+
+# Homebrew:
+export HOMEBREW_NO_ANALYTICS=1  # disables statistics that brew collects
+
+export LESS="-iRFXMx4"
+export PAGER='less'
+export MANPAGER='less'
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
@@ -26,3 +36,8 @@ export CPPFLAGS="-I/opt/homebrew/opt/ruby/include"
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
+
+# We won't highlight code longer than 200 chars, because it is slow:
+export ZSH_HIGHLIGHT_MAXLENGTH=200
+
+export PATH
