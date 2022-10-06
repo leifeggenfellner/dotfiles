@@ -6,8 +6,8 @@ alias brewrm="brew remove"
 
 ## ls
 alias ls="exa"
-alias ll="exa -lah --color=auto"
-alias l.="exa -a --color=auto"
+alias ll="exa -lah --icons"
+alias l.="exa -a"
 
 ## pip
 alias pip="pip3"
@@ -31,13 +31,8 @@ alias cbonsai="cbonsai -l"
 alias top="vtop -t nord"
 alias oldtop="/usr/bin/top"
 
-## weather
-alias weather="curl wttr.in"
-
 ## grep
 alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
 
 ## mkdir create parents
 alias mkdir="mkdir -pv"
@@ -54,17 +49,9 @@ alias j="jobs -l"
 ## exit
 alias x="exit"
 
-## custom commands
-alias now="date +'%T'"
-alias nowtime=now
-alias nowdate="date +'%d-%m-%Y'"
-
 ## ping
 alias ping="ping -c 5"
 alias fastping="ping -c 100 -s.2"
-
-## netstat
-alias ports="netstat -tulanp"
 
 ## root
 alias root="sudo -i"
@@ -76,16 +63,8 @@ alias poweroff="sudo /sbin/poweroff"
 alias halt="sudo /sbin/halt"
 alias off="sudo /sbin/shutdown -h now"
 
-## system info
-alias meminfo="free -mlt"
-
-alias psmem="ps aux | sort -nr -k 4"
-alias psmem10="ps aux | sort -nr -k 4 | head -10"
-
-alias pscpu="ps aux | sort -nr -k 3"
-alias pscpu10="ps aux | sort -nr -k 4 | head -10"
-
-alias cpuinfo="sysctl -a hw machdep.cpu"
+# Show local ip:
+alias localip="ipconfig getifaddr en0"
 
 ## wget
 alias wget="wget -c"
