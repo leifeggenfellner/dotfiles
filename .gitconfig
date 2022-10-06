@@ -1,0 +1,43 @@
+[user]
+	name = leifeggenfellner
+	email = eggenfellner@protonmail.com
+[alias]
+	p = push
+	st = status -sb
+	lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	lg = !"git lg1"
+	ll = log --oneline
+	last = log -1 HEAD --stat
+	cm = commit -m
+	rv = remote -v
+	d = diff
+	gl = config --global -l
+	se = !git rev-list --all | xargs git grep -F
+	sw = switch
+	cob = checkout -b
+	del = branch -D
+	br = branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]' --sort=-committerdate
+	save = !git add -A && git commit -m 'chore: commit save point'
+	undo = reset HEAD~1 --mixed
+	res = !git reset --hard
+	done = !git push origin HEAD
+	ls = ls-files -s
+	swc = switch -c
+	cma = config --amend
+[help]
+	autocorrect = 20
+[color]
+	ui = auto
+[pull]
+	rebase = true
+[init]
+	defaultBranch = main
+[diff]
+    tool = default-difftool
+[difftool "default-difftool"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+[core]
+	editor = code --wait
+[push]
+	autoSetupRemote = true
