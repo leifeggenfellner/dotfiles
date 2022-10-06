@@ -2,7 +2,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="agnoster"
 
-plugins=(git up zsh-autosuggestions zsh-syntax-highlighting colored-man-pages command-not-found docker npm pip pyenv python sudo npm pip pyenv python sudo copypath)
+plugins=(git up zsh-autosuggestions zsh-syntax-highlighting colored-man-pages command-not-found docker npm pip pyenv python sudo copypath)
 
 source $ZSH/oh-my-zsh.sh
 source $HOME/.aliases
