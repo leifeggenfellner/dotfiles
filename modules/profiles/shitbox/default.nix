@@ -5,7 +5,7 @@
   imports = [ ../../default.nix ];
 
   # Home modules to load
-  program.hyprlock.defaultMonitor = "DP-8";
+  program.hyprlock.defaultMonitor = "DP-5";
 
   service = lib.mkMerge [
     {
