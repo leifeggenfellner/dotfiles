@@ -1,5 +1,6 @@
-{ pkgs
-, ...
+{
+  pkgs,
+  ...
 }:
 let
   gitConfig = {
@@ -90,8 +91,8 @@ in
         condition = "gitdir:~/Workflow/";
         contents = {
           user = {
-            name = "Knut Oien";
-            email = "knut.andre.gulseth.oien@hnikt.no";
+            name = "leifeggenfellner";
+            email = "eggenfellner@protonmail.com";
           };
         };
       }
@@ -99,8 +100,8 @@ in
         condition = "hasconfig:remote.*.url:ssh://git@github.com:HNIKT-Tjenesteutvikling-Systemutvikling/**";
         contents = {
           user = {
-            name = "Knut Oien";
-            email = "knut.andre.gulseth.oien@hnikt.no";
+            name = "leifeggenfellner";
+            email = "eggenfellner@protonmail.com";
           };
         };
       }

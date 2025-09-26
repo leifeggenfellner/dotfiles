@@ -46,7 +46,7 @@ in
     upgrade = "sudo nixos-rebuild switch --flake";
 
     # Locations
-    dot = "cd ~/Sources/nixhnikt";
+    dot = "cd ~/Sources/dotfiles";
     doc = "cd ~/Documents";
     work = "cd ~/Projects/workspace";
     tod = "cd ~/Projects/workspace/worksetup";

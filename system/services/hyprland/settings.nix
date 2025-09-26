@@ -45,7 +45,7 @@
       };
     };
     input = {
-      kb_layout = "us,no";
+      kb_layout = "no,us";
       kb_options = "grp:alt_shift_toggle";
     };
     dwindle = {
