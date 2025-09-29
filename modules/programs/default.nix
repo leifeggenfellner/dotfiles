@@ -57,6 +57,7 @@ in
   ./spotify.nix
   ./ssh.nix
   ./starship.nix
+  ./vscode.nix
   ./waybar.nix
   ./wine.nix
   ./wowup.nix

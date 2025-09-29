@@ -20,7 +20,6 @@ let
     google-java-format
     black
     rustfmt
-    haskell-language-server
     kotlin-language-server
 
     # JavaScript/TypeScript ecosystem
