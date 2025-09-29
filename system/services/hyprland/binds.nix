@@ -28,7 +28,7 @@ in
       "${mainMod} ${SECONDARY}, L, exec, ${runOnce "hyprlock"}"
 
       # Screenshot
-      "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copysave area"}"
+      "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copy area"}"
 
       # Scratchpads
       "${mainMod} ${SECONDARY}, T, movetoworkspace, special"
@@ -72,6 +72,15 @@ in
       "${mainMod} ${SECONDARY}, 7, movetoworkspace, 7"
       "${mainMod} ${SECONDARY}, 8, movetoworkspace, 8"
       "${mainMod} ${SECONDARY}, 9, movetoworkspace, 9"
+
+      # Volume keys
+      ", XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +5%"
+      ", XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -5%"
+      ", XF86AudioMute,        exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
+
+      # Brightness keys
+      ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
+      ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
     ];
 
     # Window
