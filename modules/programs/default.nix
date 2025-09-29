@@ -9,6 +9,7 @@ let
         dconf2nix # dconf (gnome) files to nix converter
         ffmpegthumbnailer # thumbnailer for video files
         headsetcontrol # control logitech headsets
+        imv # image viewer
         imagemagick # image manipulation
         killall # kill processes by name
         libsecret # secret management
@@ -21,6 +22,7 @@ let
         pavucontrol # pulseaudio volume control
         prettyping # a nicer ping
         poppler # pdf tools
+        pipewire # control volume
         rage # encryption tool for secrets management
         ripgrep # fast grep
         tldr # summary of a man page

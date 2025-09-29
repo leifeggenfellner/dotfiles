@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  wallpaper = "${config.home.homeDirectory}/Sources/archive/images/wallpapers/moon.png";
+  wallpaper = "${config.home.homeDirectory}/Sources/walls-catppuccin-mocha/crane.png";
 in
 {
   services.hyprpaper = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {

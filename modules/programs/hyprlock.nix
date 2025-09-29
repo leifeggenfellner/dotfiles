@@ -6,8 +6,7 @@
 , ...
 }:
 let
-  wallpaper = "${config.home.homeDirectory}/Sources/archive/images/wallpapers/moon.png";
-  cfg = config.program.hyprlock;
+  wallpaper = "${config.home.homeDirectory}/Sources/walls-catppuccin-mocha/crane.png";
 in
 {
 
@@ -20,12 +19,12 @@ in
 
     defaultMonitor = lib.mkOption {
       type = lib.types.str;
-      default = "";
+      default = "desc:HP Inc. HP E45c G5 CNC50212K0";
       description = "Set the default monitor.";
     };
   };
 
-  config = lib.mkIf (cfg.enable && osConfig.environment.desktop.windowManager == "hyprland") {
+  config = lib.mkIf (config.program.hyprlock.enable && osConfig.environment.desktop.windowManager == "hyprland") {
     programs.hyprlock = {
       enable = true;
       package = inputs.hyprlock.packages.${pkgs.system}.hyprlock;
@@ -38,24 +37,22 @@ in
           no_fade_in = true;
         };
 
-        animation = [
-          "inputFieldDots, 1, 2, linear"
-          "fadeIn, 0"
-        ];
+        # Correct animation: single string, comma-separated
+        animation = "inputFieldDots, 1, 2, linear, fadeIn, 0";
 
         background = [
           {
-            monitor = "";
+            monitor = "";   # all monitors
             path = "${wallpaper}";
           }
         ];
 
-        input-field = [
+        input_field = [
           {
-            monitor = cfg.defaultMonitor;
+            monitor = config.program.hyprlock.defaultMonitor;   # only default monitor
             size = "300, 50";
-            valign = "bottom";
-            position = "0%, 10%";
+            valign = "center";
+            position = "50%, 50%";
 
             outline_thickness = 1;
 
@@ -116,3 +113,4 @@ in
     };
   };
 }
+

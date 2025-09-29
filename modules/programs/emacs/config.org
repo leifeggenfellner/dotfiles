@@ -18,17 +18,29 @@ The dashboard package is configured to display a welcoming startup screen with a
   (use-package dashboard
     :ensure t
     :config
-    (setq dashboard-startup-banner 'logo
-  	  dashboard-banner-logo-title "Welcome back Master"
-  	  dashboard-set-file-icons t
-  	  dashboard-center-content t
-  	  dashboard-items '((recents  . 5)
-  			    (bookmarks . 5)
-  			    (projects . 5)
-  			    (agenda . 5))
-  	  initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
-    :init
-    :hook (after-init . dashboard-setup-startup-hook))
+    (defun my/dashboard-setup-for-frame (frame)
+      (with-selected-frame frame
+        (when (display-graphic-p)
+          (let ((banner-path (expand-file-name "~/Sources/dotfiles/modules/programs/emacs/banners/anime-coding-girl.png")))
+            (setq dashboard-startup-banner
+                  (if (file-exists-p banner-path) banner-path 'logo)))
+          (dashboard-setup-startup-hook))))
+
+    (add-hook 'after-make-frame-functions #'my/dashboard-setup-for-frame)
+
+    ;; run for initial frame if graphical
+    (when (display-graphic-p)
+      (my/dashboard-setup-for-frame (selected-frame)))
+
+    ;; other settings
+    (setq dashboard-banner-logo-title "Welcome back Slave °˖✧◝(⁰▿⁰)◜✧˖°"
+          dashboard-set-file-icons t
+          dashboard-center-content t
+          dashboard-items '((recents   . 5)
+                            (bookmarks . 5)
+                            (projects  . 5)
+                            (agenda    . 5))
+          initial-buffer-choice (lambda () (get-buffer-create "*dashboard*"))))
 #+end_src
 
 *** Fonts
@@ -48,7 +60,7 @@ Custom fonts are set using "Iosevka Nerd Font" for both the main text and the mo
 *** Icons
 All-the-icons: Provides a rich set of icons for various file types and modes.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lis  ๑(◕‿◕)๑
   (use-package all-the-icons
     :ensure t)
 #+end_src
