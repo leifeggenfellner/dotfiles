@@ -22,22 +22,28 @@
 
   programs.hyprland.settings = lib.mkIf (config.environment.desktop.windowManager == "hyprland") {
     monitor = [
+      # laptop screen
       "eDP-1,1920x1200,2560x1440,1"
-      "DP-5,2560x1440,0x0,1"
-      "DP-6,2560x1440,2560x0,1"
+
+      # external monitors
+      "desc:HP Inc. HP E45c G5 CNC50212K0,2560x1440,0x0,1"
+      "desc:HP Inc. HP E45c G5 CNC1000000,2560x1440,2560x0,1"
+
+      # fallback
       ",highrr,auto,1"
     ];
 
     workspace = [
-      "1, monitor:DP-5"
-      "2, monitor:DP-6"
-      "3, monitor:DP-6"
-      "4, monitor:DP-6"
-      "5, monitor:DP-6"
-      "6, monitor:DP-5"
-      "7, monitor:DP-6"
-      "8, monitor:DP-6"
-      "9, monitor:DP-6"
+      # left external = CNC50212K0, right external = CNC1000000
+      "1, monitor:desc:HP Inc. HP E45c G5 CNC50212K0"
+      "2, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
+      "3, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
+      "4, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
+      "5, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
+      "6, monitor:desc:HP Inc. HP E45c G5 CNC50212K0"
+      "7, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
+      "8, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
+      "9, monitor:desc:HP Inc. HP E45c G5 CNC1000000"
     ];
   };
   # Modules loaded
