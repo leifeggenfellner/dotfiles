@@ -266,6 +266,11 @@ in
           "git.confirmSync" = false;
           "git.enableSmartCommit" = true;
           "git.path" = "${pkgs.git}/bin/git";
+          "git.decorations.enabled" = true;
+          "git.showPushSuccessNotification" = true;
+
+          # GitHub Copilot settings
+          "github.copilot.nextEditSuggestions.enabled" = true;
 
           # Editor improvements
           "workbench.tree.indent" = 20;
@@ -278,6 +283,39 @@ in
           "editor.linkedEditing" = true;
           "editor.bracketPairColorization.enabled" = true;
           "editor.guides.bracketPairs" = "active";
+          "editor.inlineSuggest.enabled" = true;
+          "editor.suggestSelection" = "first";
+          "editor.quickSuggestions" = {
+            "other" = true;
+            "comments" = false;
+            "strings" = false;
+          };
+
+          # Search improvements
+          "search.exclude" = {
+            "**/node_modules" = true;
+            "**/bower_components" = true;
+            "**/dist" = true;
+            "**/coverage" = true;
+            "**/.git" = true;
+            "**/.svn" = true;
+            "**/.hg" = true;
+            "**/CVS" = true;
+            "**/.DS_Store" = true;
+            "**/Thumbs.db" = true;
+            "**/.metals" = true;
+            "**/.bloop" = true;
+          };
+
+          # Explorer improvements
+          "explorer.fileNesting.enabled" = true;
+          "explorer.fileNesting.patterns" = {
+            "*.ts" = "\${capture}.js, \${capture}.d.ts, \${capture}.js.map";
+            "*.tsx" = "\${capture}.jsx";
+            "package.json" = "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb";
+            "tsconfig.json" = "tsconfig.*.json";
+            ".env" = ".env.*";
+          };
 
           # Terminal font configuration for nerd icons
           "terminal.integrated.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', monospace";
