@@ -64,7 +64,7 @@ in
   options.program.vscode = {
     enable = lib.mkOption {
       type = lib.types.bool;
-      default = false;
+      default = true;
       description = "Enable VSCode";
     };
 
@@ -78,10 +78,9 @@ in
       type = lib.types.enum [
         "dark"
         "light"
-        "onedark"
-        "stardew"
+        "catppuccin"
       ];
-      default = "dark";
+      default = "catppuccin";
       description = "VSCode color theme";
     };
   };
@@ -104,7 +103,6 @@ in
 
             # Editor
             editorconfig.editorconfig
-            ms-azuretools.vscode-docker
             ms-vscode-remote.remote-ssh
             ms-vscode-remote.remote-ssh-edit
             ms-vscode-remote.remote-containers
@@ -125,9 +123,15 @@ in
             vscjava.vscode-java-dependency
             vscjava.vscode-java-pack
 
-            # Javascript/CSS
+            # Javascript/CSS/TypeScript
             vue.volar
             bradlc.vscode-tailwindcss
+            dbaeumer.vscode-eslint
+            usernamehw.errorlens
+            christian-kohler.path-intellisense
+            christian-kohler.npm-intellisense
+            formulahendry.auto-rename-tag
+            formulahendry.auto-close-tag
 
             # Kotlin
             mathiasfrohlich.kotlin
@@ -139,6 +143,7 @@ in
             # Python
             ms-python.python
             ms-pyright.pyright
+            ms-python.black-formatter
 
             # Rust
             rust-lang.rust-analyzer
@@ -148,7 +153,8 @@ in
             scalameta.metals
             scala-lang.scala
 
-            # Theme
+            # Docker
+            ms-azuretools.vscode-docker
 
             # Yaml/Markdown
             bierner.github-markdown-preview
@@ -160,58 +166,99 @@ in
           ]
           ++ lib.optionals cfg.godMode [ vscodevim.vim ]
           ++ [
+            # Theme extensions
             (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-              name = "one-dark-theme";
-              publisher = "mskelton";
-              version = "1.14.2";
-              sha256 = "sha256-6nIfEPbau5Dy1DGJ0oQ5L2EGn2NDhpd8jSdYujtOU68=";
+              name = "catppuccin-vsc";
+              publisher = "Catppuccin";
+              version = "3.18.0";
+              sha256 = "sha256-57c0HRdEABLz03qozeQgFJH1NaWUbA+7tDJv0V4At8M=";
             })
-          ]
-          ++ [
             (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-              name = "stardew-valley-theme";
-              publisher = "zimo";
-              version = "0.0.6";
-              sha256 = "sha256-xYCqEDePdH9i4/MAcZCM0kYK4WQFVlc5Bpj0FQjVdgI=";
+              name = "catppuccin-vsc-icons";
+              publisher = "Catppuccin";
+              version = "1.24.0";
+              sha256 = "sha256-2M7N4Ccw9FAaMmG36hGHi6i0i1qR+uPCSgXELAA03Xk=";
             })
-          ]
-          ++ [
+
+            # Testing tools - Quokka
             (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-              name = "stardew-valley-icon-theme";
-              publisher = "NqMax";
-              version = "0.0.1";
-              sha256 = "sha256-bgdOSRqmPHlKX01uHjPWm5ak7FWvblUQ8p3H7PigdXc=";
+              name = "quokka-vscode";
+              publisher = "WallabyJs";
+              version = "1.0.742";
+              sha256 = "sha256-wNyKxMbop4P9snHt2z/4ATdUNgAwvgqU3LppoXYqIKQ=";
             })
-          ]
-          ++ [
+
+            # Vue/TypeScript/Web Development extensions
             (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-              name = "stardew-pets";
-              publisher = "Botpa";
-              version = "1.2.3";
-              sha256 = "sha256-DEoe9smyIcsKd8hTm2b6/r1u95OtrbgoOix+6ai44pU=";
+              name = "headwind";
+              publisher = "heybourn";
+              version = "1.7.0";
+              sha256 = "sha256-yXsZoSuJQTdbHLjEERXX2zVheqNYmcPXs97/uQYa7og=";
+            })
+            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+              name = "pretty-ts-errors";
+              publisher = "yoavbls";
+              version = "0.6.1";
+              sha256 = "sha256-LvX21nEjgayNd9q+uXkahmdYwzfWBZOhQaF+clFUUF4=";
+            })
+            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+              name = "typescript-hero";
+              publisher = "rbbit";
+              version = "3.0.0";
+              sha256 = "sha256-I5Hbwe3E4HDGl2oMgkHYBvhtFA49UERP9WRStQ4hwMk=";
+            })
+            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+              name = "console-ninja";
+              publisher = "WallabyJs";
+              version = "1.0.478";
+              sha256 = "sha256-WbSzN7aZxyjWFlpeSiJJMY+5gyxtpYUDn4qe1q6XIjk=";
+            })
+            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+              name = "vscode-css-peek";
+              publisher = "pranaygp";
+              version = "4.4.3";
+              sha256 = "sha256-oY+mpDv2OTy5hFEk2DMNHi9epFm4Ay4qi0drCXPuYhU=";
+            })
+            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+              name = "color-highlight";
+              publisher = "naumovs";
+              version = "2.8.0";
+              sha256 = "sha256-mT2P1lEdW66YkDRN6fi0rmmvvyBfXiJjAUHns8a8ipE=";
+            })
+            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+              name = "dotenv";
+              publisher = "mikestead";
+              version = "1.0.1";
+              sha256 = "sha256-dieCzNOIcZiTGu4Mv5zYlG7jLhaEsJR05qbzzzQ7RWc=";
             })
           ];
 
         userSettings = {
           # Theme settings
           "workbench.colorTheme" =
-            if cfg.theme == "onedark" then
-              "One Dark"
+            if cfg.theme == "catppuccin" then
+              "Catppuccin Mocha"
             else if cfg.theme == "dark" then
               "Default Dark Modern"
-            else if cfg.theme == "stardew" then
-              "Stardew Valley Theme"
             else
               "Default Light Modern";
           "workbench.preferredDarkColorTheme" = "Default Dark Modern";
           "workbench.preferredLightColorTheme" = "Default Light Modern";
           "window.autoDetectColorScheme" = false;
 
+          # Icon theme
+          "workbench.iconTheme" = "catppuccin-mocha";
+
+          # Sidebar placement
+          "workbench.sideBar.location" = "right";
+
           # Performance improvements for Scala/Metals
           "files.watcherExclude" = {
             "**/.bloop" = true;
             "**/.metals" = true;
             "**/.ammonite" = true;
+            "**/node_modules" = true;
+            "**/.git" = true;
           };
 
           # Git improvements
@@ -228,6 +275,9 @@ in
           "editor.minimap.enabled" = false;
           "editor.defaultFormatter" = "esbenp.prettier-vscode";
           "editor.lineNumbers" = "relative";
+          "editor.linkedEditing" = true;
+          "editor.bracketPairColorization.enabled" = true;
+          "editor.guides.bracketPairs" = "active";
 
           # Terminal font configuration for nerd icons
           "terminal.integrated.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', monospace";
@@ -254,7 +304,6 @@ in
 
           "terminal.integrated.inheritEnv" = true;
           "terminal.integrated.shellIntegration.enabled" = true;
-          "terminal.integrated.shellIntegration.showWelcome" = false;
 
           # Code lens for better navigation
           "java.referencesCodeLens.enabled" = true;
@@ -267,17 +316,48 @@ in
           "files.associations" = {
             "*.kt" = "gradle-kotlin-dsl";
             "*.css" = "tailwindcss";
+            "*.vue" = "vue";
           };
 
           # Auto-import improvements
           "javascript.updateImportsOnFileMove.enabled" = "always";
           "typescript.updateImportsOnFileMove.enabled" = "always";
 
+          # TypeScript/Javascript specific settings
+          "typescript.preferences.importModuleSpecifier" = "shortest";
+          "javascript.preferences.importModuleSpecifier" = "shortest";
+          "typescript.suggest.autoImports" = true;
+          "javascript.suggest.autoImports" = true;
+
+          # ESLint configuration
+          "eslint.validate" = [
+            "javascript"
+            "javascriptreact"
+            "typescript"
+            "typescriptreact"
+            "vue"
+          ];
+          "eslint.probe" = [
+            "javascript"
+            "javascriptreact"
+            "typescript"
+            "typescriptreact"
+            "vue"
+          ];
+
           # UX improvements
           "explorer.confirmDelete" = false;
           "explorer.confirmDragAndDrop" = false;
           "diffEditor.ignoreTrimWhitespace" = false;
           "security.workspace.trust.untrustedFiles" = "open";
+
+          # Error Lens configuration
+          "errorLens.enabledDiagnosticLevels" = [
+            "error"
+            "warning"
+            "info"
+          ];
+          "errorLens.excludeBySource" = [ "eslint(prettier/prettier)" ];
 
           # Metals configuration - let it use environment JAVA_HOME
           "metals.sbtScript" = "${pkgs.sbt}/bin/sbt";
@@ -322,9 +402,12 @@ in
             };
           };
 
-          # Formatters
-          # "prettier.prettierPath" = "${pkgs.nodePackages.prettier}/bin/prettier";
-          "nix.formatterPath" = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
+          # Prettier configuration
+          "prettier.semi" = true;
+          "prettier.singleQuote" = true;
+          "prettier.tabWidth" = 2;
+          "prettier.useTabs" = false;
+          "prettier.trailingComma" = "es5";
 
           # Java extension configuration to use environment variables
           "java.configuration.detectJdksAtStart" = true;
@@ -351,6 +434,11 @@ in
           "typescript.preferences.includePackageJsonAutoImports" = "auto";
           "javascript.preferences.includePackageJsonAutoImports" = "auto";
 
+          # Vue specific settings
+          "vue.autoInsert.dotValue" = true;
+          "vue.inlayHints.missingRequired" = true;
+          "vue.updateImportsOnFileMove.enabled" = true;
+
           # EditorConfig
           "editorconfig.generateAuto" = false;
 
@@ -365,7 +453,18 @@ in
           "tailwindCSS.experimental.classRegex" = [
             "class:\\s*?[\"'`]([^\"'`]*.*?)[\"'`]"
             "className:\\s*?[\"'`]([^\"'`]*.*?)[\"'`]"
+            "tw`([^`]*)`"
+            "tw\\.\\w+`([^`]*)`"
+            "tw\\([\"'`]([^\"'`]*)[\"'`]\\)"
           ];
+          "tailwindCSS.emmetCompletions" = true;
+
+          # Headwind (Tailwind CSS class sorter)
+          "headwind.runOnSave" = true;
+
+          # Prevent auto-updates
+          "extensions.autoCheckUpdates" = false;
+          "update.mode" = "none";
 
           # Formatter configuration
           "[css]" = {
@@ -398,6 +497,7 @@ in
           "[python]" = {
             "editor.defaultFormatter" = "ms-python.black-formatter";
           };
+          "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
           "[rust]" = {
             "editor.defaultFormatter" = "rust-lang.rust-analyzer";
           };
@@ -414,14 +514,11 @@ in
             "editor.defaultFormatter" = "esbenp.prettier-vscode";
           };
           "[vue]" = {
-            "editor.defaultFormatter" = "vue.volar";
+            "editor.defaultFormatter" = "Vue.volar";
           };
           "[yaml]" = {
             "editor.defaultFormatter" = "esbenp.prettier-vscode";
           };
-
-          "python.formatting.provider" = "black";
-          "python.formatting.blackPath" = "${pkgs.black}/bin/black";
 
           "rust-analyzer.rustfmt.extraArgs" = [ "+nightly" ];
         };
@@ -443,6 +540,10 @@ in
 
         # Add our specific tools to the front of the PATH but preserve the rest
         export PATH="${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}:$PATH"
+
+        # Clear Electron/Chrome flags that might cause warnings
+        unset ELECTRON_OZONE_PLATFORM_HINT
+        unset NIXOS_OZONE_WL
 
         # Use regular vscode package instead of FHS version to avoid permission issues
         exec ${pkgs.vscode}/bin/code "$@"
