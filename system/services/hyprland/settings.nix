@@ -22,10 +22,14 @@
     general = {
       gaps_in = 7;
       gaps_out = 7;
-      border_size = 1;
+      border_size = 3; # Increased for better visibility
       allow_tearing = true;
       resize_on_border = true;
+      # Fixed color format - use hex format with proper syntax
+      "col.active_border" = "0xffB48EAD"; # Magenta with alpha
+      "col.inactive_border" = "0x884C566A"; # Gray with transparency
     };
+
     cursor.inactive_timeout = 5;
     decoration = {
       rounding = 16;
@@ -38,15 +42,14 @@
       };
     };
 
-    # Layer rules for wofi to ensure proper rendering
     layerrule = [
-      "blur,wofi"
-      "ignorezero,wofi"
+      "noblur,wofi"
+      "ignorealpha 0,wofi"
     ];
 
     animations.enabled = true;
     animation = [
-      "border, 1, 2, default"
+      "border, 1, 4, default" # Smoother border animations
       "fade, 1, 4, default"
       "windows, 1, 3, default, popin 80%"
       "workspaces, 1, 2, default, slide"
