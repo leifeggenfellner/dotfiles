@@ -367,6 +367,9 @@ in
           "typescript.suggest.autoImports" = true;
           "javascript.suggest.autoImports" = true;
 
+          # Console Ninja
+          "console-ninja.featureSet" = "Community";
+
           # ESLint configuration
           "eslint.validate" = [
             "javascript"
