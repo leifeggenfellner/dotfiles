@@ -36,7 +36,7 @@ in
 [
   ./emacs
   ./neofetch
-  # ./wofi
+  ./wofi
   ./alacritty.nix
   ./bat.nix
   ./broot.nix
@@ -55,7 +55,6 @@ in
   ./pcmanfm.nix
   ./qt.nix
   ./repl.nix
-  ./rofi.nix
   ./slack.nix
   ./spotify.nix
   ./ssh.nix
