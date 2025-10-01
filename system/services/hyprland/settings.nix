@@ -22,58 +22,172 @@
     general = {
       gaps_in = 7;
       gaps_out = 7;
-      border_size = 3; # Increased for better visibility
+      border_size = 3;
       allow_tearing = true;
       resize_on_border = true;
-      # Fixed to use standard rgb() format that actually works
-      "col.active_border" = "rgb(B48EAD)";        # Magenta border
-      "col.inactive_border" = "rgba(4C566A,0.5)"; # Gray with transparency
+      "col.active_border" = "rgb(B48EAD) rgb(89B4FA) rgb(74C7EC) 45deg";  # Magenta to blue gradient
+      "col.inactive_border" = "rgb(313244)";
+      # Border hover effects
+      hover_icon_on_border = true;
+      extend_border_grab_area = 15;
     };
 
-    cursor.inactive_timeout = 5;
+    cursor = {
+      inactive_timeout = 3;
+      no_hardware_cursors = false;
+      enable_hyprcursor = true;
+    };
+
     decoration = {
       rounding = 16;
+      drop_shadow = false;
+
       blur = {
         enabled = true;
-        size = 6;
-        passes = 3;
+        size = 8;
+        passes = 4;
         new_optimizations = true;
         ignore_opacity = true;
+        xray = false;
+        contrast = 1.1;
+        brightness = 1.0;
+        noise = 0.02;
       };
+
+      active_opacity = 1.0;
+      inactive_opacity = 0.95;
+      fullscreen_opacity = 1.0;
     };
 
     layerrule = [
-      "noblur,wofi"
-      "ignorealpha 0,wofi"
+      "blur, wofi"
+      "ignorealpha 0, wofi"
+      "blur, waybar"
+      "ignorealpha 0, waybar"
+      "blur, notifications"
+      "ignorealpha 0, notifications"
     ];
 
-    animations.enabled = true;
-    animation = [
-      "border, 1, 4, default" # Smoother border animations
-      "fade, 1, 4, default"
-      "windows, 1, 3, default, popin 80%"
-      "workspaces, 1, 2, default, slide"
-    ];
-    group = {
-      groupbar = {
-        font_size = 10;
-        gradients = false;
-      };
+    animations = {
+      enabled = true;
+
+      bezier = [
+        "wind, 0.05, 0.9, 0.1, 1.05"
+        "winIn, 0.1, 1.1, 0.1, 1.1"
+        "winOut, 0.3, -0.3, 0, 1"
+        "liner, 1, 1, 1, 1"
+        "overshot, 0.13, 0.99, 0.29, 1.1"
+      ];
+
+      animation = [
+        # Window bounce effect
+        "windows, 1, 6, wind, slide"
+        "windowsIn, 1, 6, winIn, slide"
+        "windowsOut, 1, 5, winOut, slide"
+        "windowsMove, 1, 5, wind, slide"
+
+        # Border color transitions
+        "border, 1, 10, liner"
+        "borderangle, 1, 30, liner, loop"
+
+        # Fade effects
+        "fade, 1, 10, default"
+        "fadeIn, 1, 10, default"
+        "fadeOut, 1, 5, default"
+
+        # Workspace animations with overshot
+        "workspaces, 1, 6, overshot, slidevert"
+
+        # Special effects
+        "specialWorkspace, 1, 6, default, slidevert"
+        "layers, 1, 5, default, popin"
+      ];
     };
+
     input = {
       kb_layout = "no,us";
       kb_options = "grp:alt_shift_toggle";
+
+      follow_mouse = 2;          # Focus follows mouse with slight delay
+      mouse_refocus = false;     # Don't refocus when mouse returns
+      sensitivity = 0.0;         # Neutral sensitivity
+      accel_profile = "flat";    # Consistent mouse movement
+
+      # Touchpad improvements
+      touchpad = {
+        natural_scroll = true;
+        disable_while_typing = true;
+        tap-to-click = true;
+        middle_button_emulation = true;
+      };
     };
+
+    group = {
+      groupbar = {
+        font_size = 10;
+        gradients = true;          # Enable gradients on group bars
+        render_titles = true;      # Show window titles in groups
+        scrolling = true;          # Scroll through grouped windows
+      };
+
+      # Group border colors
+      "col.border_active" = "rgb(B48EAD)";
+      "col.border_inactive" = "rgb(313244)";
+    };
+
+    # Enhanced window management
     dwindle = {
       pseudotile = true;
       preserve_split = true;
+      force_split = 0;           # 0=split follows mouse, 1=always split right/bottom
+      default_split_ratio = 1.2; # Slightly prefer larger main window
+      smart_split = true;        # Smart splitting algorithm
+      smart_resizing = true;     # Smart window resizing
     };
+
+    # Miscellaneous settings
     misc = {
       disable_autoreload = true;
       force_default_wallpaper = 0;
-      animate_mouse_windowdragging = false;
+      animate_mouse_windowdragging = true;  # Smooth dragging
+      animate_manual_resizes = true;        # Animate manual window resizing
       vrr = 1;
+
+      # Window focus settings
+      focus_on_activate = true;
+      mouse_move_focuses_monitor = true;
+
+      # Visual effects
+      enable_swallow = true;               # Terminal swallowing
+      swallow_regex = "^(foot|alacritty|kitty)$";
+
+      # Workspace behavior
+      new_window_takes_focus = true;
+      allow_session_lock_restore = true;
     };
+
+    # Window rules for better behavior
+    windowrule = [
+      # Float certain applications
+      "float, ^(pavucontrol)$"
+      "float, ^(blueman-manager)$"
+      "float, ^(nm-connection-editor)$"
+      "float, ^(file-roller)$"
+
+      # Size constraints
+      "size 800 600, ^(pavucontrol)$"
+      "center, ^(pavucontrol)$"
+
+      # Opacity for specific apps
+      "opacity 0.95 0.85, ^(alacritty)$"
+      "opacity 0.95 0.85, ^(foot)$"
+    ];
+
+    # Enhanced workspace management
+    workspace = [
+      # Special workspace for multimedia
+      "special:magic, gapsin:20, gapsout:40, bordersize:5, border:true, shadow:true"
+    ];
 
     xwayland.force_zero_scaling = true;
     debug.disable_logs = false;
