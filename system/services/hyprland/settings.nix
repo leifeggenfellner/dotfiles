@@ -71,6 +71,7 @@
     animations = {
       enabled = true;
 
+      # Custom bezier curves
       bezier = [
         "wind, 0.05, 0.9, 0.1, 1.05"
         "winIn, 0.1, 1.1, 0.1, 1.1"
@@ -78,40 +79,37 @@
         "liner, 1, 1, 1, 1"
         "overshot, 0.13, 0.99, 0.29, 1.1"
       ];
-
-      animation = [
-        # Window bounce effect
-        "windows, 1, 6, wind, slide"
-        "windowsIn, 1, 6, winIn, slide"
-        "windowsOut, 1, 5, winOut, slide"
-        "windowsMove, 1, 5, wind, slide"
-
-        # Border color transitions
-        "border, 1, 10, liner"
-        "borderangle, 1, 30, liner, loop"
-
-        # Fade effects
-        "fade, 1, 10, default"
-        "fadeIn, 1, 10, default"
-        "fadeOut, 1, 5, default"
-
-        # Workspace animations with overshot
-        "workspaces, 1, 6, overshot, slidevert"
-
-        # Special effects
-        "specialWorkspace, 1, 6, default, slidevert"
-        "layers, 1, 5, default, popin"
-      ];
     };
+
+    animation = [
+      # Window animations with bounce effect
+      "windows, 1, 6, wind, slide"
+      "windowsIn, 1, 6, winIn, slide"
+      "windowsOut, 1, 5, winOut, slide"
+      "windowsMove, 1, 5, wind, slide"
+
+      # Border color transitions
+      "border, 1, 10, liner"
+      "borderangle, 1, 30, liner, loop"
+
+      # Fade effects
+      "fade, 1, 10, default"
+
+      # Workspace animations with overshot
+      "workspaces, 1, 6, overshot, slidevert"
+
+      # Special effects
+      "specialWorkspace, 1, 6, default, slidevert"
+    ];
 
     input = {
       kb_layout = "no,us";
       kb_options = "grp:alt_shift_toggle";
 
-      follow_mouse = 2;          # Focus follows mouse with slight delay
-      mouse_refocus = false;     # Don't refocus when mouse returns
-      sensitivity = 0.0;         # Neutral sensitivity
-      accel_profile = "flat";    # Consistent mouse movement
+      follow_mouse = 1;
+      mouse_refocus = true;
+      sensitivity = 0.0;
+      accel_profile = "adaptive";
 
       # Touchpad improvements
       touchpad = {
@@ -125,9 +123,9 @@
     group = {
       groupbar = {
         font_size = 10;
-        gradients = true;          # Enable gradients on group bars
-        render_titles = true;      # Show window titles in groups
-        scrolling = true;          # Scroll through grouped windows
+        gradients = true;
+        render_titles = true;
+        scrolling = true;
       };
 
       # Group border colors
@@ -135,22 +133,20 @@
       "col.border_inactive" = "rgb(313244)";
     };
 
-    # Enhanced window management
     dwindle = {
       pseudotile = true;
       preserve_split = true;
-      force_split = 0;           # 0=split follows mouse, 1=always split right/bottom
-      default_split_ratio = 1.2; # Slightly prefer larger main window
-      smart_split = true;        # Smart splitting algorithm
-      smart_resizing = true;     # Smart window resizing
+      force_split = 0;
+      default_split_ratio = 1.2;
+      smart_split = true;
+      smart_resizing = true;
     };
 
-    # Miscellaneous settings
     misc = {
       disable_autoreload = true;
       force_default_wallpaper = 0;
-      animate_mouse_windowdragging = true;  # Smooth dragging
-      animate_manual_resizes = true;        # Animate manual window resizing
+      animate_mouse_windowdragging = true;
+      animate_manual_resizes = true;
       vrr = 1;
 
       # Window focus settings
@@ -158,7 +154,7 @@
       mouse_move_focuses_monitor = true;
 
       # Visual effects
-      enable_swallow = true;               # Terminal swallowing
+      enable_swallow = true;
       swallow_regex = "^(foot|alacritty|kitty)$";
 
       # Workspace behavior
@@ -166,26 +162,20 @@
       allow_session_lock_restore = true;
     };
 
-    # Window rules for better behavior
+    # Window rules
     windowrule = [
-      # Float certain applications
       "float, ^(pavucontrol)$"
       "float, ^(blueman-manager)$"
       "float, ^(nm-connection-editor)$"
       "float, ^(file-roller)$"
-
-      # Size constraints
       "size 800 600, ^(pavucontrol)$"
       "center, ^(pavucontrol)$"
-
-      # Opacity for specific apps
       "opacity 0.95 0.85, ^(alacritty)$"
       "opacity 0.95 0.85, ^(foot)$"
     ];
 
-    # Enhanced workspace management
+    # Workspace rules
     workspace = [
-      # Special workspace for multimedia
       "special:magic, gapsin:20, gapsout:40, bordersize:5, border:true, shadow:true"
     ];
 
