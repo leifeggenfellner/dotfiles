@@ -202,12 +202,6 @@ in
               sha256 = "sha256-LvX21nEjgayNd9q+uXkahmdYwzfWBZOhQaF+clFUUF4=";
             })
             (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-              name = "typescript-hero";
-              publisher = "rbbit";
-              version = "3.0.0";
-              sha256 = "sha256-I5Hbwe3E4HDGl2oMgkHYBvhtFA49UERP9WRStQ4hwMk=";
-            })
-            (pkgs.vscode-utils.extensionFromVscodeMarketplace {
               name = "console-ninja";
               publisher = "WallabyJs";
               version = "1.0.478";
