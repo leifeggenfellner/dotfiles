@@ -62,10 +62,9 @@ in
           warning = 30;
           critical = 15;
         };
-        format = "{icon}";
-        format-charging = "󰂄";
-        format-plugged = "";
-        format-alt = "{icon} {capacity}%";
+        format = "{icon} {capacity}%";
+        format-charging = "󰂄 {capacity}%";
+        format-plugged = " {capacity}%";
         format-icons = [
           "󰂎" # 0-10%
           "󰁺" # 10-20%
@@ -79,14 +78,18 @@ in
           "󰂂" # 90-95%
           "󰁹" # 95-100%
         ];
-        tooltip-format = "Battery: {capacity}% - {time}";
+        tooltip-format = "{timeTo} - {capacity}%";
+        tooltip-format-charging = "Charging: {timeTo} - {capacity}%";
+        tooltip-format-discharging = "Discharging: {timeTo} - {capacity}%";
+        tooltip-format-plugged = "Pluggen in - {capacity}%";
+        tooltip-format-alt = "Battery: {capacity}%";
+        on-click = "${system}";
       };
 
       clock = {
-        format = " {:%a, %d %b, %I:%M %p}";
+        format = "  {:%a, %d %b, %I:%M %p}";
         tooltip = "true";
-        tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-        format-alt = " {:%d%m}";
+        tooltip-format = "<tt><small>{calendar}</small></tt>";
         on-click = "${calendar}";
       };
 
@@ -105,18 +108,6 @@ in
 
       "hyprland/workspaces" = {
         format = "{name}";
-        format-icons = {
-          "1" = "";
-          "2" = "";
-          "3" = "";
-          "4" = "";
-          "5" = "";
-          "6" = "";
-          "7" = "";
-          "8" = "";
-          "9" = "";
-          default = "";
-        };
         on-click = "activate";
         all-outputs = true;
         active-only = false;
@@ -135,7 +126,6 @@ in
 
       memory = {
         format = "󰍛 {percentage}%";
-        format-alt = "󰍛 {used:0.1f}G";
         on-click = "${system}";
         interval = 5;
         tooltip-format = "Memory: {used:0.1f}G / {total:0.1f}G";
@@ -147,13 +137,12 @@ in
         tooltip-format = "Connected to {essid} {ifname} via {gwaddr}";
         format-linked = "󰈀 (No IP)";
         format-disconnected = "󰖪 ";
-        format-alt = " {essid}";
         on-click = "nm-connection-editor";
       };
 
       pulseaudio = {
-        format = "{icon}";
-        format-muted = "󰝟";
+        format = "{icon} {volume}%";
+        format-muted = "󰝟 {volume}%";
         format-icons = {
           default = [ "󰕿" "󰖀" "󰕾" ];
         };
@@ -164,7 +153,6 @@ in
 
       temperature = {
         format = " {temperatureC}°C";
-        format-alt = "";
         on-click = "${system}";
         tooltip = true;
         critical-threshold = 80;
@@ -173,6 +161,8 @@ in
       tray = {
         icon-size = 18;
         spacing = 8;
+        show-passive-items = false;
+        reverse-direction = false;
       };
 
       "group/system" = {
@@ -200,8 +190,7 @@ in
          background-color: transparent;
       }
 
-
-      /* Individual module styling */
+      /* Individual module styling - ALL modules get same background */
       #workspaces,
       #clock,
       #tray,
@@ -215,18 +204,20 @@ in
         border: 2px solid ${palette.magenta};
       }
 
-      /* Workspace styling */
+      /* Workspace styling - clean numbers with background/color changes */
       #workspaces {
         padding: 2px 4px;
       }
 
       #workspaces button {
-        padding: 4px 8px;
+        padding: 6px 12px;
         margin: 2px;
         border-radius: 8px;
         color: ${palette.grey};
         background-color: transparent;
-        transition: all 0.3s ease;
+        transition: background-color 0.2s ease;
+        font-weight: normal;
+        min-width: 20px;
       }
 
       #workspaces button.active {
@@ -235,10 +226,9 @@ in
         font-weight: bold;
       }
 
-
       #workspaces button:hover {
-        background-color: ${palette.blue};
-        color: #${config.colorScheme.palette.base00};
+        background-color: rgba(137, 180, 250, 0.3);
+        color: ${palette.blue};
       }
 
       #workspaces button.urgent {
@@ -251,22 +241,24 @@ in
         font-size: 18px;
         color: ${palette.magenta};
         padding: 6px 12px;
+        padding-right: 18px;
+        transition: background-color 0.2s ease;
       }
 
       #custom-launcher:hover {
         background-color: ${palette.magenta};
-        color: #${config.colorScheme.palette.base00};
+        color: ${palette.background-color};
       }
 
       /* Lock button styling */
       #custom-lock {
         color: ${palette.green};
-        padding: 6px 12px;
+        padding: 6px 18px;
+        transition: background-color 0.2s ease;
       }
 
       #custom-lock:hover {
-        background-color: ${palette.green};
-        color: #${config.colorScheme.palette.base00};
+        background-color: rgba(166, 227, 161, 0.2);
       }
 
       /* Clock styling */
@@ -274,16 +266,25 @@ in
         color: ${palette.blue};
         font-weight: bold;
         padding: 6px 16px;
+        transition: background-color 0.2s ease;
+      }
+
+      #clock:hover {
+        background-color: rgba(203, 166, 247, 0.2);
       }
 
       /* System group styling */
       #system {
-        background-color: rgba(180, 142, 173, 0.15);
         border-color: ${palette.magenta};
         padding: 4px 8px;
+        transition: background-color 0.2s ease;
       }
 
-      /* Individual system module colors */
+      #system:hover {
+        background-color: rgba(203, 166, 247, 0.15);
+      }
+
+      /* Individual system modules */
       #battery {
         color: ${palette.green};
         margin: 0 4px;
@@ -326,9 +327,13 @@ in
 
       /* Tray styling */
       #tray {
-        background-color: rgba(180, 142, 173, 0.2);
         border-color: ${palette.magenta};
         padding: 6px 12px;
+        transition: background-color 0.2s ease;
+      }
+
+      #tray:hover {
+        background-color: rgba(203, 166, 247, 0.15);
       }
 
       #tray > .passive {
@@ -338,13 +343,6 @@ in
       #tray > .needs-attention {
         -gtk-icon-effect: highlight;
         background-color: ${palette.red};
-      }
-
-      /* Hover effects for all modules */
-      #clock:hover,
-      #system:hover,
-      #tray:hover {
-        background-color: rgba(180, 142, 173, 0.3);
       }
 
       /* Tooltips */
