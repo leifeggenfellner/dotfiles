@@ -317,6 +317,13 @@ in
             ".env" = ".env.*";
           };
 
+          # Editor font configuration for nerd icons
+          "editor.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', 'Courier New', monospace";
+          "editor.fontSize" = 14;
+          "editor.fontLigatures" = true;
+          "editor.renderWhitespace" = "selection";
+          "editor.renderControlCharacters" = true;
+
           # Terminal font configuration for nerd icons
           "terminal.integrated.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', monospace";
           "terminal.integrated.fontSize" = 14;
