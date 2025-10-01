@@ -13,9 +13,9 @@
       "wl-clip-persist --clipboard both &"
       "wl-paste --watch cliphist store &"
       "uwsm finalize"
-      "[workspace 1 silent] zen"
-      "[workspace 3 silent] alacritty"
-      "[workspace 8 silent] slack"
+      "[workspace 3 silent] zen"
+      "[workspace 2 silent] alacritty"
+      "[workspace 4 silent] slack"
     ];
 
     general = {
@@ -24,7 +24,7 @@
       border_size = 2;
       allow_tearing = true;
       resize_on_border = true;
-      "col.active_border" = "rgb(B48EAD) rgb(89B4FA) rgb(74C7EC) 45deg";  # Magenta to blue gradient
+      "col.active_border" = "rgb(B48EAD) rgb(89B4FA) rgb(74C7EC) 45deg"; # Magenta to blue gradient
       "col.inactive_border" = "rgb(313244)";
       # Border hover effects
       hover_icon_on_border = true;
@@ -88,7 +88,7 @@
 
       # Border animations
       "border, 1, 10, liner"
-      "borderangle, 1, 60, liner, loop"  # Animated gradient rotation
+      "borderangle, 1, 60, liner, loop" # Animated gradient rotation
 
       # Fade effects
       "fade, 1, 10, default"
