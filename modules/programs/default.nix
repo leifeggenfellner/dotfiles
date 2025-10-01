@@ -51,6 +51,7 @@ in
   ./hyprlock.nix
   ./icue.nix
   ./jq.nix
+  ./kitty.nix
   ./neovim.nix
   ./pcmanfm.nix
   ./qt.nix
