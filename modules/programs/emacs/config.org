@@ -177,13 +177,14 @@ This enables spaceline, it looks better and works very well with my theme of cho
 #+end_src
 
 *** Themes
-The bivrost-theme.
+The Catppuccin Mocha theme.
 
 #+begin_src emacs-lisp
-  (use-package bivrost-theme
+  (use-package catppuccin-theme
     :ensure t
     :config
-    (load-theme 'bivrost t))
+    (setq catppuccin-flavor 'mocha)
+    (load-theme 'catppuccin :no-confirm))
 #+end_src
 
 ** Completion

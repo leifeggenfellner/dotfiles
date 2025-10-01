@@ -142,7 +142,7 @@ in
           all-the-icons # A package for inserting developer icons
           all-the-icons-completion
           all-the-icons-ivy-rich # More friendly display transformer for ivy
-          bivrost-theme # Custom theme
+          catppuccin-theme # Color theme
           dashboard # A startup screen extracted from Spacemacs
           spaceline # A mode-line theming package
           nerd-icons # Nerd icons for Emacs
