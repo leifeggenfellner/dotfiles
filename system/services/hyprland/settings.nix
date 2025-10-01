@@ -40,7 +40,7 @@
 
     decoration = {
       rounding = 16;
-      drop_shadow = false;
+      # Removed drop_shadow as it doesn't exist in this version
 
       blur = {
         enabled = true;
@@ -72,7 +72,7 @@
       enabled = true;
     };
 
-    # Fixed: Define beziers and animations together
+    # Define beziers and animations
     bezier = [
       "wind, 0.05, 0.9, 0.1, 1.05"
       "winIn, 0.1, 1.1, 0.1, 1.1"
@@ -157,26 +157,24 @@
       enable_swallow = true;
       swallow_regex = "^(foot|alacritty|kitty)$";
 
-      # Workspace behavior
-      new_window_takes_focus = true;
-      allow_session_lock_restore = true;
+      # Removed new_window_takes_focus and allow_session_lock_restore as they don't exist
     };
 
-    # Window rules
-    windowrule = [
-      "float, ^(pavucontrol)$"
-      "float, ^(blueman-manager)$"
-      "float, ^(nm-connection-editor)$"
-      "float, ^(file-roller)$"
-      "size 800 600, ^(pavucontrol)$"
-      "center, ^(pavucontrol)$"
-      "opacity 0.95 0.85, ^(alacritty)$"
-      "opacity 0.95 0.85, ^(foot)$"
+    # Fixed window rules - use windowrulev2 for better regex support
+    windowrulev2 = [
+      "float, class:^(pavucontrol)$"
+      "float, class:^(blueman-manager)$"
+      "float, class:^(nm-connection-editor)$"
+      "float, class:^(file-roller)$"
+      "size 800 600, class:^(pavucontrol)$"
+      "center, class:^(pavucontrol)$"
+      "opacity 0.95 0.85, class:^(alacritty)$"
+      "opacity 0.95 0.85, class:^(foot)$"
     ];
 
-    # Workspace rules
+    # Simplified workspace rules
     workspace = [
-      "special:magic, gapsin:20, gapsout:40, bordersize:5, border:true, shadow:true"
+      "special:magic, gapsin:20, gapsout:40"
     ];
 
     xwayland.force_zero_scaling = true;
