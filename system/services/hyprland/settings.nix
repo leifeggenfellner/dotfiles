@@ -14,9 +14,8 @@
       "wl-paste --watch cliphist store &"
       "uwsm finalize"
       "[workspace 1 silent] zen"
-      "[workspace 2 silent] emacsclient -c -n"
+      "[workspace 3 silent] alacritty"
       "[workspace 8 silent] slack"
-      "[workspace 9 silent] discord"
     ];
 
     general = {
@@ -40,7 +39,6 @@
 
     decoration = {
       rounding = 16;
-      # Removed drop_shadow as it doesn't exist in this version
 
       blur = {
         enabled = true;
@@ -90,7 +88,7 @@
 
       # Border animations
       "border, 1, 10, liner"
-      "borderangle, 1, 30, liner, loop"  # Animated gradient rotation
+      "borderangle, 1, 120, liner, loop"  # Animated gradient rotation
 
       # Fade effects
       "fade, 1, 10, default"
