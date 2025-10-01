@@ -29,8 +29,21 @@
     cursor.inactive_timeout = 5;
     decoration = {
       rounding = 16;
-      blur.enabled = true;
+      blur = {
+        enabled = true;
+        size = 6;
+        passes = 3;
+        new_optimizations = true;
+        ignore_opacity = true;
+      };
     };
+
+    # Layer rules for wofi to ensure proper rendering
+    layerrule = [
+      "blur,wofi"
+      "ignorezero,wofi"
+    ];
+
     animations.enabled = true;
     animation = [
       "border, 1, 2, default"
