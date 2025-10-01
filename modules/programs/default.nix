@@ -36,7 +36,7 @@ in
 [
   ./emacs
   ./neofetch
-  ./wofi
+  # ./wofi
   ./alacritty.nix
   ./bat.nix
   ./broot.nix
@@ -51,11 +51,11 @@ in
   ./hyprlock.nix
   ./icue.nix
   ./jq.nix
-  ./kitty.nix
   ./neovim.nix
   ./pcmanfm.nix
   ./qt.nix
   ./repl.nix
+  ./rofi.nix
   ./slack.nix
   ./spotify.nix
   ./ssh.nix
