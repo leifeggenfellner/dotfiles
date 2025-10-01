@@ -51,7 +51,7 @@ in
       layer = "overlay";
       cache_file = "/tmp/wofi-cache";
       show = "drun";
-      prompt = "";
+      prompt = "Search...";
     };
     style = ''
       /* Global reset and base styles */
