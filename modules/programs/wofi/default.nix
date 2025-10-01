@@ -40,7 +40,11 @@ in
       layer = "overlay";
     };
     style = ''
+      /* The magic fix - reset everything that causes bleeding */
       * {
+        background: none;
+        border: none;
+        font-size: ${commonSettings.fontsize}px;
         font-family: ${commonSettings.font}, monospace;
         font-weight: bold;
         color: #${config.colorScheme.palette.base05};
@@ -50,52 +54,31 @@ in
         text-rendering: optimizeLegibility;
         box-sizing: border-box;
         outline: none;
-        /* Force integer pixel positioning */
-        image-rendering: crisp-edges;
       }
 
       #window {
-        /* Even more solid background approach */
-        background-color: #${config.colorScheme.palette.base00};
-        border-radius: 18px; /* Slightly smaller radius for cleaner edges */
-        border: 2px solid #${config.colorScheme.palette.base0D};
+        /* Apply alpha 0.9 to background as suggested */
+        background-color: rgba(${
+          let
+            hex = config.colorScheme.palette.base00;
+            r = toString (lib.trivial.fromHexString (builtins.substring 0 2 hex));
+            g = toString (lib.trivial.fromHexString (builtins.substring 2 2 hex));
+            b = toString (lib.trivial.fromHexString (builtins.substring 4 2 hex));
+          in "${r}, ${g}, ${b}"
+        }, 0.9);
 
-        /* Prevent subpixel positioning */
-        position: relative;
+        border-radius: 18px;
+        border: 2px solid #${config.colorScheme.palette.base0E}; /* Changed from base0D to base0E (magenta) */
 
-        /* Enhanced clipping */
-        overflow: hidden;
-
-        /* Simplified shadow - no blur that might cause artifacts */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-
-        /* Force hardware acceleration for clean rendering */
-        transform: translateZ(0);
-        will-change: transform;
-
-        /* Ensure crisp edges */
-        shape-rendering: crispEdges;
-
+        /* Clean, simple styling */
         margin: 0;
         padding: 0;
-      }
-
-      /* Additional background layer for complete coverage */
-      #window::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #${config.colorScheme.palette.base00};
-        border-radius: 16px; /* Slightly smaller than window */
-        z-index: -1;
-        pointer-events: none;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       }
 
       #input {
-        border-radius: 12px; /* Further reduced for cleaner edges */
+        border-radius: 12px;
         margin: 12px;
         padding: 10px 16px;
         background-color: #${config.colorScheme.palette.base01};
@@ -103,20 +86,15 @@ in
         border: 1px solid #${config.colorScheme.palette.base02};
         min-height: 18px;
         box-sizing: border-box;
-
-        /* Ensure crisp input field */
-        image-rendering: crisp-edges;
       }
 
       #input:focus {
-        border: 1px solid #${config.colorScheme.palette.base0D};
-        box-shadow: 0 0 0 1px rgba(113, 156, 214, 0.3);
+        border: 1px solid #${config.colorScheme.palette.base0E}; /* Changed from base0D to base0E (magenta) */
+        box-shadow: 0 0 0 1px rgba(180, 142, 173, 0.3); /* Changed to magenta rgba (B48EAD) */
         outline: none;
       }
 
       #outer-box {
-        font-weight: bold;
-        font-size: ${commonSettings.fontsize}px;
         margin: 4px;
         padding: 8px;
         min-height: 100%;
@@ -126,7 +104,6 @@ in
       #scroll {
         overflow-y: auto;
         overflow-x: hidden;
-        /* Ensure scroll area doesn't interfere with edges */
         margin: 2px;
       }
 
@@ -141,8 +118,7 @@ in
       #entry {
         margin: 2px 12px;
         padding: 6px 10px;
-        border-radius: 6px; /* Much smaller radius for cleaner look */
-        border: none;
+        border-radius: 6px;
         background-color: transparent;
         min-height: 32px;
         box-sizing: border-box;
@@ -152,8 +128,8 @@ in
       }
 
       #entry:selected {
-        background-color: #${config.colorScheme.palette.base0D};
-        color: #${config.colorScheme.palette.base00};
+        background-color: #${config.colorScheme.palette.base0E}; /* Changed from base0D to base0E (magenta) */
+        color: #${config.colorScheme.palette.base00}; /* Dark text on magenta background for readability */
       }
 
       #entry:hover {
@@ -166,8 +142,6 @@ in
         width: 18px;
         height: 18px;
         object-fit: contain;
-        /* Ensure crisp icons */
-        image-rendering: crisp-edges;
       }
     '';
   };
