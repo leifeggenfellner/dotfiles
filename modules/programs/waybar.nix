@@ -7,7 +7,7 @@
 let
   fontSize = "14px";
   iconSize = "17px";
-  opacity = "0.46";
+  opacity = "0.8";
   palette = {
     font = "RobotoMono Nerd Font";
     fontsize = fontSize;
@@ -38,11 +38,12 @@ in
     settings.mainBar = {
       position = "top";
       layer = "top";
-      height = 28;
-      margin-top = 3;
-      margin-bottom = 2;
-      margin-left = 4;
-      margin-right = 4;
+      height = 36;
+      margin-top = 6;
+      margin-bottom = 0;
+      margin-left = 8;
+      margin-right = 8;
+      spacing = 8;
       modules-left = [
         "custom/launcher"
         "hyprland/workspaces"
@@ -52,9 +53,7 @@ in
       ];
       modules-right = [
         "tray"
-        "custom/space"
         "group/system"
-        "custom/space"
         "custom/lock"
       ];
       battery = {
@@ -64,63 +63,92 @@ in
           critical = 15;
         };
         format = "{icon}";
-        format-charging = "";
+        format-charging = "󰂄";
         format-plugged = "";
-        format-alt = "{icon} {time}";
-        format-icons = [ "" "" "" "" "" ];
+        format-alt = "{icon} {capacity}%";
+        format-icons = [
+          "󰂎" # 0-10%
+          "󰁺" # 10-20%
+          "󰁻" # 20-30%
+          "󰁼" # 30-40%
+          "󰁽" # 40-50%
+          "󰁾" # 50-60%
+          "󰁿" # 60-70%
+          "󰂀" # 70-80%
+          "󰂁" # 80-90%
+          "󰂂" # 90-95%
+          "󰁹" # 95-100%
+        ];
+        tooltip-format = "Battery: {capacity}% - {time}";
       };
 
       clock = {
         format = " {:%a, %d %b, %I:%M %p}";
         tooltip = "true";
         tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-        format-alt = " {:%d/%m}";
+        format-alt = " {:%d%m}";
         on-click = "${calendar}";
       };
 
       "custom/launcher" = {
-        format = "   ";
+        format = "";
         tooltip = false;
+        on-click = "wofi --show drun";
       };
+
       "custom/lock" = {
         "format" = "󰌾";
         "tooltip" = true;
         "tooltip-format" = "Lock Screen";
         "on-click" = "${lockScreen}";
       };
-      "custom/power" = {
-        "format" = "󰐥";
-        "tooltip" = true;
-        "tooltip-format" = "Power menu (wlogout)";
-        "on-click" = "wlogout";
-      };
-      "custom/space" = {
-        "format" = " ";
-        "tooltip" = false;
-      };
 
       "hyprland/workspaces" = {
-        format = "{icon}";
-        on-click = "activate";
+        format = "{name}";
         format-icons = {
+          "1" = "";
+          "2" = "";
+          "3" = "";
+          "4" = "";
+          "5" = "";
+          "6" = "";
+          "7" = "";
+          "8" = "";
+          "9" = "";
           default = "";
-          active = "";
         };
-        sort-by-number = true;
+        on-click = "activate";
+        all-outputs = true;
+        active-only = false;
+        persistent-workspaces = {
+          "1" = [ ];
+          "2" = [ ];
+          "3" = [ ];
+          "4" = [ ];
+          "5" = [ ];
+          "6" = [ ];
+          "7" = [ ];
+          "8" = [ ];
+          "9" = [ ];
+        };
       };
 
       memory = {
-        format = "󰍛";
+        format = "󰍛 {percentage}%";
+        format-alt = "󰍛 {used:0.1f}G";
         on-click = "${system}";
         interval = 5;
+        tooltip-format = "Memory: {used:0.1f}G / {total:0.1f}G";
       };
 
       network = {
         format-wifi = " ";
-        format-ethernet = " ";
+        format-ethernet = "󰈀 ";
         tooltip-format = "Connected to {essid} {ifname} via {gwaddr}";
-        format-linked = "{ifname} (No IP)";
+        format-linked = "󰈀 (No IP)";
         format-disconnected = "󰖪 ";
+        format-alt = " {essid}";
+        on-click = "nm-connection-editor";
       };
 
       pulseaudio = {
@@ -131,16 +159,19 @@ in
         };
         scroll-step = 5;
         on-click = "pavucontrol";
+        tooltip-format = "Volume: {volume}%";
       };
 
       temperature = {
-        format = "";
+        format = " {temperatureC}°C";
+        format-alt = "";
         on-click = "${system}";
         tooltip = true;
+        critical-threshold = 80;
       };
 
       tray = {
-        icon-size = 20;
+        icon-size = 18;
         spacing = 8;
       };
 
@@ -161,72 +192,101 @@ in
           border-radius: 0px;
           font-family: ${palette.font};
           font-size: ${palette.fontsize};
+          font-weight: bold;
           min-height: 0;
       }
 
       window#waybar {
          background-color: transparent;
       }
-      window > box {
-         margin-left: 5px;
-         margin-right: 5px;
-         margin-top: 5px;
-         background-color: ${palette.background-color};
-         border: 2px none ${palette.blue};
+
+
+      /* Individual module styling */
+      #workspaces,
+      #clock,
+      #tray,
+      #system,
+      #custom-launcher,
+      "custom-lock {
+        background-color: ${palette.background-color};
+        border-radius: 12px;
+        margin: 4px 2px;
+        padding: 4px 12px;
+        border: 2px solid ${palette.magenta};
       }
 
-      #workspaces button:hover,
-      #workspaces button.active:hover,
-      #workspaces button.empty:hover
-      {
-        margin: initial;
-        box-shadow: initial;
+      /* Workspace styling */
+      #workspaces {
+        padding: 2px 4px;
       }
 
       #workspaces button {
-        margin: initial;
-        padding: initial;
-        padding-left: 2px;
-        padding-right: 2px;
+        padding: 4px 8px;
+        margin: 2px;
+        border-radius: 8px;
         color: ${palette.grey};
+        background-color: transparent;
+        transition: all 0.3s ease;
       }
 
-      #workspaces button.active,
-      #workspaces button.empty
-      {
-        color: ${palette.blue};
+      #workspaces button.active {
+        background-color: ${palette.magenta};
+        color: #${config.colorScheme.palette.base00};
+        font-weight: bold;
       }
 
+
+      #workspaces button:hover {
+        background-color: ${palette.blue};
+        color: #${config.colorScheme.palette.base00};
+      }
+
+      #workspaces button.urgent {
+        background-color: ${palette.red};
+        color: #${config.colorScheme.palette.base00};
+      }
+
+      /* Launcher styling */
       #custom-launcher {
-         font-size: 20px;
-         padding-left: 16px;
-         padding-right: 28px;
-         color: ${palette.blue};
-         padding: 2px 8px;
+        font-size: 18px;
+        color: ${palette.magenta};
+        padding: 6px 12px;
       }
 
+      #custom-launcher:hover {
+        background-color: ${palette.magenta};
+        color: #${config.colorScheme.palette.base00};
+      }
+
+      /* Lock button styling */
       #custom-lock {
-        padding-left: 7px;
-        padding-right: 7px;
         color: ${palette.green};
-        background-color: ${palette.background-color};
+        padding: 6px 12px;
       }
 
-      #battery, #clock, #memory, #network, #pulseaudio, #temperature {
-         padding-left: 7px;
-         padding-right: 7px;
+      #custom-lock:hover {
+        background-color: ${palette.green};
+        color: #${config.colorScheme.palette.base00};
       }
 
+      /* Clock styling */
+      #clock {
+        color: ${palette.blue};
+        font-weight: bold;
+        padding: 6px 16px;
+      }
+
+      /* System group styling */
       #system {
-        background-color: ${palette.background-color};
-        border: 1px solid ${palette.background_border-frame};
-        border-radius: 5px;
-        margin-left: 8px;
-        padding: 0px 3px;
+        background-color: rgba(180, 142, 173, 0.15);
+        border-color: ${palette.magenta};
+        padding: 4px 8px;
       }
 
+      /* Individual system module colors */
       #battery {
-        color: ${palette.orange};
+        color: ${palette.green};
+        margin: 0 4px;
       }
       #battery.warning {
         color: ${palette.yellow};
@@ -234,28 +294,65 @@ in
       #battery.critical {
         color: ${palette.red};
       }
+
       #memory {
         color: ${palette.cyan};
+        margin: 0 4px;
       }
+
       #network {
-        color: ${palette.green};
+        color: ${palette.blue};
+        margin: 0 4px;
       }
       #network.disconnected {
         color: ${palette.red};
       }
+
       #pulseaudio {
         color: ${palette.magenta};
+        margin: 0 4px;
       }
-      #pulseaudio.muted, #pulseaudio format-muted {
+      #pulseaudio.muted {
         color: ${palette.grey};
       }
+
       #temperature {
-        color: ${palette.yellow};
+        color: ${palette.orange};
+        margin: 0 4px;
+      }
+      #temperature.critical {
+        color: ${palette.red};
       }
 
+      /* Tray styling */
       #tray {
-         padding-right: 28px;
-         padding-left: 10px;
+        background-color: rgba(180, 142, 173, 0.2);
+        border-color: ${palette.magenta};
+        padding: 6px 12px;
+      }
+
+      #tray > .passive {
+        -gtk-icon-effect: dim;
+      }
+
+      #tray > .needs-attention {
+        -gtk-icon-effect: highlight;
+        background-color: ${palette.red};
+      }
+
+      /* Hover effects for all modules */
+      #clock:hover,
+      #system:hover,
+      #tray:hover {
+        background-color: rgba(180, 142, 173, 0.3);
+      }
+
+      /* Tooltips */
+      tooltip {
+        background-color: rgba(26, 26, 26, 0.95);
+        border: 2px solid ${palette.magenta};
+        border-radius: 8px;
+        color: ${palette.grey};
       }
     '';
   };
