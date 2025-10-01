@@ -25,9 +25,9 @@
       border_size = 3; # Increased for better visibility
       allow_tearing = true;
       resize_on_border = true;
-      # Fixed color format - use hex format with proper syntax
-      "col.active_border" = "0xffB48EAD"; # Magenta with alpha
-      "col.inactive_border" = "0x884C566A"; # Gray with transparency
+      # Fixed to use standard rgb() format that actually works
+      "col.active_border" = "rgb(B48EAD)";        # Magenta border
+      "col.inactive_border" = "rgba(4C566A,0.5)"; # Gray with transparency
     };
 
     cursor.inactive_timeout = 5;
