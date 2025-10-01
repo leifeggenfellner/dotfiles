@@ -10,6 +10,19 @@ let
     fontsize = "12";
     cursor = "Numix-Cursor";
   };
+
+  # Extract colors for better readability
+  colors = config.colorScheme.palette;
+
+  # Calculate RGB values for alpha background
+  backgroundRgb =
+    let
+      hex = colors.base00;
+      r = toString (lib.trivial.fromHexString (builtins.substring 0 2 hex));
+      g = toString (lib.trivial.fromHexString (builtins.substring 2 2 hex));
+      b = toString (lib.trivial.fromHexString (builtins.substring 4 2 hex));
+    in
+    "${r}, ${g}, ${b}";
 in
 {
   programs.wofi = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
@@ -18,7 +31,7 @@ in
       patches =
         (oa.patches or [ ])
         ++ [
-          ./wofi-run-shell.patch # Fix for https://todo.sr.ht/~scoopta/wofi/174
+          ./wofi-run-shell.patch
         ];
     });
     settings = {
@@ -26,7 +39,6 @@ in
       width = "20%";
       hide_scroll = true;
       term = "foot";
-      # Anti-jitter settings
       filter_rate = 100;
       allow_markup = true;
       no_actions = true;
@@ -36,69 +48,59 @@ in
       insensitive = true;
       parse_search = true;
       gtk_dark = true;
-      # Layer shell settings to prevent background bleeding
       layer = "overlay";
+      cache_file = "/tmp/wofi-cache";
+      show = "drun";
+      prompt = "";
     };
     style = ''
-      /* The magic fix - reset everything that causes bleeding */
+      /* Global reset and base styles */
       * {
         background: none;
         border: none;
-        font-size: ${commonSettings.fontsize}px;
-        font-family: ${commonSettings.font}, monospace;
-        font-weight: bold;
-        color: #${config.colorScheme.palette.base05};
-        /* Enhanced anti-aliasing */
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        box-sizing: border-box;
-        outline: none;
-      }
-
-      #window {
-        /* Apply alpha 0.9 to background as suggested */
-        background-color: rgba(${
-          let
-            hex = config.colorScheme.palette.base00;
-            r = toString (lib.trivial.fromHexString (builtins.substring 0 2 hex));
-            g = toString (lib.trivial.fromHexString (builtins.substring 2 2 hex));
-            b = toString (lib.trivial.fromHexString (builtins.substring 4 2 hex));
-          in "${r}, ${g}, ${b}"
-        }, 0.9);
-
-        border-radius: 18px;
-        border: 2px solid #${config.colorScheme.palette.base0E}; /* Changed from base0D to base0E (magenta) */
-
-        /* Clean, simple styling */
         margin: 0;
         padding: 0;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        font-family: ${commonSettings.font}, monospace;
+        font-size: ${commonSettings.fontsize}px;
+        font-weight: bold;
+        color: #${colors.base05};
+        outline: none;
+        box-sizing: border-box;
       }
 
+      /* Main window */
+      #window {
+        background-color: rgba(${backgroundRgb}, 0.9);
+        border: 2px solid #${colors.base0E};
+        border-radius: 18px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+      }
+
+      /* Search input */
       #input {
-        border-radius: 12px;
         margin: 12px;
         padding: 10px 16px;
-        background-color: #${config.colorScheme.palette.base01};
-        color: #${config.colorScheme.palette.base07};
-        border: 1px solid #${config.colorScheme.palette.base02};
-        min-height: 18px;
-        box-sizing: border-box;
+        border-radius: 12px;
+        background-color: #${colors.base01};
+        color: #${colors.base07};
+        border: 1px solid #${colors.base02};
+        transition: border-color 0.2s ease;
       }
 
       #input:focus {
-        border: 1px solid #${config.colorScheme.palette.base0E}; /* Changed from base0D to base0E (magenta) */
-        box-shadow: 0 0 0 1px rgba(180, 142, 173, 0.3); /* Changed to magenta rgba (B48EAD) */
-        outline: none;
+        border-color: #${colors.base0E};
+        box-shadow: 0 0 0 1px rgba(203, 166, 247, 0.3);
       }
 
+      #input > *:not(:last-child) {
+        margin-right: 1rem;
+      }
+
+      /* Container boxes */
       #outer-box {
         margin: 4px;
         padding: 8px;
-        min-height: 100%;
-        box-sizing: border-box;
       }
 
       #scroll {
@@ -107,41 +109,42 @@ in
         margin: 2px;
       }
 
-      #text {
-        color: #${config.colorScheme.palette.base05};
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.4;
-      }
-
+      /* Entry items */
       #entry {
         margin: 2px 12px;
         padding: 6px 10px;
         border-radius: 6px;
-        background-color: transparent;
         min-height: 32px;
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        transition: all 0.12s ease-in-out;
-      }
-
-      #entry:selected {
-        background-color: #${config.colorScheme.palette.base0E}; /* Changed from base0D to base0E (magenta) */
-        color: #${config.colorScheme.palette.base00}; /* Dark text on magenta background for readability */
+        transition: background-color 0.12s ease;
       }
 
       #entry:hover {
-        background-color: #${config.colorScheme.palette.base02};
-        color: #${config.colorScheme.palette.base06};
+        background-color: #${colors.base02};
+        color: #${colors.base06};
       }
 
+      #entry:selected {
+        background-color: #${colors.base0E};
+      }
+
+      /* Icons and text */
       #entry img {
-        margin-right: 8px;
         width: 18px;
         height: 18px;
         object-fit: contain;
+      }
+
+      #text {
+        color: inherit;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-left: 12px;
+      }
+
+      #text:selected {
+        color: #${colors.base00};
       }
     '';
   };
