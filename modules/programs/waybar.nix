@@ -207,7 +207,7 @@ in
       #tray,
       #system,
       #custom-launcher,
-      "custom-lock {
+      #custom-lock {
         background-color: ${palette.background-color};
         border-radius: 12px;
         margin: 4px 2px;
