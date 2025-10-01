@@ -21,7 +21,7 @@
     general = {
       gaps_in = 7;
       gaps_out = 7;
-      border_size = 3;
+      border_size = 2;
       allow_tearing = true;
       resize_on_border = true;
       "col.active_border" = "rgb(B48EAD) rgb(89B4FA) rgb(74C7EC) 45deg";  # Magenta to blue gradient
@@ -88,7 +88,7 @@
 
       # Border animations
       "border, 1, 10, liner"
-      "borderangle, 1, 120, liner, loop"  # Animated gradient rotation
+      "borderangle, 1, 60, liner, loop"  # Animated gradient rotation
 
       # Fade effects
       "fade, 1, 10, default"
