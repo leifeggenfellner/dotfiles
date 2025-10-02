@@ -87,7 +87,8 @@ in
       };
 
       clock = {
-        format = "  {:%a, %d %b, %I:%M %p}";
+        format = "  {:%a, %d %b, %H:%M}";
+        timezone = "Europe/Oslo";
         tooltip = "true";
         tooltip-format = "<tt><small>{calendar}</small></tt>";
         on-click = "${calendar}";
