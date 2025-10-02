@@ -556,7 +556,7 @@ in
             "editor.defaultFormatter" = "esbenp.prettier-vscode";
           };
           "[vue]" = {
-            "editor.defaultFormatter" = "Vue.volar";
+            "editor.defaultFormatter" = "esbenp.prettier-vscode";
           };
           "[yaml]" = {
             "editor.defaultFormatter" = "esbenp.prettier-vscode";
