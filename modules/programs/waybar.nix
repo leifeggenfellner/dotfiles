@@ -81,7 +81,7 @@ in
         tooltip-format = "{timeTo} - {capacity}%";
         tooltip-format-charging = "Charging: {timeTo} - {capacity}%";
         tooltip-format-discharging = "Discharging: {timeTo} - {capacity}%";
-        tooltip-format-plugged = "Pluggen in - {capacity}%";
+        tooltip-format-plugged = "Plugged in - {capacity}%";
         tooltip-format-alt = "Battery: {capacity}%";
         on-click = "${system}";
       };
