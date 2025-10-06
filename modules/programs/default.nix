@@ -19,14 +19,18 @@ let
         nix-prefetch-git # prefetch git sources
         ouch # painless compression and decompression for your terminal
         paprefs # pulseaudio preferences
+        playerctl # media player control
+        pulseaudio # pulseaudio
         pavucontrol # pulseaudio volume control
         prettyping # a nicer ping
         poppler # pdf tools
+        powertop # power stuff
         pipewire # control volume
         rage # encryption tool for secrets management
         ripgrep # fast grep
         tldr # summary of a man page
         tree # display files in a tree view
+        spicetify-cli # Customize Spotify client
         unzip # unzip files
         xarchiver # archive manager
         zip # zip files

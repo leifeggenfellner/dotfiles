@@ -9,34 +9,15 @@
     (lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
       home.persistence."/persist/${config.home.homeDirectory}" = {
         directories = [
-          ".cache/spotify-player"
+          ".config/spotify"
+          ".cache/spotify"
         ];
       };
 
-      programs.spotify-player = {
-        enable = true;
-        settings = {
-          theme = "default";
-          border_type = "Rounded";
-          progress_bar_type = "Line";
-          playback_window_position = "Top";
-          play_icon = "";
-          pause_icon = "";
-          liked_icon = "";
-          copy_command = {
-            command = "wl-copy";
-            args = [ ];
-          };
-          client_id = "65b708073fc0480ea92a077233ca87bd";
-          client_port = 8888;
-          ap_port = 443;
-          device = {
-            audio_cache = true;
-            normalization = true;
-            volume = 50;
-          };
-        };
-      };
+      # Install regular Spotify
+      home.packages = with pkgs; [
+        spotify
+      ];
     })
     (lib.mkIf (osConfig.environment.desktop.windowManager == "gnome") {
       home.packages = [
