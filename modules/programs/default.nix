@@ -4,6 +4,7 @@ let
     {
       home.packages = with pkgs; [
         acpi # battery info
+        asciiquarium-transparent # asciiquarium
         brightnessctl # control screen brightness
         cacert # ca certificates
         dconf2nix # dconf (gnome) files to nix converter
