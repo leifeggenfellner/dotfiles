@@ -110,6 +110,10 @@ in
             mkhl.direnv
             bmalehorn.vscode-fish
 
+            # Git extensions
+            eamodio.gitlens
+            donjayamanne.githistory
+
             # Formatters
             esbenp.prettier-vscode
 

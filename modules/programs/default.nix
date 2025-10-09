@@ -9,6 +9,7 @@ let
         cacert # ca certificates
         dconf2nix # dconf (gnome) files to nix converter
         ffmpegthumbnailer # thumbnailer for video files
+        gum # glamorous shell scripts
         headsetcontrol # control logitech headsets
         imv # image viewer
         imagemagick # image manipulation
@@ -39,7 +40,7 @@ let
     };
 in
 [
-  ./emacs
+  # ./emacs
   ./neofetch
   ./wofi
   ./alacritty.nix
