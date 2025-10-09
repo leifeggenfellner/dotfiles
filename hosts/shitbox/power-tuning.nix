@@ -39,7 +39,7 @@
       PCIE_ASPM_ON_BAT = "powersupersave";
 
       START_CHARGE_THRESH_BAT0 = 75;
-      STOP_CHARGE_THRESH_BAT0  = 85;
+      STOP_CHARGE_THRESH_BAT0 = 85;
     };
   };
 
