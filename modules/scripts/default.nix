@@ -1,11 +1,14 @@
 let
-  scripts = { pkgs, ... }:
+  scripts = { pkgs, config, ... }:
     let
       countdown-timer = pkgs.callPackage ./countdown-timer.nix { inherit pkgs; };
       gen-ssh-key = pkgs.callPackage ./gen-ssh-key.nix { inherit pkgs; };
       set-monitor = pkgs.callPackage ./set-monitor.nix { inherit pkgs; };
       handle-monitor = pkgs.callPackage ./handle-monitor.nix { inherit pkgs; };
-      gum-scripts = pkgs.callPackage ./gum-scripts.nix { inherit pkgs; };
+      gum-scripts = pkgs.callPackage ./gum-scripts.nix {
+        inherit pkgs;
+        colorScheme = config.colorScheme;
+      };
     in
     {
       home.packages =

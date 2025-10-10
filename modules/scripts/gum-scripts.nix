@@ -1,8 +1,8 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, colorScheme, ... }:
 
 let
   # Access colors from your colorScheme config
-  palette = config.colorScheme.palette;
+  palette = colorScheme.palette;
 
   catppuccin = {
     mauve = "#${palette.base0E}"; # Mauve / Magenta
@@ -47,7 +47,7 @@ let
       "Clear package cache")
 
     if [ -z "$TASKS" ]; then
-      echo "$(gum style --foreground "$RED" "󱟁") No tasks selected"
+      echo "$(gum style --foreground "$RED" "✗") No tasks selected"
       exit 1
     fi
 
@@ -68,7 +68,7 @@ let
         "Nix garbage collection")
           gum spin --title "Running garbage collection..." -- nix-collect-garbage
           ;;
-        "Old generations (keep last 3)")
+        "Old generations (keep last 3 days)")
           gum spin --title "Removing old generations..." -- \
             sudo nix-collect-garbage --delete-older-than 3d
           ;;
@@ -93,7 +93,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(gum style --foreground "$MAUVE" ' Projects')  Launcher"
+      "$(gum style --foreground "$MAUVE" ' Projects')  Launcher"
 
     PROJECT=$(find "$PROJECTS_DIR" -maxdepth 2 -type d -name ".git" | \
       sed "s|$PROJECTS_DIR/||;s|/.git||" | \
@@ -113,7 +113,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$GREEN" \
-      "$(gum style --foreground "$GREEN" ' Project')  $PROJECT"
+      "$(gum style --foreground "$GREEN" ' Project')  $PROJECT"
 
     echo ""
     echo "$(gum style --foreground "$BLUE" "󰿄") Opening in $(gum style --foreground "$MAUVE" "$EDITOR")..."
@@ -131,7 +131,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(gum style --foreground "$MAUVE" ' Git')  Branch Switcher"
+      "$(gum style --foreground "$MAUVE" ' Git')  Branch Switcher"
 
     BRANCH=$(git branch --format="%(refname:short)" | \
       gum filter --placeholder="Search branches..." \
