@@ -1,69 +1,130 @@
 #!/usr/bin/env bash
 
 # Catppuccin Mocha colors
-export GUM_INPUT_CURSOR_FOREGROUND="#89b4fa"
-export GUM_INPUT_PROMPT_FOREGROUND="#cba6f7"
-export GUM_INPUT_PLACEHOLDER_FOREGROUND="#585b70"
-export GUM_INPUT_FOREGROUND="#cdd6f4"
+MAUVE="#cba6f7"
+TEXT="#cdd6f4"
+GREEN="#a6e3a1"
+RED="#f38ba8"
+BLUE="#89b4fa"
 
-export GUM_CHOOSE_CURSOR_FOREGROUND="#89b4fa"
-export GUM_CHOOSE_SELECTED_FOREGROUND="#cba6f7"
-export GUM_CHOOSE_ITEM_FOREGROUND="#cdd6f4"
+color_text() {
+	gum style --foreground "$MAUVE" "$1"
+}
 
-export GUM_CONFIRM_PROMPT_FOREGROUND="#cba6f7"
-export GUM_CONFIRM_SELECTED_FOREGROUND="#a6e3a1"
-export GUM_CONFIRM_UNSELECTED_FOREGROUND="#f38ba8"
+# Check if we're in a git repository
+git rev-parse --git-dir >/dev/null 2>&1
 
-export GUM_WRITE_PROMPT_FOREGROUND="#cba6f7"
-export GUM_WRITE_PLACEHOLDER_FOREGROUND="#585b70"
-export GUM_WRITE_CURSOR_FOREGROUND="#89b4fa"
-export GUM_WRITE_FOREGROUND="#cdd6f4"
+if [ $? -ne 0 ]; then
+	echo "$(gum style --foreground "$RED" "✗") Must be run in a $(color_text "git") repository"
+	exit 1
+fi
+
+# Header
+gum style \
+	--border rounded \
+	--margin "1" \
+	--padding "1 2" \
+	--border-foreground "$MAUVE" \
+	"$(color_text ' Git')  Commit Helper"
 
 # Select commit type
-TYPE=$(gum choose "feat" "fix" "docs" "style" "refactor" "perf" "test" "build" "ci" "chore" "revert" --header "Select commit type: 󱓊")
+TYPE=$(gum choose \
+	--selected.foreground="$MAUVE" \
+	--cursor.foreground="$BLUE" \
+	--header="Select commit type:" \
+	"feat" "fix" "docs" "style" "refactor" "perf" "test" "build" "ci" "chore" "revert")
 
 if [ -z "$TYPE" ]; then
-  echo "No commit type selected. Exiting."
-  exit 1
+	echo "$(gum style --foreground "$RED" "✗") No commit type selected"
+	exit 1
 fi
 
 # Enter commit message
-MESSAGE=$(gum input --placeholder "Enter commit message" --prompt "> " --width 80)
+SUMMARY=$(gum input \
+	--prompt="$(color_text "$TYPE: ")" \
+	--prompt.foreground="$MAUVE" \
+	--cursor.foreground="$BLUE" \
+	--placeholder="Summary of this change" \
+	--width=80)
 
-if [ -z "$MESSAGE" ]; then
-  echo "No commit message provided. Exiting."
-  exit 1
+if [ -z "$SUMMARY" ]; then
+	echo "$(gum style --foreground "$RED" "✗") No commit message provided"
+	exit 1
 fi
 
-# Build the commit message
-COMMIT_MSG="${TYPE}: ${MESSAGE}"
+# Build commit message
+FULL_SUMMARY="$TYPE: $SUMMARY"
 
-# Ask if body should be included (default: yes)
-if gum confirm "Add body?" --default=true; then
-  BODY=$(gum write --placeholder "Enter commit body (Ctrl+D to finish)" --width 80 --height 5)
-  if [ -n "$BODY" ]; then
-    COMMIT_MSG="${COMMIT_MSG}\n\n${BODY}"
-  fi
+# Ask for body (default: yes)
+BODY=""
+if gum confirm \
+	--default=true \
+	--selected.foreground="$GREEN" \
+	--unselected.foreground="$RED" \
+	--prompt.foreground="$MAUVE" \
+	"Add body?"; then
+	BODY=$(gum write \
+		--placeholder="Details of this change (CTRL+D to finish)" \
+		--cursor.foreground="$BLUE" \
+		--width=80 \
+		--height=8)
 fi
 
-# Ask if footer should be included (default: no)
-if gum confirm "Add footer?" --default=false; then
-  FOOTER=$(gum write --placeholder "Enter footer (e.g., 'Fixes #123') (Ctrl+D to finish)" --width 80 --height 3)
-  if [ -n "$FOOTER" ]; then
-    COMMIT_MSG="${COMMIT_MSG}\n\n${FOOTER}"
-  fi
+# Ask for footer (default: no)
+FOOTER=""
+if gum confirm \
+	--default=false \
+	--selected.foreground="$GREEN" \
+	--unselected.foreground="$RED" \
+	--prompt.foreground="$MAUVE" \
+	"Add footer?"; then
+	FOOTER=$(gum write \
+		--placeholder="Footer (e.g., 'Fixes #123') (CTRL+D to finish)" \
+		--cursor.foreground="$BLUE" \
+		--width=80 \
+		--height=3)
 fi
 
-# Preview the commit message
+# Preview commit message
 echo ""
-gum style --border rounded --padding "1 2" --border-foreground "#cba6f7" "$(echo -e "$COMMIT_MSG")"
-echo ""
+gum style \
+	--border rounded \
+	--padding "1 2" \
+	--border-foreground "$BLUE" \
+	--margin "0 1" \
+	"$(gum style --foreground "$MAUVE" --bold "Commit Preview:")"$'\n\n'"$(gum style --foreground "$TEXT" "$FULL_SUMMARY")"
 
-# Confirm commit
-if gum confirm "Commit with this message?"; then
-  echo -e "$COMMIT_MSG" | git commit -F -
-  echo "✓ Committed successfully!" | gum style --foreground "#a6e3a1"
+# Commit
+if [ -z "$BODY" ] && [ -z "$FOOTER" ]; then
+	gum confirm \
+		--default=true \
+		--selected.foreground="$GREEN" \
+		--unselected.foreground="$RED" \
+		--prompt.foreground="$MAUVE" \
+		"Commit changes?" && \
+	git commit -m "$FULL_SUMMARY" && \
+	echo "$(gum style --foreground "$GREEN" "✓") Committed successfully!"
+elif [ -z "$FOOTER" ]; then
+	gum confirm \
+		--default=true \
+		--selected.foreground="$GREEN" \
+		--unselected.foreground="$RED" \
+		--prompt.foreground="$MAUVE" \
+		"Commit changes?" && \
+	git commit -m "$FULL_SUMMARY" -m "$BODY" && \
+	echo "$(gum style --foreground "$GREEN" "✓") Committed successfully!"
 else
-  echo "✗ Commit cancelled." | gum style --foreground "#f38ba8"
-  exit 1
+	gum confirm \
+		--default=true \
+		--selected.foreground="$GREEN" \
+		--unselected.foreground="$RED" \
+		--prompt.foreground="$MAUVE" \
+		"Commit changes?" && \
+	git commit -m "$FULL_SUMMARY" -m "$BODY" -m "$FOOTER" && \
+	echo "$(gum style --foreground "$GREEN" "✓") Committed successfully!"
+fi
+
+if [ $? -ne 0 ]; then
+	echo "$(gum style --foreground "$RED" "✗") Commit cancelled or failed"
+	exit 1
 fi
