@@ -15,7 +15,7 @@ color_text() {
 git rev-parse --git-dir >/dev/null 2>&1
 
 if [ $? -ne 0 ]; then
-	echo "$(gum style --foreground "$RED" "✗") Must be run in a $(color_text "git") repository"
+	echo "$(gum style --foreground "$RED" "󱓌") Must be run in a $(color_text "git") repository"
 	exit 1
 fi
 
@@ -25,7 +25,7 @@ gum style \
 	--margin "1" \
 	--padding "1 2" \
 	--border-foreground "$MAUVE" \
-	"$(color_text ' Git')  Commit Helper"
+	"$(color_text ' Git') Commit Helper"
 
 # Select commit type
 TYPE=$(gum choose \
@@ -35,7 +35,7 @@ TYPE=$(gum choose \
 	"feat" "fix" "docs" "style" "refactor" "perf" "test" "build" "ci" "chore" "revert")
 
 if [ -z "$TYPE" ]; then
-	echo "$(gum style --foreground "$RED" "✗") No commit type selected"
+	echo "$(gum style --foreground "$RED" "󱓌") No commit type selected"
 	exit 1
 fi
 
@@ -48,7 +48,7 @@ SUMMARY=$(gum input \
 	--width=80)
 
 if [ -z "$SUMMARY" ]; then
-	echo "$(gum style --foreground "$RED" "✗") No commit message provided"
+	echo "$(gum style --foreground "$RED" "󱓌") No commit message provided"
 	exit 1
 fi
 
@@ -85,14 +85,29 @@ if gum confirm \
 		--height=3)
 fi
 
-# Preview commit message
-echo ""
+# Clear screen and show preview
+clear
+
+# Build preview content
+PREVIEW_CONTENT="$(gum style --foreground "$MAUVE" --bold "$FULL_SUMMARY")"
+
+if [ -n "$BODY" ]; then
+	PREVIEW_CONTENT="$PREVIEW_CONTENT"$'\n\n'"$(gum style --foreground "$TEXT" "$BODY")"
+fi
+
+if [ -n "$FOOTER" ]; then
+	PREVIEW_CONTENT="$PREVIEW_CONTENT"$'\n\n'"$(gum style --foreground "$BLUE" "$FOOTER")"
+fi
+
+# Show preview in same style as header
 gum style \
 	--border rounded \
+	--margin "1" \
 	--padding "1 2" \
-	--border-foreground "$BLUE" \
-	--margin "0 1" \
-	"$(gum style --foreground "$MAUVE" --bold "Commit Preview:")"$'\n\n'"$(gum style --foreground "$TEXT" "$FULL_SUMMARY")"
+	--border-foreground "$MAUVE" \
+	"$(color_text '󱓊 Git') Commit Preview"$'\n\n'"$PREVIEW_CONTENT"
+
+echo ""
 
 # Commit
 if [ -z "$BODY" ] && [ -z "$FOOTER" ]; then
@@ -103,7 +118,7 @@ if [ -z "$BODY" ] && [ -z "$FOOTER" ]; then
 		--prompt.foreground="$MAUVE" \
 		"Commit changes?" && \
 	git commit -m "$FULL_SUMMARY" && \
-	echo "$(gum style --foreground "$GREEN" "✓") Committed successfully!"
+	echo "$(gum style --foreground "$GREEN" "󱓏") Committed successfully!"
 elif [ -z "$FOOTER" ]; then
 	gum confirm \
 		--default=true \
@@ -112,7 +127,7 @@ elif [ -z "$FOOTER" ]; then
 		--prompt.foreground="$MAUVE" \
 		"Commit changes?" && \
 	git commit -m "$FULL_SUMMARY" -m "$BODY" && \
-	echo "$(gum style --foreground "$GREEN" "✓") Committed successfully!"
+	echo "$(gum style --foreground "$GREEN" "󱓏") Committed successfully!"
 else
 	gum confirm \
 		--default=true \
@@ -121,10 +136,10 @@ else
 		--prompt.foreground="$MAUVE" \
 		"Commit changes?" && \
 	git commit -m "$FULL_SUMMARY" -m "$BODY" -m "$FOOTER" && \
-	echo "$(gum style --foreground "$GREEN" "✓") Committed successfully!"
+	echo "$(gum style --foreground "$GREEN" "󱓏") Committed successfully!"
 fi
 
 if [ $? -ne 0 ]; then
-	echo "$(gum style --foreground "$RED" "✗") Commit cancelled or failed"
+	echo "$(gum style --foreground "$RED" "󱓌") Commit cancelled or failed"
 	exit 1
 fi
