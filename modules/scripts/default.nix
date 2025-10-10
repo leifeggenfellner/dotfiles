@@ -7,7 +7,7 @@ let
       handle-monitor = pkgs.callPackage ./handle-monitor.nix { inherit pkgs; };
       gum-scripts = pkgs.callPackage ./gum-scripts.nix {
         inherit pkgs;
-        colorScheme = config.colorScheme;
+        inherit (config) colorScheme;
       };
     in
     {

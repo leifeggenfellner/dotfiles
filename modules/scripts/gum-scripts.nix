@@ -2,7 +2,7 @@
 
 let
   # Access colors from your colorScheme config
-  palette = colorScheme.palette;
+  inherit (colorScheme) palette;
 
   catppuccin = {
     mauve = "#${palette.base0E}"; # Mauve / Magenta
@@ -283,8 +283,8 @@ let
 
 in
 {
-  system-cleanup = system-cleanup;
-  project-launcher = project-launcher;
+  inherit system-cleanup;
+  inherit project-launcher;
   gswitch = git-switch;
   cm = git-commit-helper;
 }
