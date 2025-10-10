@@ -35,7 +35,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(gum style --foreground "$MAUVE" ' System')  Cleanup"
+      "$(gum style --foreground "$MAUVE" ' System')  Cleanup"
 
     TASKS=$(gum choose --no-limit \
       --selected.foreground="$MAUVE" \
@@ -54,8 +54,8 @@ let
     # Check if any task needs sudo
     if echo "$TASKS" | grep -q "Old generations"; then
       echo "$(gum style --foreground "$MAUVE" "") Some tasks require sudo access..."
-      sudo -v
-      while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+      /run/wrappers/bin/sudo -v
+      while true; do /run/wrappers/bin/sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
     fi
 
     echo ""
@@ -70,7 +70,7 @@ let
           ;;
         "Old generations (keep last 3 days)")
           gum spin --title "Removing old generations..." -- \
-            sudo nix-collect-garbage --delete-older-than 3d
+            /run/wrappers/bin/sudo nix-collect-garbage --delete-older-than 3d
           ;;
         "Docker cleanup")
           gum spin --title "Cleaning Docker..." -- docker system prune -af
