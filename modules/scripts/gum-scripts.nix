@@ -1,12 +1,15 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 let
+  # Access colors from your colorScheme config
+  palette = config.colorScheme.palette;
+
   catppuccin = {
-    mauve = "#cba6f7";
-    green = "#a6e3a1";
-    red = "#f38ba8";
-    blue = "#89b4fa";
-    text = "#cdd6f4";
+    mauve = "#${palette.base0E}"; # Mauve / Magenta
+    green = "#${palette.base0B}"; # Green
+    red = "#${palette.base08}"; # Red
+    blue = "#${palette.base0D}"; # Blue
+    text = "#${palette.base05}"; # Text (main fg)
   };
 
   mkGumScript = name: deps: text: pkgs.writeShellScriptBin name ''
@@ -26,7 +29,7 @@ let
     ${text}
   '';
 
-  system-cleanup = mkGumScript "system-cleanup" (with pkgs; [ gum nix docker sudo coreutils grep ]) ''
+  system-cleanup = mkGumScript "system-cleanup" (with pkgs; [ gum nix docker sudo coreutils gnugrep ]) ''
     gum style \
       --border rounded \
       --margin "1" \
@@ -44,7 +47,7 @@ let
       "Clear package cache")
 
     if [ -z "$TASKS" ]; then
-      echo "$(gum style --foreground "$RED" "✗") No tasks selected"
+      echo "$(gum style --foreground "$RED" "󱟁") No tasks selected"
       exit 1
     fi
 
@@ -65,7 +68,7 @@ let
         "Nix garbage collection")
           gum spin --title "Running garbage collection..." -- nix-collect-garbage
           ;;
-        "Old generations (keep last 3 days)")
+        "Old generations (keep last 3)")
           gum spin --title "Removing old generations..." -- \
             sudo nix-collect-garbage --delete-older-than 3d
           ;;
@@ -282,6 +285,6 @@ in
 {
   system-cleanup = system-cleanup;
   project-launcher = project-launcher;
-  git-switch = git-switch;
-  git-commit-helper = git-commit-helper;
+  gswitch = git-switch;
+  cm = git-commit-helper;
 }

@@ -18,8 +18,8 @@ let
           # Gum scripts
           gum-scripts.system-cleanup # system cleanup with gum
           gum-scripts.project-launcher # project launcher with gum
-          gum-scripts.git-switch # git branch switcher with gum
-          gum-scripts.git-commit-helper # git commit helper with gum
+          gum-scripts.gswitch # git branch switcher with gum
+          gum-scripts.cm # git commit helper with gum
         ]
         ++ (pkgs.sxm.scripts or [ ]);
     };
