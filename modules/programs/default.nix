@@ -30,6 +30,7 @@ let
         pipewire # control volume
         rage # encryption tool for secrets management
         ripgrep # fast grep
+        statix #linting
         tldr # summary of a man page
         tree # display files in a tree view
         spicetify-cli # Customize Spotify client
