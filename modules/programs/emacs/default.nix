@@ -81,24 +81,6 @@ let
     '';
   };
 
-  bivrost-theme = pkgs.emacsPackages.melpaBuild {
-    pname = "bivrost-theme";
-    version = "20250330";
-    commit = "38c6fae362356800b7391fdb4aa999fd76fa1d24";
-    src = pkgs.fetchFromGitHub {
-      owner = "gako358";
-      repo = "bivrost";
-      rev = "38c6fae362356800b7391fdb4aa999fd76fa1d24";
-      hash = "sha256-bsVoX9G8RfEOAhJHKnCJhYlaCjGA4R75fTPwgN+GGx4=";
-    };
-    recipe = pkgs.writeText "recipe" ''
-      (bivrost-theme
-       :repo "gako358/bivrost"
-       :fetcher github
-       :files ("*.el"))
-    '';
-  };
-
   # Embeded packages
   emacsOnlyTools = [
     metals
