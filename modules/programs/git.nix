@@ -4,42 +4,27 @@
 let
   gitConfig = {
     core = {
-      editor = "emacsclient";
-      pager = "diff-so-fancy | less --tabs=4 -RFX";
+      editor = "nvim";
     };
     init.defaultBranch = "main";
-    merge = {
-      conflictStyle = "diff3";
-      tool = "ediff";
-      keepBackup = false;
-      trustExitCode = true;
-      ediff.keepBackup = false;
-      ediff.cmd = ''
-        emacs --eval \"\
-        (progn\
-          (defun ediff-write-merge-buffer ()\
-            (let ((file ediff-merge-store-file))\
-              (set-buffer ediff-buffer-C)\
-              (write-region (point-min) (point-max) file)\
-              (message \\\"Merge buffer saved in: %s\\\" file)\
-              (set-buffer-modified-p nil)\
-              (sit-for 1)))\
-          (setq ediff-quit-hook 'kill-emacs\
-                ediff-quit-merge-hook 'ediff-write-merge-buffer)\
-          (ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\"\
-                                           \\\"$BASE\\\" nil \\\"$MERGED\\\"))\"
-      '';
-    };
-    color.ui = true;
+    color.ui = "auto";
+    help.autocorrect = 20;
     fetch.prune = true;
-    pull.rebase = false;
+    pull.rebase = true;
     push.default = "upstream";
     push.autoSetupRemote = true;
+    diff = {
+      tool = "nvimdiff";
+    };
+    difftool = {
+      prompt = false;
+      nvimdiff.cmd = "nvim -d $LOCAL $REMOTE";
+    };
     url = {
       "https://github.com/".insteadOf = "gh:";
       "ssh://git@github.com".pushInsteadOf = "gh:";
     };
-    github.user = "gako358";
+    github.user = "leifeggenfellner";
   };
 
   rg = "${pkgs.ripgrep}/bin/rg";
@@ -55,17 +40,36 @@ in
   programs.git = {
     enable = true;
     aliases = {
+      p = "push";
+      st = "status -sb";
+      lg1 = "log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all";
+      lg2 = "log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all";
+      lg = "!git lg1";
+      ll = "log --oneline";
+      last = "log -1 HEAD --stat";
+      cm = "commit -m";
+      rv = "remote -v";
+      d = "diff";
+      gl = "config --global -l";
+      se = "!git rev-list --all | xargs git grep -F";
+      sw = "switch";
+      cob = "checkout -b";
+      del = "branch -D";
+      br = "branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]' --sort=-committerdate";
+      save = "!git add -A && git commit -m 'chore: commit save point'";
+      undo = "reset HEAD~1 --mixed";
+      res = "!git reset --hard";
+      done = "!git push origin HEAD";
+      ls = "ls-files -s";
+      swc = "switch -c";
+      cma = "commit --amend";
+
       amend = "commit --amend -m";
       fixup = "!f(){ git reset --soft HEAD~\${1} && git commit --amend -C HEAD; };f";
-      loc = "!f(){ git ls-files | ${rg} \"\\.\${1}\" | xargs wc -l; };f"; # lines of code
+      loc = "!f(){ git ls-files | ${rg} \"\\.\${1}\" | xargs wc -l; };f";
       staash = "stash --all";
       graph = "log --decorate --oneline --graph";
-      br = "branch";
       co = "checkout";
-      st = "status";
-      ls = "log --pretty=format:\"%C(yellow)%h%Cred%d\\\\ %Creset%s%Cblue\\\\ [%cn]\" --decorate";
-      ll = "log --pretty=format:\"%C(yellow)%h%Cred%d\\\\ %Creset%s%Cblue\\\\ [%cn]\" --decorate --numstat";
-      cm = "commit -m";
       ca = "commit -am";
       dc = "diff --cached";
     };
@@ -77,10 +81,10 @@ in
       "*.metals.sbt"
       "*metals.sbt"
       "*.direnv"
-      "*.envrc" # there is lorri, nix-direnv & simple direnv; let people decide
-      "*hie.yaml" # ghcide files
-      "*.mill-version" # used by metals
-      "*.jvmopts" # should be local to every project
+      "*.envrc"
+      "*hie.yaml"
+      "*.mill-version"
+      "*.jvmopts"
     ];
     userEmail = "eggenfellner@protonmail.com";
     userName = "leifeggenfellner";
