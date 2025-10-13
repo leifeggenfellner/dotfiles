@@ -161,7 +161,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(color_text ' Git') Commit Helper"
+      "$(color_text ' Git') Commit Helper"
 
     # Select commit type
     TYPE=$(gum choose \
@@ -199,11 +199,15 @@ let
       --unselected.foreground="$RED" \
       --prompt.foreground="$MAUVE" \
       "Add body?"; then
+      echo ""
+      gum style --foreground "$BLUE" --italic "💡 Opening editor for body (save and close when finished)..."
       BODY=$(gum write \
-        --placeholder="Details of this change (CTRL+D to finish)" \
+        --show-line-numbers \
+        --char-limit=0 \
+        --placeholder="Details of this change..." \
         --cursor.foreground="$BLUE" \
         --width=80 \
-        --height=8)
+        --height=10)
     fi
 
     # Ask for footer (default: no)
@@ -214,11 +218,15 @@ let
       --unselected.foreground="$RED" \
       --prompt.foreground="$MAUVE" \
       "Add footer?"; then
+      echo ""
+      gum style --foreground "$BLUE" --italic "💡 Opening editor for footer (save and close when finished)..."
       FOOTER=$(gum write \
-        --placeholder="Footer (e.g., 'Fixes #123') (CTRL+D to finish)" \
+        --show-line-numbers \
+        --char-limit=0 \
+        --placeholder="Footer (e.g., 'Fixes #123')..." \
         --cursor.foreground="$BLUE" \
         --width=80 \
-        --height=3)
+        --height=5)
     fi
 
     # Clear screen and show preview
@@ -239,12 +247,16 @@ let
 
     if [ -n "$BODY" ]; then
       echo ""
-      echo "$BODY" | gum style --foreground "$TEXT"
+      printf '%s\n' "$BODY" | while IFS= read -r line; do
+        gum style --foreground "$TEXT" "$line"
+      done
     fi
 
     if [ -n "$FOOTER" ]; then
       echo ""
-      echo "$FOOTER" | gum style --foreground "$BLUE"
+      printf '%s\n' "$FOOTER" | while IFS= read -r line; do
+        gum style --foreground "$BLUE" "$line"
+      done
     fi
 
     echo ""
