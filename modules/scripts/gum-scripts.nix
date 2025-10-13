@@ -285,10 +285,277 @@ let
     fi
   '';
 
+  git-add-selector = mkGumScript "gadd" (with pkgs; [ gum git coreutils gawk gnugrep ]) ''
+    # Check if we're in a git repository
+    git rev-parse --git-dir >/dev/null 2>&1
+
+    if [ $? -ne 0 ]; then
+      echo "$(gum style --foreground "$RED" "󱓌") Not a $(color_text "git") repository"
+      exit 1
+    fi
+
+    # Get the git root directory
+    GIT_ROOT=$(git rev-parse --show-toplevel)
+
+    # Header
+    gum style \
+      --border rounded \
+      --margin "1" \
+      --padding "1 2" \
+      --border-foreground "$MAUVE" \
+      "$(color_text ' Git') File Selector"
+
+    # Get list of modified, untracked, and deleted files (relative to git root)
+    FILES=$(git -C "$GIT_ROOT" status --porcelain | awk '{print $2}')
+
+    # Check if there are any files to add
+    if [ -z "$FILES" ]; then
+      echo "$(gum style --foreground "$GREEN" "󱓏") No files to add!"
+      exit 0
+    fi
+
+    # Show current status
+    echo ""
+    gum style --foreground "$MAUVE" --bold "Current Status:"
+    git status --short
+    echo ""
+
+    # Let user select files to add
+    SELECTED=$(echo "$FILES" | gum choose --no-limit \
+      --selected.foreground="$MAUVE" \
+      --cursor.foreground="$BLUE" \
+      --header="Select files to stage (Space to select, Enter to confirm):")
+
+    # Check if any files were selected
+    if [ -z "$SELECTED" ]; then
+      echo "$(gum style --foreground "$YELLOW" "󰋼") No files selected"
+      exit 0
+    fi
+
+    # Add selected files from git root
+    echo ""
+    echo "$SELECTED" | while IFS= read -r file; do
+      git -C "$GIT_ROOT" add -- "$file" && \
+      echo "$(gum style --foreground "$GREEN" "󱓏") Added: $(gum style --foreground "$TEXT" "$file")" || \
+      echo "$(gum style --foreground "$RED" "󱓌") Failed to add: $(gum style --foreground "$TEXT" "$file")"
+    done
+
+    echo ""
+
+    # Show updated status
+    gum style --foreground "$MAUVE" --bold "Updated Status:"
+    git status --short
+
+    echo ""
+
+    # Ask if user wants to commit
+    if gum confirm \
+      --default=true \
+      --selected.foreground="$GREEN" \
+      --unselected.foreground="$RED" \
+      --prompt.foreground="$MAUVE" \
+      "Commit these changes?"; then
+
+      # Get commit message
+      COMMIT_MSG=$(gum input \
+        --prompt="$(gum style --foreground "$MAUVE" "󰏫 Commit message: ")" \
+        --cursor.foreground="$BLUE" \
+        --placeholder="Enter commit message" \
+        --width=80)
+
+      if [ -n "$COMMIT_MSG" ]; then
+        git commit -m "$COMMIT_MSG" && \
+        echo "$(gum style --foreground "$GREEN" "󱓏") Changes committed!"
+      else
+        echo "$(gum style --foreground "$YELLOW" "󰋼") No commit message provided. Skipping commit."
+      fi
+    else
+      echo "$(gum style --foreground "$YELLOW" "󰋼") Commit skipped"
+    fi
+  '';
+
+  git-log-viewer = mkGumScript "glog" (with pkgs; [ gum git coreutils gnused gawk ]) ''
+    # Check if we're in a git repository
+    git rev-parse --git-dir >/dev/null 2>&1
+
+    if [ $? -ne 0 ]; then
+      echo "$(gum style --foreground "$RED" "󱓌") Not a $(color_text "git") repository"
+      exit 1
+    fi
+
+    # Header
+    gum style \
+      --border rounded \
+      --margin "1" \
+      --padding "1 2" \
+      --border-foreground "$MAUVE" \
+      "$(color_text ' Git') Log Viewer"
+
+    # Get number of commits to show
+    LIMIT=$(gum input \
+      --prompt="$(gum style --foreground "$MAUVE" "󰦨 Number of commits: ")" \
+      --cursor.foreground="$BLUE" \
+      --placeholder="50" \
+      --value="50" \
+      --width=20)
+
+    # Default to 50 if empty
+    LIMIT=''${LIMIT:-50}
+
+    echo ""
+    gum style --foreground "$BLUE" "󰁯 Loading commits..."
+    echo ""
+
+    # Get formatted log with hash, date, author, and message
+    LOG=$(git log -n "$LIMIT" --pretty=format:"%h|%ar|%an|%s" | \
+      awk -F'|' '{printf "%-8s %-20s %-25s %s\n", $1, $2, substr($3,1,25), $4}')
+
+    # Let user select a commit
+    SELECTED=$(echo "$LOG" | gum filter \
+      --indicator.foreground="$MAUVE" \
+      --match.foreground="$GREEN" \
+      --placeholder="Search commits..." \
+      --height=20)
+
+    if [ -z "$SELECTED" ]; then
+      echo "$(gum style --foreground "$YELLOW" "󰋼") No commit selected"
+      exit 0
+    fi
+
+    # Extract commit hash (first word)
+    COMMIT_HASH=$(echo "$SELECTED" | awk '{print $1}')
+
+    clear
+
+    # Show commit header
+    gum style \
+      --border rounded \
+      --margin "1" \
+      --padding "1 2" \
+      --border-foreground "$MAUVE" \
+      "$(color_text '󰜘 Commit') $COMMIT_HASH"
+
+    echo ""
+
+    # Show full commit details
+    gum style --foreground "$MAUVE" --bold "Commit Details:"
+    git show --stat --pretty=format:"%C(bold)Hash:%C(reset)    %H%n%C(bold)Author:%C(reset)  %an <%ae>%n%C(bold)Date:%C(reset)    %ar (%ai)%n%C(bold)Subject:%C(reset) %s%n" "$COMMIT_HASH" --color=always
+
+    echo ""
+    echo ""
+
+    # Ask what to do with this commit
+    ACTION=$(gum choose \
+      --selected.foreground="$MAUVE" \
+      --cursor.foreground="$BLUE" \
+      --header="What would you like to do?" \
+      "View full diff" \
+      "Copy commit hash" \
+      "Checkout this commit" \
+      "Cherry-pick this commit" \
+      "Revert this commit" \
+      "Show files changed" \
+      "Exit")
+
+    case "$ACTION" in
+      "View full diff")
+        clear
+        gum style \
+          --border rounded \
+          --margin "1" \
+          --padding "1 2" \
+          --border-foreground "$GREEN" \
+          "$(gum style --foreground "$GREEN" '󰖷 Diff') $COMMIT_HASH"
+        echo ""
+        git show "$COMMIT_HASH" --color=always | less -R
+        ;;
+
+      "Copy commit hash")
+        echo -n "$COMMIT_HASH" | xclip -selection clipboard 2>/dev/null || \
+        echo -n "$COMMIT_HASH" | pbcopy 2>/dev/null || \
+        echo -n "$COMMIT_HASH" | wl-copy 2>/dev/null || \
+        echo "$COMMIT_HASH"
+        echo "$(gum style --foreground "$GREEN" "󱓏") Copied $(color_text "$COMMIT_HASH") to clipboard"
+        ;;
+
+      "Checkout this commit")
+        if gum confirm \
+          --default=false \
+          --selected.foreground="$GREEN" \
+          --unselected.foreground="$RED" \
+          --prompt.foreground="$MAUVE" \
+          "Checkout commit $COMMIT_HASH? (detached HEAD)"; then
+          git checkout "$COMMIT_HASH" && \
+          echo "$(gum style --foreground "$GREEN" "󱓏") Checked out $(color_text "$COMMIT_HASH")"
+        else
+          echo "$(gum style --foreground "$YELLOW" "󰋼") Checkout cancelled"
+        fi
+        ;;
+
+      "Cherry-pick this commit")
+        if gum confirm \
+          --default=true \
+          --selected.foreground="$GREEN" \
+          --unselected.foreground="$RED" \
+          --prompt.foreground="$MAUVE" \
+          "Cherry-pick commit $COMMIT_HASH?"; then
+          git cherry-pick "$COMMIT_HASH" && \
+          echo "$(gum style --foreground "$GREEN" "󱓏") Cherry-picked $(color_text "$COMMIT_HASH")" || \
+          echo "$(gum style --foreground "$RED" "󱓌") Cherry-pick failed"
+        else
+          echo "$(gum style --foreground "$YELLOW" "󰋼") Cherry-pick cancelled"
+        fi
+        ;;
+
+      "Revert this commit")
+        if gum confirm \
+          --default=false \
+          --selected.foreground="$GREEN" \
+          --unselected.foreground="$RED" \
+          --prompt.foreground="$MAUVE" \
+          "Revert commit $COMMIT_HASH?"; then
+          git revert "$COMMIT_HASH" && \
+          echo "$(gum style --foreground "$GREEN" "󱓏") Reverted $(color_text "$COMMIT_HASH")" || \
+          echo "$(gum style --foreground "$RED" "󱓌") Revert failed"
+        else
+          echo "$(gum style --foreground "$YELLOW" "󰋼") Revert cancelled"
+        fi
+        ;;
+
+      "Show files changed")
+        clear
+        gum style \
+          --border rounded \
+          --margin "1" \
+          --padding "1 2" \
+          --border-foreground "$BLUE" \
+          "$(gum style --foreground "$BLUE" '󰈙 Files Changed') $COMMIT_HASH"
+        echo ""
+        git show --name-status --pretty=format:"" "$COMMIT_HASH" | grep -v '^$' | \
+          while IFS= read -r line; do
+            STATUS=$(echo "$line" | awk '{print $1}')
+            FILE=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ //')
+            case "$STATUS" in
+              A) echo "$(gum style --foreground "$GREEN" "󰐕 $STATUS") $FILE" ;;
+              M) echo "$(gum style --foreground "$BLUE" "󰏫 $STATUS") $FILE" ;;
+              D) echo "$(gum style --foreground "$RED" "󰍶 $STATUS") $FILE" ;;
+              R*) echo "$(gum style --foreground "$YELLOW" "󰁔 $STATUS") $FILE" ;;
+              *) echo "$(gum style --foreground "$TEXT" "  $STATUS") $FILE" ;;
+            esac
+          done
+        ;;
+
+      "Exit")
+        exit 0
+        ;;
+    esac
+  '';
 in
 {
   inherit system-cleanup;
   inherit project-launcher;
   gswitch = git-switch;
   cm = git-commit-helper;
+  gadd = git-add-selector;
+  glog = git-log-viewer;
 }

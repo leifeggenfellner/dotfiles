@@ -23,6 +23,8 @@ let
           gum-scripts.project-launcher # project launcher with gum
           gum-scripts.gswitch # git branch switcher with gum
           gum-scripts.cm # git commit helper with gum
+          gum-scripts.gadd # git add helper with gum
+          gum-scripts.glog # git log viewer with gum
         ]
         ++ (pkgs.sxm.scripts or [ ]);
     };
