@@ -161,7 +161,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(color_text ' Git') Commit Helper"
+      "$(color_text ' Git') Commit Helper"
 
     # Select commit type
     TYPE=$(gum choose \
@@ -239,12 +239,12 @@ let
 
     if [ -n "$BODY" ]; then
       echo ""
-      gum style --foreground "$TEXT" "$BODY"
+      echo "$BODY" | gum style --foreground "$TEXT"
     fi
 
     if [ -n "$FOOTER" ]; then
       echo ""
-      gum style --foreground "$BLUE" "$FOOTER"
+      echo "$FOOTER" | gum style --foreground "$BLUE"
     fi
 
     echo ""
@@ -389,7 +389,7 @@ let
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(color_text ' Git') Log Viewer"
+      "$(color_text ' Git') Log Viewer"
 
     # Get number of commits to show
     LIMIT=$(gum input \
