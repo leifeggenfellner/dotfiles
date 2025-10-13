@@ -224,24 +224,28 @@ let
     # Clear screen and show preview
     clear
 
-    # Build preview content
-    PREVIEW_CONTENT="$(gum style --foreground "$MAUVE" --bold "$FULL_SUMMARY")"
-
-    if [ -n "$BODY" ]; then
-      PREVIEW_CONTENT="$PREVIEW_CONTENT"$'\n\n'"$(gum style --foreground "$TEXT" "$BODY")"
-    fi
-
-    if [ -n "$FOOTER" ]; then
-      PREVIEW_CONTENT="$PREVIEW_CONTENT"$'\n\n'"$(gum style --foreground "$BLUE" "$FOOTER")"
-    fi
-
-    # Show preview in same style as header
+    # Show preview header
     gum style \
       --border rounded \
       --margin "1" \
       --padding "1 2" \
       --border-foreground "$MAUVE" \
-      "$(color_text '󱓊 Git') Commit Preview"$'\n\n'"$PREVIEW_CONTENT"
+      "$(color_text '󱓊 Git') Commit Preview"
+
+    echo ""
+
+    # Show preview content
+    gum style --foreground "$MAUVE" --bold "$FULL_SUMMARY"
+
+    if [ -n "$BODY" ]; then
+      echo ""
+      gum style --foreground "$TEXT" "$BODY"
+    fi
+
+    if [ -n "$FOOTER" ]; then
+      echo ""
+      gum style --foreground "$BLUE" "$FOOTER"
+    fi
 
     echo ""
 
