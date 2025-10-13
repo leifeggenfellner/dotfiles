@@ -13,6 +13,11 @@ let
     pull.rebase = true;
     push.default = "upstream";
     push.autoSetupRemote = true;
+    rebase = {
+      updateRefs = true;
+      autoSquash = true;
+      autoStash = true;
+    };
     diff = {
       tool = "nvimdiff";
     };
@@ -63,6 +68,8 @@ in
       ls = "ls-files -s";
       swc = "switch -c";
       cma = "commit --amend";
+      prune-branches = "!git fetch --prune && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D";
+      show-prunable = "!git fetch --prune && git branch -vv | grep ': gone]'";
 
       amend = "commit --amend -m";
       fixup = "!f(){ git reset --soft HEAD~\${1} && git commit --amend -C HEAD; };f";
