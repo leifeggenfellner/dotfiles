@@ -25,7 +25,6 @@ let
     yellow = "#${config.colorScheme.palette.base0A}";
   };
   calendar = "${pkgs.gnome-calendar}/bin/gnome-calendar";
-  lockScreen = "${pkgs.hyprlock}/bin/hyprlock";
   system = "${pkgs.gnome-system-monitor}/bin/gnome-system-monitor";
 in
 {
@@ -54,7 +53,6 @@ in
       modules-right = [
         "tray"
         "group/system"
-        "custom/lock"
       ];
       battery = {
         states = {
@@ -98,13 +96,6 @@ in
         format = "";
         tooltip = false;
         on-click = "wofi --show drun";
-      };
-
-      "custom/lock" = {
-        "format" = "󰌾";
-        "tooltip" = true;
-        "tooltip-format" = "Lock Screen";
-        "on-click" = "${lockScreen}";
       };
 
       "hyprland/workspaces" = {
@@ -196,36 +187,44 @@ in
          background-color: transparent;
       }
 
-      /* Individual module styling - ALL modules get same background */
-      #workspaces,
-      #clock,
-      #tray,
-      #system,
-      #custom-launcher,
-      #custom-lock {
-        background-color: ${palette.background-color};
+      /* Left section - Launcher + Workspaces as connected unit */
+      #custom-launcher {
+        background: ${palette.background-color};
+        color: ${palette.magenta};
+        padding: 9px 22px 8px 15px;
+        margin: 4px 0px;
         border-radius: 12px;
-        margin: 4px 2px;
-        padding: 4px 12px;
+        font-size: 20px;
         border: 2px solid ${palette.magenta};
+        transition: all 0.2s ease;
       }
 
-      /* Workspace styling - clean icons with background/color changes */
+      #custom-launcher:hover {
+        background: linear-gradient(135deg, ${palette.magenta} 0%, ${palette.blue} 100%);
+        color: ${palette.background-color};
+        border-color: ${palette.magenta};
+      }
+
       #workspaces {
-        padding: 2px 4px;
+        background-color: ${palette.background-color};
+        padding: 4px 8px;
+        margin: 4px 6px;
+        border-radius: 12px;
+        border: 2px solid ${palette.magenta};
       }
 
       #workspaces button {
         padding: 0px;
-        margin: 2px;
+        margin: 2px 3px;
         border-radius: 8px;
         color: ${palette.grey};
         background-color: transparent;
-        transition: background-color 0.2s ease;
+        transition: all 0.2s ease;
         font-weight: normal;
         font-size: ${palette.iconsize};
         min-width: 32px;
         min-height: 28px;
+        border: 2px solid transparent;
       }
 
       #workspaces button label {
@@ -233,152 +232,173 @@ in
         font-size: ${palette.iconsize};
       }
 
-      /* Individual workspace icon adjustments for centering using margins */
       #workspaces button:nth-child(1) label {
-        /* Workspace 1 - dev icon  */
         margin-left: -3px;
         margin-top: 1px;
       }
 
       #workspaces button:nth-child(2) label {
-        /* Workspace 2 - term icon  */
         margin-left: -1px;
+        margin-top: 1px;
       }
 
       #workspaces button:nth-child(3) label {
-        /* Workspace 3 - zen icon 󰈹 */
         margin-left: -3px;
-
       }
 
       #workspaces button:nth-child(4) label {
-        /* Workspace 4 - slack icon 󰒱 */
         margin-left: -3px;
       }
 
       #workspaces button:nth-child(5) label {
-        /* Workspace 5 - spotify icon  */
-        margin-left: -2px;
+        margin-left: -3px;
       }
 
       #workspaces button:nth-child(6) label {
-        /* Workspace 6 - system icon  */
+        margin-left: -3px;
       }
 
       #workspaces button.active {
-        background-color: ${palette.magenta};
-        color: #${config.colorScheme.palette.base00};
+        background: linear-gradient(135deg, ${palette.magenta} 0%, ${palette.blue} 100%);
+        color: ${palette.background-color};
         font-weight: bold;
+        border: 2px solid ${palette.magenta};
       }
 
       #workspaces button:hover {
-        background-color: rgba(137, 180, 250, 0.3);
+        background-color: rgba(137, 180, 250, 0.2);
         color: ${palette.blue};
+        border: 2px solid ${palette.blue};
       }
 
-      #workspaces button.urgent {
-        background-color: ${palette.red};
-        color: #${config.colorScheme.palette.base00};
-      }
-
-      /* Launcher styling */
-      #custom-launcher {
-        font-size: 18px;
-        color: ${palette.magenta};
-        padding: 6px 12px;
-        padding-right: 18px;
-        transition: background-color 0.2s ease;
-      }
-
-      #custom-launcher:hover {
-        background-color: ${palette.magenta};
+      #workspaces button.active:hover {
+        background: linear-gradient(135deg, ${palette.blue} 0%, ${palette.magenta} 100%);
         color: ${palette.background-color};
       }
 
-      /* Lock button styling */
-      #custom-lock {
-        color: ${palette.green};
-        padding: 6px 18px;
-        transition: background-color 0.2s ease;
+      #workspaces button.urgent {
+        background: linear-gradient(135deg, ${palette.red} 0%, ${palette.orange} 100%);
+        color: ${palette.background-color};
+        border: 2px solid ${palette.red};
       }
 
-      #custom-lock:hover {
-        background-color: rgba(166, 227, 161, 0.2);
-      }
-
-      /* Clock styling */
+            /* Center - Clock with emphasis */
       #clock {
+        background-color: ${palette.background-color};
         color: ${palette.blue};
         font-weight: bold;
-        padding: 6px 16px;
-        transition: background-color 0.2s ease;
+        padding: 8px 16px;
+        margin: 4px 6px;
+        border-radius: 12px;
+        border: 2px solid ${palette.blue};
+        transition: all 0.3s ease;
       }
 
       #clock:hover {
-        background-color: rgba(203, 166, 247, 0.2);
+        background-color: rgba(137, 180, 250, 0.2);
+        color: ${palette.background-color};
+        border-color: ${palette.magenta};
       }
 
-      /* System group styling */
+      /* Right section - System group connected bar with colored backgrounds */
       #system {
-        border-color: ${palette.magenta};
-        padding: 4px 8px;
-        transition: background-color 0.2s ease;
+        background-color: transparent;
+        padding: 0px;
+        margin: 4px 0px;
+        border-radius: 12px;
       }
 
-      #system:hover {
-        background-color: rgba(203, 166, 247, 0.15);
-      }
-
-      /* Individual system modules */
-      #battery {
-        color: ${palette.green};
-        margin: 0 4px;
-      }
-      #battery.warning {
-        color: ${palette.yellow};
-      }
-      #battery.critical {
-        color: ${palette.red};
-      }
-
-      #memory {
-        color: ${palette.cyan};
-        margin: 0 4px;
-      }
-
+      #temperature,
+      #memory,
+      #battery,
+      #pulseaudio,
       #network {
-        color: ${palette.blue};
-        margin: 0 4px;
-      }
-      #network.disconnected {
-        color: ${palette.red};
-      }
-
-      #pulseaudio {
-        color: ${palette.magenta};
-        margin: 0 4px;
-      }
-      #pulseaudio.muted {
-        color: ${palette.grey};
+        padding: 8px 12px;
+        margin: 0px;
+        border: none;
+        transition: all 0.3s ease;
+        color: ${palette.background-color};
       }
 
+      /* Temperature - first item with left rounded edge */
       #temperature {
-        color: ${palette.orange};
-        margin: 0 4px;
-      }
-      #temperature.critical {
-        color: ${palette.red};
+        background-color: ${palette.orange};
+        border-radius: 12px 0px 0px 12px;
       }
 
-      /* Tray styling */
+      #temperature:hover {
+        background-color: ${palette.yellow};
+      }
+
+      #temperature.critical {
+        background-color: ${palette.red};
+      }
+
+      /* Memory - middle item */
+      #memory {
+        background-color: ${palette.cyan};
+      }
+
+      #memory:hover {
+        background-color: ${palette.blue};
+      }
+
+      /* Battery - middle item */
+      #battery {
+        background-color: ${palette.green};
+      }
+
+      #battery:hover {
+        background-color: ${palette.cyan};
+      }
+
+      #battery.warning {
+        background-color: ${palette.yellow};
+      }
+
+      #battery.critical {
+        background-color: ${palette.red};
+      }
+
+      /* Pulseaudio - middle item */
+      #pulseaudio {
+        background-color: ${palette.magenta};
+      }
+
+      #pulseaudio:hover {
+        background-color: ${palette.blue};
+      }
+
+      #pulseaudio.muted {
+        background-color: ${palette.grey};
+      }
+
+      /* Network - last item with right rounded edge */
+      #network {
+        background-color: ${palette.blue};
+        border-radius: 0px 12px 12px 0px;
+      }
+
+      #network:hover {
+        background-color: ${palette.cyan};
+      }
+
+      #network.disconnected {
+        background-color: ${palette.red};
+      }
+
+      /* Tray - separate rounded box */
       #tray {
-        border-color: ${palette.magenta};
-        padding: 6px 12px;
-        transition: background-color 0.2s ease;
+        background-color: ${palette.background-color};
+        padding: 8px 14px;
+        margin: 4px 6px 4px 4px;
+        border-radius: 12px;
+        border: 2px solid ${palette.magenta};
+        transition: all 0.3s ease;
       }
 
       #tray:hover {
-        background-color: rgba(203, 166, 247, 0.15);
+        background-color: rgba(203, 166, 247, 0.1);
       }
 
       #tray > .passive {
@@ -388,13 +408,19 @@ in
       #tray > .needs-attention {
         -gtk-icon-effect: highlight;
         background-color: ${palette.red};
+        border-radius: 8px;
       }
 
       /* Tooltips */
       tooltip {
-        background-color: rgba(26, 26, 26, 0.95);
+        background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(40, 40, 40, 0.98) 100%);
         border: 2px solid ${palette.magenta};
-        border-radius: 8px;
+        border-radius: 10px;
+        color: ${palette.grey};
+        padding: 8px 12px;
+      }
+
+      tooltip label {
         color: ${palette.grey};
       }
     '';
