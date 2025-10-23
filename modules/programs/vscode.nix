@@ -92,8 +92,8 @@ in
       package = pkgs.vscode;
       mutableExtensionsDir = true;
       profiles.default = {
-        enableUpdateCheck = false;
-        enableExtensionUpdateCheck = false;
+        enableUpdateCheck = true;
+        enableExtensionUpdateCheck = true;
         extensions =
           with pkgs.vscode-extensions;
           [
@@ -391,6 +391,31 @@ in
             "vue"
           ];
 
+          # disable built-in auto-closing and HTML auto-closing
+          "typescript.autoClosingTags" = false;
+          "javascript.autoClosingTags" = false;
+          "html.autoClosingTags" = false;
+
+          # limit the auto-close / auto-rename tag extensions to explicit languages
+          "auto-close-tag.enableAutoCloseTag" = true;
+          "auto-close-tag.activationOnLanguage" = [
+            "html"
+            "xml"
+            "php"
+            "javascript"
+            "javascriptreact"
+            "vue"
+          ];
+
+          "auto-rename-tag.activationOnLanguage" = [
+            "html"
+            "xml"
+            "php"
+            "javascript"
+            "javascriptreact"
+            "vue"
+          ];
+
           # UX improvements
           "explorer.confirmDelete" = false;
           "explorer.confirmDragAndDrop" = false;
@@ -508,9 +533,9 @@ in
           # Headwind (Tailwind CSS class sorter)
           "headwind.runOnSave" = true;
 
-          # Prevent auto-updates
-          "extensions.autoCheckUpdates" = false;
-          "update.mode" = "none";
+          # Perform auto-updates
+          "extensions.autoCheckUpdates" = true;
+          "update.mode" = "default";
 
           # Formatter configuration
           "[css]" = {

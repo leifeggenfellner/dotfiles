@@ -6,15 +6,12 @@ let
   laptop = "eDP-1";
 
   workspaceDefs = [
-    { id = "1"; name = "code"; monitor = monitorLeft; }
-    { id = "2"; name = "alacritty"; monitor = monitorLeft; }
+    { id = "1"; name = "dev"; monitor = monitorLeft; }
+    { id = "2"; name = "term"; monitor = monitorLeft; }
     { id = "3"; name = "zen"; monitor = monitorRight; }
-    { id = "4"; name = "comms"; monitor = monitorRight; }
-    { id = "5"; name = "media"; monitor = monitorRight; }
-    { id = "6"; name = "vm"; monitor = monitorLeft; }
-    { id = "7"; name = "sys"; monitor = monitorLeft; }
-    { id = "8"; name = "chat"; monitor = monitorRight; }
-    { id = "9"; name = "misc"; monitor = monitorRight; }
+    { id = "4"; name = "slack"; monitor = monitorRight; }
+    { id = "5"; name = "spotify"; monitor = monitorRight; }
+    { id = "6"; name = "system"; monitor = monitorLeft; }
   ];
 
   hyprWorkspaces = builtins.map (ws: "${ws.id}, monitor:${ws.monitor}") workspaceDefs;
@@ -102,7 +99,6 @@ in
         "workspace 4,class:(Slack)"
         "workspace 4,class:(discord)"
         "workspace 5,class:(spotify)"
-        "float,class:(pavucontrol)"
       ];
     };
   };

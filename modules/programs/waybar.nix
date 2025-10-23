@@ -108,7 +108,15 @@ in
       };
 
       "hyprland/workspaces" = {
-        format = "{name}";
+        format = "{icon}";
+        format-icons = {
+          "1" = ""; # dev
+          "2" = ""; # term
+          "3" = "󰈹"; # zen
+          "4" = ""; # slack
+          "5" = ""; # spotify
+          "6" = "󰣇"; # system
+        };
         on-click = "activate";
         all-outputs = true;
         active-only = false;
@@ -119,9 +127,6 @@ in
           "4" = [ ];
           "5" = [ ];
           "6" = [ ];
-          "7" = [ ];
-          "8" = [ ];
-          "9" = [ ];
         };
       };
 
@@ -205,20 +210,59 @@ in
         border: 2px solid ${palette.magenta};
       }
 
-      /* Workspace styling - clean numbers with background/color changes */
+      /* Workspace styling - clean icons with background/color changes */
       #workspaces {
         padding: 2px 4px;
       }
 
       #workspaces button {
-        padding: 6px 12px;
+        padding: 0px;
         margin: 2px;
         border-radius: 8px;
         color: ${palette.grey};
         background-color: transparent;
         transition: background-color 0.2s ease;
         font-weight: normal;
-        min-width: 20px;
+        font-size: ${palette.iconsize};
+        min-width: 32px;
+        min-height: 28px;
+      }
+
+      #workspaces button label {
+        padding: 0px 8px;
+        font-size: ${palette.iconsize};
+      }
+
+      /* Individual workspace icon adjustments for centering using margins */
+      #workspaces button:nth-child(1) label {
+        /* Workspace 1 - dev icon  */
+        margin-left: -3px;
+        margin-top: 1px;
+      }
+
+      #workspaces button:nth-child(2) label {
+        /* Workspace 2 - term icon  */
+        margin-left: -1px;
+      }
+
+      #workspaces button:nth-child(3) label {
+        /* Workspace 3 - zen icon 󰈹 */
+        margin-left: -3px;
+
+      }
+
+      #workspaces button:nth-child(4) label {
+        /* Workspace 4 - slack icon 󰒱 */
+        margin-left: -3px;
+      }
+
+      #workspaces button:nth-child(5) label {
+        /* Workspace 5 - spotify icon  */
+        margin-left: -2px;
+      }
+
+      #workspaces button:nth-child(6) label {
+        /* Workspace 6 - system icon  */
       }
 
       #workspaces button.active {
