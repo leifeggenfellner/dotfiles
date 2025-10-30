@@ -285,17 +285,17 @@ in
             /* Center - Clock with emphasis */
       #clock {
         background-color: ${palette.background-color};
-        color: ${palette.blue};
+        color: ${palette.magenta};
         font-weight: bold;
         padding: 8px 16px;
         margin: 4px 6px;
         border-radius: 12px;
-        border: 2px solid ${palette.blue};
+        border: 2px solid ${palette.magenta};
         transition: all 0.3s ease;
       }
 
       #clock:hover {
-        background-color: rgba(137, 180, 250, 0.2);
+        background-color: ${palette.magenta};
         color: ${palette.background-color};
         border-color: ${palette.magenta};
       }
