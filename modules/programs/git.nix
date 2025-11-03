@@ -35,7 +35,7 @@ let
   rg = "${pkgs.ripgrep}/bin/rg";
 in
 {
-  home.packages = with pkgs.gitAndTools; [
+  home.packages = with pkgs; [
     diff-so-fancy # git diff with colors
     git-crypt # git files encryption
     hub # github command-line client
