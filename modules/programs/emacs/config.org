@@ -33,7 +33,7 @@ The dashboard package is configured to display a welcoming startup screen with a
       (my/dashboard-setup-for-frame (selected-frame)))
 
     ;; other settings
-    (setq dashboard-banner-logo-title "Welcome back Slave °˖✧◝(⁰▿⁰)◜✧˖°"
+    (setq dashboard-banner-logo-title "You ban me from Twitter, God bans you from Heaven"
           dashboard-set-file-icons t
           dashboard-center-content t
           dashboard-items '((recents   . 5)
