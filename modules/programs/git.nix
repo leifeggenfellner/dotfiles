@@ -91,8 +91,8 @@ let
       prune-branches = "!git fetch --prune && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D";
       show-prunable = "!git fetch --prune && git branch -vv | grep ': gone]'";
       amend = "commit --amend -m";
-      fixup = "!f(){ git reset --soft HEAD~${1} && git commit --amend -C HEAD; };f";
-      loc = "!f(){ git ls-files | ${rg} \"\\.${1}\" | xargs wc -l; };f";
+      fixup = "!f(){ git reset --soft HEAD~\${1} && git commit --amend -C HEAD; };f";
+      loc = "!f(){ git ls-files | ${rg} \"\\.\\$\{1}\" | xargs wc -l; };f";
       staash = "stash --all";
       graph = "log --decorate --oneline --graph";
       co = "checkout";
@@ -112,10 +112,8 @@ in
   programs.git = {
     enable = true;
 
-    # All git configuration now lives under `settings` (was `extraConfig`)
     settings = gitConfig;
 
-    # Keep your includes at top-level if you still want per-repo or condition-based includes.
     includes = [
       {
         condition = "gitdir:~/Workflow/";
@@ -137,7 +135,7 @@ in
       }
     ];
 
-    # Keeps your ignores list — this option is still valid on the top-level programs.git
+    # Keeps your ignores list
     ignores = [
       "*.bloop"
       "*.bsp"
