@@ -57,8 +57,8 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Set up git
         run: |
-          git config user.email "gako358@outlook.com"
-          git config user.name "Gako358"
+          git config user.email "eggenfellner@protonmail.com"
+          git config user.name "leifeggenfellner"
       - name: Update the flake
         run: nix flake update
       - name: Store flake.lock
@@ -190,15 +190,15 @@ jobs:
           name: flake_lock
       - name: Set up git
         run: |
-          git config user.email "gako358@outlook.com"
-          git config user.name "Gako358"
+          git config user.email "eggenfellner@protonmail.com"
+          git config user.name "leifeggenfellner"
       - name: Create and merge PR
         run: |
           git switch -c updates-${{ github.run_id }}
           git commit -am "flake.lock: Update"
           git push -u origin updates-${{ github.run_id }}
           PR=$(gh pr create \
-            --assignee Gako358 \
+            --assignee leifeggenfellner \
             --base main \
             --body "Automatic flake update on $(date -I)" \
             --fill \
