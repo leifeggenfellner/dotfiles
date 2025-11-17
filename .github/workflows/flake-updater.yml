@@ -202,9 +202,7 @@ jobs:
             --base main \
             --body "Automatic flake update on $(date -I)" \
             --fill \
-            --label bot \
-            --title "Auto update $(date -I)")
-          gh pr merge $PR --rebase --delete-branch
+            --label bot
         env:
           GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
 
