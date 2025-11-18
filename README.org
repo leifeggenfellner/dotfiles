@@ -9,7 +9,7 @@
 
 *** My NixOS Configuration
 
-Welcome to my compilation of dotfiles, the secret sauce behind the construction and configuration of my Linux systems. For a deeper dive into NixOS, the innovative Linux distribution I use, and Nix, the powerful package management tool and language that this repository is primarily written in, click [[https://nixos.org][Nix]].
+I have done something, it works on my machine.
 
 *** How To Install
 
@@ -30,15 +30,10 @@ nixos-rebuild switch --flake .#
 
 + ~flake.nix~: Entrypoint for hosts and home configurations. Also exposes a devshell for bootstrapping (~nix develop~ or ~nix-shell~).
 + ~hosts~: NixOS Configurations, accessible via ~nixos-rebuild --flake~.
-  + ~aanallein~: HP Server
-  + ~rhuidean~: Virtual Machine - Used for tesing
-  + ~tanchico~: Gaming PC - 32GB RAM, Ryzon7 5800X3D
-  + ~terangreal~: Desktop PC - 48GB RAM, Ryzon7 5600
-  + ~tuathaan~: HP work laptop
+  + ~shitbox~:  - HP ZBook Firefly 14
 + ~modules~: My Home-manager configuration, accessible via ~home-manager --flake~
   + Each directory here is a "feature" each ~hm~ configuration can toggle, thus customizing my setup for each machine (be it a server, desktop, laptop, anything really).
 + ~pkgs~: My custom packages. Also accessible via ~nix build~. You can compose these into your own configuration by using my flake's overlay or consume them through NUR.
-+ ~secrets~: My ~sops~ secrets, used in the configuration.
 + ~system~: Modules that are the "system/nixpkgs," configuration. ~flake.nix~.
 
 **** Installation via Media
@@ -50,5 +45,5 @@ Alternatively, you can install these configurations via the install media from t
 3. Run:
 
 #+BEGIN_SRC shell
-nixos-install --flake github:gako358/dotfiles#terangreal
+nixos-install --flake github:leifeggenfellner/dotfiles#shitbox
 #+END_SRC
