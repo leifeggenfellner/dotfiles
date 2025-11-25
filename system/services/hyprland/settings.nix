@@ -58,17 +58,15 @@
     };
 
     layerrule = [
-      "blur, wofi"
-      "ignorealpha 0, wofi"
-      "blur, waybar"
-      "ignorealpha 0, waybar"
-      "blur, notifications"
-      "ignorealpha 0, notifications"
+      "blur on, match:namespace ^(wofi)$"
+      "ignore_alpha 0, match:namespace ^(wofi)$"
+      "blur on, match:namespace ^(waybar)$"
+      "ignore_alpha 0, match:namespace ^(waybar)$"
+      "blur on, match:namespace ^(notifications)$"
+      "ignore_alpha 0, match:namespace ^(notifications)$"
     ];
 
-    animations = {
-      enabled = true;
-    };
+    animations.enabled = true;
 
     # Define beziers and animations
     bezier = [
@@ -155,20 +153,7 @@
       enable_swallow = true;
       swallow_regex = "^(foot|alacritty|kitty)$";
 
-      # Removed new_window_takes_focus and allow_session_lock_restore as they don't exist
     };
-
-    # Fixed window rules - use windowrulev2 for better regex support
-    windowrulev2 = [
-      "float, class:^(pavucontrol)$"
-      "float, class:^(blueman-manager)$"
-      "float, class:^(nm-connection-editor)$"
-      "float, class:^(file-roller)$"
-      "size 800 600, class:^(pavucontrol)$"
-      "center, class:^(pavucontrol)$"
-      "opacity 0.95 0.85, class:^(alacritty)$"
-      "opacity 0.95 0.85, class:^(foot)$"
-    ];
 
     # Simplified workspace rules
     workspace = [

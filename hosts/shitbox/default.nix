@@ -92,14 +92,6 @@ in
         ",highrr,auto,1"
       ];
       workspace = hyprWorkspaces;
-      windowrulev2 = [
-        "workspace 1,class:(Code)"
-        "workspace 2,class:(Alacritty)"
-        "workspace 3,class:(zen)"
-        "workspace 4,class:(Slack)"
-        "workspace 4,class:(discord)"
-        "workspace 5,class:(spotify)"
-      ];
     };
   };
 
