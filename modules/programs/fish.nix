@@ -8,15 +8,16 @@ in
 {
   home = {
     packages = with pkgs; [
-      any-nix-shell # fish support for nix shell
-      dive # explore docker layers
-      duf # disk usage/free utility
-      eza # a better `ls`
-      fd # "find" for files
-      jump # fast directory navigation
-      ncdu # disk space info (a better du)
-      nitch # minimal system information fetch
+      any-nix-shell
+      dive
+      duf
+      eza
+      fd
+      jump
+      ncdu
+      nitch
     ];
+
     persistence."/persist/${config.home.homeDirectory}" = {
       directories = [
         ".local/share/fish"
@@ -24,8 +25,68 @@ in
       ];
     };
   };
+
   programs.fish = {
     enable = true;
     plugins = [ fenv ];
+
+    functions = {
+      sw = {
+        wraps = "git switch";
+        body = ''
+          git switch $argv
+        '';
+      };
+
+      swc = {
+        wraps = "git switch -c";
+        body = ''
+          git switch -c $argv
+        '';
+      };
+
+      co = {
+        wraps = "git checkout";
+        body = ''
+          git checkout $argv
+        '';
+      };
+
+      cma = {
+        wraps = "git commit -am";
+        body = ''
+          git commit -am $argv
+        '';
+      };
+
+      undo = {
+        wraps = "git reset";
+        body = ''
+          git reset HEAD~1 --mixed
+        '';
+      };
+
+      res = {
+        wraps = "git reset --hard";
+        body = ''
+          git reset --hard
+        '';
+      };
+
+      fixup = {
+        wraps = "git commit --amend";
+        body = ''
+          git reset --soft HEAD~$argv[1]
+          git commit --amend -C HEAD
+        '';
+      };
+
+      loc = {
+        wraps = "git ls-files";
+        body = ''
+          git ls-files | ${pkgs.ripgrep}/bin/rg "$argv[1]" | xargs wc -l
+        '';
+      };
+    };
   };
 }

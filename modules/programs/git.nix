@@ -2,8 +2,6 @@
 , ...
 }:
 let
-  rg = "${pkgs.ripgrep}/bin/rg";
-
   gitConfig = {
     core = {
       editor = "nvim";
@@ -77,27 +75,16 @@ let
       d = "diff";
       gl = "config --global -l";
       se = "!git rev-list --all | xargs git grep -F";
-      sw = "switch";
       cob = "checkout -b";
       del = "branch -D";
       br = "branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]' --sort=-committerdate";
       save = "!git add -A && git commit -m 'chore: commit save point'";
-      undo = "reset HEAD~1 --mixed";
-      res = "!git reset --hard";
       done = "!git push origin HEAD";
       ls = "ls-files -s";
-      swc = "switch -c";
-      cma = "commit --amend";
-      prune-branches = "!git fetch --prune && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D";
-      show-prunable = "!git fetch --prune && git branch -vv | grep ': gone]'";
-      amend = "commit --amend -m";
-      fixup = "!f(){ git reset --soft HEAD~\${1} && git commit --amend -C HEAD; };f";
-      loc = "!f(){ git ls-files | ${rg} \"\\.\\$\{1}\" | xargs wc -l; };f";
       staash = "stash --all";
       graph = "log --decorate --oneline --graph";
-      co = "checkout";
-      ca = "commit -am";
       dc = "diff --cached";
+      amend = "commit --amend -m";
     };
   };
 in
