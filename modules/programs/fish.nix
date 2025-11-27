@@ -13,12 +13,13 @@ in
       duf
       eza
       fd
+      git
       jump
       ncdu
       nitch
     ];
 
-    persistence."/persist/${config.home.homeDirectory}" = {
+    persistence. "/persist/${config.home.homeDirectory}" = {
       directories = [
         ".local/share/fish"
         ".jump"
@@ -26,39 +27,16 @@ in
     };
   };
 
-  programs.fish = {
+  programs. fish = {
     enable = true;
     plugins = [ fenv ];
 
+    interactiveShellInit = ''
+      set -p fish_complete_path ${pkgs.fish}/share/fish/completions
+      set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions. d
+    '';
+
     functions = {
-      sw = {
-        wraps = "git switch";
-        body = ''
-          git switch $argv
-        '';
-      };
-
-      swc = {
-        wraps = "git switch -c";
-        body = ''
-          git switch -c $argv
-        '';
-      };
-
-      co = {
-        wraps = "git checkout";
-        body = ''
-          git checkout $argv
-        '';
-      };
-
-      cma = {
-        wraps = "git commit -am";
-        body = ''
-          git commit -am $argv
-        '';
-      };
-
       undo = {
         wraps = "git reset";
         body = ''

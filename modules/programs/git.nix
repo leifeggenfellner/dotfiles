@@ -47,7 +47,7 @@ let
     # URL rewrites
     url = {
       "https://github.com/".insteadOf = "gh:";
-      "ssh://git@github.com".pushInsteadOf = "gh:";
+      "ssh://git@github.com". pushInsteadOf = "gh:";
     };
 
     # GitHub helper
@@ -55,30 +55,34 @@ let
       user = "leifeggenfellner";
     };
 
-    # User identity (moved here from deprecated top-level keys)
+    # User identity
     user = {
       name = "leifeggenfellner";
       email = "eggenfellner@protonmail.com";
     };
 
-    # Aliases (now under `alias` in settings)
+    # Aliases (git subcommands)
     alias = {
+      sw = "switch";
+      swc = "switch -c";
+      co = "checkout";
+      cma = "commit -am";
       p = "push";
       st = "status -sb";
       lg1 = "log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all";
       lg2 = "log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all";
-      lg = "!git lg1";
+      lg = "! git lg1";
       ll = "log --oneline";
       last = "log -1 HEAD --stat";
       cm = "commit -m";
       rv = "remote -v";
       d = "diff";
       gl = "config --global -l";
-      se = "!git rev-list --all | xargs git grep -F";
+      se = "! git rev-list --all | xargs git grep -F";
       cob = "checkout -b";
       del = "branch -D";
       br = "branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]' --sort=-committerdate";
-      save = "!git add -A && git commit -m 'chore: commit save point'";
+      save = "! git add -A && git commit -m 'chore: commit save point'";
       done = "!git push origin HEAD";
       ls = "ls-files -s";
       staash = "stash --all";
@@ -89,7 +93,7 @@ let
   };
 in
 {
-  home.packages = with pkgs; [
+  home. packages = with pkgs; [
     diff-so-fancy
     git-crypt
     hub
@@ -112,7 +116,7 @@ in
         };
       }
       {
-        condition = "hasconfig:remote.*.url:ssh://git@github.com:HNIKT-Tjenesteutvikling-Systemutvikling/**";
+        condition = "hasconfig:remote.*. url:ssh://git@github.com:HNIKT-Tjenesteutvikling-Systemutvikling/**";
         contents = {
           user = {
             name = "leifeggenfellner";
@@ -122,7 +126,6 @@ in
       }
     ];
 
-    # Keeps your ignores list
     ignores = [
       "*.bloop"
       "*.bsp"
@@ -131,7 +134,7 @@ in
       "*metals.sbt"
       "*.direnv"
       "*.envrc"
-      "*hie.yaml"
+      "*hie. yaml"
       "*.mill-version"
       "*.jvmopts"
     ];
