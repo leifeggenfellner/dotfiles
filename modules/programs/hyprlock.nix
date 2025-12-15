@@ -30,7 +30,7 @@ in
   config = lib.mkIf (config.program.hyprlock.enable && osConfig.environment.desktop.windowManager == "hyprland") {
     programs.hyprlock = {
       enable = true;
-      package = inputs.hyprlock.packages.${pkgs.system}.hyprlock;
+      package = inputs.hyprlock.packages.${pkgs.stdenv.hostPlatform.system}.hyprlock;
 
       settings = {
         general = {
