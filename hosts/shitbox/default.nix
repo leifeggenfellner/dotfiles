@@ -3,18 +3,31 @@
 let
   monitorLeft = "desc:HP Inc. HP E45c G5 CNC50212K0";
   monitorRight = "desc:HP Inc. HP E45c G5 CNC1000000";
+  monitorHome = "desc:Samsung Electric Company C34J79x HTRM900265";
   laptop = "eDP-1";
 
   workspaceDefs = [
-    { id = "1"; name = "dev"; monitor = monitorLeft; }
-    { id = "2"; name = "term"; monitor = monitorLeft; }
-    { id = "3"; name = "zen"; monitor = monitorRight; }
-    { id = "4"; name = "slack"; monitor = monitorRight; }
-    { id = "5"; name = "spotify"; monitor = monitorRight; }
-    { id = "6"; name = "system"; monitor = monitorLeft; }
+    # Office layout
+    { id = "1"; monitor = monitorLeft; }
+    { id = "2"; monitor = monitorLeft; }
+    { id = "3"; monitor = monitorRight; }
+    { id = "4"; monitor = monitorRight; }
+    { id = "5"; monitor = monitorRight; }
+    { id = "6"; monitor = monitorLeft; }
+
+    # Home overrides (only apply if Samsung exists)
+    { id = "1"; monitor = monitorHome; }
+    { id = "2"; monitor = monitorHome; }
+
+    # Home laptop placement
+    { id = "3"; monitor = laptop; }
+    { id = "4"; monitor = laptop; }
+    { id = "5"; monitor = laptop; }
+    { id = "6"; monitor = laptop; }
   ];
 
-  hyprWorkspaces = builtins.map (ws: "${ws.id}, monitor:${ws.monitor}") workspaceDefs;
+  hyprWorkspaces =
+    builtins.map (ws: "${ws.id}, monitor:${ws.monitor}") workspaceDefs;
 in
 {
   imports = [
