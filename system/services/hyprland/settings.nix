@@ -13,8 +13,10 @@
       "wl-clip-persist --clipboard both &"
       "wl-paste --watch cliphist store &"
       "uwsm finalize"
-      "[workspace 3 silent] zen"
+      "setup-monitors"
+      "handle-monitor &"
       "[workspace 2 silent] alacritty"
+      "[workspace 3 silent] zen"
       "[workspace 4 silent] slack"
     ];
 
