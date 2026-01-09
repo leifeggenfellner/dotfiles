@@ -1,38 +1,8 @@
 { config, lib, pkgs, ... }:
-
-let
-  monitorLeft = "desc:HP Inc. HP E45c G5 CNC50212K0";
-  monitorRight = "desc:HP Inc. HP E45c G5 CNC1000000";
-  monitorHome = "desc:Samsung Electric Company C34J79x HTRM900265";
-  laptop = "eDP-1";
-
-  workspaceDefs = [
-    # Office layout
-    { id = "1"; monitor = monitorLeft; }
-    { id = "2"; monitor = monitorLeft; }
-    { id = "3"; monitor = monitorRight; }
-    { id = "4"; monitor = monitorRight; }
-    { id = "5"; monitor = monitorRight; }
-    { id = "6"; monitor = monitorLeft; }
-
-    # Home overrides (only apply if Samsung exists)
-    { id = "1"; monitor = monitorHome; }
-    { id = "2"; monitor = monitorHome; }
-
-    # Home laptop placement
-    { id = "3"; monitor = laptop; }
-    { id = "4"; monitor = laptop; }
-    { id = "5"; monitor = laptop; }
-    { id = "6"; monitor = laptop; }
-  ];
-
-  hyprWorkspaces =
-    builtins.map (ws: "${ws.id}, monitor:${ws.monitor}") workspaceDefs;
-in
 {
   imports = [
     ./hardware-configuration.nix
-    ./power-tuning.nix # your CPU / TLP tuning module
+    ./power-tuning.nix
   ];
 
   networking.hostName = "shitbox";
@@ -48,33 +18,32 @@ in
   # NVIDIA PRIME Offload Base (Active)
   ########################################
   hardware = {
-    graphics.enable = true;
+    graphics. enable = true;
 
     nvidia = {
       modesetting.enable = true;
       powerManagement.enable = true;
-      powerManagement.finegrained = true; # runtime suspend
-      open = false; # keep proprietary kernel module
+      powerManagement.finegrained = true;
+      open = false;
       nvidiaSettings = true;
       package = config.boot.kernelPackages.nvidiaPackages.stable;
 
       prime = {
-        offload.enable = true;
-        offload.enableOffloadCmd = true; # adds prime-run
-        sync.enable = false; # ensure dGPU not primary
+        offload. enable = true;
+        offload.enableOffloadCmd = true;
+        sync.enable = false;
         intelBusId = "PCI:0:2:0";
         nvidiaBusId = "PCI:1:0:0";
       };
     };
   };
 
-  # Needed for Xwayland / some OpenGL apps
-  services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver. videoDrivers = [ "nvidia" ];
 
   ########################################
-  # Specialisation: Disable NVIDIA fully
+  # Specialisation:  Disable NVIDIA fully
   ########################################
-  specialisation.no-nvidia.configuration = {
+  specialisation.no-nvidia. configuration = {
     boot.blacklistedKernelModules = [
       "nouveau"
       "nvidia"
@@ -83,7 +52,6 @@ in
       "nvidia_uvm"
     ];
     services.xserver.videoDrivers = [ "modesetting" ];
-    # Neutralize hardware.nvidia block if imported elsewhere
     hardware.nvidia = lib.mkForce { };
   };
 
@@ -99,23 +67,29 @@ in
     enable = true;
     settings = {
       monitor = [
-        "${laptop},1920x1200,2560x1440,1"
-        "${monitorLeft},2560x1440,0x0,1"
-        "${monitorRight},2560x1440,2560x0,1"
-        ",highrr,auto,1"
+        # Laptop on the left
+        "eDP-1,1920x1200@60,0x0,1"
+
+        # Samsung to the right of laptop (home)
+        "desc:Samsung Electric Company C34J79x HTRM900265,3440x1440@60,1920x0,1"
+
+        # Office:  HP monitors to the right of laptop
+        "desc:HP Inc. HP E45c G5 CNC50212K0,2560x1440@60,1920x0,1"
+        "desc:HP Inc. HP E45c G5 CNC1000000,2560x1440@60,4480x0,1"
+
+        ",preferred,auto,1"
       ];
-      workspace = hyprWorkspaces;
     };
   };
 
   system = {
-    disks.extraStoreDisk.enable = false;
+    disks. extraStoreDisk. enable = false;
     bluetooth.enable = true;
   };
 
   service = {
     blueman.enable = true;
-    touchpad.enable = true;
+    touchpad. enable = true;
   };
 
   environment.systemPackages = with pkgs; [

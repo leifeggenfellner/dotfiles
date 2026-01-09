@@ -143,8 +143,6 @@ in
               usernamehw.errorlens
               christian-kohler.path-intellisense
               christian-kohler.npm-intellisense
-              formulahendry.auto-rename-tag
-              formulahendry.auto-close-tag
 
               # Kotlin
               mathiasfrohlich.kotlin
@@ -169,13 +167,15 @@ in
               # Docker
               ms-azuretools.vscode-docker
 
-              # Yaml/Markdown
+              # Yaml/Markdown/CSV
               bierner.github-markdown-preview
               bierner.markdown-checkbox
               bierner.markdown-emoji
               bierner.markdown-footnotes
               bierner.markdown-mermaid
               bierner.markdown-preview-github-styles
+              unifiedjs.vscode-mdx
+              mechatroner.rainbow-csv
             ]
             ++ lib.optionals cfg.godMode [ vscodevim.vim ]
             ++ [
@@ -395,26 +395,6 @@ in
             "javascript.autoClosingTags" = false;
             "html.autoClosingTags" = false;
 
-            # limit the auto-close / auto-rename tag extensions to explicit languages
-            "auto-close-tag.enableAutoCloseTag" = true;
-            "auto-close-tag.activationOnLanguage" = [
-              "html"
-              "xml"
-              "php"
-              "javascript"
-              "javascriptreact"
-              "vue"
-            ];
-
-            "auto-rename-tag.activationOnLanguage" = [
-              "html"
-              "xml"
-              "php"
-              "javascript"
-              "javascriptreact"
-              "vue"
-            ];
-
             # UX improvements
             "explorer.confirmDelete" = false;
             "explorer.confirmDragAndDrop" = false;
@@ -475,9 +455,10 @@ in
             # Prettier configuration
             "prettier.semi" = true;
             "prettier.singleQuote" = true;
-            "prettier.tabWidth" = 2;
+            "prettier.tabWidth" = 4;
             "prettier.useTabs" = false;
             "prettier.trailingComma" = "es5";
+            "prettier.printWidth" = 130;
 
             # Java extension configuration to use environment variables
             "java.configuration.detectJdksAtStart" = true;
