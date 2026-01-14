@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, ... }:
 let
   fenv = {
     inherit (pkgs.fishPlugins.foreign-env) src;
@@ -19,7 +19,7 @@ in
       nitch
     ];
 
-    persistence. "/persist/${config.home.homeDirectory}" = {
+    persistence."/persist/" = {
       directories = [
         ".local/share/fish"
         ".jump"
@@ -27,13 +27,13 @@ in
     };
   };
 
-  programs. fish = {
+  programs.fish = {
     enable = true;
     plugins = [ fenv ];
 
     interactiveShellInit = ''
       set -p fish_complete_path ${pkgs.fish}/share/fish/completions
-      set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions. d
+      set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions.d
     '';
 
     functions = {

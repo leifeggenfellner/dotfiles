@@ -266,7 +266,7 @@ in
           recursive = true;
         };
       };
-      persistence."/persist/${config.home.homeDirectory}" = {
+      persistence."/persist/" = {
         directories = [
           ".emacs.d"
         ];
