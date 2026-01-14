@@ -18,7 +18,7 @@
   # NVIDIA PRIME Offload Base (Active)
   ########################################
   hardware = {
-    graphics. enable = true;
+    graphics.enable = true;
 
     nvidia = {
       modesetting.enable = true;
@@ -29,7 +29,7 @@
       package = config.boot.kernelPackages.nvidiaPackages.stable;
 
       prime = {
-        offload. enable = true;
+        offload.enable = true;
         offload.enableOffloadCmd = true;
         sync.enable = false;
         intelBusId = "PCI:0:2:0";
@@ -38,12 +38,12 @@
     };
   };
 
-  services.xserver. videoDrivers = [ "nvidia" ];
+  services.xserver.videoDrivers = [ "nvidia" ];
 
   ########################################
   # Specialisation:  Disable NVIDIA fully
   ########################################
-  specialisation.no-nvidia. configuration = {
+  specialisation.no-nvidia.configuration = {
     boot.blacklistedKernelModules = [
       "nouveau"
       "nvidia"
@@ -67,15 +67,15 @@
     enable = true;
     settings = {
       monitor = [
-        # Laptop on the left
-        "eDP-1,1920x1200@60,0x0,1"
+        # Laptop on the right
+        "eDP-1,1920x1200@60,1920x0,1"
 
-        # Samsung to the right of laptop (home)
-        "desc:Samsung Electric Company C34J79x HTRM900265,3440x1440@60,1920x0,1"
+        # Samsung to the left (home)
+        "desc:Samsung Electric Company C34J79x HTRM900265,3440x1440@60,0x0,1"
 
-        # Office:  HP monitors to the right of laptop
-        "desc:HP Inc. HP E45c G5 CNC50212K0,2560x1440@60,1920x0,1"
-        "desc:HP Inc. HP E45c G5 CNC1000000,2560x1440@60,4480x0,1"
+        # Office: HP ultrawide split into two
+        "desc:HP Inc. HP E45c G5 CNC50212K0,2560x1440@60,3440x0,1"
+        "desc:HP Inc. HP E45c G5 CNC1000000,2560x1440@60,6000x0,1"
 
         ",preferred,auto,1"
       ];
@@ -83,13 +83,13 @@
   };
 
   system = {
-    disks. extraStoreDisk. enable = false;
+    disks.extraStoreDisk.enable = false;
     bluetooth.enable = true;
   };
 
   service = {
     blueman.enable = true;
-    touchpad. enable = true;
+    touchpad.enable = true;
   };
 
   environment.systemPackages = with pkgs; [

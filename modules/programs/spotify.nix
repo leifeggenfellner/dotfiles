@@ -1,5 +1,4 @@
 { osConfig
-, config
 , pkgs
 , lib
 , ...
@@ -7,7 +6,7 @@
 {
   config = lib.mkMerge [
     (lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
-      home.persistence."/persist/${config.home.homeDirectory}" = {
+      home.persistence."/persist/" = {
         directories = [
           ".config/spotify"
           ".cache/spotify"

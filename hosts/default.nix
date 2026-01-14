@@ -27,7 +27,6 @@ let
               {
                 imports = [
                   inputs.nix-colors.homeManagerModules.default
-                  inputs.impermanence.homeManagerModules.impermanence
                   inputs.sops-nix.homeManagerModules.sops
                   profilePath
                 ];

@@ -7,11 +7,9 @@
 {
   imports = [
     inputs.hyprland.nixosModules.default
-
     ./binds.nix
     ./rules.nix
     ./settings.nix
-    ./tty.nix
   ];
 
   config = lib.mkIf (config.environment.desktop.windowManager == "hyprland") {
@@ -34,9 +32,10 @@
           # hyprexpo
         ];
       };
-
-      uwsm.waylandCompositors.hyprland.binPath = lib.mkForce "/run/current-system/sw/bin/start-hyprland";
+      # Patch fix for starting hyprland with start-hyprland
+      # uwsm.waylandCompositors.hyprland.binPath = lib.mkForce "${config.programs.hyprland.package}/bin/start-hyprland";
     };
+
 
     xdg.portal = {
       enable = true;
