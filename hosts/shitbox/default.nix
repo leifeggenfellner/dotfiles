@@ -67,20 +67,20 @@
     enable = true;
     settings = {
       monitor = [
-        # Laptop on the right
-        "eDP-1,1920x1200@60,1920x0,1"
-
-        # Samsung to the left (home)
-        "desc:Samsung Electric Company C34J79x HTRM900265,3440x1440@60,0x0,1"
-
-        # Office: HP ultrawide split into two
-        "desc:HP Inc. HP E45c G5 CNC50212K0,2560x1440@60,3440x0,1"
-        "desc:HP Inc. HP E45c G5 CNC1000000,2560x1440@60,6000x0,1"
-
+        # Safe default only
         ",preferred,auto,1"
+
+        # Laptop starts disabled; scripts decide
+        "eDP-1,disable"
+      ];
+
+      exec-once = [
+        "setup-monitors"
+        "handle-monitor"
       ];
     };
   };
+
 
   system = {
     disks.extraStoreDisk.enable = false;
