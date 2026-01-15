@@ -41,11 +41,13 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     hyprctl keyword monitor "desc:$MONITOR_RIGHT_DESC,2560x1440@60,2560x0,1"
 
     hyprctl keyword workspace "1,monitor:desc:$MONITOR_LEFT_DESC"
-    hyprctl keyword workspace "2,monitor:desc:$MONITOR_LEFT_DESC"
-    hyprctl keyword workspace "3,monitor:desc:$MONITOR_RIGHT_DESC"
-    hyprctl keyword workspace "4,monitor:desc:$MONITOR_RIGHT_DESC"
-    hyprctl keyword workspace "5,monitor:desc:$MONITOR_RIGHT_DESC"
+    hyprctl keyword workspace "4,monitor:desc:$MONITOR_LEFT_DESC"
     hyprctl keyword workspace "6,monitor:desc:$MONITOR_LEFT_DESC"
+
+    hyprctl keyword workspace "2,monitor:desc:$MONITOR_RIGHT_DESC"
+    hyprctl keyword workspace "3,monitor:desc:$MONITOR_RIGHT_DESC"
+    hyprctl keyword workspace "5,monitor:desc:$MONITOR_RIGHT_DESC"
+
 
   else
     echo "Laptop-only setup"
