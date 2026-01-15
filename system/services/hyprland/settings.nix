@@ -17,7 +17,7 @@
       "handle-monitor &"
     ];
 
-    windowrulev2 = [
+    windowrule = [
       # Workspace 1
       "workspace 1 silent, class:^(code|Code)$"
 
