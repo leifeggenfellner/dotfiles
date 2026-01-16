@@ -110,9 +110,6 @@ in
               github.copilot
               github.copilot-chat
 
-              # Docker
-              ms-azuretools.vscode-docker
-
               # Editor
               editorconfig.editorconfig
               ms-vscode-remote.remote-ssh
@@ -128,6 +125,10 @@ in
 
               # Formatters
               esbenp.prettier-vscode
+
+              # Haskell
+              haskell.haskell
+              justusadam.language-haskell
 
               # Java
               redhat.java
@@ -163,8 +164,8 @@ in
               scalameta.metals
               scala-lang.scala
 
-              # Vim
-              vscodevim.vim
+              # Docker
+              ms-azuretools.vscode-docker
 
               # Yaml/Markdown/CSV
               davidanson.vscode-markdownlint
@@ -234,7 +235,7 @@ in
               })
             ];
 
-          settings = {
+          userSettings = {
             # Theme settings
             "workbench.colorTheme" =
               if cfg.theme == "catppuccin" then
@@ -517,86 +518,6 @@ in
             "extensions.autoCheckUpdates" = true;
             "update.mode" = "default";
 
-            # Vim extension settings
-            "vim.enable" = true;
-            "vim.easymotion" = true;
-            "vim.incsearch" = true;
-            "vim.useSystemClipboard" = true;
-            "vim.useCtrlKeys" = true;
-            "vim.hlsearch" = true;
-            "vim.leader" = "<space>";
-
-            # Performance optimization
-            "extensions.experimental.affinity" = {
-              "vscodevim.vim" = 1;
-            };
-
-            # Insert mode keybindings
-            "vim.insertModeKeyBindings" = [
-              {
-                before = [ "j" "j" ];
-                after = [ "<Esc>" ];
-              }
-              {
-                before = [ "j" "k" ];
-                after = [ "<Esc>" ];
-              }
-            ];
-
-            # Normal mode key bindings (non-recursive)
-            "vim.normalModeKeyBindingsNonRecursive" = [
-              {
-                before = [ "<leader>" "d" ];
-                after = [ "d" "d" ];
-              }
-              {
-                before = [ "<C-n>" ];
-                commands = [ ":nohl" ];
-              }
-              {
-                before = [ "K" ];
-                commands = [ "lineBreakInsert" ];
-                silent = true;
-              }
-              # Additional useful bindings
-              {
-                before = [ "<leader>" "w" ];
-                commands = [ "workbench.action.files.save" ];
-              }
-              {
-                before = [ "<leader>" "q" ];
-                commands = [ "workbench.action.closeActiveEditor" ];
-              }
-            ];
-
-            # Handle keys that should bypass vim
-            "vim.handleKeys" = {
-              "<C-a>" = false;
-              "<C-f>" = false;
-              "<C-c>" = false;
-              "<C-v>" = false;
-              "<C-x>" = false;
-              "<C-i>" = false;
-              "<C-p>" = false;
-            };
-
-            # Status bar color control
-            "vim.statusBarColorControl" = true;
-            "vim.statusBarColors.normal" = [ "#8FBCBB" "#434C5E" ];
-            "vim.statusBarColors.insert" = "#BF616A";
-            "vim.statusBarColors.visual" = "#B48EAD";
-            "vim.statusBarColors.visualline" = "#B48EAD";
-            "vim.statusBarColors.visualblock" = "#A3BE8C";
-            "vim.statusBarColors.replace" = "#D08770";
-            "vim.statusBarColors.commandlineinprogress" = "#89b4fa";
-            "vim.statusBarColors.searchinprogressmode" = "#f9e2af";
-            "vim.statusBarColors.easymotionmode" = "#a6e3a1";
-            "vim.statusBarColors.easymotioninputmode" = "#94e2d5";
-            "vim.statusBarColors.surroundinputmode" = "#cba6f7";
-
-            # Better scrolling
-            "vim.scroll" = 5;
-
             # Formatter configuration
             "[css]" = {
               "editor.defaultFormatter" = "esbenp.prettier-vscode";
@@ -708,7 +629,7 @@ in
 
       xdg.desktopEntries."code" = {
         name = "Visual Studio Code";
-        comment = "Code Editing.Redefined.";
+        comment = "Code Editing. Redefined.";
         genericName = "Text Editor";
         exec = "code-wrapped %F";
         icon = "code";
