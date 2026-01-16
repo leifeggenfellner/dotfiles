@@ -17,6 +17,7 @@ let
     };
     fetch = {
       prune = true;
+      pruneTags = true;
     };
     pull = {
       rebase = true;
@@ -89,6 +90,8 @@ let
       graph = "log --decorate --oneline --graph";
       dc = "diff --cached";
       amend = "commit --amend -m";
+      prune-local = "!git fetch --prune && git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch -d";
+      prune-local-hard = "!git fetch --prune && git branch -vv | awk '$3 !~ /^\\[/' | xargs -r git branch -D";
     };
   };
 in
