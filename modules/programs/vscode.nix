@@ -581,9 +581,9 @@ in
 
             # Status bar color control
             "vim.statusBarColorControl" = true;
-            "vim.statusBarColors. normal" = [ "#8FBCBB" "#434C5E" ];
-            "vim.statusBarColors. insert" = "#BF616A";
-            "vim.statusBarColors. visual" = "#B48EAD";
+            "vim.statusBarColors.normal" = [ "#8FBCBB" "#434C5E" ];
+            "vim.statusBarColors.insert" = "#BF616A";
+            "vim.statusBarColors.visual" = "#B48EAD";
             "vim.statusBarColors.visualline" = "#B48EAD";
             "vim.statusBarColors.visualblock" = "#A3BE8C";
             "vim.statusBarColors.replace" = "#D08770";
@@ -707,7 +707,7 @@ in
 
       xdg.desktopEntries."code" = {
         name = "Visual Studio Code";
-        comment = "Code Editing. Redefined.";
+        comment = "Code Editing.Redefined.";
         genericName = "Text Editor";
         exec = "code-wrapped %F";
         icon = "code";
