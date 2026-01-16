@@ -67,11 +67,11 @@
     enable = true;
     settings = {
       monitor = [
-        # Safe default only
-        ",preferred,auto,1"
+        # Laptop display - safe default, will be reconfigured by scripts
+        "eDP-1,preferred,auto,1"
 
-        # Laptop starts disabled; scripts decide
-        "eDP-1,disable"
+        # External monitors - disabled by default, enabled by scripts if detected
+        ",preferred,auto,1"
       ];
 
       exec-once = [

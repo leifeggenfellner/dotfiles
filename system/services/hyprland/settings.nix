@@ -17,26 +17,6 @@
       "handle-monitor &"
     ];
 
-    windowrule = [
-      # Workspace 1
-      "workspace 1 silent, class:^(code|Code)$"
-
-      # Workspace 2
-      "workspace 2 silent, class:^(Alacritty|alacritty)$"
-
-      # Workspace 3
-      "workspace 3 silent, class:^(zen|ZenBrowser)$"
-
-      # Workspace 4
-      "workspace 4 silent, class:^(Slack)$"
-
-      # Workspace 5
-      "workspace 5 silent, class:^(Spotify)$"
-
-      # Workspace 6 (monitoring / tools)
-      "workspace 6 silent, class:^(btop|htop|nvtop|MissionCenter)$"
-    ];
-
     general = {
       gaps_in = 7;
       gaps_out = 7;
