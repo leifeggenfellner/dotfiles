@@ -30,12 +30,13 @@
       "opacity 0.91 override 0.73 override, match:class ^(Emacs)$"
 
       # Workspace assignments
-      "workspace 1, match:class ^(Code)$"
-      "workspace 2, match:class ^(Alacritty)$"
-      "workspace 3, match:class ^(zen)$"
+      "workspace 1, match:class ^(code|Code)$"
+      "workspace 2, match:class ^(Alacritty|alacritty)$"
+      "workspace 3, match:class ^(zen|ZenBrowser)$"
       "workspace 4, match:class ^(Slack)$"
       "workspace 4, match:class ^(discord)$"
       "workspace 5, match:class ^(spotify)$"
+      "workspace 6, match:class ^(btop|htop|nvtop|MissionCenter)$"
     ];
   };
 }
