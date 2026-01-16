@@ -110,6 +110,9 @@ in
               github.copilot
               github.copilot-chat
 
+              # Docker
+              ms-azuretools.vscode-docker
+
               # Editor
               editorconfig.editorconfig
               ms-vscode-remote.remote-ssh
@@ -125,10 +128,6 @@ in
 
               # Formatters
               esbenp.prettier-vscode
-
-              # Haskell
-              haskell.haskell
-              justusadam.language-haskell
 
               # Java
               redhat.java
@@ -164,10 +163,11 @@ in
               scalameta.metals
               scala-lang.scala
 
-              # Docker
-              ms-azuretools.vscode-docker
+              # Vim
+              vscodevim.vim
 
               # Yaml/Markdown/CSV
+              davidanson.vscode-markdownlint
               bierner.github-markdown-preview
               bierner.markdown-checkbox
               bierner.markdown-emoji
@@ -516,6 +516,81 @@ in
             # Perform auto-updates
             "extensions.autoCheckUpdates" = true;
             "update.mode" = "default";
+
+            # Vim extension settings
+            "vim.enable" = true;
+            "vim.easymotion" = true;
+            "vim.incsearch" = true;
+            "vim.useSystemClipboard" = true;
+            "vim.useCtrlKeys" = true;
+            "vim.hlsearch" = true;
+            "vim.leader" = "<space>";
+
+            # Performance optimization
+            "extensions.experimental.affinity" = {
+              "vscodevim.vim" = 1;
+            };
+
+            # Insert mode keybindings
+            "vim.insertModeKeyBindings" = [
+              {
+                before = [ "j" "j" ];
+                after = [ "<Esc>" ];
+              }
+              {
+                before = [ "j" "k" ];
+                after = [ "<Esc>" ];
+              }
+            ];
+
+            # Normal mode key bindings (non-recursive)
+            "vim.normalModeKeyBindingsNonRecursive" = [
+              {
+                before = [ "<leader>" "d" ];
+                after = [ "d" "d" ];
+              }
+              {
+                before = [ "<C-n>" ];
+                commands = [ ":nohl" ];
+              }
+              {
+                before = [ "K" ];
+                commands = [ "lineBreakInsert" ];
+                silent = true;
+              }
+              # Additional useful bindings
+              {
+                before = [ "<leader>" "w" ];
+                commands = [ "workbench.action.files.save" ];
+              }
+              {
+                before = [ "<leader>" "q" ];
+                commands = [ "workbench.action.closeActiveEditor" ];
+              }
+            ];
+
+            # Handle keys that should bypass vim
+            "vim.handleKeys" = {
+              "<C-a>" = false;
+              "<C-f>" = false;
+              "<C-c>" = false;
+              "<C-v>" = false;
+              "<C-x>" = false;
+              "<C-i>" = false;
+            };
+
+            "vim.statusBarColorControl" = true;
+            "vim.statusBarColors" = {
+              "normal" = [ "#89dceb" "#000000" ];
+              "insert" = [ "#f38ba8" "#000000" ];
+              "visual" = [ "#a6e3a1" "#000000" ];
+              "visualline" = [ "#fab387" "#000000" ];
+              "visualblock" = [ "#89b4fa" "#000000" ];
+              "replace" = [ "#f9e2af" "#000000" ];
+            };
+
+            # Better scrolling
+            "vim.scroll" = 5;
 
             # Formatter configuration
             "[css]" = {
