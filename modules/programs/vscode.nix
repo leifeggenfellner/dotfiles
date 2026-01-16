@@ -579,15 +579,19 @@ in
               "<C-i>" = false;
             };
 
+            # Status bar color control
             "vim.statusBarColorControl" = true;
-            "vim.statusBarColors" = {
-              "normal" = [ "#89dceb" "#000000" ];
-              "insert" = [ "#f38ba8" "#000000" ];
-              "visual" = [ "#a6e3a1" "#000000" ];
-              "visualline" = [ "#fab387" "#000000" ];
-              "visualblock" = [ "#89b4fa" "#000000" ];
-              "replace" = [ "#f9e2af" "#000000" ];
-            };
+            "vim.statusBarColors. normal" = [ "#8FBCBB" "#434C5E" ];
+            "vim.statusBarColors. insert" = "#BF616A";
+            "vim.statusBarColors. visual" = "#B48EAD";
+            "vim.statusBarColors.visualline" = "#B48EAD";
+            "vim.statusBarColors.visualblock" = "#A3BE8C";
+            "vim.statusBarColors.replace" = "#D08770";
+            "vim.statusBarColors.commandlineinprogress" = "#89b4fa";
+            "vim.statusBarColors.searchinprogressmode" = "#f9e2af";
+            "vim.statusBarColors.easymotionmode" = "#a6e3a1";
+            "vim.statusBarColors.easymotioninputmode" = "#94e2d5";
+            "vim.statusBarColors.surroundinputmode" = "#cba6f7";
 
             # Better scrolling
             "vim.scroll" = 5;
