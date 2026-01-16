@@ -234,7 +234,7 @@ in
               })
             ];
 
-          userSettings = {
+          settings = {
             # Theme settings
             "workbench.colorTheme" =
               if cfg.theme == "catppuccin" then
@@ -577,6 +577,7 @@ in
               "<C-v>" = false;
               "<C-x>" = false;
               "<C-i>" = false;
+              "<C-p>" = false;
             };
 
             # Status bar color control
