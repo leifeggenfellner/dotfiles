@@ -61,17 +61,17 @@ in
       "${mainMod}, 9, exec, hyprctl dispatch workspace 9"
 
       # Move active window to workspace
-      "${mainMod} ${SECONDARY}, right, exec, hyprctl movetoworkspace, e+1"
-      "${mainMod} ${SECONDARY}, left, exec, hyprctl movetoworkspace, e-1"
-      "${mainMod} ${SECONDARY}, 1, exec, hyprctl movetoworkspace, 1"
-      "${mainMod} ${SECONDARY}, 2, exec, hyprctl movetoworkspace, 2"
-      "${mainMod} ${SECONDARY}, 3, exec, hyprctl movetoworkspace, 3"
-      "${mainMod} ${SECONDARY}, 4, exec, hyprctl movetoworkspace, 4"
-      "${mainMod} ${SECONDARY}, 5, exec, hyprctl movetoworkspace, 5"
-      "${mainMod} ${SECONDARY}, 6, exec, hyprctl movetoworkspace, 6"
-      "${mainMod} ${SECONDARY}, 7, exec, hyprctl movetoworkspace, 7"
-      "${mainMod} ${SECONDARY}, 8, exec, hyprctl movetoworkspace, 8"
-      "${mainMod} ${SECONDARY}, 9, exec, hyprctl movetoworkspace, 9"
+      "${mainMod} ${SECONDARY}, right, exec, hyprctl dispatch movetoworkspace e+1"
+      "${mainMod} ${SECONDARY}, left, exec, hyprctl dispatch movetoworkspace e-1"
+      "${mainMod} ${SECONDARY}, 1, exec, hyprctl dispatch movetoworkspace 1"
+      "${mainMod} ${SECONDARY}, 2, exec, hyprctl dispatch movetoworkspace 2"
+      "${mainMod} ${SECONDARY}, 3, exec, hyprctl dispatch movetoworkspace 3"
+      "${mainMod} ${SECONDARY}, 4, exec, hyprctl dispatch movetoworkspace 4"
+      "${mainMod} ${SECONDARY}, 5, exec, hyprctl dispatch movetoworkspace 5"
+      "${mainMod} ${SECONDARY}, 6, exec, hyprctl dispatch movetoworkspace 6"
+      "${mainMod} ${SECONDARY}, 7, exec, hyprctl dispatch movetoworkspace 7"
+      "${mainMod} ${SECONDARY}, 8, exec, hyprctl dispatch movetoworkspace 8"
+      "${mainMod} ${SECONDARY}, 9, exec, hyprctl dispatch movetoworkspace 9"
 
       # Volume keys
       ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
