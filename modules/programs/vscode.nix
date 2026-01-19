@@ -582,7 +582,7 @@ in
               }
               {
                 before = [ "<leader>" "c" ];
-                commands = [ "editor.action.toggleCommentLine" ];
+                commands = [ "editor.action.commentLine" ];
               }
               {
                 before = [ "<leader>" "r" ];
@@ -606,6 +606,7 @@ in
               "<C-v>" = false;
               "<C-x>" = false;
               "<C-i>" = false;
+              "<C-w>" = false;
             };
 
             # Better scrolling
