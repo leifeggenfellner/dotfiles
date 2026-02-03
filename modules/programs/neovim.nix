@@ -64,7 +64,7 @@
       imap <4-MiddleMouse> <Nop>
     '';
 
-    extraLuaConfig = ''
+    initLua = ''
       -- Telescope setup
       local telescope = require("telescope")
       local builtin = require("telescope.builtin")
