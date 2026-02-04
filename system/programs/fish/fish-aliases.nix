@@ -19,6 +19,8 @@ in
 
     # Navigation
     ".." = "cd ..";
+    be = "cd ~/Projects/workspace/nmkp/";
+    fe = "cd ~/Projects/workspace/nmkp/modules/nmkp-app-core/";
 
     # Git alias
     gcm = "git checkout master";
