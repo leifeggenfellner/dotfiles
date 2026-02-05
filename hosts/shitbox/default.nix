@@ -5,8 +5,6 @@
     ./power-tuning.nix
   ];
 
-  nix.settings.allow-import-from-derivation = true;
-
   networking.hostName = "shitbox";
 
   users.users.leif = {

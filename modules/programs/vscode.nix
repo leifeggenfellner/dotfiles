@@ -163,7 +163,7 @@ in
               # Docker
               ms-azuretools.vscode-docker
 
-              # Yaml/Markdown/CSV
+              # Yaml/Markdown/CSV/Org
               davidanson.vscode-markdownlint
               bierner.github-markdown-preview
               bierner.markdown-checkbox
@@ -228,6 +228,13 @@ in
                 publisher = "mikestead";
                 version = "1.0.1";
                 sha256 = "sha256-dieCzNOIcZiTGu4Mv5zYlG7jLhaEsJR05qbzzzQ7RWc=";
+              })
+              # Org mode
+              (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                name = "org-mode";
+                publisher = "tootone";
+                version = "0.5.0";
+                sha256 = "sha256-vXwo3oFLwK/wY7XEph9lGvXYIxjZsxeIE4TVAROmV2o=";
               })
             ];
 
