@@ -25,6 +25,16 @@ let
     push = {
       default = "upstream";
       autoSetupRemote = true;
+      followTags = true;
+    };
+    tag = {
+      forceSignAnnotated = false;
+    };
+    remote = {
+      origin = {
+        tagOpt = "--tags";
+        fetch = "+refs/tags/*:refs/tags/*";
+      };
     };
 
     # Rebase behaviour
@@ -119,7 +129,7 @@ in
         };
       }
       {
-        condition = "hasconfig:remote.*. url:ssh://git@github.com:HNIKT-Tjenesteutvikling-Systemutvikling/**";
+        condition = "hasconfig:remote.*.url:ssh://git@github.com:HNIKT-Tjenesteutvikling-Systemutvikling/**";
         contents = {
           user = {
             name = "leifeggenfellner";
@@ -137,7 +147,7 @@ in
       "*metals.sbt"
       "*.direnv"
       "*.envrc"
-      "*hie. yaml"
+      "*hie.yaml"
       "*.mill-version"
       "*.jvmopts"
     ];
