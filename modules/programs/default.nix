@@ -21,6 +21,7 @@ let
         nix-prefetch-git # prefetch git sources
         ouch # painless compression and decompression for your terminal
         paprefs # pulseaudio preferences
+        pgadmin4-desktopmode # db viewer
         playerctl # media player control
         pulseaudio # pulseaudio
         pavucontrol # pulseaudio volume control
