@@ -98,8 +98,8 @@
     ];
 
     input = {
-      kb_layout = "no,us";
-      kb_options = "grp:alt_shift_toggle";
+      kb_layout = "no";
+      # kb_options = "grp:alt_shift_toggle";
 
       follow_mouse = 1;
       mouse_refocus = true;
@@ -131,10 +131,11 @@
     dwindle = {
       pseudotile = true;
       preserve_split = true;
-      force_split = 0;
+      force_split = 1;
       default_split_ratio = 1.2;
-      smart_split = true;
-      smart_resizing = true;
+      smart_split = false;
+      smart_resizing = false;
+      use_active_for_splits = true;
     };
 
     misc = {
