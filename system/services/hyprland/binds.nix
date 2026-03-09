@@ -41,7 +41,7 @@ in
       "${mainMod}, G, fullscreen"
       "${mainMod}, P, layoutmsg, togglesplit"
 
-      # Move focus with mainMod + arrow keys
+      # Move focus with mainMod + hjkl
       "${mainMod}, k, movefocus, u"
       "${mainMod}, j, movefocus, d"
       "${mainMod}, l, movefocus, r"
@@ -94,10 +94,10 @@ in
       "${mainMod} ${TERTIARY}, j, resizeactive, 0 20"
       "${mainMod} ${TERTIARY}, l, resizeactive, 20 0"
       "${mainMod} ${TERTIARY}, h, resizeactive, -20 0"
-      "${mainMod} ALT,  k, moveactive, 0 -20"
-      "${mainMod} ALT,  j, moveactive, 0 20"
-      "${mainMod} ALT,  l, moveactive, 20 0"
-      "${mainMod} ALT,  h, moveactive, -20 0"
+      "${mainMod} ALT,  k, swapwindow, u"
+      "${mainMod} ALT,  j, swapwindow, d"
+      "${mainMod} ALT,  l, swapwindow, r"
+      "${mainMod} ALT,  h, swapwindow, l"
     ];
 
     # Move/resize windows with mainMod + LMB/RMB and dragging
