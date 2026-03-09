@@ -39,7 +39,7 @@ in
       "${mainMod}, Q, killactive"
       "${mainMod}, F, togglefloating"
       "${mainMod}, G, fullscreen"
-      "${mainMod}, P, togglesplit"
+      "${mainMod}, P, layoutmsg, togglesplit"
 
       # Move focus with mainMod + arrow keys
       "${mainMod}, k, movefocus, u"
