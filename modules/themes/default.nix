@@ -29,6 +29,7 @@ let
         };
         gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
       };
+      gtk.gtk4.theme = null;
       xdg.configFile."gtk-4.0/gtk.css".enable = lib.mkForce false;
     };
 in
