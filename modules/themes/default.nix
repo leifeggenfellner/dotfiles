@@ -3,7 +3,6 @@ let
   themes =
     { config
     , pkgs
-    , lib
     , ...
     }:
     {
