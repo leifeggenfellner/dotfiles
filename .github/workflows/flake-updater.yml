@@ -8,8 +8,7 @@ jobs:
   generate_matrix:
     runs-on: ubuntu-latest
     outputs:
-      nixos_configurations:
-        ${{ steps.gen_nixos_configurations.outputs.nixos_configurations }}
+      nixos_configurations: ${{ steps.gen_nixos_configurations.outputs.nixos_configurations }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -75,40 +74,25 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        nixos_configuration:
-          ${{ fromJson(needs.generate_matrix.outputs.nixos_configurations) }}
+        nixos_configuration: ${{ fromJson(needs.generate_matrix.outputs.nixos_configurations) }}
     steps:
+      - name: Clean up additional space
+        run: |
+          sudo apt-get remove -y '^llvm-.*' 'php.*' azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel || true
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+          sudo rm -rf /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          df -h
       - name: Free diskspace
         uses: easimon/maximize-build-space@master
         with:
           build-mount-path: /nix
           swap-size-mb: 8192
-          root-reserve-mb: 4096
+          root-reserve-mb: 10240
           remove-dotnet: true
           remove-android: true
           remove-haskell: true
           remove-docker-images: true
-      - name: Clean up additional space (Packages and Directories)
-        run: |
-          echo "Initial disk space:"
-          df -h
-          sudo apt-get remove -y '^llvm-.*' 'php.*' azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel || true
-          sudo apt-get autoremove -y
-          sudo apt-get clean
-          echo "Disk space after apt cleanup:"
-          df -h
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /usr/local/share/boost || true
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true
-          echo "Disk space after directory cleanup:"
-          df -h
-      - name: Clean up additional space
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true
       - name: Clone repository
         uses: actions/checkout@v4
         with:
@@ -206,4 +190,3 @@ jobs:
             )
         env:
           GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
-
