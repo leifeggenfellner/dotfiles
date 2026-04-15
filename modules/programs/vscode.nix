@@ -93,8 +93,8 @@ in
         package = pkgs.vscode;
         mutableExtensionsDir = true;
         profiles.default = {
-          enableUpdateCheck = true;
-          enableExtensionUpdateCheck = true;
+          enableUpdateCheck = false;
+          enableExtensionUpdateCheck = false;
 
           keybindings = [
             {
@@ -517,9 +517,10 @@ in
             # Headwind (Tailwind CSS class sorter)
             "headwind.runOnSave" = true;
 
-            # Perform auto-updates
-            "extensions.autoCheckUpdates" = true;
-            "update.mode" = "default";
+            # Disable auto-updates (settings.json is read-only on NixOS)
+            "extensions.autoCheckUpdates" = false;
+            "extensions.autoUpdate" = false;
+            "update.mode" = "none";
 
             # Vim extension configuration
             "vim.easyMotion" = true;
