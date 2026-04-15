@@ -25,7 +25,7 @@ in
       "${mainMod} ${SECONDARY}, D, exec, ${runOnce "pcmanfm"}"
 
       # Lockscreen
-      "${mainMod} ${SECONDARY}, L, exec, ${runOnce "hyprlock"}"
+      "${mainMod} ${SECONDARY}, L, exec, ${runOnce "lock-screen"}"
 
       # Screenshot
       "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copy area"}"

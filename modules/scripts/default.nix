@@ -6,6 +6,7 @@ let
       set-monitor = pkgs.callPackage ./set-monitor.nix { inherit pkgs; };
       setup-monitors = pkgs.callPackage ./setup-monitors.nix { inherit pkgs; };
       handle-monitor = pkgs.callPackage ./handle-monitor.nix { inherit pkgs; };
+      lock-screen = pkgs.callPackage ./lock-screen.nix { inherit pkgs; };
       gum-scripts = pkgs.callPackage ./gum-scripts.nix {
         inherit pkgs;
         inherit (config) colorScheme;
@@ -19,6 +20,7 @@ let
           set-monitor # set monitor resolution
           setup-monitors # setup monitors based on connected displays
           handle-monitor # handle monitor resolution
+          lock-screen # dynamic hyprlock wrapper
 
           # Gum scripts
           gum-scripts.system-cleanup # system cleanup with gum

@@ -244,11 +244,11 @@ in
               if cfg.theme == "catppuccin" then
                 "Catppuccin Mocha"
               else if cfg.theme == "dark" then
-                "Default Dark Modern"
+                "Dark Modern"
               else
-                "Default Light Modern";
-            "workbench.preferredDarkColorTheme" = "Default Dark Modern";
-            "workbench.preferredLightColorTheme" = "Default Light Modern";
+                "Light Modern";
+            "workbench.preferredDarkColorTheme" = "Dark Modern";
+            "workbench.preferredLightColorTheme" = "Light Modern";
             "window.autoDetectColorScheme" = false;
 
             # Icon theme
