@@ -2,6 +2,7 @@
   imports = [
     ./hyprland
     ./blueman.nix
+    ./bolt.nix
     ./btrbk.nix
     ./gnome.nix
     ./greetd.nix

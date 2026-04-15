@@ -5,9 +5,9 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
   JQ=${pkgs. jq}/bin/jq
 
-  MONITOR_LEFT_DESC="HP Inc. HP E45c G5 CNC50212K0"
-  MONITOR_RIGHT_DESC="HP Inc. HP E45c G5 CNC1000000"
   MONITOR_HOME_DESC="Samsung Electric Company C34J79x HTRM900265"
+  MONITOR_WORK_CENTER_DESC="HP Inc. HP 527pu 1H35421YT0"
+  MONITOR_WORK_RIGHT_DESC="HP Inc. HP 527pu 1H35421YRD"
   LAPTOP="eDP-1"
 
   MONITORS_JSON=$(hyprctl monitors -j)
@@ -20,6 +20,10 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   name_of() {
     echo "$MONITORS_JSON" | $JQ -r --arg d "$1" \
       '.[] | select(.description | contains($d)) | .name'
+  }
+
+  move_ws() {
+    hyprctl dispatch moveworkspacetomonitor "$1" "$2" 2>/dev/null || true
   }
 
   echo "Detected monitors:"
@@ -35,10 +39,10 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     hyprctl keyword monitor "$HOME_MON,3440x1440@60,1920x0,1"
 
     # Move existing workspaces first
-    hyprctl dispatch moveworkspacetomonitor 1 "$HOME_MON"
-    hyprctl dispatch moveworkspacetomonitor 2 "$HOME_MON"
+    move_ws 1 "$HOME_MON"
+    move_ws 2 "$HOME_MON"
     for i in {3..6}; do
-      hyprctl dispatch moveworkspacetomonitor "$i" "$LAPTOP"
+      move_ws "$i" "$LAPTOP"
     done
 
     # Then set defaults for future workspaces
@@ -49,34 +53,36 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     hyprctl keyword workspace "5,monitor:$LAPTOP"
     hyprctl keyword workspace "6,monitor:$LAPTOP"
 
-  elif has_desc "$MONITOR_LEFT_DESC" && has_desc "$MONITOR_RIGHT_DESC"; then
-    echo "Office setup detected"
+  elif has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
+    echo "Work setup detected"
 
-    LEFT_MON=$(name_of "$MONITOR_LEFT_DESC")
-    RIGHT_MON=$(name_of "$MONITOR_RIGHT_DESC")
-    echo "Left office monitor: $LEFT_MON, Right office monitor: $RIGHT_MON"
+    CENTER_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")
+    RIGHT_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
+    echo "Center monitor: $CENTER_MON, Right monitor: $RIGHT_MON"
 
-    hyprctl keyword monitor "$LAPTOP,disable"
-    hyprctl keyword monitor "$LEFT_MON,2560x1440@60,0x0,1"
-    hyprctl keyword monitor "$RIGHT_MON,2560x1440@60,2560x0,1"
+    hyprctl keyword monitor "$LAPTOP,1920x1200@60,0x0,1"
+    hyprctl keyword monitor "$CENTER_MON,2560x1440@60,1920x0,1"
+    hyprctl keyword monitor "$RIGHT_MON,2560x1440@60,4480x0,1"
 
     # Move existing workspaces first
-    hyprctl dispatch moveworkspacetomonitor 1 "$LEFT_MON"
-    hyprctl dispatch moveworkspacetomonitor 4 "$LEFT_MON"
-    hyprctl dispatch moveworkspacetomonitor 6 "$LEFT_MON"
+    move_ws 1 "$CENTER_MON"
+    move_ws 6 "$CENTER_MON"
 
-    hyprctl dispatch moveworkspacetomonitor 2 "$RIGHT_MON"
-    hyprctl dispatch moveworkspacetomonitor 3 "$RIGHT_MON"
-    hyprctl dispatch moveworkspacetomonitor 5 "$RIGHT_MON"
+    move_ws 3 "$RIGHT_MON"
+
+    move_ws 2 "$LAPTOP"
+    move_ws 4 "$LAPTOP"
+    move_ws 5 "$LAPTOP"
 
     # Then set defaults for future workspaces
-    hyprctl keyword workspace "1,monitor:$LEFT_MON"
-    hyprctl keyword workspace "4,monitor:$LEFT_MON"
-    hyprctl keyword workspace "6,monitor:$LEFT_MON"
+    hyprctl keyword workspace "1,monitor:$CENTER_MON"
+    hyprctl keyword workspace "6,monitor:$CENTER_MON"
 
-    hyprctl keyword workspace "2,monitor:$RIGHT_MON"
     hyprctl keyword workspace "3,monitor:$RIGHT_MON"
-    hyprctl keyword workspace "5,monitor:$RIGHT_MON"
+
+    hyprctl keyword workspace "2,monitor:$LAPTOP"
+    hyprctl keyword workspace "4,monitor:$LAPTOP"
+    hyprctl keyword workspace "5,monitor:$LAPTOP"
 
   else
     echo "Laptop-only setup"
