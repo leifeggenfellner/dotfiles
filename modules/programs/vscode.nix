@@ -107,7 +107,6 @@ in
             with pkgs.vscode-extensions;
             [
               # Copilot
-              github.copilot
               github.copilot-chat
 
               # Editor
@@ -156,9 +155,11 @@ in
               rust-lang.rust-analyzer
               tamasfe.even-better-toml
 
-              # Scala/Metals
+              # Scala/Metals/Haskell
               scalameta.metals
               scala-lang.scala
+              justusadam.language-haskell
+              haskell.haskell
 
               # Docker
               ms-azuretools.vscode-docker
@@ -273,9 +274,6 @@ in
             "git.path" = "${pkgs.git}/bin/git";
             "git.decorations.enabled" = true;
             "git.showPushSuccessNotification" = true;
-
-            # GitHub Copilot settings
-            "github.copilot.nextEditSuggestions.enabled" = true;
 
             # Editor improvements
             "workbench.tree.indent" = 20;
