@@ -15,12 +15,28 @@
   };
 
   ########################################
-  # NVIDIA PRIME Offload Base (Active)
+  # Intel Arc (default — no NVIDIA)
   ########################################
-  hardware = {
-    graphics.enable = true;
+  hardware.graphics.enable = true;
 
-    nvidia = {
+  boot.blacklistedKernelModules = [
+    "nouveau"
+    "nvidia"
+    "nvidia_drm"
+    "nvidia_modeset"
+    "nvidia_uvm"
+  ];
+
+  services.xserver.videoDrivers = [ "modesetting" ];
+
+  ########################################
+  # Specialisation:  Enable NVIDIA offload
+  ########################################
+  specialisation.with-nvidia.configuration = {
+    boot.blacklistedKernelModules = lib.mkForce [ ];
+    services.xserver.videoDrivers = lib.mkForce [ "nvidia" ];
+
+    hardware.nvidia = {
       modesetting.enable = true;
       powerManagement.enable = true;
       powerManagement.finegrained = true;
@@ -36,23 +52,6 @@
         nvidiaBusId = "PCI:1:0:0";
       };
     };
-  };
-
-  services.xserver.videoDrivers = [ "nvidia" ];
-
-  ########################################
-  # Specialisation:  Disable NVIDIA fully
-  ########################################
-  specialisation.no-nvidia.configuration = {
-    boot.blacklistedKernelModules = [
-      "nouveau"
-      "nvidia"
-      "nvidia_drm"
-      "nvidia_modeset"
-      "nvidia_uvm"
-    ];
-    services.xserver.videoDrivers = [ "modesetting" ];
-    hardware.nvidia = lib.mkForce { };
   };
 
   ########################################
