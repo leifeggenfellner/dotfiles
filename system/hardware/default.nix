@@ -79,9 +79,22 @@ in
         canTouchEfiVariables = true;
         efiSysMountPoint = "/boot/efi";
       };
-      systemd-boot = {
+      grub = {
         enable = true;
+        device = "nodev";
+        efiSupport = true;
         configurationLimit = 10;
+        theme = pkgs.stdenv.mkDerivation {
+          pname = "catppuccin-grub-theme";
+          version = "1.0.0";
+          src = pkgs.fetchFromGitHub {
+            owner = "catppuccin";
+            repo = "grub";
+            rev = "0a37ab19f654e77129b409fed371891c01ffd0b9";
+            hash = "sha256-jgM22pvCQvb0bjQQXoiqGMgScR9AgCK3OfDF5Ud+/mk=";
+          };
+          installPhase = "cp -r $src/src/catppuccin-mocha-grub-theme $out";
+        };
       };
     };
     plymouth = {
