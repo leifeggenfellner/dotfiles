@@ -79,23 +79,9 @@ in
         canTouchEfiVariables = true;
         efiSysMountPoint = "/boot/efi";
       };
-      grub = {
+      systemd-boot = {
         enable = true;
-        device = "nodev";
-        efiSupport = true;
-        enableCryptodisk = true;
         configurationLimit = 10;
-        theme = pkgs.stdenv.mkDerivation {
-          pname = "catppuccin-grub-theme";
-          version = "1.0.0";
-          src = pkgs.fetchFromGitHub {
-            owner = "catppuccin";
-            repo = "grub";
-            rev = "0a37ab19f654e77129b409fed371891c01ffd0b9";
-            hash = "sha256-jgM22pvCQvb0bjQQXoiqGMgScR9AgCK3OfDF5Ud+/mk=";
-          };
-          installPhase = "cp -r $src/src/catppuccin-mocha-grub-theme $out";
-        };
       };
     };
     plymouth = {
