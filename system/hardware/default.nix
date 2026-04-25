@@ -83,6 +83,7 @@ in
         enable = true;
         device = "nodev";
         efiSupport = true;
+        enableCryptodisk = true;
         configurationLimit = 10;
         theme = pkgs.stdenv.mkDerivation {
           pname = "catppuccin-grub-theme";
