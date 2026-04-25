@@ -69,7 +69,7 @@ let
     # User identity
     user = {
       name = "leifeggenfellner";
-      email = "eggenfellner@protonmail.com";
+      email = "dev@zorvian.eu";
     };
 
     # Aliases (git subcommands)
@@ -124,7 +124,7 @@ in
         contents = {
           user = {
             name = "leifeggenfellner";
-            email = "eggenfellner@protonmail.com";
+            email = "dev@zorvian.eu";
           };
         };
       }
@@ -133,7 +133,7 @@ in
         contents = {
           user = {
             name = "leifeggenfellner";
-            email = "eggenfellner@protonmail.com";
+            email = "dev@zorvian.eu";
           };
         };
       }

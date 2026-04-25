@@ -24,7 +24,7 @@
         port = 443;
         user = "git";
         identitiesOnly = true;
-        identityFile = "~/.ssh/id_rsa";
+        identityFile = "~/.ssh/id_ed25519";
       };
 
       "10.0.0.*" = {
