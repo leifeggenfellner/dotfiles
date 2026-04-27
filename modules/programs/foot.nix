@@ -15,7 +15,7 @@ _: {
       options.program.foot = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = false;
+          default = true;
           description = "Enable foot terminal";
         };
         fontSize = lib.mkOption {
@@ -29,7 +29,7 @@ _: {
           enable = true;
           settings = {
             main = {
-              font = "FiraCode:size=${toString cfg.fontSize}";
+              font = "RobotoMono Nerd Font:size=${toString cfg.fontSize}";
               horizontal-letter-offset = 0;
               vertical-letter-offset = 0;
               pad = "5x5 center";
@@ -61,7 +61,7 @@ _: {
               beam-thickness = 1;
             };
 
-            colors = {
+            colors-dark = {
               alpha = 0.91;
               foreground = "${palette.base05}";
               background = "${palette.base00}";

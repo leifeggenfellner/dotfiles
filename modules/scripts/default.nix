@@ -21,6 +21,7 @@ _: {
         monitorWorkRight = monitorDesc "workRight";
       };
       handle-monitor = pkgs.callPackage ./_handle-monitor.nix { inherit pkgs; };
+      thunderbolt-wait = pkgs.callPackage ./_thunderbolt-wait.nix { inherit pkgs; };
       lock-screen = pkgs.callPackage ./_lock-screen.nix {
         inherit pkgs;
         monitorPriority = lockPriority;
@@ -28,6 +29,10 @@ _: {
       gum-scripts = pkgs.callPackage ./_gum-scripts.nix {
         inherit pkgs;
         inherit (config) colorScheme;
+      };
+      theme-switcher = pkgs.callPackage ./_theme-switcher.nix {
+        inherit pkgs;
+        themes = builtins.attrNames (import ../themes/_palettes.nix);
       };
     in
     {
@@ -38,7 +43,9 @@ _: {
           set-monitor
           setup-monitors
           handle-monitor
+          thunderbolt-wait
           lock-screen
+          theme-switcher
 
           gum-scripts.system-cleanup
           gum-scripts.project-launcher

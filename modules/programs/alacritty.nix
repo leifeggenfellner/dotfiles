@@ -13,7 +13,7 @@ _: {
       options.program.alacritty = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = true;
+          default = false;
           description = "Enable alacritty terminal";
         };
         fontSize = lib.mkOption {

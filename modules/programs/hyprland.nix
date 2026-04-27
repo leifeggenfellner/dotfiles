@@ -24,7 +24,6 @@ _: {
             pkgs.pavucontrol # pulseaudio volume control
             pkgs.poppler # pdf tools
             pkgs.pulsemixer # pulseaudio volume control
-            pkgs.ranger # file manager
             pkgs.scrot # screenshot tool
             pkgs.slurp # select a region in a wayland compositor
             pkgs.wayshot # screenshot tool

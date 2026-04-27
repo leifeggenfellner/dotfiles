@@ -29,6 +29,9 @@ _: {
         poppler # pdf tools
         powertop # power stuff
         pipewire # control volume
+        pipes-rs # terminal pipes eye candy
+        cbonsai # bonsai trees in terminal
+        cmatrix # matrix rain in terminal
         rage # encryption tool for secrets management
         ripgrep # fast grep
         statix #linting
