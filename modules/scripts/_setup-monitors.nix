@@ -1,13 +1,18 @@
-{ pkgs, ... }:
+{ pkgs
+, monitorHome ? ""
+, monitorWorkCenter ? ""
+, monitorWorkRight ? ""
+, ...
+}:
 
 pkgs.writeShellScriptBin "setup-monitors" ''
   set -euo pipefail
 
-  JQ=${pkgs. jq}/bin/jq
+  JQ=${pkgs.jq}/bin/jq
 
-  MONITOR_HOME_DESC="Samsung Electric Company C34J79x HTRM900265"
-  MONITOR_WORK_CENTER_DESC="HP Inc. HP 527pu 1H35421YT0"
-  MONITOR_WORK_RIGHT_DESC="HP Inc. HP 527pu 1H35421YRD"
+  MONITOR_HOME_DESC="${monitorHome}"
+  MONITOR_WORK_CENTER_DESC="${monitorWorkCenter}"
+  MONITOR_WORK_RIGHT_DESC="${monitorWorkRight}"
   LAPTOP="eDP-1"
 
   MONITORS_JSON=$(hyprctl monitors -j)

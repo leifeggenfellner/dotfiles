@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 {
   imports = [
     ./_hardware-configuration.nix
@@ -25,6 +25,12 @@
   environment.desktop = {
     enable = true;
     windowManager = "hyprland";
+
+    monitors = {
+      laptop = { desc = "eDP-1"; name = "eDP-1"; resolution = "1920x1200@60"; };
+    };
+
+    lockMonitorPriority = [ "laptop" ];
   };
 
   programs.hyprland = {

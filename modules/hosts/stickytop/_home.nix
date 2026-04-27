@@ -1,7 +1,9 @@
-{ lib, ... }:
+{ lib, osConfig, ... }:
+let
+  monitors = osConfig.environment.desktop.monitors;
+in
 {
-  # Built-in 14" eDP panel
-  program.hyprlock.defaultMonitor = "eDP-1";
+  program.hyprlock.defaultMonitor = monitors.laptop.name;
 
   service = lib.mkMerge [
     {
