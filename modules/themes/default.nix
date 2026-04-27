@@ -1,17 +1,19 @@
 _:
 let
   colors = import ./_colors.nix;
-  palette = import ./_palette.nix;
 in
 {
   flake.homeModules = {
     themes-palette =
-      { lib, ... }:
+      { lib, osConfig, ... }:
+      let
+        palette = import ./_palette.nix osConfig.environment.desktop.theme.scheme;
+      in
       {
         options.theme.colors = lib.mkOption {
           type = lib.types.attrsOf lib.types.str;
           default = palette;
-          description = "Full Catppuccin Mocha named color palette (hex without #)";
+          description = "Full named color palette (hex without #)";
         };
       };
     themes-gtk =

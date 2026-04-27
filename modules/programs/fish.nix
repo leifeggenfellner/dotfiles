@@ -1,7 +1,7 @@
 _: {
   # NixOS side: full fish system config (vendor, aliases, prompt, init scripts).
   flake.nixosModules.programs-fish =
-    { pkgs, lib, ... }:
+    { pkgs, ... }:
     let
       fzfConfig = ''
         set -x FZF_DEFAULT_OPTS "--preview='bat {} --color=always'" \n
@@ -44,13 +44,13 @@ _: {
           # Tool replacements
           cat = "bat";
           du = "${pkgs.ncdu}/bin/ncdu --color dark -rr -x";
-          ls = "${pkgs.eza}/bin/eza";
-          la = "${lib.getExe pkgs.eza} --long --all --group --header --group-directories-first --sort=type --icons";
-          lg = "${lib.getExe pkgs.eza} --long --all --group --header --git";
-          lt = "${lib.getExe pkgs.eza} --long --all --group --header --tree --level ";
           ping = "${pkgs.prettyping}/bin/prettyping";
-          tree = "${pkgs.eza}/bin/eza -T";
           xdg-open = "${pkgs.mimeo}/bin/mimeo";
+
+          # Fun
+          bonsai = "cbonsai -li -t 0.02";
+          matrix = "cmatrix -ab";
+          pipes = "pipes-rs";
 
           # Navigation
           ".." = "cd ..";
@@ -107,12 +107,10 @@ _: {
           any-nix-shell
           dive
           duf
-          eza
           fd
           git
           jump
           ncdu
-          nitch
         ];
 
         persistence."/persist/" = {
@@ -128,6 +126,7 @@ _: {
         plugins = [ fenv ];
 
         interactiveShellInit = ''
+          fastfetch
           set -p fish_complete_path ${pkgs.fish}/share/fish/completions
           set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions.d
         '';

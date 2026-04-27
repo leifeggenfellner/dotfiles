@@ -1,11 +1,13 @@
+{ osConfig, ... }:
 let
-  c = import ./_palette.nix;
+  inherit (osConfig.environment.desktop.theme) scheme;
+  c = import ./_palette.nix scheme;
 in
-_: {
+{
   colorScheme = {
-    slug = "catppuccin-mocha";
-    name = "Catppuccin Mocha";
-    author = "Catppuccin Community";
+    slug = scheme;
+    name = scheme;
+    author = "Community";
     palette = {
       base00 = c.base;
       base01 = c.mantle;

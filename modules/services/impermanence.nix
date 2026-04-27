@@ -48,6 +48,8 @@ _: {
               directory = ".local/share/keyrings";
               mode = "0700";
             }
+            ".config/waypaper"
+            ".local/share/swww"
           ]
           ++ (lib.optionals config.environment.desktop.develop developSpecificDirs);
         };

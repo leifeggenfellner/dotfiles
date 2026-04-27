@@ -1,0 +1,139 @@
+;; === Variables ===
+(deflisten workspaces "eww-workspaces")
+(deflisten volume "eww-volume")
+(deflisten brightness "eww-brightness")
+(deflisten network "eww-network")
+(deflisten battery "eww-battery")
+(deflisten notifications "eww-notifications")
+(defpoll hour :interval "1s" "date '+%H'")
+(defpoll min :interval "1s" "date '+%M'")
+(defvar volum false)
+(defvar bright false)
+(defvar power false)
+
+;; === Bar Widgets ===
+
+;; Launcher — NixOS logo
+(defwidget launcher []
+  (button :class "launcher_icon"
+          :onclick "wofi --show drun &"
+    "󱄅"))
+
+;; Workspaces (vertical, icon per workspace)
+(defwidget workspaces-widget []
+  (box :class "works" :orientation "v" :halign "center" :valign "start"
+       :space-evenly false :spacing 4
+    (for ws in workspaces
+      (button :class "${ws.active ? 'ws-active' : 'ws-inactive'}"
+              :onclick "hyprctl dispatch workspace ${ws.id}"
+        "${ws.id == 1 ? '󰨞' : ws.id == 2 ? '' : ws.id == 3 ? '󰈹' : ws.id == 4 ? '󰒱' : ws.id == 5 ? '󰓇' : ws.id == 6 ? '󰕮' : ws.id}"))))
+
+;; Battery
+(defwidget bat-widget []
+  (box :class "bat" :orientation "v" :tooltip "Battery: ${battery.capacity}%"
+       :visible "${battery.present}"
+    (label :text "${battery.status == 'Charging' ? '󰂄' :
+                   battery.capacity > 90 ? '󰁹' :
+                   battery.capacity > 70 ? '󰂀' :
+                   battery.capacity > 50 ? '󰁾' :
+                   battery.capacity > 30 ? '󰁼' :
+                   battery.capacity > 10 ? '󰁺' : '󰂎'}")))
+
+;; Wifi
+(defwidget wifi-widget []
+  (button :class "wifi-icon" :onclick "networkmanager_dmenu &"
+          :tooltip "${network.ssid}"
+    (label :text "${network.type == 'wifi' ? '󰤨' : network.type == 'ethernet' ? '󰈀' : '󰤭'}")))
+
+;; Brightness (vertical slider on hover)
+(defwidget brightness-widget []
+  (eventbox :onhover "eww update bright=true"
+            :onhoverlost "eww update bright=false"
+    (box :orientation "v" :space-evenly false :spacing 2
+      (revealer :transition "slideup" :reveal bright :duration "350ms"
+        (scale :class "bribar" :value "${brightness.brightness}"
+               :orientation "v" :flipped true
+               :tooltip "Brightness: ${brightness.brightness}%"
+               :max 101 :min 0
+               :onchange "brightnessctl set {}%"))
+      (label :class "brightness-icon" :text "󰃟"))))
+
+;; Volume (vertical slider on hover)
+(defwidget volume-widget []
+  (eventbox :onhover "eww update volum=true"
+            :onhoverlost "eww update volum=false"
+    (box :orientation "v" :space-evenly false :spacing 2
+      (revealer :transition "slideup" :reveal volum :duration "350ms"
+        (scale :class "volbar" :value "${volume.volume}"
+               :orientation "v" :flipped true
+               :tooltip "Volume: ${volume.volume}%"
+               :max 101 :min 0
+               :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%"))
+      (button :class "volume-icon" :onclick "pavucontrol &"
+        (label :text "${volume.muted == 1 ? '󰝟' : volume.volume > 50 ? '󰕾' : volume.volume > 0 ? '󰖀' : '󰕿'}")))))
+
+;; Notifications
+(defwidget notif-widget []
+  (button :class "notif-icon ${notifications.count > 0 ? 'has-notifs' : ''}"
+          :onclick "swaync-client -t -sw &"
+    (label :text "${notifications.dnd == 'true' ? '󰂛' : notifications.count > 0 ? '󰂚' : '󰂜'}")))
+
+;; Control panel — battery, wifi, brightness, volume, notifications
+(defwidget control []
+  (box :orientation "v" :space-evenly false :class "control"
+    (bat-widget)
+    (wifi-widget)
+    (brightness-widget)
+    (volume-widget)
+    (notif-widget)))
+
+;; Clock (vertical, stacked hour/min)
+(defwidget time-widget []
+  (box :orientation "v" :class "time" :valign "end" :space-evenly false
+    (label :class "time-hour" :text hour)
+    (label :class "time-min" :text min)))
+
+;; Powermenu
+(defwidget power-widget []
+  (eventbox :onhover "eww update power=true"
+            :onhoverlost "eww update power=false"
+    (box :orientation "v" :space-evenly false :class "powermenu"
+      (revealer :transition "slideup" :reveal power :duration "350ms"
+        (box :orientation "v" :space-evenly false
+          (button :class "btn-reboot" :tooltip "Reboot"
+                  :onclick "systemctl reboot" "󰜉")
+          (button :class "btn-lock" :tooltip "Lock"
+                  :onclick "lock-screen" "󰌾")
+          (button :class "btn-logout" :tooltip "Logout"
+                  :onclick "hyprctl dispatch exit" "󰍃")))
+      (button :class "btn-shutdown" :tooltip "Shutdown"
+              :onclick "systemctl poweroff" "󰐥"))))
+
+;; Top section
+(defwidget top []
+  (box :orientation "v" :space-evenly false :valign "start"
+    (launcher)
+    (workspaces-widget)))
+
+;; Bottom section
+(defwidget bottom []
+  (box :orientation "v" :space-evenly false :valign "end" :spacing 5
+    (control)
+    (time-widget)
+    (power-widget)))
+
+;; Main bar
+(defwidget bar []
+  (box :class "eww_bar" :orientation "v" :hexpand false :vexpand true
+    (top)
+    (bottom)))
+
+;; === Bar Window ===
+(defwindow bar
+  :monitor 0
+  :geometry (geometry :x "0" :y "0" :height "100%" :width "48px"
+                      :anchor "left center")
+  :stacking "fg"
+  :exclusive true
+  :namespace "eww"
+  (bar))

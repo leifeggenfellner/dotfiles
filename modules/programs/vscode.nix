@@ -10,6 +10,20 @@ _: {
       inherit (osConfig.environment) desktop;
       cfg = config.program.vscode;
 
+      # Map palette scheme names to VS Code theme names
+      vscodeThemeMap = {
+        "catppuccin-mocha" = "Catppuccin Mocha";
+        "catppuccin-macchiato" = "Catppuccin Macchiato";
+        "catppuccin-frappe" = "Catppuccin Frappé";
+        "catppuccin-latte" = "Catppuccin Latte";
+        "nord" = "Nord";
+        "tokyo-night" = "Tokyo Night";
+        "rose-pine" = "Rosé Pine";
+        "gruvbox-dark" = "Gruvbox Dark Medium";
+        "dracula" = "Dracula";
+      };
+      activeVscodeTheme = vscodeThemeMap.${desktop.theme.scheme} or "Catppuccin Mocha";
+
       sharedAliases = import ./_fish-aliases.nix { inherit pkgs lib; };
 
       # VS Code only tools
@@ -179,7 +193,12 @@ _: {
                 ]
                 ++ lib.optionals cfg.godMode [ vscodevim.vim ]
                 ++ [
-                  # Theme extensions
+                  # Theme extensions — all palettes
+                  arcticicestudio.nord-visual-studio-code
+                  enkia.tokyo-night
+                  mvllow.rose-pine
+                  jdinhlife.gruvbox
+                  dracula-theme.theme-dracula
                   (pkgs.vscode-utils.extensionFromVscodeMarketplace {
                     name = "catppuccin-vsc";
                     publisher = "Catppuccin";
@@ -242,15 +261,9 @@ _: {
                 ];
 
               userSettings = {
-                # Theme settings
-                "workbench.colorTheme" =
-                  if cfg.theme == "catppuccin" then
-                    "Catppuccin Mocha"
-                  else if cfg.theme == "dark" then
-                    "Dark Modern"
-                  else
-                    "Light Modern";
-                "workbench.preferredDarkColorTheme" = "Dark Modern";
+                # Theme settings — derived from environment.desktop.theme.scheme
+                "workbench.colorTheme" = activeVscodeTheme;
+                "workbench.preferredDarkColorTheme" = activeVscodeTheme;
                 "workbench.preferredLightColorTheme" = "Light Modern";
                 "window.autoDetectColorScheme" = false;
 

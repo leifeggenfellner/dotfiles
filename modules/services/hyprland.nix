@@ -1,11 +1,9 @@
 { inputs, ... }:
-let
-  c = import ../themes/_palette.nix;
-in
 {
   flake.nixosModules.services-hyprland =
     { lib, pkgs, config, ... }:
     let
+      c = import ../themes/_palette.nix config.environment.desktop.theme.scheme;
       fmt = import ../themes/_fmt.nix lib;
     in
     {
@@ -28,8 +26,7 @@ in
             withUWSM = true;
             package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
             portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-            plugins = with inputs.hyprland-plugins.packages.${pkgs.stdenv.hostPlatform.system}; [
-            ];
+            plugins = [ ];
 
             settings =
               let
@@ -56,12 +53,12 @@ in
                   "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
                 ];
                 exec-once = [
-                  "hyprpaper"
+                  "awww-daemon && waypaper --restore"
                   "hyprctl setcursor capitaine-cursors-white 16"
                   "wl-clip-persist --clipboard both &"
                   "wl-paste --watch cliphist store &"
                   "uwsm finalize"
-                  "setup-monitors"
+                  "thunderbolt-wait && setup-monitors"
                   "handle-monitor &"
                 ];
 
@@ -108,8 +105,10 @@ in
                   "ignore_alpha 0, match:namespace ^(wofi)$"
                   "blur on, match:namespace ^(waybar)$"
                   "ignore_alpha 0, match:namespace ^(waybar)$"
-                  "blur on, match:namespace ^(notifications)$"
-                  "ignore_alpha 0, match:namespace ^(notifications)$"
+                  "blur on, match:namespace ^(swaync-notification-window)$"
+                  "ignore_alpha 0, match:namespace ^(swaync-notification-window)$"
+                  "blur on, match:namespace ^(swaync-control-center)$"
+                  "ignore_alpha 0, match:namespace ^(swaync-control-center)$"
                 ];
 
                 animations.enabled = true;
@@ -130,6 +129,9 @@ in
                   "border, 1, 10, liner"
                   "borderangle, 1, 60, liner, loop"
                   "fade, 1, 10, default"
+                  "layers, 1, 4, wind, slide"
+                  "layersIn, 1, 4, winIn, slide"
+                  "layersOut, 1, 3, winOut, fade"
                   "workspaces, 1, 6, overshot, slidevert"
                   "specialWorkspace, 1, 6, default, slidevert"
                 ];
@@ -191,14 +193,20 @@ in
 
                 # === Binds ===
                 bind = [
-                  "${mainMod}, Return, exec, ${launch "alacritty"}"
+                  "${mainMod}, Return, exec, ${launch "foot"}"
                   "${mainMod}, D, exec, ${toggle "wofi --show drun"}"
-                  "${mainMod}, B, exec, ${toggle "alacritty -t btop -e btm"}"
-                  "${mainMod}, R, exec, ${toggle "alacritty -t ranger -e ranger"}"
+                  "${mainMod}, B, exec, ${toggle "foot -T btop -e btop"}"
+                  "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
                   "${mainMod} ${SECONDARY}, D, exec, ${runOnce "pcmanfm"}"
+                  "${mainMod}, W, exec, waypaper --folder ~/Pictures/wallpapers"
+                  "${mainMod} ${SECONDARY}, W, exec, theme-switcher"
 
                   "${mainMod} ${SECONDARY}, L, exec, ${runOnce "lock-screen"}"
+
+                  "${mainMod}, N, exec, swaync-client -t -sw"
+                  "${mainMod} ${SECONDARY}, N, exec, swaync-client -d -sw"
+                  "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, swaync-client -C -sw"
 
                   "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copy area"}"
 
@@ -287,17 +295,16 @@ in
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(transmission-gtk)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.kde.kdeconnect-settings)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.pulseaudio.pavucontrol)$"
+                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(waypaper)$"
 
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(Spotify Premium)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(Spotify)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(spotify_player)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(ranger)$"
+                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(yazi)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(btop)$"
 
-                  "opacity 0.91 override 0.73 override, match:class ^(Emacs)$"
-
                   "workspace 1, match:class ^(code|Code)$"
-                  "workspace 2, match:class ^(Alacritty|alacritty)$"
+                  "workspace 2, match:class ^(Alacritty|alacritty|foot)$"
                   "workspace 3, match:class ^(zen|ZenBrowser)$"
                   "workspace 4, match:class ^(Slack)$"
                   "workspace 4, match:class ^(discord)$"
