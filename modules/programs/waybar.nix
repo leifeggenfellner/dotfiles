@@ -10,21 +10,23 @@ _: {
       fontSize = "14px";
       iconSize = "17px";
       opacity = "0.8";
+      c = config.theme.colors;
+      fmt = import ../themes/_fmt.nix lib;
       palette = {
         font = "RobotoMono Nerd Font";
         fontsize = fontSize;
         iconsize = iconSize;
-        background-color = "rgba(26, 26, 26, ${opacity})";
-        background_border-frame = "#${config.colorScheme.palette.base02}";
+        background-color = fmt.rgba c.base opacity;
+        background_border-frame = fmt.hex c.surface0;
 
-        blue = "#${config.colorScheme.palette.base0D}";
-        cyan = "#${config.colorScheme.palette.base0C}";
-        green = "#${config.colorScheme.palette.base0B}";
-        grey = "#${config.colorScheme.palette.base04}";
-        magenta = "#${config.colorScheme.palette.base0E}";
-        orange = "#${config.colorScheme.palette.base09}";
-        red = "#${config.colorScheme.palette.base08}";
-        yellow = "#${config.colorScheme.palette.base0A}";
+        blue = fmt.hex c.blue;
+        cyan = fmt.hex c.teal;
+        green = fmt.hex c.green;
+        grey = fmt.hex c.surface2;
+        magenta = fmt.hex c.mauve;
+        orange = fmt.hex c.peach;
+        red = fmt.hex c.red;
+        yellow = fmt.hex c.yellow;
       };
       calendar = "${pkgs.gnome-calendar}/bin/gnome-calendar";
       system = "${pkgs.gnome-system-monitor}/bin/gnome-system-monitor";
@@ -268,7 +270,7 @@ _: {
           }
 
           #workspaces button:hover {
-            background-color: rgba(137, 180, 250, 0.2);
+            background-color: ${fmt.rgba c.blue "0.2"};
             color: ${palette.blue};
             border: 2px solid ${palette.blue};
           }
@@ -400,7 +402,7 @@ _: {
           }
 
           #tray:hover {
-            background-color: rgba(203, 166, 247, 0.1);
+            background-color: ${fmt.rgba c.mauve "0.1"};
           }
 
           #tray > .passive {
@@ -415,7 +417,7 @@ _: {
 
           /* Tooltips */
           tooltip {
-            background: linear-gradient(135deg, rgba(26, 26, 26, 0.98) 0%, rgba(40, 40, 40, 0.98) 100%);
+            background: linear-gradient(135deg, ${fmt.rgba c.crust "0.98"} 0%, ${fmt.rgba c.surface0 "0.98"} 100%);
             border: 2px solid ${palette.magenta};
             border-radius: 10px;
             color: ${palette.grey};

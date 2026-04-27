@@ -1,6 +1,13 @@
-{ inputs, ... }: {
+{ inputs, ... }:
+let
+  c = import ../themes/_palette.nix;
+in
+{
   flake.nixosModules.services-hyprland =
     { lib, pkgs, config, ... }:
+    let
+      fmt = import ../themes/_fmt.nix lib;
+    in
     {
       imports = [
         inputs.hyprland.nixosModules.default
@@ -64,8 +71,8 @@
                   border_size = 2;
                   allow_tearing = true;
                   resize_on_border = true;
-                  "col.active_border" = "rgb(B48EAD) rgb(89B4FA) rgb(74C7EC) 45deg";
-                  "col.inactive_border" = "rgb(313244)";
+                  "col.active_border" = "${fmt.rgb c.mauve} ${fmt.rgb c.blue} ${fmt.rgb c.sapphire} 45deg";
+                  "col.inactive_border" = fmt.rgb c.surface0;
                   hover_icon_on_border = true;
                   extend_border_grab_area = 15;
                 };
@@ -149,8 +156,8 @@
                     render_titles = true;
                     scrolling = true;
                   };
-                  "col.border_active" = "rgb(B48EAD)";
-                  "col.border_inactive" = "rgb(313244)";
+                  "col.border_active" = fmt.rgb c.mauve;
+                  "col.border_inactive" = fmt.rgb c.surface0;
                 };
 
                 dwindle = {
