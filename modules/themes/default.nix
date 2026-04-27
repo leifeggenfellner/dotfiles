@@ -4,8 +4,8 @@ let
   palette = import ./_palette.nix;
 in
 {
-  flake = {
-    homeModules.themes-palette =
+  flake.homeModules = {
+    themes-palette =
       { lib, ... }:
       {
         options.theme.colors = lib.mkOption {
@@ -14,7 +14,7 @@ in
           description = "Full Catppuccin Mocha named color palette (hex without #)";
         };
       };
-    homeModules.themes-gtk =
+    themes-gtk =
       { config, pkgs, ... }:
       {
         gtk = {
@@ -40,6 +40,6 @@ in
           gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
         };
       };
-    homeModules.themes-colors = colors;
+    themes-colors = colors;
   };
 }

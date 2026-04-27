@@ -1,8 +1,8 @@
 _: {
   flake.homeModules.scripts =
-    { pkgs, config, osConfig, lib, ... }:
+    { pkgs, config, osConfig, ... }:
     let
-      monitors = osConfig.environment.desktop.monitors;
+      inherit (osConfig.environment.desktop) monitors;
       lockPriority =
         let
           prio = osConfig.environment.desktop.lockMonitorPriority;
