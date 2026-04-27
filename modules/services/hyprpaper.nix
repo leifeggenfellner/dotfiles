@@ -1,8 +1,8 @@
 { inputs, ... }: {
   flake.homeModules.services-hyprpaper =
-    { lib, pkgs, config, osConfig, ... }:
+    { lib, pkgs, osConfig, ... }:
     let
-      wallpaper = osConfig.environment.desktop.theme.wallpaper;
+      inherit (osConfig.environment.desktop.theme) wallpaper;
     in
     {
       services.hyprpaper = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
