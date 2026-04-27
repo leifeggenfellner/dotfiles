@@ -2,7 +2,7 @@
   flake.homeModules.services-hyprpaper =
     { lib, pkgs, config, osConfig, ... }:
     let
-      wallpaper = "${config.home.homeDirectory}/Sources/walls-catppuccin-mocha/flower-branch.png";
+      wallpaper = osConfig.environment.desktop.theme.wallpaper;
     in
     {
       services.hyprpaper = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
