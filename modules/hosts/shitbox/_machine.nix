@@ -60,6 +60,15 @@
   environment.desktop = {
     enable = true;
     windowManager = "hyprland";
+
+    monitors = {
+      laptop = { desc = "LG Display 0x0791"; name = "eDP-1"; resolution = "1920x1200@60"; };
+      work = { desc = "HP Inc. HP 527pu 1H35421YT0"; resolution = "2560x1440@60"; };
+      workRight = { desc = "HP Inc. HP 527pu 1H35421YRD"; resolution = "2560x1440@60"; };
+      home = { desc = "Samsung Electric Company C34J79x HTRM900265"; resolution = "3440x1440@60"; };
+    };
+
+    lockMonitorPriority = [ "work" "home" "laptop" ];
   };
 
   programs.hyprland = {

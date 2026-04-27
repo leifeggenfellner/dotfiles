@@ -1,6 +1,9 @@
-{ lib, ... }:
+{ lib, osConfig, ... }:
+let
+  monitors = osConfig.environment.desktop.monitors;
+in
 {
-  program.hyprlock.defaultMonitor = "desc:HP Inc. HP E45c G5 CNC50212K0";
+  program.hyprlock.defaultMonitor = "desc:${monitors.work.desc}";
 
   service = lib.mkMerge [
     {

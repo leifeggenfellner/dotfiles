@@ -1,13 +1,30 @@
 _: {
   flake.homeModules.scripts =
-    { pkgs, config, ... }:
+    { pkgs, config, osConfig, lib, ... }:
     let
+      monitors = osConfig.environment.desktop.monitors;
+      lockPriority =
+        let
+          prio = osConfig.environment.desktop.lockMonitorPriority;
+        in
+        map (key: monitors.${key}.desc) (builtins.filter (k: monitors ? ${k}) prio);
+
+      monitorDesc = key: if monitors ? ${key} then monitors.${key}.desc else "";
+
       countdown-timer = pkgs.callPackage ./_countdown-timer.nix { inherit pkgs; };
       gen-ssh-key = pkgs.callPackage ./_gen-ssh-key.nix { inherit pkgs; };
       set-monitor = pkgs.callPackage ./_set-monitor.nix { inherit pkgs; };
-      setup-monitors = pkgs.callPackage ./_setup-monitors.nix { inherit pkgs; };
+      setup-monitors = pkgs.callPackage ./_setup-monitors.nix {
+        inherit pkgs;
+        monitorHome = monitorDesc "home";
+        monitorWorkCenter = monitorDesc "work";
+        monitorWorkRight = monitorDesc "workRight";
+      };
       handle-monitor = pkgs.callPackage ./_handle-monitor.nix { inherit pkgs; };
-      lock-screen = pkgs.callPackage ./_lock-screen.nix { inherit pkgs; };
+      lock-screen = pkgs.callPackage ./_lock-screen.nix {
+        inherit pkgs;
+        monitorPriority = lockPriority;
+      };
       gum-scripts = pkgs.callPackage ./_gum-scripts.nix {
         inherit pkgs;
         inherit (config) colorScheme;
