@@ -1,6 +1,6 @@
 { lib, osConfig, ... }:
 let
-  monitors = osConfig.environment.desktop.monitors;
+  inherit (osConfig.environment.desktop) monitors;
 in
 {
   program.hyprlock.defaultMonitor = "desc:${monitors.work.desc}";
