@@ -2,45 +2,13 @@
   description = "leif Flake";
 
   outputs =
-    inputs@{ flake-parts, ... }:
+    inputs@{ flake-parts, import-tree, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
-      imports = [
-        ./hosts
-        ./pkgs
-      ];
-      perSystem =
-        { pkgs, system, ... }:
-        let
-          pre-commit-lib = inputs.pre-commit-hooks-nix.lib.${system};
-        in
-        {
-          devShells.default = pkgs.mkShell {
-            name = "leif-dev-shell";
-            inputsFrom = [ ];
-            nativeBuildInputs = with pkgs; [
-              nixpkgs-fmt
-            ];
-          };
-
-          formatter = pkgs.nixpkgs-fmt;
-          checks = {
-            pre-commit-check = pre-commit-lib.run {
-              src = ./.;
-              hooks = {
-                statix.enable = true;
-                deadnix.enable = true;
-                nil.enable = true;
-                nixpkgs-fmt.enable = true;
-                shellcheck.enable = true;
-                beautysh.enable = true;
-              };
-            };
-          };
-        };
+      imports = [ (import-tree ./modules) ];
     };
 
   inputs = {
@@ -50,6 +18,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-parts.url = "github:hercules-ci/flake-parts";
+    import-tree.url = "github:vic/import-tree";
     hardware.url = "github:nixos/nixos-hardware";
     hyprland.url = "github:hyprwm/hyprland";
     hypridle = {

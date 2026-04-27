@@ -1,10 +1,10 @@
+_:
 let
-  colors = import ./colors.nix;
-  themes =
-    { config
-    , pkgs
-    , ...
-    }:
+  colors = import ./_colors.nix;
+in
+{
+  flake.homeModules.themes-gtk =
+    { config, pkgs, ... }:
     {
       gtk = {
         enable = true;
@@ -29,8 +29,6 @@ let
         gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
       };
     };
-in
-[
-  themes
-  colors
-]
+
+  flake.homeModules.themes-colors = colors;
+}
