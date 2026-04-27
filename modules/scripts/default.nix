@@ -1,13 +1,14 @@
-let
-  scripts = { pkgs, config, ... }:
+_: {
+  flake.homeModules.scripts =
+    { pkgs, config, ... }:
     let
-      countdown-timer = pkgs.callPackage ./countdown-timer.nix { inherit pkgs; };
-      gen-ssh-key = pkgs.callPackage ./gen-ssh-key.nix { inherit pkgs; };
-      set-monitor = pkgs.callPackage ./set-monitor.nix { inherit pkgs; };
-      setup-monitors = pkgs.callPackage ./setup-monitors.nix { inherit pkgs; };
-      handle-monitor = pkgs.callPackage ./handle-monitor.nix { inherit pkgs; };
-      lock-screen = pkgs.callPackage ./lock-screen.nix { inherit pkgs; };
-      gum-scripts = pkgs.callPackage ./gum-scripts.nix {
+      countdown-timer = pkgs.callPackage ./_countdown-timer.nix { inherit pkgs; };
+      gen-ssh-key = pkgs.callPackage ./_gen-ssh-key.nix { inherit pkgs; };
+      set-monitor = pkgs.callPackage ./_set-monitor.nix { inherit pkgs; };
+      setup-monitors = pkgs.callPackage ./_setup-monitors.nix { inherit pkgs; };
+      handle-monitor = pkgs.callPackage ./_handle-monitor.nix { inherit pkgs; };
+      lock-screen = pkgs.callPackage ./_lock-screen.nix { inherit pkgs; };
+      gum-scripts = pkgs.callPackage ./_gum-scripts.nix {
         inherit pkgs;
         inherit (config) colorScheme;
       };
@@ -15,22 +16,20 @@ let
     {
       home.packages =
         [
-          countdown-timer # countdown timer with figlet
-          gen-ssh-key # generate ssh key and add it to the system
-          set-monitor # set monitor resolution
-          setup-monitors # setup monitors based on connected displays
-          handle-monitor # handle monitor resolution
-          lock-screen # dynamic hyprlock wrapper
+          countdown-timer
+          gen-ssh-key
+          set-monitor
+          setup-monitors
+          handle-monitor
+          lock-screen
 
-          # Gum scripts
-          gum-scripts.system-cleanup # system cleanup with gum
-          gum-scripts.project-launcher # project launcher with gum
-          gum-scripts.gswitch # git branch switcher with gum
-          gum-scripts.cm # git commit helper with gum
-          gum-scripts.gadd # git add helper with gum
-          gum-scripts.glog # git log viewer with gum
+          gum-scripts.system-cleanup
+          gum-scripts.project-launcher
+          gum-scripts.gswitch
+          gum-scripts.cm
+          gum-scripts.gadd
+          gum-scripts.glog
         ]
         ++ (pkgs.sxm.scripts or [ ]);
     };
-in
-[ scripts ]
+}

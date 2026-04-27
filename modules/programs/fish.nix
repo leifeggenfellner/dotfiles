@@ -1,70 +1,167 @@
-{ pkgs, ... }:
-let
-  fenv = {
-    inherit (pkgs.fishPlugins.foreign-env) src;
-    name = "foreign-env";
-  };
-in
-{
-  home = {
-    packages = with pkgs; [
-      any-nix-shell
-      dive
-      duf
-      eza
-      fd
-      git
-      jump
-      ncdu
-      nitch
-    ];
+_: {
+  # NixOS side: full fish system config (vendor, aliases, prompt, init scripts).
+  flake.nixosModules.programs-fish =
+    { pkgs, lib, ... }:
+    let
+      fzfConfig = ''
+        set -x FZF_DEFAULT_OPTS "--preview='bat {} --color=always'" \n
+        set -x SKIM_DEFAULT_COMMAND "rg --files || fd || find ."
+      '';
 
-    persistence."/persist/" = {
-      directories = [
-        ".local/share/fish"
-        ".jump"
-      ];
+      themeConfig = ''
+        set -g theme_display_date no
+        set -g theme_display_git_master_branch no
+        set -g theme_nerd_fonts yes
+        set -g theme_newline_cursor yes
+        set -g theme_color_scheme solarized
+      '';
+
+      fishConfig =
+        ''
+          set fish_greeting
+        ''
+        + fzfConfig
+        + themeConfig;
+
+      dc = "${pkgs.docker-compose}/bin/docker-compose";
+    in
+    {
+      programs.fish = {
+        enable = true;
+        vendor = {
+          completions.enable = true;
+          config.enable = true;
+          functions.enable = true;
+        };
+        interactiveShellInit = ''
+          eval (direnv hook fish)
+          jump shell fish | source
+          any-nix-shell fish --info-right | source
+        '';
+        shellAliases = {
+          inherit dc;
+
+          # Tool replacements
+          cat = "bat";
+          du = "${pkgs.ncdu}/bin/ncdu --color dark -rr -x";
+          ls = "${pkgs.eza}/bin/eza";
+          la = "${lib.getExe pkgs.eza} --long --all --group --header --group-directories-first --sort=type --icons";
+          lg = "${lib.getExe pkgs.eza} --long --all --group --header --git";
+          lt = "${lib.getExe pkgs.eza} --long --all --group --header --tree --level ";
+          ping = "${pkgs.prettyping}/bin/prettyping";
+          tree = "${pkgs.eza}/bin/eza -T";
+          xdg-open = "${pkgs.mimeo}/bin/mimeo";
+
+          # Navigation
+          ".." = "cd ..";
+
+          # Git alias
+          gcm = "git checkout master";
+          gs = "git status";
+          ga = "git add";
+          gaa = "git add -A";
+          gm = "git commit -m";
+          gp = "git push";
+          gc = "git checkout";
+
+          # Maven alias
+          mvncp = "mvn clean package";
+          mvnci = "mvn clean install";
+
+          # Docker
+          dps = "${dc} ps";
+          dcd = "${dc} down --remove-orphans";
+          drm = "docker images -a -q | xargs docker rmi -f";
+
+          # Nix
+          nixgc = "nix-collect-garbage";
+          nixgcd = "sudo nix-collect-garbage -d";
+          update = "nix flake update";
+          supdate = "sudo nix flake update";
+          upgrade = "sudo nixos-rebuild switch --flake";
+
+          # Locations
+          dot = "cd ~/Sources/dotfiles";
+          doc = "cd ~/Documents";
+          work = "cd ~/Projects/workspace";
+          tod = "cd ~/Projects/workspace/worksetup";
+          be = "cd ~/Projects/workspace/nmkp/";
+          fe = "cd ~/Projects/workspace/nmkp/modules/nmkp-app-core/";
+        };
+        shellInit = fishConfig;
+      };
     };
-  };
 
-  programs.fish = {
-    enable = true;
-    plugins = [ fenv ];
+  # home-manager side: per-user plugins, useful packages, persistence.
+  flake.homeModules.programs-fish =
+    { pkgs, ... }:
+    let
+      fenv = {
+        inherit (pkgs.fishPlugins.foreign-env) src;
+        name = "foreign-env";
+      };
+    in
+    {
+      home = {
+        packages = with pkgs; [
+          any-nix-shell
+          dive
+          duf
+          eza
+          fd
+          git
+          jump
+          ncdu
+          nitch
+        ];
 
-    interactiveShellInit = ''
-      set -p fish_complete_path ${pkgs.fish}/share/fish/completions
-      set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions.d
-    '';
-
-    functions = {
-      undo = {
-        wraps = "git reset";
-        body = ''
-          git reset HEAD~1 --mixed
-        '';
+        persistence."/persist/" = {
+          directories = [
+            ".local/share/fish"
+            ".jump"
+          ];
+        };
       };
 
-      res = {
-        wraps = "git reset --hard";
-        body = ''
-          git reset --hard
-        '';
-      };
+      programs.fish = {
+        enable = true;
+        plugins = [ fenv ];
 
-      fixup = {
-        wraps = "git commit --amend";
-        body = ''
-          git reset --soft HEAD~$argv[1]
-          git commit --amend -C HEAD
+        interactiveShellInit = ''
+          set -p fish_complete_path ${pkgs.fish}/share/fish/completions
+          set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions.d
         '';
-      };
 
-      loc = {
-        wraps = "git ls-files";
-        body = ''
-          git ls-files | ${pkgs.ripgrep}/bin/rg "$argv[1]" | xargs wc -l
-        '';
+        functions = {
+          undo = {
+            wraps = "git reset";
+            body = ''
+              git reset HEAD~1 --mixed
+            '';
+          };
+
+          res = {
+            wraps = "git reset --hard";
+            body = ''
+              git reset --hard
+            '';
+          };
+
+          fixup = {
+            wraps = "git commit --amend";
+            body = ''
+              git reset --soft HEAD~$argv[1]
+              git commit --amend -C HEAD
+            '';
+          };
+
+          loc = {
+            wraps = "git ls-files";
+            body = ''
+              git ls-files | ${pkgs.ripgrep}/bin/rg "$argv[1]" | xargs wc -l
+            '';
+          };
+        };
       };
     };
-  };
 }
