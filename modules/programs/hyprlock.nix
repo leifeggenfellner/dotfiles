@@ -7,7 +7,9 @@
     , ...
     }:
     let
-      wallpaper = "${config.home.homeDirectory}/Sources/walls-catppuccin-mocha/flower-branch.png";
+      wallpaper = osConfig.environment.desktop.theme.wallpaper;
+      c = config.theme.colors;
+      fmt = import ../themes/_fmt.nix lib;
 
       # Monitor definitions - match setup-monitors.nix
       workMonitor = "desc:HP Inc. HP 527pu 1H35421YT0"; # Work center
@@ -18,7 +20,7 @@
       mkTimeLabel = monitor: fontSize: yOffset: {
         inherit monitor;
         text = "cmd[update:1000] TZ='Europe/Oslo' echo \"<span>$(date +\"%H:%M\")</span>\"";
-        color = "rgba(203, 166, 247, 1.0)"; # Mauve
+        color = fmt.rgba c.mauve "1.0";
         font_size = fontSize;
         font_family = "RobotoMono Nerd Font";
         position = "0, -${toString yOffset}";
@@ -29,7 +31,7 @@
       mkDateLabel = monitor: fontSize: yOffset: {
         inherit monitor;
         text = "cmd[update:1000] TZ='Europe/Oslo' LC_TIME=nb_NO.UTF-8 echo -e \"$(date +\"%A, %d. %B\")\"";
-        color = "rgba(180, 190, 254, 0.9)"; # Lavender
+        color = fmt.rgba c.lavender "0.9";
         font_size = fontSize;
         font_family = "RobotoMono Nerd Font";
         position = "0, -${toString yOffset}";
@@ -40,7 +42,7 @@
       mkGreetingLabel = monitor: fontSize: yOffset: {
         inherit monitor;
         text = "When the issue is labeled \"Bra for nybegynnere\" ༼ ༎ຶ ᆺ ༎ຶ༽";
-        color = "rgba(186, 194, 222, 0.8)"; # Subtext1
+        color = fmt.rgba c.subtext1 "0.8";
         font_size = fontSize;
         font_family = "RobotoMono Nerd Font";
         position = "0, -${toString yOffset}";
@@ -49,11 +51,11 @@
       };
 
       statusColors = {
-        check_color = "rgba(166, 227, 161, 1.0)"; # Green - correct password
-        fail_color = "rgba(243, 139, 168, 1.0)"; # Red - wrong password
-        bothlock_color = "rgba(249, 226, 175, 1.0)"; # Yellow - caps lock warning
-        capslock_color = "rgba(250, 179, 135, 1.0)"; # Peach - caps lock on
-        numlock_color = "rgba(137, 220, 235, 1.0)"; # Sky - num lock
+        check_color = fmt.rgba c.green "1.0";
+        fail_color = fmt.rgba c.red "1.0";
+        bothlock_color = fmt.rgba c.yellow "1.0";
+        capslock_color = fmt.rgba c.peach "1.0";
+        numlock_color = fmt.rgba c.sky "1.0";
       };
 
       mkInputField = monitor: extraAttrs: {
@@ -63,9 +65,9 @@
         dots_size = 0.16;
         dots_spacing = 0.3;
         dots_center = true;
-        outer_color = "rgba(203, 166, 247, 0.8)"; # Mauve border
-        inner_color = "rgba(49, 50, 68, 0.8)"; # Surface0 background
-        font_color = "rgba(205, 214, 244, 1.0)"; # Text color
+        outer_color = fmt.rgba c.mauve "0.8";
+        inner_color = fmt.rgba c.surface0 "0.8";
+        font_color = fmt.rgba c.text "1.0";
         fade_on_empty = false;
         placeholder_text = "hunter2";
         hide_input = false;

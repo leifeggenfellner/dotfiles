@@ -1,8 +1,18 @@
 _:
 let
   colors = import ./_colors.nix;
+  palette = import ./_palette.nix;
 in
 {
+  flake.homeModules.themes-palette =
+    { lib, ... }:
+    {
+      options.theme.colors = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = palette;
+        description = "Full Catppuccin Mocha named color palette (hex without #)";
+      };
+    };
   flake.homeModules.themes-gtk =
     { config, pkgs, ... }:
     {

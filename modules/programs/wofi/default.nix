@@ -13,18 +13,9 @@ _: {
         cursor = "Numix-Cursor";
       };
 
-      # Extract colors for better readability
-      colors = config.colorScheme.palette;
-
-      # Calculate RGB values for alpha background
-      backgroundRgb =
-        let
-          hex = colors.base00;
-          r = toString (lib.trivial.fromHexString (builtins.substring 0 2 hex));
-          g = toString (lib.trivial.fromHexString (builtins.substring 2 2 hex));
-          b = toString (lib.trivial.fromHexString (builtins.substring 4 2 hex));
-        in
-        "${r}, ${g}, ${b}";
+      # Named palette + format helpers
+      c = config.theme.colors;
+      fmt = import ../../themes/_fmt.nix lib;
     in
     {
       programs.wofi = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
@@ -65,15 +56,15 @@ _: {
             font-family: ${commonSettings.font}, monospace;
             font-size: ${commonSettings.fontsize}px;
             font-weight: bold;
-            color: #${colors.base05};
+            color: ${fmt.hex c.text};
             outline: none;
             box-sizing: border-box;
           }
 
           /* Main window */
           #window {
-            background-color: rgba(${backgroundRgb}, 0.9);
-            border: 2px solid #${colors.base0E};
+            background-color: ${fmt.rgba c.base "0.9"};
+            border: 2px solid ${fmt.hex c.mauve};
             border-radius: 18px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             overflow: hidden;
@@ -84,15 +75,15 @@ _: {
             margin: 12px;
             padding: 10px 16px;
             border-radius: 12px;
-            background-color: #${colors.base01};
-            color: #${colors.base07};
-            border: 1px solid #${colors.base02};
+            background-color: ${fmt.hex c.mantle};
+            color: ${fmt.hex c.lavender};
+            border: 1px solid ${fmt.hex c.surface0};
             transition: border-color 0.2s ease;
           }
 
           #input:focus {
-            border-color: #${colors.base0E};
-            box-shadow: 0 0 0 1px rgba(203, 166, 247, 0.3);
+            border-color: ${fmt.hex c.mauve};
+            box-shadow: 0 0 0 1px ${fmt.rgba c.mauve "0.3"};
           }
 
           #input > *:not(:last-child) {
@@ -121,12 +112,12 @@ _: {
           }
 
           #entry:hover {
-            background-color: #${colors.base02};
-            color: #${colors.base06};
+            background-color: ${fmt.hex c.surface0};
+            color: ${fmt.hex c.rosewater};
           }
 
           #entry:selected {
-            background-color: #${colors.base0E};
+            background-color: ${fmt.hex c.mauve};
           }
 
           /* Icons and text */
@@ -146,7 +137,7 @@ _: {
           }
 
           #text:selected {
-            color: #${colors.base00};
+            color: ${fmt.hex c.base};
           }
         '';
       };
