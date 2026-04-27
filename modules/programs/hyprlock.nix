@@ -7,7 +7,7 @@
     , ...
     }:
     let
-      wallpaper = osConfig.environment.desktop.theme.wallpaper;
+      inherit (osConfig.environment.desktop.theme) wallpaper;
       c = config.theme.colors;
       fmt = import ../themes/_fmt.nix lib;
 
