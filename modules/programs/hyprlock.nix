@@ -9,8 +9,10 @@
     let
       inherit (osConfig.environment.desktop.theme) wallpaper;
       c = config.theme.colors;
+      s = config.theme.style;
       fmt = import ../themes/_fmt.nix lib;
       cfg = config.program.hyprlock;
+      accent = c.${s.accentPrimary};
 
       statusColors = {
         check_color = fmt.rgba c.green "1.0";
@@ -62,51 +64,56 @@
               ({
                 monitor = cfg.defaultMonitor;
                 size = "280, 50";
-                outline_thickness = 2;
+                outline_thickness = s.borderWidth;
                 dots_size = 0.16;
                 dots_spacing = 0.3;
                 dots_center = true;
-                outer_color = fmt.rgba c.mauve "0.8";
-                inner_color = fmt.rgba c.surface0 "0.8";
+                outer_color = fmt.rgba accent "${toString s.opacityLockscreen}";
+                inner_color = fmt.rgba c.surface0 "${toString s.opacityLockscreen}";
                 font_color = fmt.rgba c.text "1.0";
                 fade_on_empty = false;
                 placeholder_text = "hunter2";
                 hide_input = false;
-                position = "0, 80";
+                rounding = s.roundingSmall;
+                position = "0, 40";
                 halign = "center";
                 valign = "bottom";
               } // statusColors)
             ];
 
             label = [
+              # ── Clock (hero element, center-top) ──
               {
                 monitor = cfg.defaultMonitor;
-                color = fmt.rgba c.mauve "1.0";
-                font_size = 120;
-                font_family = "RobotoMono Nerd Font";
-                position = "0, -80";
+                text = "$TIME";
+                color = fmt.rgba accent "1.0";
+                font_size = s.fontSizeLockTime;
+                font_family = s.fontMono;
+                position = "0, 120";
                 halign = "center";
-                valign = "top";
+                valign = "center";
               }
+              # ── Date (below clock) ──
               {
                 monitor = cfg.defaultMonitor;
-                text = "cmd[update:1000] TZ='Europe/Oslo' LC_TIME=nb_NO.UTF-8 echo -e \"$(date +\"%A, %d. %B\")\"";
+                text = "cmd[update:60000] TZ='Europe/Oslo' LC_TIME=nb_NO.UTF-8 date +\"%A, %d. %B\"";
                 color = fmt.rgba c.lavender "0.9";
-                font_size = 28;
-                font_family = "RobotoMono Nerd Font";
-                position = "0, -260";
+                font_size = s.fontSizeLockDate;
+                font_family = s.fontMono;
+                position = "0, 20";
                 halign = "center";
-                valign = "top";
+                valign = "center";
               }
+              # ── Greeting (subtle, above input) ──
               {
                 monitor = cfg.defaultMonitor;
                 text = "When the issue is labeled \"Bra for nybegynnere\" ༼ ༎ຶ ᆺ ༎ຶ༽";
-                color = fmt.rgba c.subtext1 "0.8";
-                font_size = 20;
-                font_family = "RobotoMono Nerd Font";
-                position = "0, -320";
+                color = fmt.rgba c.subtext1 "0.5";
+                font_size = s.fontSizeLockQuote;
+                font_family = s.fontMono;
+                position = "0, -60";
                 halign = "center";
-                valign = "top";
+                valign = "center";
               }
             ];
           };

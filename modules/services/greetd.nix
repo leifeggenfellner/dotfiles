@@ -34,8 +34,9 @@ _: {
 
           greetd =
             let
+              uwsm = lib.getExe config.programs.uwsm.package;
               session = {
-                command = "${lib.getExe config.programs.uwsm.package} start -e -D Hyprland hyprland-uwsm.desktop";
+                command = "${uwsm} stop 2>/dev/null; ${uwsm} start -e -D Hyprland hyprland-uwsm.desktop";
                 user = "leif";
               };
             in

@@ -7,11 +7,7 @@ _: {
     , ...
     }:
     let
-      commonSettings = {
-        font = "RobotoMono Nerd Font";
-        fontsize = "12";
-        cursor = "Numix-Cursor";
-      };
+      s = config.theme.style;
 
       # Named palette + format helpers
       c = config.theme.colors;
@@ -53,8 +49,8 @@ _: {
             border: none;
             margin: 0;
             padding: 0;
-            font-family: ${commonSettings.font}, monospace;
-            font-size: ${commonSettings.fontsize}px;
+            font-family: ${s.fontMono}, monospace;
+            font-size: ${toString s.fontSizeNormal}px;
             font-weight: bold;
             color: ${fmt.hex c.text};
             outline: none;
@@ -63,9 +59,9 @@ _: {
 
           /* Main window */
           #window {
-            background-color: ${fmt.rgba c.base "0.9"};
-            border: 2px solid ${fmt.hex c.mauve};
-            border-radius: 18px;
+            background-color: ${fmt.rgba c.base (toString s.opacityPopups)};
+            border: ${toString s.borderWidth}px solid ${fmt.hex c.mauve};
+            border-radius: ${toString s.rounding}px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             overflow: hidden;
           }
@@ -74,7 +70,7 @@ _: {
           #input {
             margin: 12px;
             padding: 10px 16px;
-            border-radius: 12px;
+            border-radius: ${toString s.roundingSmall}px;
             background-color: ${fmt.hex c.mantle};
             color: ${fmt.hex c.lavender};
             border: 1px solid ${fmt.hex c.surface0};
@@ -106,7 +102,7 @@ _: {
           #entry {
             margin: 2px 12px;
             padding: 6px 10px;
-            border-radius: 6px;
+            border-radius: ${toString (s.roundingSmall - 6)}px;
             min-height: 32px;
             transition: background-color 0.12s ease;
           }

@@ -4,7 +4,7 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
   set -euo pipefail
 
   BOLTCTL=${pkgs.bolt}/bin/boltctl
-  MAX_WAIT=15
+  MAX_WAIT=30
   POLL_INTERVAL=1
 
   echo "=== Thunderbolt dock scan ==="
@@ -63,6 +63,8 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
     monitor_count=$(hyprctl monitors -j 2>/dev/null | ${pkgs.jq}/bin/jq 'length' 2>/dev/null || echo "0")
     if [ "$monitor_count" -gt 1 ]; then
       echo "Detected $monitor_count monitors — dock displays are online"
+      # Wake monitors that may have gone to DPMS sleep during boot
+      hyprctl dispatch dpms on 2>/dev/null || true
       exit 0
     fi
     sleep "$POLL_INTERVAL"
@@ -70,7 +72,12 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
 
     # Re-authorize on each poll in case devices appeared late
     authorize_sysfs
+
+    # Poke DPMS periodically to wake any sleeping monitors
+    hyprctl dispatch dpms on 2>/dev/null || true
   done
 
+  # Final DPMS wake even on timeout — monitors may have appeared but gone to sleep
+  hyprctl dispatch dpms on 2>/dev/null || true
   echo "Timeout after ''${MAX_WAIT}s — only laptop display found, proceeding anyway"
 ''

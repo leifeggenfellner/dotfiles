@@ -8,6 +8,9 @@ _: {
     }:
     let
       cfg = config.program.alacritty;
+      c = config.theme.colors;
+      s = config.theme.style;
+      fmt = import ../themes/_fmt.nix lib;
     in
     {
       options.program.alacritty = {
@@ -15,11 +18,6 @@ _: {
           type = lib.types.bool;
           default = false;
           description = "Enable alacritty terminal";
-        };
-        fontSize = lib.mkOption {
-          type = lib.types.int;
-          default = 10;
-          description = "Font size for alacritty";
         };
       };
 
@@ -30,94 +28,94 @@ _: {
             bell = {
               animation = "EaseOutExpo";
               duration = 5;
-              color = "#ffffff";
+              color = fmt.hex c.text;
             };
             colors = {
               primary = {
-                background = "#${config.colorScheme.palette.base00}";
-                foreground = "#${config.colorScheme.palette.base05}";
+                background = fmt.hex c.base;
+                foreground = fmt.hex c.text;
               };
               cursor = {
-                text = "#${config.colorScheme.palette.base06}";
-                cursor = "#${config.colorScheme.palette.base05}";
+                text = fmt.hex c.rosewater;
+                cursor = fmt.hex c.text;
               };
               vi_mode_cursor = {
-                text = "#${config.colorScheme.palette.base06}";
-                cursor = "#${config.colorScheme.palette.base0C}";
+                text = fmt.hex c.rosewater;
+                cursor = fmt.hex c.teal;
               };
               search = {
                 matches = {
-                  foreground = "#${config.colorScheme.palette.base06}";
-                  background = "#${config.colorScheme.palette.base03}";
+                  foreground = fmt.hex c.rosewater;
+                  background = fmt.hex c.surface1;
                 };
                 focused_match = {
-                  foreground = "#${config.colorScheme.palette.base06}";
-                  background = "#${config.colorScheme.palette.base0B}";
+                  foreground = fmt.hex c.rosewater;
+                  background = fmt.hex c.green;
                 };
               };
               footer_bar = {
-                foreground = "#${config.colorScheme.palette.base06}";
-                background = "#${config.colorScheme.palette.base01}";
+                foreground = fmt.hex c.rosewater;
+                background = fmt.hex c.mantle;
               };
               hints = {
                 start = {
-                  foreground = "#${config.colorScheme.palette.base06}";
-                  background = "#${config.colorScheme.palette.base09}";
+                  foreground = fmt.hex c.rosewater;
+                  background = fmt.hex c.peach;
                 };
                 end = {
-                  foreground = "#${config.colorScheme.palette.base06}";
-                  background = "#${config.colorScheme.palette.base01}";
+                  foreground = fmt.hex c.rosewater;
+                  background = fmt.hex c.mantle;
                 };
               };
               normal = {
-                black = "#${config.colorScheme.palette.base00}";
-                red = "#${config.colorScheme.palette.base08}";
-                green = "#${config.colorScheme.palette.base0B}";
-                yellow = "#${config.colorScheme.palette.base0A}";
-                blue = "#${config.colorScheme.palette.base0D}";
-                magenta = "#${config.colorScheme.palette.base0E}";
-                cyan = "#${config.colorScheme.palette.base0C}";
-                white = "#${config.colorScheme.palette.base05}";
+                black = fmt.hex c.base;
+                red = fmt.hex c.red;
+                green = fmt.hex c.green;
+                yellow = fmt.hex c.yellow;
+                blue = fmt.hex c.blue;
+                magenta = fmt.hex c.mauve;
+                cyan = fmt.hex c.teal;
+                white = fmt.hex c.text;
               };
               bright = {
-                black = "#${config.colorScheme.palette.base01}";
-                red = "#${config.colorScheme.palette.base08}";
-                green = "#${config.colorScheme.palette.base0B}";
-                yellow = "#${config.colorScheme.palette.base0A}";
-                blue = "#${config.colorScheme.palette.base0D}";
-                magenta = "#${config.colorScheme.palette.base0E}";
-                cyan = "#${config.colorScheme.palette.base0C}";
-                white = "#${config.colorScheme.palette.base07}";
+                black = fmt.hex c.mantle;
+                red = fmt.hex c.red;
+                green = fmt.hex c.green;
+                yellow = fmt.hex c.yellow;
+                blue = fmt.hex c.blue;
+                magenta = fmt.hex c.mauve;
+                cyan = fmt.hex c.teal;
+                white = fmt.hex c.lavender;
               };
               dim = {
-                black = "#${config.colorScheme.palette.base02}";
-                red = "#${config.colorScheme.palette.base08}";
-                green = "#${config.colorScheme.palette.base0B}";
-                yellow = "#${config.colorScheme.palette.base0A}";
-                blue = "#${config.colorScheme.palette.base0D}";
-                magenta = "#${config.colorScheme.palette.base0E}";
-                cyan = "#${config.colorScheme.palette.base0C}";
-                white = "#${config.colorScheme.palette.base04}";
+                black = fmt.hex c.surface0;
+                red = fmt.hex c.red;
+                green = fmt.hex c.green;
+                yellow = fmt.hex c.yellow;
+                blue = fmt.hex c.blue;
+                magenta = fmt.hex c.mauve;
+                cyan = fmt.hex c.teal;
+                white = fmt.hex c.surface2;
               };
             };
             font = {
               normal = {
-                family = "FiraCode";
+                family = s.fontMono;
                 style = "Medium";
               };
               bold = {
-                family = "FiraCode";
+                family = s.fontMono;
                 style = "Bold";
               };
               italic = {
-                family = "JetBrainsMono Nerd Font";
+                family = s.fontMono;
                 style = "Italic";
               };
               bold_italic = {
-                family = "JetBrainsMonoNL Nerd Font";
+                family = s.fontMono;
                 style = "Bold Italic";
               };
-              size = cfg.fontSize;
+              size = s.fontSizeSmall;
             };
             hints.enabled = [
               {
@@ -135,7 +133,7 @@ _: {
                 lines = 37;
               };
               decorations = "none";
-              opacity = 0.91;
+              opacity = s.opacityTerminal;
               padding = {
                 x = 5;
                 y = 5;

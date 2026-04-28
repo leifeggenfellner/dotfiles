@@ -37,5 +37,14 @@ pkgs.writeShellScriptBin "lock-screen" ''
   $SED -E "s|(monitor = ).+|\1$TARGET|" \
     "$HYPRLOCK_CONF" > "$DYNAMIC_CONF"
 
+  # Sync wallpaper: if a persisted wallpaper exists, override the static one
+  PERSIST_WP="$HOME/.config/wallpaper/current"
+  if [ -f "$PERSIST_WP" ]; then
+    LIVE_WP=$(cat "$PERSIST_WP")
+    if [ -f "$LIVE_WP" ]; then
+      $SED -i -E "s|^(    path = ).+|\1$LIVE_WP|" "$DYNAMIC_CONF"
+    fi
+  fi
+
   exec hyprlock --config "$DYNAMIC_CONF"
 ''

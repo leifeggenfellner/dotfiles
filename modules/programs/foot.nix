@@ -7,7 +7,8 @@ _: {
     , ...
     }:
     let
-      inherit (config.colorScheme) palette;
+      c = config.theme.colors;
+      s = config.theme.style;
       cfg = config.program.foot;
     in
     {
@@ -18,18 +19,13 @@ _: {
           default = true;
           description = "Enable foot terminal";
         };
-        fontSize = lib.mkOption {
-          type = lib.types.int;
-          default = 10;
-          description = "Font size for foot";
-        };
       };
       config = lib.mkIf (cfg.enable && osConfig.environment.desktop.windowManager == "hyprland") {
         programs.foot = {
           enable = true;
           settings = {
             main = {
-              font = "RobotoMono Nerd Font:size=${toString cfg.fontSize}";
+              font = "${s.fontMono}:size=${toString s.fontSizeSmall}";
               horizontal-letter-offset = 0;
               vertical-letter-offset = 0;
               pad = "5x5 center";
@@ -62,25 +58,25 @@ _: {
             };
 
             colors-dark = {
-              alpha = 0.91;
-              foreground = "${palette.base05}";
-              background = "${palette.base00}";
-              regular0 = "${palette.base00}"; # black
-              regular1 = "${palette.base08}"; # red
-              regular2 = "${palette.base0B}"; # green
-              regular3 = "${palette.base0A}"; # yellow
-              regular4 = "${palette.base0D}"; # blue
-              regular5 = "${palette.base0E}"; # magenta
-              regular6 = "${palette.base0C}"; # cyan
-              regular7 = "${palette.base05}"; # white
-              bright0 = "${palette.base03}"; # bright black
-              bright1 = "${palette.base08}"; # bright red
-              bright2 = "${palette.base0B}"; # bright green
-              bright3 = "${palette.base0A}"; # bright yellow
-              bright4 = "${palette.base0D}"; # bright blue
-              bright5 = "${palette.base0E}"; # bright magenta
-              bright6 = "${palette.base0C}"; # bright cyan
-              bright7 = "${palette.base07}"; # bright white
+              alpha = s.opacityTerminal;
+              foreground = c.text;
+              background = c.base;
+              regular0 = c.base; # black
+              regular1 = c.red; # red
+              regular2 = c.green; # green
+              regular3 = c.yellow; # yellow
+              regular4 = c.blue; # blue
+              regular5 = c.mauve; # magenta
+              regular6 = c.teal; # cyan
+              regular7 = c.text; # white
+              bright0 = c.surface1; # bright black
+              bright1 = c.red; # bright red
+              bright2 = c.green; # bright green
+              bright3 = c.yellow; # bright yellow
+              bright4 = c.blue; # bright blue
+              bright5 = c.mauve; # bright magenta
+              bright6 = c.teal; # bright cyan
+              bright7 = c.lavender; # bright white
             };
           };
         };

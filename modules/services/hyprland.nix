@@ -5,6 +5,10 @@
     let
       c = import ../themes/_palette.nix config.environment.desktop.theme.scheme;
       fmt = import ../themes/_fmt.nix lib;
+      s = config.environment.desktop.theme.style;
+      accent1 = c.${s.accentPrimary};
+      accent2 = c.${s.accentSecondary};
+      accent3 = c.${s.accentTertiary};
     in
     {
       imports = [
@@ -49,12 +53,12 @@
                 env = [
                   "GRIMBLAST_NO_CURSOR,0"
                   "HYPRCURSOR_THEME,${pkgs.capitaine-cursors}"
-                  "HYPRCURSOR_SIZE,16"
+                  "HYPRCURSOR_SIZE,${toString s.cursorSize}"
                   "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
                 ];
                 exec-once = [
-                  "awww-daemon && waypaper --restore"
-                  "hyprctl setcursor capitaine-cursors-white 16"
+                  "wallpaper-restore"
+                  "hyprctl setcursor ${s.cursorName} ${toString s.cursorSize}"
                   "wl-clip-persist --clipboard both &"
                   "wl-paste --watch cliphist store &"
                   "uwsm finalize"
@@ -63,12 +67,12 @@
                 ];
 
                 general = {
-                  gaps_in = 7;
-                  gaps_out = 7;
-                  border_size = 2;
+                  gaps_in = s.gapsInner;
+                  gaps_out = s.gapsOuter;
+                  border_size = s.borderWidth;
                   allow_tearing = true;
                   resize_on_border = true;
-                  "col.active_border" = "${fmt.rgb c.mauve} ${fmt.rgb c.blue} ${fmt.rgb c.sapphire} 45deg";
+                  "col.active_border" = "${fmt.rgb accent1} ${fmt.rgb accent2} ${fmt.rgb accent3} 45deg";
                   "col.inactive_border" = fmt.rgb c.surface0;
                   hover_icon_on_border = true;
                   extend_border_grab_area = 15;
@@ -81,22 +85,22 @@
                 };
 
                 decoration = {
-                  rounding = 16;
+                  inherit (s) rounding;
 
                   blur = {
                     enabled = true;
-                    size = 8;
-                    passes = 4;
+                    size = s.blurSize;
+                    passes = s.blurPasses;
                     new_optimizations = true;
                     ignore_opacity = true;
                     xray = false;
-                    contrast = 1.1;
-                    brightness = 1.0;
-                    noise = 0.02;
+                    contrast = s.blurContrast;
+                    brightness = s.blurBrightness;
+                    noise = s.blurNoise;
                   };
 
-                  active_opacity = 1.0;
-                  inactive_opacity = 0.95;
+                  active_opacity = s.opacityActive;
+                  inactive_opacity = s.opacityInactive;
                   fullscreen_opacity = 1.0;
                 };
 
@@ -114,26 +118,26 @@
                 animations.enabled = true;
 
                 bezier = [
-                  "wind, 0.05, 0.9, 0.1, 1.05"
-                  "winIn, 0.1, 1.1, 0.1, 1.1"
-                  "winOut, 0.3, -0.3, 0, 1"
-                  "liner, 1, 1, 1, 1"
-                  "overshot, 0.13, 0.99, 0.29, 1.1"
+                  "wind, ${s.bezierWind}"
+                  "winIn, ${s.bezierWinIn}"
+                  "winOut, ${s.bezierWinOut}"
+                  "liner, ${s.bezierLiner}"
+                  "overshot, ${s.bezierOvershot}"
                 ];
 
                 animation = [
-                  "windows, 1, 6, wind, slide"
-                  "windowsIn, 1, 6, winIn, slide"
-                  "windowsOut, 1, 5, winOut, slide"
-                  "windowsMove, 1, 5, wind, slide"
-                  "border, 1, 10, liner"
-                  "borderangle, 1, 60, liner, loop"
-                  "fade, 1, 10, default"
-                  "layers, 1, 4, wind, slide"
-                  "layersIn, 1, 4, winIn, slide"
-                  "layersOut, 1, 3, winOut, fade"
-                  "workspaces, 1, 6, overshot, slidevert"
-                  "specialWorkspace, 1, 6, default, slidevert"
+                  "windows, 1, ${toString s.speedWindowOpen}, wind, slide"
+                  "windowsIn, 1, ${toString s.speedWindowOpen}, winIn, slide"
+                  "windowsOut, 1, ${toString s.speedWindowClose}, winOut, slide"
+                  "windowsMove, 1, ${toString s.speedWindowMove}, wind, slide"
+                  "border, 1, ${toString s.speedBorder}, liner"
+                  "borderangle, 1, ${toString s.speedBorderAngle}, liner, loop"
+                  "fade, 1, ${toString s.speedFade}, default"
+                  "layers, 1, ${toString s.speedLayer}, wind, slide"
+                  "layersIn, 1, ${toString s.speedLayerIn}, winIn, slide"
+                  "layersOut, 1, ${toString s.speedLayerOut}, winOut, fade"
+                  "workspaces, 1, ${toString s.speedWorkspace}, overshot, slidevert"
+                  "specialWorkspace, 1, ${toString s.speedSpecialWorkspace}, default, slidevert"
                 ];
 
                 input = {
@@ -153,12 +157,12 @@
 
                 group = {
                   groupbar = {
-                    font_size = 10;
+                    font_size = s.fontSizeSmall;
                     gradients = true;
                     render_titles = true;
                     scrolling = true;
                   };
-                  "col.border_active" = fmt.rgb c.mauve;
+                  "col.border_active" = fmt.rgb accent1;
                   "col.border_inactive" = fmt.rgb c.surface0;
                 };
 
@@ -199,8 +203,8 @@
                   "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
                   "${mainMod} ${SECONDARY}, D, exec, ${runOnce "pcmanfm"}"
-                  "${mainMod}, W, exec, waypaper --folder ~/Pictures/wallpapers"
-                  "${mainMod} ${SECONDARY}, W, exec, theme-switcher"
+                  "${mainMod}, W, exec, ${launch "foot -T wallpaper-picker -e wallpaper-picker"}"
+                  "${mainMod} ${SECONDARY}, W, exec, ${launch "foot -T theme-switcher -e theme-switcher"}"
 
                   "${mainMod} ${SECONDARY}, L, exec, ${runOnce "lock-screen"}"
 
@@ -295,13 +299,14 @@
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(transmission-gtk)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.kde.kdeconnect-settings)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.pulseaudio.pavucontrol)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(waypaper)$"
 
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(Spotify Premium)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(Spotify)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(spotify_player)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(yazi)$"
                   "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(btop)$"
+                  "float on, size (monitor_w*0.4) (monitor_h*0.7), center on, match:title ^(theme-switcher)$"
+                  "float on, size (monitor_w*0.6) (monitor_h*0.8), center on, match:title ^(wallpaper-picker)$"
 
                   "workspace 1, match:class ^(code|Code)$"
                   "workspace 2, match:class ^(Alacritty|alacritty|foot)$"

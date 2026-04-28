@@ -43,11 +43,6 @@
         # External monitors — auto-detect
         ",preferred,auto,1"
       ];
-
-      exec-once = [
-        "setup-monitors"
-        "handle-monitor"
-      ];
     };
   };
 

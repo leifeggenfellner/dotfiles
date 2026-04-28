@@ -2,13 +2,18 @@ _: {
   flake.homeModules.programs-cava =
     { lib, config, osConfig, ... }:
     let
-      c = config.colorScheme.palette;
+      c = config.theme.colors;
+      fmt = import ../themes/_fmt.nix lib;
     in
     {
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
         programs.cava = {
           enable = true;
           settings = {
+            input = {
+              method = "pulse";
+              source = "auto";
+            };
             general = {
               framerate = 60;
               bar_width = 2;
@@ -20,12 +25,12 @@ _: {
             color = {
               gradient = 1;
               gradient_count = 6;
-              gradient_color_1 = "'#${c.base0D}'";
-              gradient_color_2 = "'#${c.base0C}'";
-              gradient_color_3 = "'#${c.base0E}'";
-              gradient_color_4 = "'#${c.base06}'";
-              gradient_color_5 = "'#${c.base08}'";
-              gradient_color_6 = "'#${c.base09}'";
+              gradient_color_1 = "'${fmt.hex c.blue}'";
+              gradient_color_2 = "'${fmt.hex c.teal}'";
+              gradient_color_3 = "'${fmt.hex c.mauve}'";
+              gradient_color_4 = "'${fmt.hex c.rosewater}'";
+              gradient_color_5 = "'${fmt.hex c.red}'";
+              gradient_color_6 = "'${fmt.hex c.peach}'";
             };
           };
         };

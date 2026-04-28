@@ -2,7 +2,8 @@ _: {
   flake.homeModules.services-swaync =
     { osConfig, config, lib, ... }:
     let
-      c = config.colorScheme.palette;
+      c = config.theme.colors;
+      s = config.theme.style;
       fmt = import ../themes/_fmt.nix lib;
     in
     {
@@ -68,9 +69,9 @@ _: {
         style = ''
           /* === Root variables === */
           * {
-            font-family: "RobotoMono Nerd Font", monospace;
-            font-size: 13px;
-            color: ${fmt.hex c.base05};
+            font-family: "${s.fontMono}", monospace;
+            font-size: ${toString s.fontSizeNotification}px;
+            color: ${fmt.hex c.text};
           }
 
           /* === Popup notification window === */
@@ -86,32 +87,32 @@ _: {
           }
 
           .notification {
-            border-radius: 16px;
-            border: 1px solid rgba(${fmt.rgbComponents c.base0D}, 0.4);
-            background: rgba(${fmt.rgbComponents c.base00}, 0.75);
-            box-shadow: 0 4px 16px rgba(${fmt.rgbComponents "${c.base01}"}, 0.5);
+            border-radius: ${toString s.rounding}px;
+            border: 1px solid rgba(${fmt.rgbComponents c.blue}, 0.4);
+            background: rgba(${fmt.rgbComponents c.base}, 0.75);
+            box-shadow: 0 4px 16px rgba(${fmt.rgbComponents c.mantle}, 0.5);
             padding: 0;
             margin: 6px 12px;
             transition: all 200ms ease-in-out;
           }
 
           .notification:hover {
-            border-color: rgba(${fmt.rgbComponents c.base0D}, 0.7);
-            box-shadow: 0 6px 20px rgba(${fmt.rgbComponents "${c.base01}"}, 0.7);
+            border-color: rgba(${fmt.rgbComponents c.blue}, 0.7);
+            box-shadow: 0 6px 20px rgba(${fmt.rgbComponents c.mantle}, 0.7);
           }
 
           /* Urgency styles */
           .low-urgency .notification {
-            border-color: rgba(${fmt.rgbComponents c.base03}, 0.4);
+            border-color: rgba(${fmt.rgbComponents c.surface1}, 0.4);
           }
 
           .normal-urgency .notification {
-            border-color: rgba(${fmt.rgbComponents c.base0D}, 0.4);
+            border-color: rgba(${fmt.rgbComponents c.blue}, 0.4);
           }
 
           .critical-urgency .notification {
-            border: 2px solid rgba(${fmt.rgbComponents c.base08}, 0.7);
-            background: rgba(${fmt.rgbComponents c.base00}, 0.82);
+            border: ${toString s.borderWidth}px solid rgba(${fmt.rgbComponents c.red}, 0.7);
+            background: rgba(${fmt.rgbComponents c.base}, 0.82);
           }
 
           /* Notification content */
@@ -120,54 +121,54 @@ _: {
           }
 
           .summary {
-            font-size: 14px;
+            font-size: ${toString (s.fontSizeNotification + 1)}px;
             font-weight: bold;
-            color: ${fmt.hex c.base05};
+            color: ${fmt.hex c.text};
           }
 
           .body {
-            font-size: 12px;
-            color: ${fmt.hex c.base04};
+            font-size: ${toString (s.fontSizeNotification - 1)}px;
+            color: ${fmt.hex c.surface2};
           }
 
           .time {
-            font-size: 11px;
-            color: ${fmt.hex c.base03};
+            font-size: ${toString (s.fontSizeNotification - 2)}px;
+            color: ${fmt.hex c.surface1};
             margin-right: 12px;
           }
 
           /* Notification icon */
           .notification-image {
             margin: 8px 0px 8px 12px;
-            border-radius: 12px;
+            border-radius: ${toString s.roundingSmall}px;
           }
 
           /* Action buttons */
           .notification-action {
             border-radius: 10px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.6);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.4);
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.6);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.4);
             margin: 4px;
             padding: 6px 12px;
-            color: ${fmt.hex c.base05};
+            color: ${fmt.hex c.text};
             transition: all 150ms ease-in-out;
           }
 
           .notification-action:hover {
-            background: rgba(${fmt.rgbComponents c.base0D}, 0.2);
-            border-color: rgba(${fmt.rgbComponents c.base0D}, 0.6);
+            background: rgba(${fmt.rgbComponents c.blue}, 0.2);
+            border-color: rgba(${fmt.rgbComponents c.blue}, 0.6);
           }
 
           .notification-default-action {
-            border-radius: 16px;
+            border-radius: ${toString s.rounding}px;
           }
 
           /* Close button */
           .close-button {
             border-radius: 50%;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.8);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.4);
-            color: ${fmt.hex c.base05};
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.8);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.4);
+            color: ${fmt.hex c.text};
             min-width: 24px;
             min-height: 24px;
             margin: 8px;
@@ -175,16 +176,16 @@ _: {
           }
 
           .close-button:hover {
-            background: rgba(${fmt.rgbComponents c.base08}, 0.4);
-            border-color: rgba(${fmt.rgbComponents c.base08}, 0.7);
+            background: rgba(${fmt.rgbComponents c.red}, 0.4);
+            border-color: rgba(${fmt.rgbComponents c.red}, 0.7);
           }
 
           /* === Control Center === */
           .control-center {
-            border-radius: 16px;
-            border: 1px solid rgba(${fmt.rgbComponents c.base0D}, 0.3);
-            background: rgba(${fmt.rgbComponents c.base00}, 0.85);
-            box-shadow: 0 8px 32px rgba(${fmt.rgbComponents "${c.base01}"}, 0.6);
+            border-radius: ${toString s.rounding}px;
+            border: 1px solid rgba(${fmt.rgbComponents c.blue}, 0.3);
+            background: rgba(${fmt.rgbComponents c.base}, 0.85);
+            box-shadow: 0 8px 32px rgba(${fmt.rgbComponents c.mantle}, 0.6);
             margin: 8px;
             padding: 12px;
             transition: all 250ms ease-in-out;
@@ -198,45 +199,45 @@ _: {
           .widget-title > label {
             font-size: 16px;
             font-weight: bold;
-            color: ${fmt.hex c.base05};
+            color: ${fmt.hex c.text};
           }
 
           .widget-title > button {
             border-radius: 10px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.6);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.4);
-            color: ${fmt.hex c.base05};
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.6);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.4);
+            color: ${fmt.hex c.text};
             padding: 6px 16px;
             transition: all 150ms ease-in-out;
           }
 
           .widget-title > button:hover {
-            background: rgba(${fmt.rgbComponents c.base08}, 0.3);
-            border-color: rgba(${fmt.rgbComponents c.base08}, 0.6);
+            background: rgba(${fmt.rgbComponents c.red}, 0.3);
+            border-color: rgba(${fmt.rgbComponents c.red}, 0.6);
           }
 
           /* DnD widget */
           .widget-dnd {
             margin: 8px 12px;
             padding: 8px;
-            border-radius: 12px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.4);
+            border-radius: ${toString s.roundingSmall}px;
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.4);
           }
 
           .widget-dnd > switch {
-            border-radius: 12px;
-            background: rgba(${fmt.rgbComponents c.base03}, 0.6);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.4);
+            border-radius: ${toString s.roundingSmall}px;
+            background: rgba(${fmt.rgbComponents c.surface1}, 0.6);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.4);
           }
 
           .widget-dnd > switch:checked {
-            background: rgba(${fmt.rgbComponents c.base0D}, 0.5);
-            border-color: rgba(${fmt.rgbComponents c.base0D}, 0.7);
+            background: rgba(${fmt.rgbComponents c.blue}, 0.5);
+            border-color: rgba(${fmt.rgbComponents c.blue}, 0.7);
           }
 
           .widget-dnd > switch slider {
             border-radius: 50%;
-            background: ${fmt.hex c.base05};
+            background: ${fmt.hex c.text};
             min-width: 20px;
             min-height: 20px;
             margin: 2px;
@@ -246,13 +247,13 @@ _: {
           .widget-mpris {
             margin: 8px 12px;
             padding: 12px;
-            border-radius: 12px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.3);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.3);
+            border-radius: ${toString s.roundingSmall}px;
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.3);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.3);
           }
 
           .widget-mpris-player {
-            border-radius: 12px;
+            border-radius: ${toString s.roundingSmall}px;
             padding: 8px;
           }
 
@@ -260,38 +261,38 @@ _: {
             border-radius: 50%;
             min-width: 32px;
             min-height: 32px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.6);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.3);
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.6);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.3);
             transition: all 150ms ease-in-out;
           }
 
           .widget-mpris > box > button:hover {
-            background: rgba(${fmt.rgbComponents c.base0D}, 0.3);
+            background: rgba(${fmt.rgbComponents c.blue}, 0.3);
           }
 
           /* Volume widget */
           .widget-volume {
             margin: 8px 12px;
             padding: 8px 12px;
-            border-radius: 12px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.3);
-            border: 1px solid rgba(${fmt.rgbComponents c.base03}, 0.3);
+            border-radius: ${toString s.roundingSmall}px;
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.3);
+            border: 1px solid rgba(${fmt.rgbComponents c.surface1}, 0.3);
           }
 
           .widget-volume scale trough {
             border-radius: 8px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.8);
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.8);
             min-height: 8px;
           }
 
           .widget-volume scale trough highlight {
             border-radius: 8px;
-            background: rgba(${fmt.rgbComponents c.base0D}, 0.8);
+            background: rgba(${fmt.rgbComponents c.blue}, 0.8);
           }
 
           .widget-volume scale slider {
             border-radius: 50%;
-            background: ${fmt.hex c.base05};
+            background: ${fmt.hex c.text};
             min-width: 16px;
             min-height: 16px;
           }
@@ -300,28 +301,28 @@ _: {
           .widget-inhibitors {
             margin: 8px 12px;
             padding: 8px;
-            border-radius: 12px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.3);
+            border-radius: ${toString s.roundingSmall}px;
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.3);
           }
 
           /* Notification group headers */
           .notification-group-headers {
             margin: 4px 12px;
             font-weight: bold;
-            font-size: 12px;
-            color: ${fmt.hex c.base04};
+            font-size: ${toString (s.fontSizeNotification - 1)}px;
+            color: ${fmt.hex c.surface2};
           }
 
           .notification-group-collapse-button {
             border-radius: 8px;
-            background: rgba(${fmt.rgbComponents c.base02}, 0.5);
+            background: rgba(${fmt.rgbComponents c.surface0}, 0.5);
             border: none;
             padding: 4px 8px;
             transition: all 150ms ease-in-out;
           }
 
           .notification-group-collapse-button:hover {
-            background: rgba(${fmt.rgbComponents c.base0D}, 0.2);
+            background: rgba(${fmt.rgbComponents c.blue}, 0.2);
           }
 
           /* Empty state */
@@ -336,12 +337,12 @@ _: {
 
           scrollbar slider {
             border-radius: 8px;
-            background: rgba(${fmt.rgbComponents c.base03}, 0.5);
+            background: rgba(${fmt.rgbComponents c.surface1}, 0.5);
             min-width: 6px;
           }
 
           scrollbar slider:hover {
-            background: rgba(${fmt.rgbComponents c.base04}, 0.6);
+            background: rgba(${fmt.rgbComponents c.surface2}, 0.6);
           }
         '';
       };

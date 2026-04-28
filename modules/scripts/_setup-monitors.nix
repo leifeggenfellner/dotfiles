@@ -28,7 +28,36 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   }
 
   move_ws() {
-    hyprctl dispatch moveworkspacetomonitor "$1" "$2" 2>/dev/null || true
+    # Only move workspaces that actually exist
+    if hyprctl workspaces -j | $JQ -e --argjson id "$1" '.[] | select(.id == $id)' >/dev/null 2>&1; then
+      hyprctl dispatch moveworkspacetomonitor "$1" "$2" >/dev/null 2>&1 || true
+    fi
+  }
+
+  # Ensure a workspace exists on the target monitor — create it if missing
+  ensure_ws() {
+    local ws="$1" mon="$2"
+    if ! hyprctl workspaces -j | $JQ -e --argjson id "$ws" '.[] | select(.id == $id)' >/dev/null 2>&1; then
+      # Focus the target monitor first, then create workspace there
+      hyprctl dispatch focusmonitor "$mon" >/dev/null 2>&1 || true
+      hyprctl dispatch workspace "$ws" >/dev/null 2>&1 || true
+    fi
+  }
+
+  # Clean up auto-created empty workspaces (11, 12, etc.) on newly added monitors
+  cleanup_empty() {
+    hyprctl workspaces -j | $JQ -r '.[] | select(.id >= 10 and .windows == 0) | .id' 2>/dev/null | while read -r ws; do
+      # Switch away from it, then it'll be cleaned up if empty
+      hyprctl dispatch workspace 1 >/dev/null 2>&1 || true
+    done
+  }
+
+  set_mon() {
+    hyprctl keyword monitor "$1" >/dev/null 2>&1
+  }
+
+  set_ws() {
+    hyprctl keyword workspace "$1" >/dev/null 2>&1
   }
 
   echo "Detected monitors:"
@@ -40,23 +69,31 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     HOME_MON=$(name_of "$MONITOR_HOME_DESC")
     echo "Samsung output name: $HOME_MON"
 
-    hyprctl keyword monitor "$LAPTOP,1920x1200@60,0x0,1"
-    hyprctl keyword monitor "$HOME_MON,3440x1440@60,1920x0,1"
+    set_mon "$LAPTOP,1920x1200@60,0x0,1"
+    set_mon "$HOME_MON,3440x1440@60,1920x0,1"
 
-    # Move existing workspaces first
+    # Bind workspaces to monitors first — affects both existing and new workspaces
+    set_ws "1,monitor:$HOME_MON,default:true"
+    set_ws "2,monitor:$HOME_MON"
+    set_ws "3,monitor:$LAPTOP,default:true"
+    set_ws "4,monitor:$LAPTOP"
+    set_ws "5,monitor:$LAPTOP"
+    set_ws "6,monitor:$LAPTOP"
+
+    # Ensure target workspaces exist, then move them
+    ensure_ws 1 "$HOME_MON"
+    ensure_ws 2 "$HOME_MON"
+    for i in {3..6}; do
+      ensure_ws "$i" "$LAPTOP"
+    done
+
     move_ws 1 "$HOME_MON"
     move_ws 2 "$HOME_MON"
     for i in {3..6}; do
       move_ws "$i" "$LAPTOP"
     done
 
-    # Then set defaults for future workspaces
-    hyprctl keyword workspace "1,monitor:$HOME_MON"
-    hyprctl keyword workspace "2,monitor:$HOME_MON"
-    hyprctl keyword workspace "3,monitor:$LAPTOP"
-    hyprctl keyword workspace "4,monitor:$LAPTOP"
-    hyprctl keyword workspace "5,monitor:$LAPTOP"
-    hyprctl keyword workspace "6,monitor:$LAPTOP"
+    cleanup_empty
 
   elif has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
     echo "Work setup detected"
@@ -65,39 +102,47 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     RIGHT_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
     echo "Center monitor: $CENTER_MON, Right monitor: $RIGHT_MON"
 
-    hyprctl keyword monitor "$LAPTOP,1920x1200@60,0x0,1"
-    hyprctl keyword monitor "$CENTER_MON,2560x1440@60,1920x0,1"
-    hyprctl keyword monitor "$RIGHT_MON,2560x1440@60,4480x0,1"
+    set_mon "$LAPTOP,1920x1200@60,0x0,1"
+    set_mon "$CENTER_MON,2560x1440@60,1920x0,1"
+    set_mon "$RIGHT_MON,2560x1440@60,4480x0,1"
 
-    # Move existing workspaces first
+    # Bind workspaces to monitors first
+    set_ws "1,monitor:$CENTER_MON,default:true"
+    set_ws "6,monitor:$CENTER_MON"
+    set_ws "3,monitor:$RIGHT_MON,default:true"
+    set_ws "2,monitor:$LAPTOP,default:true"
+    set_ws "4,monitor:$LAPTOP"
+    set_ws "5,monitor:$LAPTOP"
+
+    # Ensure target workspaces exist, then move them
+    ensure_ws 1 "$CENTER_MON"
+    ensure_ws 6 "$CENTER_MON"
+    ensure_ws 3 "$RIGHT_MON"
+    ensure_ws 2 "$LAPTOP"
+    ensure_ws 4 "$LAPTOP"
+    ensure_ws 5 "$LAPTOP"
+
     move_ws 1 "$CENTER_MON"
     move_ws 6 "$CENTER_MON"
-
     move_ws 3 "$RIGHT_MON"
-
     move_ws 2 "$LAPTOP"
     move_ws 4 "$LAPTOP"
     move_ws 5 "$LAPTOP"
 
-    # Then set defaults for future workspaces
-    hyprctl keyword workspace "1,monitor:$CENTER_MON"
-    hyprctl keyword workspace "6,monitor:$CENTER_MON"
-
-    hyprctl keyword workspace "3,monitor:$RIGHT_MON"
-
-    hyprctl keyword workspace "2,monitor:$LAPTOP"
-    hyprctl keyword workspace "4,monitor:$LAPTOP"
-    hyprctl keyword workspace "5,monitor:$LAPTOP"
+    cleanup_empty
 
   else
     echo "Laptop-only setup"
 
-    hyprctl keyword monitor "$LAPTOP,preferred,0x0,1"
+    set_mon "$LAPTOP,preferred,0x0,1"
 
     for i in {1..10}; do
-      hyprctl keyword workspace "$i,monitor:$LAPTOP"
+      set_ws "$i,monitor:$LAPTOP"
     done
   fi
+
+  # Wake any DPMS-sleeping monitors
+  hyprctl dispatch dpms on 2>/dev/null || true
 
   echo "Monitor setup complete"
 ''

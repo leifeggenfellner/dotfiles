@@ -18,6 +18,9 @@ _: {
         directories = [
           "/etc/NetworkManager/system-connections"
           "/etc/ssh"
+          "/opt/docker"
+          "/var/lib/docker"
+          "/var/lib/NetworkManager"
           "/var/lib/nixos"
           "/var/lib/systemd/coredump"
           "/var/log"
@@ -48,7 +51,9 @@ _: {
               directory = ".local/share/keyrings";
               mode = "0700";
             }
-            ".config/waypaper"
+            ".config/wallpaper"
+            ".cache/wallpaper-thumbs"
+            ".cache/fastfetch"
             ".local/share/swww"
           ]
           ++ (lib.optionals config.environment.desktop.develop developSpecificDirs);

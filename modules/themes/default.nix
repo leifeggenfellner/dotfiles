@@ -4,6 +4,18 @@ let
 in
 {
   flake.homeModules = {
+    themes-style =
+      { lib, osConfig, ... }:
+      {
+        # HM alias — modules read `config.theme.style.*` which mirrors
+        # the NixOS-side `environment.desktop.theme.style` options.
+        options.theme.style = lib.mkOption {
+          type = lib.types.attrsOf lib.types.anything;
+          default = { };
+          description = "Visual style parameters (mirrored from NixOS environment.desktop.theme.style)";
+        };
+        config.theme.style = osConfig.environment.desktop.theme.style;
+      };
     themes-palette =
       { lib, osConfig, ... }:
       let
@@ -18,11 +30,14 @@ in
       };
     themes-gtk =
       { config, pkgs, ... }:
+      let
+        s = config.theme.style;
+      in
       {
         gtk = {
           enable = true;
           font = {
-            name = "Inter";
+            name = s.fontSans;
             package = pkgs.google-fonts.override { fonts = [ "Inter" ]; };
             size = 9;
           };
@@ -35,9 +50,9 @@ in
             package = pkgs.flat-remix-icon-theme;
           };
           cursorTheme = {
-            name = "capitaine-cursors-white";
+            name = s.cursorName;
             package = pkgs.capitaine-cursors;
-            size = 16;
+            size = s.cursorSize;
           };
           gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
         };

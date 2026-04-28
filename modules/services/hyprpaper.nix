@@ -3,42 +3,45 @@ _: {
     { lib, pkgs, osConfig, ... }:
     let
       inherit (osConfig.environment.desktop.theme) wallpaper;
+      awww = "${pkgs.awww}/bin/awww";
+
+      # Boot-time wallpaper restore script: reads persisted path, falls back to Nix default
+      wallpaper-restore = pkgs.writeShellScriptBin "wallpaper-restore" ''
+        set -euo pipefail
+        PERSIST_FILE="$HOME/.config/wallpaper/current"
+        DEFAULT="${wallpaper}"
+
+        # Start daemon if not running
+        ${awww}-daemon 2>/dev/null &
+        disown
+        # Give daemon a moment to initialise
+        sleep 0.3
+
+        # Use persisted wallpaper if it exists and points to a real file
+        WP="$DEFAULT"
+        if [ -f "$PERSIST_FILE" ]; then
+          SAVED=$(cat "$PERSIST_FILE")
+          if [ -f "$SAVED" ]; then
+            WP="$SAVED"
+          fi
+        fi
+
+        # Seed the persist file if missing
+        mkdir -p "$(dirname "$PERSIST_FILE")"
+        echo "$WP" > "$PERSIST_FILE"
+
+        ${awww} img "$WP" \
+          --transition-type fade \
+          --transition-duration 1.0 \
+          --transition-fps 60 2>/dev/null || true
+      '';
     in
     {
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
         home.packages = [
           pkgs.awww
-          pkgs.waypaper
+          wallpaper-restore
         ];
-
-        # waypaper config — uses awww backend, recursive wallpaper dir
-        # Mutable so waypaper can save the user's wallpaper selection and
-        # --restore picks it up on next boot. Home Manager seeds the file
-        # only when it doesn't already exist (force = false).
-        xdg.configFile."waypaper/config.ini" = {
-          force = false;
-          text = ''
-            [Settings]
-            language = en
-            folder = ~/Pictures/wallpapers
-            wallpaper = ${wallpaper}
-            backend = awww
-            monitors = All
-            fill = fill
-            sort = name
-            color = #000000
-            subfolders = True
-            show_hidden = False
-            show_gifs_only = False
-            post_command =
-            swww_transition_type = fade
-            swww_transition_step = 90
-            swww_transition_angle = 0
-            swww_transition_duration = 2
-            swww_transition_fps = 60
-            use_awww = True
-          '';
-        };
       };
     };
 }

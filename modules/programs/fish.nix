@@ -126,7 +126,6 @@ _: {
         plugins = [ fenv ];
 
         interactiveShellInit = ''
-          fastfetch
           set -p fish_complete_path ${pkgs.fish}/share/fish/completions
           set -p fish_complete_path ${pkgs.git}/share/fish/vendor_completions.d
         '';

@@ -78,11 +78,6 @@
         "eDP-1,preferred,auto,1"
         ",preferred,auto,1"
       ];
-
-      exec-once = [
-        "setup-monitors"
-        "handle-monitor"
-      ];
     };
   };
 

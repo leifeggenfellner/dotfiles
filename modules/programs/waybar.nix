@@ -7,16 +7,14 @@ _: {
     , ...
     }:
     let
-      fontSize = "14px";
-      iconSize = "17px";
-      opacity = "0.8";
+      s = config.theme.style;
       c = config.theme.colors;
       fmt = import ../themes/_fmt.nix lib;
       palette = {
-        font = "RobotoMono Nerd Font";
-        fontsize = fontSize;
-        iconsize = iconSize;
-        background-color = fmt.rgba c.base opacity;
+        font = s.fontMono;
+        fontsize = "${toString s.fontSizeBar}px";
+        iconsize = "${toString s.fontSizeBarIcon}px";
+        background-color = fmt.rgba c.base (toString s.opacityBar);
         background_border-frame = fmt.hex c.surface0;
 
         blue = fmt.hex c.blue;
@@ -39,14 +37,14 @@ _: {
         });
         systemd.enable = true;
         settings.mainBar = {
-          position = "top";
+          position = s.barPosition;
           layer = "top";
-          height = 36;
-          margin-top = 6;
+          height = s.barHeight;
+          margin-top = s.barMarginTop;
           margin-bottom = 0;
-          margin-left = 8;
-          margin-right = 8;
-          spacing = 8;
+          margin-left = s.barMarginHorizontal;
+          margin-right = s.barMarginHorizontal;
+          spacing = s.barSpacing;
           modules-left = [
             "custom/launcher"
             "hyprland/workspaces"
@@ -197,9 +195,9 @@ _: {
             color: ${palette.magenta};
             padding: 9px 22px 8px 15px;
             margin: 4px 0px;
-            border-radius: 12px;
+            border-radius: ${toString s.roundingSmall}px;
             font-size: 20px;
-            border: 2px solid ${palette.magenta};
+            border: ${toString s.borderWidth}px solid ${palette.magenta};
             transition: all 0.2s ease;
           }
 
@@ -213,8 +211,8 @@ _: {
             background-color: ${palette.background-color};
             padding: 4px 8px;
             margin: 4px 6px;
-            border-radius: 12px;
-            border: 2px solid ${palette.magenta};
+            border-radius: ${toString s.roundingSmall}px;
+            border: ${toString s.borderWidth}px solid ${palette.magenta};
           }
 
           #workspaces button {
@@ -228,7 +226,7 @@ _: {
             font-size: ${palette.iconsize};
             min-width: 32px;
             min-height: 28px;
-            border: 2px solid transparent;
+            border: ${toString s.borderWidth}px solid transparent;
           }
 
           #workspaces button label {
@@ -266,13 +264,13 @@ _: {
             background: linear-gradient(135deg, ${palette.magenta} 0%, ${palette.blue} 100%);
             color: ${palette.background-color};
             font-weight: bold;
-            border: 2px solid ${palette.magenta};
+            border: ${toString s.borderWidth}px solid ${palette.magenta};
           }
 
           #workspaces button:hover {
             background-color: ${fmt.rgba c.blue "0.2"};
             color: ${palette.blue};
-            border: 2px solid ${palette.blue};
+            border: ${toString s.borderWidth}px solid ${palette.blue};
           }
 
           #workspaces button.active:hover {
@@ -283,7 +281,7 @@ _: {
           #workspaces button.urgent {
             background: linear-gradient(135deg, ${palette.red} 0%, ${palette.orange} 100%);
             color: ${palette.background-color};
-            border: 2px solid ${palette.red};
+            border: ${toString s.borderWidth}px solid ${palette.red};
           }
 
                 /* Center - Clock with emphasis */
@@ -293,8 +291,8 @@ _: {
             font-weight: bold;
             padding: 8px 16px;
             margin: 4px 6px;
-            border-radius: 12px;
-            border: 2px solid ${palette.magenta};
+            border-radius: ${toString s.roundingSmall}px;
+            border: ${toString s.borderWidth}px solid ${palette.magenta};
             transition: all 0.3s ease;
           }
 
@@ -309,7 +307,7 @@ _: {
             background-color: transparent;
             padding: 0px;
             margin: 4px 0px;
-            border-radius: 12px;
+            border-radius: ${toString s.roundingSmall}px;
           }
 
           #temperature,
@@ -327,7 +325,7 @@ _: {
           /* Temperature - first item with left rounded edge */
           #temperature {
             background-color: ${palette.orange};
-            border-radius: 12px 0px 0px 12px;
+            border-radius: ${toString s.roundingSmall}px 0px 0px ${toString s.roundingSmall}px;
           }
 
           #temperature:hover {
@@ -380,7 +378,7 @@ _: {
           /* Network - last item with right rounded edge */
           #network {
             background-color: ${palette.blue};
-            border-radius: 0px 12px 12px 0px;
+            border-radius: 0px ${toString s.roundingSmall}px ${toString s.roundingSmall}px 0px;
           }
 
           #network:hover {
@@ -396,8 +394,8 @@ _: {
             background-color: ${palette.background-color};
             padding: 8px 14px;
             margin: 4px 6px 4px 4px;
-            border-radius: 12px;
-            border: 2px solid ${palette.magenta};
+            border-radius: ${toString s.roundingSmall}px;
+            border: ${toString s.borderWidth}px solid ${palette.magenta};
             transition: all 0.3s ease;
           }
 
@@ -418,7 +416,7 @@ _: {
           /* Tooltips */
           tooltip {
             background: linear-gradient(135deg, ${fmt.rgba c.crust "0.98"} 0%, ${fmt.rgba c.surface0 "0.98"} 100%);
-            border: 2px solid ${palette.magenta};
+            border: ${toString s.borderWidth}px solid ${palette.magenta};
             border-radius: 10px;
             color: ${palette.grey};
             padding: 8px 12px;
