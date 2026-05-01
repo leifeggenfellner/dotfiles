@@ -64,6 +64,8 @@
                   "uwsm finalize"
                   "thunderbolt-wait && setup-monitors"
                   "handle-monitor &"
+                ] ++ lib.optionals config.rice.enable [
+                  "QML_XHR_ALLOW_FILE_READ=1 quickshell"
                 ];
 
                 general = {

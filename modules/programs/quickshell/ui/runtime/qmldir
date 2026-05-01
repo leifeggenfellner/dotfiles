@@ -1,0 +1,2 @@
+singleton ThemeLoader 1.0 ThemeLoader.qml
+singleton HyprlandState 1.0 HyprlandState.qml
