@@ -46,6 +46,11 @@
     };
   };
 
+  rice = {
+    enable = false;
+    theme = "lotm";
+  };
+
   system = {
     disks.extraStoreDisk.enable = false;
     bluetooth.enable = true;
