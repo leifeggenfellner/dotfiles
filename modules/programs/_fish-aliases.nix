@@ -44,6 +44,7 @@ in
     update = "nix flake update";
     supdate = "sudo nix flake update";
     upgrade = "sudo nixos-rebuild switch --flake";
+    kbar = "kill-bar-dev";
 
     # Locations
     dot = "cd ~/Sources/dotfiles";
@@ -52,5 +53,7 @@ in
     tod = "cd ~/Projects/workspace/worksetup";
     be = "cd ~/Projects/workspace/nmkp/";
     fe = "cd ~/Projects/workspace/nmkp/modules/nmkp-app-core/";
+
+    network = "sudo nix --extra-experimental-features 'nix-command flakes' run github:ZXCurban/NetOrbit";
   };
 }

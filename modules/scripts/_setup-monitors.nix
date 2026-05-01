@@ -63,7 +63,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   echo "Detected monitors:"
   echo "$MONITORS_JSON" | $JQ -r '.[].description'
 
-  if has_desc "$MONITOR_HOME_DESC"; then
+  if [ -n "$MONITOR_HOME_DESC" ] && has_desc "$MONITOR_HOME_DESC"; then
     echo "Home setup detected"
 
     HOME_MON=$(name_of "$MONITOR_HOME_DESC")
@@ -95,7 +95,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
     cleanup_empty
 
-  elif has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
+  elif [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] && has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
     echo "Work setup detected"
 
     CENTER_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")

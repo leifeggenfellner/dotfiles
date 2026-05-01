@@ -65,7 +65,7 @@
                   "thunderbolt-wait && setup-monitors"
                   "handle-monitor &"
                 ] ++ lib.optionals config.rice.enable [
-                  "QML_XHR_ALLOW_FILE_READ=1 quickshell"
+                  "uwsm app -- reload-bar --proc"
                 ];
 
                 general = {
@@ -201,6 +201,8 @@
                 bind = [
                   "${mainMod}, Return, exec, ${launch "foot"}"
                   "${mainMod}, D, exec, ${toggle "wofi --show drun"}"
+                  # Rice framework v0 launcher (greenfield shell; see docs/architecture/ROADMAP.md)
+                  "${mainMod}, Space, exec, quickshell -p \${DOTFILES:-$HOME/Sources/dotfiles}/modules/rice/runtime/quickshell ipc call shell toggleLauncher"
                   "${mainMod}, B, exec, ${toggle "foot -T btop -e btop"}"
                   "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
@@ -317,6 +319,7 @@
                   "workspace 4, match:class ^(discord)$"
                   "workspace 5, match:class ^(spotify)$"
                   "workspace 6, match:class ^(btop|htop|nvtop|MissionCenter)$"
+                  "opacity 1.0 override 1.0 override, match:class ^(zen|ZenBrowser)$"
                 ];
               };
           };

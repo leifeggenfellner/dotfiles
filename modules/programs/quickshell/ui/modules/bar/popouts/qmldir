@@ -1,0 +1,7 @@
+ConnectionPopupContent 1.0 ConnectionPopupContent.qml
+ConnectionSlider 1.0 ConnectionSlider.qml
+ConnectionActionPanel 1.0 ConnectionActionPanel.qml
+ConnectionErrorBanner 1.0 ConnectionErrorBanner.qml
+ModeSwitcher 1.0 ModeSwitcher.qml
+PasswordInputPanel 1.0 PasswordInputPanel.qml
+RitualSearchField 1.0 RitualSearchField.qml
