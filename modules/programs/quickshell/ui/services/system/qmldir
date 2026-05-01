@@ -1,0 +1,2 @@
+singleton SystemState 1.0 SystemState.qml
+singleton RepoPaths 1.0 RepoPaths.qml

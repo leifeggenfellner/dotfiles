@@ -28,6 +28,7 @@ _: {
         source-sans-pro
         unifont
         font-awesome
+        google-fonts
       ];
     };
 }

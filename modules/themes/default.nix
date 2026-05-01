@@ -46,8 +46,8 @@ in
             package = pkgs.flat-remix-gtk;
           };
           iconTheme = {
-            name = "Flat-Remix-Blue-Light";
-            package = pkgs.flat-remix-icon-theme;
+            name = "Papirus-Dark";
+            package = pkgs.papirus-icon-theme;
           };
           cursorTheme = {
             name = s.cursorName;

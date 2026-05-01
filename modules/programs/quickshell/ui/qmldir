@@ -1,2 +1,4 @@
 singleton Theme 1.0 Theme.qml
-Bar 1.0 Bar.qml
+Bar 1.0 modules/bar/Bar.qml
+PowerSigilPopup 1.0 modules/bar/PowerSigilPopup.qml
+ConnectionRitualPopup 1.0 modules/bar/ConnectionRitualPopup.qml

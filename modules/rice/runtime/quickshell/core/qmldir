@@ -1,0 +1,5 @@
+singleton Theme 1.0 Theme.qml
+singleton ManifestLoader 1.0 ManifestLoader.qml
+singleton ShellState 1.0 ShellState.qml
+singleton Motion 1.0 Motion.qml
+MotionAnim 1.0 MotionAnim.qml

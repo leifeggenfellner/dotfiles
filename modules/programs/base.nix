@@ -9,6 +9,10 @@ _: {
         ];
 
         variables.EDITOR = "nvim";
+
+        sessionVariables = {
+          CLAUDE_CODE_ENABLE_TELEMETRY = "0";
+        };
       };
 
       programs = {

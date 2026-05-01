@@ -8,6 +8,13 @@ When helping with ricing work:
 2. Use one agent profile from `.github/ai/agents/` as the task lens.
 3. Apply relevant skill recipes from `.github/ai/skills/`.
 4. Follow `.github/ai/instructions/implementation-rules.md` for scope and quality.
+5. Give only code snippets and suggestions that I can implement myself, don't write any code in the files.
+
+Preferred structural compromise for Quickshell runtime work:
+
+- Use concern-based runtime folders where practical: `assets`, `components`, `modules`, `services`, `utils`, `scripts`, `plugins`, `extras`.
+- Apply the skill `.github/ai/skills/quickshell-modular-layout.md` when placing or migrating files.
+- Keep migrations incremental and non-breaking; avoid big-bang tree rewrites.
 
 Primary technical goals:
 
