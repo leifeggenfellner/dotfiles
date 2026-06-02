@@ -33,13 +33,14 @@ _: {
         metals
         nixpkgs-fmt
         prettier
+        qt6.qtdeclarative
         google-java-format
         black
         rustfmt
         kotlin-language-server
 
         # JavaScript/TypeScript ecosystem
-        nodejs_20
+        nodejs_24
         typescript
         typescript-language-server
         vue-language-server
@@ -107,7 +108,7 @@ _: {
           programs.vscode = {
             enable = true;
             package = pkgs.vscode;
-            mutableExtensionsDir = true;
+            mutableExtensionsDir = false;
             profiles.default = {
               enableUpdateCheck = false;
               enableExtensionUpdateCheck = false;
@@ -137,6 +138,8 @@ _: {
                   # Git extensions
                   eamodio.gitlens
                   donjayamanne.githistory
+                  github.vscode-github-actions
+                  github.vscode-pull-request-github
 
                   # Formatters
                   esbenp.prettier-vscode
@@ -149,11 +152,14 @@ _: {
 
                   # Javascript/CSS/TypeScript
                   vue.volar
+                  astro-build.astro-vscode
                   bradlc.vscode-tailwindcss
+                  svelte.svelte-vscode
                   dbaeumer.vscode-eslint
                   usernamehw.errorlens
                   christian-kohler.path-intellisense
                   christian-kohler.npm-intellisense
+                  ritwickdey.liveserver
 
                   # Kotlin
                   mathiasfrohlich.kotlin
@@ -181,6 +187,7 @@ _: {
                   ms-azuretools.vscode-docker
 
                   # Yaml/Markdown/CSV/Org
+                  redhat.vscode-yaml
                   davidanson.vscode-markdownlint
                   bierner.github-markdown-preview
                   bierner.markdown-checkbox
@@ -190,9 +197,49 @@ _: {
                   bierner.markdown-preview-github-styles
                   unifiedjs.vscode-mdx
                   mechatroner.rainbow-csv
+
+                  # i18n
+                  lokalise.i18n-ally
+
+                  # Shell/spelling/binary editing
+                  timonwong.shellcheck
+                  streetsidesoftware.code-spell-checker
+                  ms-vscode.hexeditor
                 ]
                 ++ lib.optionals cfg.godMode [ vscodevim.vim ]
                 ++ [
+                  # QML
+                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                    name = "qt-core";
+                    publisher = "TheQtCompany";
+                    version = "1.13.0";
+                    sha256 = "sha256-/SAoJmKfOfLtbYn4jvtbAFIa6O7kDouv0xQVhnxFOKM=";
+                  })
+                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                    name = "qt";
+                    publisher = "TheQtCompany";
+                    version = "1.3.0";
+                    sha256 = "sha256-rwAEZ/HAqNUfjrrctbt/GyZRZPPTnEqhho/UTSlXfR0=";
+                  })
+                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                    name = "qt-qml";
+                    publisher = "TheQtCompany";
+                    version = "1.12.0";
+                    sha256 = "sha256-LNfVsmM4Wiv5RWk5ne2Z0lOonPEFH2405xKX/D3eCgY=";
+                  })
+                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                    name = "QML";
+                    publisher = "bbenoist";
+                    version = "1.0.0";
+                    sha256 = "sha256-tphnVlD5LA6Au+WDrLZkAxnMJeTCd3UTyTN1Jelditk=";
+                  })
+                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                    name = "qml-format";
+                    publisher = "Delgan";
+                    version = "1.1.0";
+                    sha256 = "sha256-QOovj9loSWAgaBCwW3HBPD/Wr7GwVppSRcCJ4R5X/as=";
+                  })
+
                   # Theme extensions — all palettes
                   arcticicestudio.nord-visual-studio-code
                   enkia.tokyo-night
@@ -210,6 +257,20 @@ _: {
                     publisher = "Catppuccin";
                     version = "1.24.0";
                     sha256 = "sha256-2M7N4Ccw9FAaMmG36hGHi6i0i1qR+uPCSgXELAA03Xk=";
+                  })
+
+                  (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
+                    mktplcRef = {
+                      name = "claude-code";
+                      publisher = "anthropic";
+                      version = "2.1.114";
+                    };
+
+                    vsix = pkgs.fetchurl {
+                      name = "anthropic-claude-code-2.1.114-linux-x64.vsix";
+                      url = "https://anthropic.gallery.vsassets.io/_apis/public/gallery/publisher/anthropic/extension/claude-code/2.1.114/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage?targetPlatform=linux-x64";
+                      hash = "sha256-rcEbeYsyhbhh5wj6Mo3kz2+K3uZe5XMBKpwmSaB9Pgc=";
+                    };
                   })
 
                   # Testing tools - Quokka
@@ -292,6 +353,11 @@ _: {
 
                 # Editor improvements
                 "workbench.tree.indent" = 20;
+                "workbench.editorAssociations" = {
+                  "*.copilotmd" = "vscode.markdown.preview.editor";
+                  "{git,gitlens,chat-editing-snapshot-text-model,copilot,git-graph,git-graph-3}:/**/*.qrc" = "default";
+                  "*.qrc" = "qt-core.qrcEditor";
+                };
                 "workbench.startupEditor" = "none";
                 "editor.formatOnSave" = true;
                 "editor.formatOnPaste" = true;
@@ -377,8 +443,11 @@ _: {
 
                 # File type associations
                 "files.associations" = {
+                  "*.astro" = "astro";
                   "*.kt" = "gradle-kotlin-dsl";
                   "*.css" = "tailwindcss";
+                  "*.mdx" = "mdx";
+                  "*.svelte" = "svelte";
                   "*.vue" = "vue";
                 };
 
@@ -393,17 +462,23 @@ _: {
 
                 # ESLint configuration
                 "eslint.validate" = [
+                  "astro"
                   "javascript"
                   "javascriptreact"
+                  "mdx"
                   "typescript"
                   "typescriptreact"
+                  "svelte"
                   "vue"
                 ];
                 "eslint.probe" = [
+                  "astro"
                   "javascript"
                   "javascriptreact"
+                  "mdx"
                   "typescript"
                   "typescriptreact"
+                  "svelte"
                   "vue"
                 ];
 
@@ -510,11 +585,46 @@ _: {
                 # EditorConfig
                 "editorconfig.generateAuto" = false;
 
+                # Svelte configuration
+                "[svelte]" = {
+                  "editor.defaultFormatter" = "svelte.svelte-vscode";
+                  "editor.formatOnSave" = true;
+                };
+                "svelte.enable-ts-plugin" = true;
+                "svelte.format.enable" = true;
+                "svelte.plugin.typescript.enable" = true;
+                "svelte.plugin.typescript.diagnostics.enable" = true;
+                "svelte.plugin.typescript.hover.enable" = true;
+                "svelte.plugin.typescript.completions.enable" = true;
+                "svelte.plugin.typescript.rename.enable" = true;
+                "svelte.plugin.css.enable" = true;
+                "svelte.plugin.html.enable" = true;
+                "javascript.suggest.autoImports" = true;
+
+                # Astro configuration
+                "[astro]" = {
+                  "editor.defaultFormatter" = "astro-build.astro-vscode";
+                  "editor.formatOnSave" = true;
+                };
+
+                # MDX configuration
+                "[mdx]" = {
+                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
+                  "editor.formatOnSave" = true;
+                };
+
+                # Live Server configuration
+                "liveServer.settings.donotShowInfoMsg" = true;
+                "liveServer.settings.donotVerifyTags" = true;
+                "liveServer.settings.port" = 5500;
+
                 # TailwindCSS configuration
                 "tailwindCSS.includeLanguages" = {
+                  "astro" = "html";
                   "html" = "html";
                   "javascript" = "javascript";
                   "typescript" = "typescript";
+                  "svelte" = "html";
                   "vue" = "vue";
                   "scala" = "html";
                 };
@@ -533,7 +643,13 @@ _: {
                 # Disable auto-updates (settings.json is read-only on NixOS)
                 "extensions.autoCheckUpdates" = false;
                 "extensions.autoUpdate" = false;
+                "extensions.ignoreRecommendations" = true;
+                "extensions.showRecommendationsOnlyOnDemand" = true;
                 "update.mode" = "none";
+                "workbench.enableExperiments" = false;
+                "telemetry.telemetryLevel" = "off";
+                "gitlens.telemetry.enabled" = false;
+                "redhat.telemetry.enabled" = false;
 
                 # Vim extension configuration
                 "vim.easyMotion" = true;
@@ -664,6 +780,9 @@ _: {
                 "[python]" = {
                   "editor.defaultFormatter" = "ms-python.black-formatter";
                 };
+                "[qml]" = {
+                  "editor.defaultFormatter" = "Delgan.qml-format";
+                };
                 "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
                 "[rust]" = {
                   "editor.defaultFormatter" = "rust-lang.rust-analyzer";
@@ -772,8 +891,10 @@ _: {
               ".config/Code"
               ".config/copilot-chat"
               ".config/github-copilot"
+              ".claude"
             ];
           };
         };
     };
 }
+
