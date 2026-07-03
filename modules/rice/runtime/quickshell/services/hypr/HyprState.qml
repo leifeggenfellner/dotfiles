@@ -8,7 +8,9 @@ import Quickshell.Hyprland
 // only what surfaces need today. Grows in Phase 5+ (workspaces,
 // window title) by porting from the legacy tree.
 //
-//   state: available, focusedScreenName ("" when unknown)
+//   state:    available, focusedScreenName ("" when unknown),
+//             activeWorkspace (id)
+//   commands: switchWorkspace(id)
 //
 // Focused output is exposed by NAME (matches ShellScreen.name);
 // HyprlandMonitor.screen is not reliable on this Quickshell version.
@@ -16,6 +18,12 @@ import Quickshell.Hyprland
 Item {
     id: hypr
 
+    readonly property bool mock: false
     readonly property bool available: Hyprland.focusedMonitor !== null
     readonly property string focusedScreenName: Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""
+    readonly property int activeWorkspace: Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1
+
+    function switchWorkspace(id) {
+        Hyprland.dispatch("workspace " + id);
+    }
 }

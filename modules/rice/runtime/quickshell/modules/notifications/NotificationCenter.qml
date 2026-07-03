@@ -67,11 +67,35 @@ PanelWindow {
             anchors.margins: Theme.metrics.space.lg
             spacing: Theme.metrics.space.sm
 
-            Text {
-                text: "Notifications"
-                color: Theme.colors.fg.primary
-                font.family: Theme.typography.families.display
-                font.pointSize: Theme.typography.sizes.heading
+            Item {
+                width: parent.width
+                height: headerTitle.height
+
+                Text {
+                    id: headerTitle
+                    text: "Notifications"
+                    color: Theme.colors.fg.primary
+                    font.family: Theme.typography.families.display
+                    font.pointSize: Theme.typography.sizes.heading
+                }
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: NotificationState.notifications.length > 0
+                    text: "clear all"
+                    color: clearMouse.containsMouse ? Theme.colors.accent.primary : Theme.colors.fg.subtle
+                    font.family: Theme.typography.families.sans
+                    font.pointSize: Theme.typography.sizes.small
+
+                    MouseArea {
+                        id: clearMouse
+                        anchors.fill: parent
+                        anchors.margins: -Theme.metrics.space.sm
+                        hoverEnabled: true
+                        onClicked: NotificationState.clearAll()
+                    }
+                }
             }
 
             Repeater {
