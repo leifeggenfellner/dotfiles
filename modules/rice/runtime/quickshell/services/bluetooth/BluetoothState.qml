@@ -1,31 +1,54 @@
 pragma Singleton
 import QtQuick
+import Quickshell.Bluetooth
 
-// ── BluetoothState — MOCK, replaced in Phase 5 ────────────────
-// Shape per contracts/service-contract.md:
-//   state:    available, busy, error, powered, devices[]
+// ── BluetoothState — REAL ─────────────────────────────────────
+// Native BlueZ binding via Quickshell.Bluetooth (D-008 tier 1):
+// no bluetoothctl, no polling. Devices are the live BluetoothDevice
+// objects (name, address, connected, paired, batteryAvailable,
+// battery) — property reads stay reactive.
+//
+//   state:    available, busy, error, mock, powered, devices[]
 //   commands: setPowered(on), connect(address), disconnect(address)
 
 Item {
     id: bluetooth
 
-    readonly property bool available: true
-    property bool busy: false
+    readonly property bool mock: false
+    readonly property var adapter: Bluetooth.defaultAdapter
+    readonly property bool available: adapter !== null
+    readonly property bool busy: false
     property string error: ""
 
-    property bool powered: true
-    property var devices: [
-        { name: "Keyboard", address: "AA:11", connected: true, battery: 0.8 },
-        { name: "Headset", address: "BB:22", connected: false, battery: 0.5 }
-    ]
+    readonly property bool powered: available ? adapter.enabled : false
+    readonly property var devices: {
+        if (!available || !adapter.devices)
+            return [];
+        return adapter.devices.values.filter(d => d.paired || d.connected);
+    }
 
     function setPowered(on) {
-        powered = on;
+        if (available)
+            adapter.enabled = on;
     }
+
+    function _find(address) {
+        if (!available)
+            return null;
+        return adapter.devices.values.find(d => d.address === address) ?? null;
+    }
+
     function connect(address) {
-        devices = devices.map(d => d.address === address ? Object.assign({}, d, { connected: true }) : d);
+        const d = _find(address);
+        if (d)
+            d.connect();
+        else
+            error = "no such device: " + address;
     }
+
     function disconnect(address) {
-        devices = devices.map(d => d.address === address ? Object.assign({}, d, { connected: false }) : d);
+        const d = _find(address);
+        if (d)
+            d.disconnect();
     }
 }

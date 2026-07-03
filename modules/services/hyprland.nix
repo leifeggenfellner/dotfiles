@@ -169,7 +169,8 @@
                 };
 
                 dwindle = {
-                  pseudotile = true;
+                  # pseudotile option removed in Hyprland 0.55; the `pseudo`
+                  # dispatcher is now always available.
                   preserve_split = true;
                   force_split = 1;
                   default_split_ratio = 1.2;
