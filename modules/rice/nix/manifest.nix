@@ -1,17 +1,19 @@
-# Serializes the active theme's manifest source to the runtime's
-# manifest path. Phase-4 minimal wiring: no validation or index yet
-# (that machinery is Phase 7 / mkThemeManifest per
-# docs/architecture/contracts/theme-manifest.md).
+# Installs the active theme's validated manifest at the runtime's
+# manifest path (~/.config/rice/manifest.json). Validation and the
+# raster pipeline live in _manifest-lib.nix (mkThemeManifest).
 _: {
   flake.homeModules.rice-manifest =
-    { lib, osConfig, ... }:
+    { lib, pkgs, osConfig, ... }:
     let
       cfg = osConfig.rice or { enable = false; };
-      manifest = import (../themes + "/${cfg.theme}/_theme.nix");
+      mkThemeManifest = import ./_manifest-lib.nix { inherit pkgs lib; };
     in
     {
       config = lib.mkIf (cfg.enable or false) {
-        xdg.configFile."rice/manifest.json".text = builtins.toJSON manifest;
+        xdg.configFile."rice/manifest.json".source = (mkThemeManifest {
+          themeName = cfg.theme;
+          themeDir = ../themes + "/${cfg.theme}";
+        }).json;
       };
     };
 }

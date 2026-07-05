@@ -65,7 +65,7 @@
                   "thunderbolt-wait && setup-monitors"
                   "handle-monitor &"
                 ] ++ lib.optionals config.rice.enable [
-                  "uwsm app -- reload-bar --proc"
+                  "uwsm app -- rice-shell"
                 ];
 
                 general = {
@@ -202,8 +202,6 @@
                 bind = [
                   "${mainMod}, Return, exec, ${launch "foot"}"
                   "${mainMod}, D, exec, ${toggle "wofi --show drun"}"
-                  # Rice framework v0 launcher (greenfield shell; see docs/architecture/ROADMAP.md)
-                  "${mainMod}, Space, exec, quickshell -p \${DOTFILES:-$HOME/Sources/dotfiles}/modules/rice/runtime/quickshell ipc call shell toggleLauncher"
                   "${mainMod}, B, exec, ${toggle "foot -T btop -e btop"}"
                   "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
@@ -213,9 +211,6 @@
 
                   "${mainMod} ${SECONDARY}, L, exec, ${runOnce "lock-screen"}"
 
-                  "${mainMod}, N, exec, swaync-client -t -sw"
-                  "${mainMod} ${SECONDARY}, N, exec, swaync-client -d -sw"
-                  "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, swaync-client -C -sw"
 
                   "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copy area"}"
 
@@ -267,7 +262,16 @@
 
                   ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
                   ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
-                ];
+                ] ++ (if config.rice.enable then [
+                  # Rice shell surfaces (see docs/architecture/ROADMAP.md)
+                  "${mainMod}, Space, exec, quickshell -c rice ipc call shell toggleLauncher"
+                  "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"
+                  "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, quickshell -c rice ipc call notifications clearAll"
+                ] else [
+                  "${mainMod}, N, exec, swaync-client -t -sw"
+                  "${mainMod} ${SECONDARY}, N, exec, swaync-client -d -sw"
+                  "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, swaync-client -C -sw"
+                ]);
 
                 binde = [
                   "${mainMod} ${TERTIARY}, k, resizeactive, 0 -20"

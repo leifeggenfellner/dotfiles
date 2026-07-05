@@ -7,7 +7,9 @@ _: {
       fmt = import ../themes/_fmt.nix lib;
     in
     {
-      services.swaync = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
+      # The rice shell owns notifications when enabled — one daemon at a
+      # time, org.freedesktop.Notifications has a single owner (ROADMAP Phase 6/7).
+      services.swaync = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland" && !(osConfig.rice.enable or false)) {
         enable = true;
 
         settings = {
