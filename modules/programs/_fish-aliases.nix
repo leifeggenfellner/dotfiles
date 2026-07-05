@@ -44,7 +44,7 @@ in
     update = "nix flake update";
     supdate = "sudo nix flake update";
     upgrade = "sudo nixos-rebuild switch --flake";
-    kbar = "kill-bar-dev";
+    kbar = "rice-shell";
 
     # Locations
     dot = "cd ~/Sources/dotfiles";

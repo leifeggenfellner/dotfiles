@@ -40,8 +40,6 @@ _: {
         inherit pkgs;
         wallpaperDir = "$HOME/Pictures/wallpapers";
       };
-      reload-bar = pkgs.callPackage ./_reload-bar.nix { inherit pkgs; };
-      kill-bar-dev = pkgs.callPackage ./_kill-bar-dev.nix { inherit pkgs; };
     in
     {
       home.packages =
@@ -55,8 +53,6 @@ _: {
           lock-screen
           theme-switcher
           wallpaper-picker
-          reload-bar
-          kill-bar-dev
 
           gum-scripts.system-cleanup
           gum-scripts.project-launcher

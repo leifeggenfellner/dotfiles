@@ -172,6 +172,19 @@ Status values: `active` | `superseded by D-NNN`.
   import-tree from loading theme data as a flake-parts module. Contract text
   updated in the same commit (D-013 procedure).
 
+### D-017 — Authored artwork is source, not a derived variant
+
+- Date: 2026-07-04 · Status: active
+- D-011 (build-time rasterization, no hand-maintained derived variants) applies
+  only to assets genuinely derivable from another source. The LOTM
+  `pathways_png/` set was misclassified as derived: it is separately authored
+  color artwork (glowing emblems), while the SVGs are black-silhouette traces —
+  different artworks sharing names. Authored color art is a first-class theme
+  asset (like wallpapers) and may carry baked-in color; L-005 (color from
+  tokens, not images) governs UI effects and token-styled elements, not
+  authored art. The raster pipeline remains for true silhouette/derivable
+  cases.
+
 ---
 
 ## Legacy imports
