@@ -12,16 +12,27 @@ import Quickshell.Io
 Item {
     id: shell
 
-    property bool topBarVisible: false
+    property bool topBarVisible: true
     property bool launcherOpen: false
     property bool dashboardOpen: false
     property bool notificationsOpen: false
     property bool osdVisible: false
     property bool debugVisible: false
 
+    // Single-open popout (L-002): the widgetId whose popout is up.
+    property string activePopout: ""
+
+    function togglePopout(widgetId) {
+        activePopout = (activePopout === widgetId) ? "" : widgetId;
+    }
+    function closePopout() {
+        activePopout = "";
+    }
+
     // Center-stage surfaces are mutually exclusive.
     function openLauncher() {
         dashboardOpen = false;
+        activePopout = "";
         launcherOpen = true;
     }
     function closeLauncher() {
@@ -68,6 +79,9 @@ Item {
         }
         function toggleDebug(): void {
             shell.toggleDebug();
+        }
+        function togglePopout(widgetId: string): void {
+            shell.togglePopout(widgetId);
         }
     }
 }

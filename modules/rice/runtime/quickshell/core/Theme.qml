@@ -111,4 +111,28 @@ QtObject {
         const root = ManifestLoader.assetsRoot;
         return root.length > 0 ? "file://" + root + "/" + value : "";
     }
+
+    // ── Assets & widget config ────────────────────────────────
+    // assetUrl specs: "raster:<set>/<file>" → build-time raster output;
+    // "/abs/path" → as-is; anything else → theme assets root relative.
+    function assetUrl(spec) {
+        if (typeof spec !== "string" || spec.length === 0)
+            return "";
+        if (spec.startsWith("raster:")) {
+            const rest = spec.slice(7);
+            const cut = rest.indexOf("/");
+            if (cut < 0)
+                return "";
+            const dir = ManifestLoader.manifest.assets.raster[rest.slice(0, cut)];
+            return dir ? "file://" + dir + "/" + rest.slice(cut + 1) : "";
+        }
+        if (spec.startsWith("/"))
+            return "file://" + spec;
+        return iconUrl(spec);
+    }
+
+    // Per-widget manifest config (contracts/widget-contract.md).
+    function widgetConfig(widgetId) {
+        return ManifestLoader.manifest.widgets[widgetId] ?? ({});
+    }
 }

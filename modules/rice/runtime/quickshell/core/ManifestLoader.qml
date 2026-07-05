@@ -62,9 +62,22 @@ Item {
                 "monitor": "󰍛",
                 "volume": "󰕾",
                 "volume-muted": "󰝟",
+                "wifi": "󰤨",
+                "wifi-off": "󰤭",
+                "ethernet": "󰈀",
+                "bluetooth": "󰂯",
+                "battery": "󰁹",
+                "battery-charging": "󰂄",
+                "power": "󰐥",
+                "lock": "󰌾",
+                "logout": "󰍃",
+                "reboot": "󰜉",
+                "refresh": "󰑐",
                 "unknown": "󰋗"
-            }
-        }
+            },
+            raster: {}
+        },
+        widgets: {}
     })
 
     property var _fileManifest: ({})

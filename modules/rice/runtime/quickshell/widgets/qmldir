@@ -1,1 +1,2 @@
-# Descriptor-driven widgets. Populated when TopBar goes live.
+singleton Registry 1.0 Registry.qml
+WidgetDescriptor 1.0 WidgetDescriptor.qml

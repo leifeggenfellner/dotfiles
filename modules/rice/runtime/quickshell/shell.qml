@@ -13,9 +13,16 @@ import "./modules/debug"
 ShellRoot {
     id: root
 
+    NotificationIpc {}
+
     Variants {
         model: Quickshell.screens
         TopBar {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        BarPopout {}
     }
 
     Variants {
@@ -36,6 +43,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         NotificationCenter {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        Toasts {}
     }
 
     Variants {
