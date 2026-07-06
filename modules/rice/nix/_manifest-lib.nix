@@ -30,15 +30,16 @@ let
     lib.attrByPath path (fail "missing tokens.${lib.concatStringsSep "." path}") attrs;
 
   tokenChecks =
-    lib.flatten (lib.mapAttrsToList
-      (group: keys: map (k: hex (get [ "colors" group k ] theme.tokens)) keys)
-      colorSchema)
+    lib.flatten
+      (lib.mapAttrsToList
+        (group: keys: map (k: hex (get [ "colors" group k ] theme.tokens)) keys)
+        colorSchema)
     ++ map (f: get [ "typography" "families" f ] theme.tokens) [ "display" "sans" "mono" ]
     ++ map (d: get [ "motion" "durations" d ] theme.tokens) [ "fast" "base" "slow" "overlay" ];
 
   metaChecks = [
     (if (theme.meta.name or null) == themeName then true
-     else fail "meta.name must equal '${themeName}'")
+    else fail "meta.name must equal '${themeName}'")
     (theme.meta.schemaVersion or (fail "missing meta.schemaVersion"))
   ];
 

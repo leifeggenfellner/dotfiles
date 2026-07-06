@@ -13,28 +13,28 @@
 #   2. No theme-name literals anywhere under the runtime (D-006).
 #
 # Usage: rice-lint.sh [runtime-root]   (default: modules/rice/runtime/quickshell)
-set -euo pipefail
+set - euo pipefail
 
-root="${1:-modules/rice/runtime/quickshell}"
+  root="${1:-modules/rice/runtime/quickshell}"
 root="$(realpath "$root")"
 fail=0
 
 layer_allow() {
-  case "$1" in
-    utils) echo "" ;;
-    core) echo "utils" ;;
-    components) echo "core utils" ;;
-    widgets) echo "components core utils" ;;
-    services) echo "utils" ;;
-    modules) echo "modules widgets components core utils services" ;;
-    .) echo "modules core" ;;
-    *) echo "" ;;
-  esac
+case "$1" in
+utils) echo "" ;;
+core) echo "utils" ;;
+components) echo "core utils" ;;
+widgets) echo "components core utils" ;;
+services) echo "utils" ;;
+modules) echo "modules widgets components core utils services" ;;
+.) echo "modules core" ;;
+*) echo "" ;;
+esac
 }
 
 while IFS= read -r -d '' file; do
   rel="${file#"$root"/}"
-  if [[ "$rel" == */* ]]; then
+if [[ "$rel" == */* ]]; then
     src_layer="${rel%%/*}"
   else
     src_layer="."
@@ -90,3 +90,4 @@ if [[ "$fail" -ne 0 ]]; then
   exit 1
 fi
 echo "rice-lint: OK ($root)"
+
