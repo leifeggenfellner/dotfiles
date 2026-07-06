@@ -211,11 +211,32 @@ contract; fix what it breaks.
 - Still open (by design): no wallpapers/preview.png yet — those become
   meaningful with the Phase 10 switcher.
 
-## Phase 10 — Rice switcher ⬜
+## Phase 10 — Rice switcher ✅
 
-- Two-layer switch machinery (D-003): all-themes build + `themes.json` index,
-  `$XDG_STATE_HOME/rice/active` pointer, `rice-switch` tool, live re-bind,
-  wallpaper orchestration, switcher UI with `preview.png`.
+- Two-layer switch machinery (D-003), concretized as D-018:
+- ✅ `mkThemeIndex` (`modules/rice/nix/_index-lib.nix`): builds every theme
+  under `themes/`, installs `~/.config/rice/themes.json` (displayName,
+  manifest, preview, wallpapers per theme — all store paths). Previews:
+  authored `assets/preview.png` wins; otherwise a token-swatch card is
+  derived at build with ImageMagick (D-011). `meta.preview` removed from the
+  contract before any theme used it.
+- ✅ `rice-switch` (`modules/rice/nix/switch.nix`): validates against the
+  index, atomic pointer write to `$XDG_STATE_HOME/rice/active`, wallpaper
+  orchestration (first theme wallpaper via the shared awww flow — dormant
+  until themes ship wallpapers), IPC nudge `rice reload` for the
+  pointer-file-creation case.
+- ✅ Live re-bind: `ManifestLoader` resolves `$RICE_MANIFEST` → pointer via
+  index → default `manifest.json`, watching all three files; IPC
+  `rice active` exposes the resolved theme for scripting/tests.
+- ✅ Switcher UI: `modules/switcher/ThemeSwitcher.qml` — preview cards from
+  `Theme.catalog`, active ringed, click switches via new `RiceState` service
+  (runs rice-switch; pointer/index knowledge stays in core). Super+T /
+  `shell toggleSwitcher`; mutually exclusive with launcher/dashboard.
+- Verified: index + previews build; home generation builds; rice-lint clean;
+  sandboxed-HOME live test — shell resolves pointer at startup, `rice-switch`
+  re-binds the running shell via the file watch alone (<2s), bogus names
+  rejected; switcher screenshot confirms themed cards + active ring.
+- Requires a rebuild to land on the host (themes.json, rice-switch, keybind).
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 

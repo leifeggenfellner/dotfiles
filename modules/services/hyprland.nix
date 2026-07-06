@@ -265,6 +265,7 @@
                 ] ++ (if config.rice.enable then [
                   # Rice shell surfaces (see docs/architecture/ROADMAP.md)
                   "${mainMod}, Space, exec, quickshell -c rice ipc call shell toggleLauncher"
+                  "${mainMod}, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
                   "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"
                   "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, quickshell -c rice ipc call notifications clearAll"
                 ] else [
