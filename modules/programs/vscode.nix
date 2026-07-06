@@ -50,6 +50,7 @@ _: {
 
         # Utilities
         jq
+        claude-code
 
         # Tools needed for aliases
         bat
@@ -202,8 +203,6 @@ _: {
                   lokalise.i18n-ally
 
                   # Shell/spelling/binary editing
-                  timonwong.shellcheck
-                  streetsidesoftware.code-spell-checker
                   ms-vscode.hexeditor
                 ]
                 ++ lib.optionals cfg.godMode [ vscodevim.vim ]
@@ -257,20 +256,6 @@ _: {
                     publisher = "Catppuccin";
                     version = "1.24.0";
                     sha256 = "sha256-2M7N4Ccw9FAaMmG36hGHi6i0i1qR+uPCSgXELAA03Xk=";
-                  })
-
-                  (pkgs.vscode-utils.buildVscodeMarketplaceExtension {
-                    mktplcRef = {
-                      name = "claude-code";
-                      publisher = "anthropic";
-                      version = "2.1.114";
-                    };
-
-                    vsix = pkgs.fetchurl {
-                      name = "anthropic-claude-code-2.1.114-linux-x64.vsix";
-                      url = "https://anthropic.gallery.vsassets.io/_apis/public/gallery/publisher/anthropic/extension/claude-code/2.1.114/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage?targetPlatform=linux-x64";
-                      hash = "sha256-rcEbeYsyhbhh5wj6Mo3kz2+K3uZe5XMBKpwmSaB9Pgc=";
-                    };
                   })
 
                   # Testing tools - Quokka
