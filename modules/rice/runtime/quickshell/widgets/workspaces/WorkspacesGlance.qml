@@ -3,9 +3,11 @@ import "../../core"
 
 // ── WorkspacesGlance ──────────────────────────────────────────
 // Workspace indicator. Identity comes entirely from theme settings:
-//   settings.items = [ { id, label, icon (assetUrl spec), color } ]
-// With empty settings it degrades to a plain numeric readout.
-// Services: hypr (injected).
+//   settings.items = [ { id, label, icon, color } ]
+// icon follows the D-016 heuristic: a value containing "/" is an
+// assetUrl spec (image file / raster output); anything else is a
+// font glyph tinted with the item's color. With empty settings it
+// degrades to a plain numeric readout. Services: hypr (injected).
 
 Item {
     id: root
@@ -34,6 +36,8 @@ Item {
                 required property var modelData
                 readonly property bool isActive: modelData.id === root.active
                 readonly property color wsColor: modelData.color ?? Theme.colors.accent.primary
+                readonly property string iconSpec: modelData.icon ?? ""
+                readonly property bool iconIsImage: Theme.iconIsFile(iconSpec)
 
                 width: 30
                 height: 30
@@ -56,14 +60,30 @@ Item {
                 // Authored color artwork (theme-provided); the widget only
                 // dims inactive entries and rings the active one.
                 Image {
+                    visible: slot.iconIsImage
                     anchors.centerIn: parent
                     width: 24
                     height: 24
-                    source: Theme.assetUrl(slot.modelData.icon ?? "")
+                    source: slot.iconIsImage ? Theme.assetUrl(slot.iconSpec) : ""
                     sourceSize.width: 48
                     sourceSize.height: 48
                     fillMode: Image.PreserveAspectFit
                     smooth: true
+                    opacity: slot.isActive ? 1 : 0.45
+
+                    Behavior on opacity {
+                        MotionAnim {}
+                    }
+                }
+
+                // Glyph identity, tinted with the item's color.
+                Text {
+                    visible: !slot.iconIsImage
+                    anchors.centerIn: parent
+                    text: slot.iconIsImage ? "" : slot.iconSpec
+                    color: slot.wsColor
+                    font.family: Theme.typography.families.mono
+                    font.pointSize: Theme.typography.sizes.icon
                     opacity: slot.isActive ? 1 : 0.45
 
                     Behavior on opacity {
