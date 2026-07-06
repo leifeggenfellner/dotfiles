@@ -4,7 +4,7 @@ _: {
       enable = true;
 
       enableDefaultConfig = false;
-      matchBlocks."*" = {
+      settings."*" = {
         forwardAgent = false;
         addKeysToAgent = "yes";
         compression = true;
@@ -17,7 +17,7 @@ _: {
         controlPersist = "no";
       };
 
-      matchBlocks = {
+      settings = {
         "github.com" = {
           hostname = "ssh.github.com";
           port = 443;
