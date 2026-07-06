@@ -4,6 +4,7 @@ import "./modules/launcher"
 import "./modules/dashboard"
 import "./modules/osd"
 import "./modules/notifications"
+import "./modules/switcher"
 import "./modules/debug"
 
 // ── shell ─────────────────────────────────────────────────────
@@ -48,6 +49,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         Toasts {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        ThemeSwitcher {}
     }
 
     Variants {

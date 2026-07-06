@@ -185,6 +185,31 @@ Status values: `active` | `superseded by D-NNN`.
   authored art. The raster pipeline remains for true silhouette/derivable
   cases.
 
+### D-018 — Switch machinery concretized (index, pointer, preview)
+
+- Date: 2026-07-06 · Status: active
+- The D-003 two-layer switch is realized as: `mkThemeIndex` builds EVERY theme
+  under `modules/rice/themes/` and installs `~/.config/rice/themes.json`
+  (`{ schemaVersion, default, themes.<name> = { displayName, manifest, preview,
+  wallpapers } }`, store paths). The mutable pointer `$XDG_STATE_HOME/rice/active`
+  holds a theme name; it is written ONLY by `rice-switch` (atomic rename +
+  wallpaper orchestration + IPC nudge `rice reload`). Runtime resolution order:
+  `$RICE_MANIFEST` env → pointer via index → `~/.config/rice/manifest.json`
+  (Nix-default theme).
+- The pointer is read and watched by `core/ManifestLoader` — it is manifest-
+  resolution input, not a user pref. This narrows the ARCHITECTURE note that
+  `$XDG_STATE_HOME/rice/` is "accessed only by a PrefsState service": that rule
+  now covers `prefs.json` (still future); text updated in the same commit.
+- Previews: not a manifest field (contract's `meta.preview` removed before any
+  theme used it, D-013 procedure). A theme MAY ship authored
+  `assets/preview.png` (D-017 — authored art wins); otherwise the index build
+  derives a swatch card from the theme's own tokens (D-011 — derived variants
+  are built, never hand-maintained). Every index entry therefore always has a
+  preview.
+- Why: switching must work with zero eval at switch time (index carries
+  everything `rice-switch` and the switcher UI need), and no theme should be
+  blocked on producing screenshot art before it can appear in the switcher.
+
 ---
 
 ## Legacy imports

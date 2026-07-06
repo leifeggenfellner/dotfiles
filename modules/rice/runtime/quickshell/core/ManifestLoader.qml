@@ -4,13 +4,17 @@ import Quickshell
 import Quickshell.Io
 
 // ── ManifestLoader ────────────────────────────────────────────
-// The ONLY file that reads theme manifest JSON. Everything else
+// The ONLY file that reads theme manifest JSON, the themes.json
+// index, and the active-theme pointer (D-018). Everything else
 // goes through the Theme facade.
 //
-// Path resolution: $RICE_MANIFEST env override (dev loop) →
-// ~/.config/rice/manifest.json (installed by the rice-manifest HM
-// module). The file is watched: editing the manifest re-themes the
-// running shell live.
+// Path resolution (D-003 two-layer switch):
+//   $RICE_MANIFEST env override (dev loop)
+//   → $XDG_STATE_HOME/rice/active pointer resolved via the
+//     ~/.config/rice/themes.json index
+//   → ~/.config/rice/manifest.json (Nix-default theme).
+// Pointer, index, and manifest are all watched: rice-switch (or a
+// manifest edit) re-themes the running shell live.
 //
 // Runtime defaults below are theme-NEUTRAL. The manifest is
 // deep-merged over them, so `tokens` and `icons` are always
@@ -89,11 +93,39 @@ Item {
     readonly property var icons: manifest.assets.icons
     readonly property string assetsRoot: manifest.assets.root
 
+    // ── Switch machinery (D-003/D-018) ────────────────────────
+    // themes.json index (Nix-built) + mutable active pointer.
+    property var themesIndex: ({})       // name → { displayName, manifest, preview, wallpapers }
+    property string defaultTheme: ""
+    property string pointerName: ""
+
+    readonly property string activeTheme: {
+        if (pointerName.length > 0 && themesIndex[pointerName] !== undefined)
+            return pointerName;
+        return defaultTheme;
+    }
+
+    readonly property string statePath: {
+        const env = Quickshell.env("XDG_STATE_HOME");
+        return (env && env.length > 0 ? env : Quickshell.env("HOME") + "/.local/state") + "/rice/active";
+    }
+
     readonly property string manifestPath: {
         const env = Quickshell.env("RICE_MANIFEST");
         if (env && env.length > 0)
             return env;
+        const entry = themesIndex[activeTheme];
+        if (entry && entry.manifest)
+            return entry.manifest;
         return Quickshell.env("HOME") + "/.config/rice/manifest.json";
+    }
+
+    // rice-switch nudges this after writing the pointer: a watch set
+    // on a not-yet-existing pointer file does not fire on creation.
+    function reload() {
+        indexFile.reload();
+        pointerFile.reload();
+        file.reload();
     }
 
     function _merge(base, over) {
@@ -127,5 +159,43 @@ Item {
         onLoaded: loader._apply(file.text())
         onLoadFailed: console.info("ManifestLoader: no manifest at", loader.manifestPath, "— using runtime defaults")
         onFileChanged: file.reload()
+    }
+
+    FileView {
+        id: indexFile
+        path: Quickshell.env("HOME") + "/.config/rice/themes.json"
+        watchChanges: true
+        onLoaded: {
+            try {
+                const idx = JSON.parse(text());
+                loader.themesIndex = idx.themes ?? {};
+                loader.defaultTheme = idx.default ?? "";
+            } catch (e) {
+                console.warn("ManifestLoader: invalid themes.json:", e);
+            }
+        }
+        onLoadFailed: console.info("ManifestLoader: no themes.json — switch machinery inactive")
+        onFileChanged: reload()
+    }
+
+    FileView {
+        id: pointerFile
+        path: loader.statePath
+        watchChanges: true
+        onLoaded: loader.pointerName = text().trim()
+        onLoadFailed: loader.pointerName = ""
+        onFileChanged: reload()
+    }
+
+    IpcHandler {
+        target: "rice"
+
+        function reload(): void {
+            loader.reload();
+        }
+        // Scripting/testing: `quickshell -c rice ipc call rice active`
+        function active(): string {
+            return loader.activeTheme;
+        }
     }
 }

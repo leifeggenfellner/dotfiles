@@ -15,6 +15,7 @@ Item {
     property bool topBarVisible: true
     property bool launcherOpen: false
     property bool dashboardOpen: false
+    property bool switcherOpen: false
     property bool notificationsOpen: false
     property bool osdVisible: false
     property bool debugVisible: false
@@ -32,6 +33,7 @@ Item {
     // Center-stage surfaces are mutually exclusive.
     function openLauncher() {
         dashboardOpen = false;
+        switcherOpen = false;
         activePopout = "";
         launcherOpen = true;
     }
@@ -44,7 +46,17 @@ Item {
 
     function toggleDashboard() {
         launcherOpen = false;
+        switcherOpen = false;
         dashboardOpen = !dashboardOpen;
+    }
+    function toggleSwitcher() {
+        launcherOpen = false;
+        dashboardOpen = false;
+        activePopout = "";
+        switcherOpen = !switcherOpen;
+    }
+    function closeSwitcher() {
+        switcherOpen = false;
     }
     function toggleNotifications() {
         notificationsOpen = !notificationsOpen;
@@ -67,6 +79,9 @@ Item {
         }
         function toggleDashboard(): void {
             shell.toggleDashboard();
+        }
+        function toggleSwitcher(): void {
+            shell.toggleSwitcher();
         }
         function toggleNotifications(): void {
             shell.toggleNotifications();

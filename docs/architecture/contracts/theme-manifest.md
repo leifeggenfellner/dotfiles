@@ -19,7 +19,8 @@ exclusively through the `Theme` facade.
     displayName = "…";            # required, shown in the switcher
     version = "0.1.0";            # required
     schemaVersion = 2;            # required
-    preview = ./preview.png;      # required, used by the rice switcher
+    # switcher preview is NOT a manifest field (D-018): ship authored
+    # assets/preview.png, or the index build derives a token swatch.
   };
 
   tokens = {                      # CLOSED schema — every key required unless marked optional

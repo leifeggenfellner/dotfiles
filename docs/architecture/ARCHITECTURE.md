@@ -82,9 +82,11 @@ theme plugins → {core, components, utils} + injected services only
    methods ([service-contract](contracts/service-contract.md)).
 2. **Shell UI state** — `core/ShellState.qml`: active popout, launcher visibility,
    OSD queue, debug overlay.
-3. **User prefs** — `$XDG_STATE_HOME/rice/` (active-theme pointer + `prefs.json`),
-   accessed only by a `PrefsState` service. Nix defines defaults; state files hold
-   user drift; nothing else is mutable.
+3. **User prefs** — `$XDG_STATE_HOME/rice/`. The active-theme pointer is written
+   only by `rice-switch` and read/watched by `core/ManifestLoader` as manifest-
+   resolution input (D-018); `prefs.json` (future) is accessed only by a
+   `PrefsState` service. Nix defines defaults; state files hold user drift;
+   nothing else is mutable.
 
 ## Event flow
 

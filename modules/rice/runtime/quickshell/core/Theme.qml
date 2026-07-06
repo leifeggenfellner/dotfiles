@@ -135,4 +135,17 @@ QtObject {
     function widgetConfig(widgetId) {
         return ManifestLoader.manifest.widgets[widgetId] ?? ({});
     }
+
+    // ── Theme catalog (switch machinery, D-018) ───────────────
+    // Every Nix-built theme from the themes.json index; empty when
+    // the index is absent (dev run without a rebuild).
+    readonly property string activeName: ManifestLoader.activeTheme
+    readonly property var catalog: {
+        const idx = ManifestLoader.themesIndex;
+        return Object.keys(idx).sort().map(n => ({
+            name: n,
+            displayName: idx[n].displayName ?? n,
+            preview: idx[n].preview ? "file://" + idx[n].preview : ""
+        }));
+    }
 }

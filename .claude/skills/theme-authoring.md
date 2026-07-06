@@ -22,7 +22,8 @@ manifest (`theme.nix`), tokens, assets, widget configuration, plugin packaging.
   fill every `tokens.*` key; put theme-specific extras under `palette.*`,
   `assets.art.*`, and `widgets.<id>.settings`.
 - Assets are organized by role (`wallpapers/`, `icons/`, `art/`, `sounds/`),
-  `snake_case` filenames, plus a mandatory `preview.png`. Raster variants are
+  `snake_case` filenames. `assets/preview.png` is optional — the index build
+  derives a token-swatch preview when absent (D-018). Raster variants are
   derived from SVG by the build, not committed by hand (D-011).
 - Theme identity flows through tokens, assets, fonts, and settings — e.g. the
   workspace indicator's icon set, labels, and per-workspace colors are
