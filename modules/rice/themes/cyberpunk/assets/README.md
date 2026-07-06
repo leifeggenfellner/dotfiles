@@ -1,6 +1,5 @@
 # Cyberpunk Assets
 
-Role directories land here when the theme grows files (wallpapers/,
-preview.png). The theme is currently glyph-only by design — see the
-theme README. This file exists so the assets root is a valid store
-path for `mkThemeManifest`.
+Role directories, per the theme-manifest contract. `wallpapers/` is
+globbed into the manifest at build time (D-019) — drop images in,
+rebuild, done. Icons remain glyph-only by design (see theme README).

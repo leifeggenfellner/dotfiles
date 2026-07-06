@@ -16,6 +16,7 @@ Item {
     property bool launcherOpen: false
     property bool dashboardOpen: false
     property bool switcherOpen: false
+    property bool wallpapersOpen: false
     property bool notificationsOpen: false
     property bool osdVisible: false
     property bool debugVisible: false
@@ -34,6 +35,7 @@ Item {
     function openLauncher() {
         dashboardOpen = false;
         switcherOpen = false;
+        wallpapersOpen = false;
         activePopout = "";
         launcherOpen = true;
     }
@@ -47,16 +49,28 @@ Item {
     function toggleDashboard() {
         launcherOpen = false;
         switcherOpen = false;
+        wallpapersOpen = false;
         dashboardOpen = !dashboardOpen;
     }
     function toggleSwitcher() {
         launcherOpen = false;
         dashboardOpen = false;
+        wallpapersOpen = false;
         activePopout = "";
         switcherOpen = !switcherOpen;
     }
     function closeSwitcher() {
         switcherOpen = false;
+    }
+    function toggleWallpapers() {
+        launcherOpen = false;
+        dashboardOpen = false;
+        switcherOpen = false;
+        activePopout = "";
+        wallpapersOpen = !wallpapersOpen;
+    }
+    function closeWallpapers() {
+        wallpapersOpen = false;
     }
     function toggleNotifications() {
         notificationsOpen = !notificationsOpen;
@@ -82,6 +96,9 @@ Item {
         }
         function toggleSwitcher(): void {
             shell.toggleSwitcher();
+        }
+        function toggleWallpapers(): void {
+            shell.toggleWallpapers();
         }
         function toggleNotifications(): void {
             shell.toggleNotifications();

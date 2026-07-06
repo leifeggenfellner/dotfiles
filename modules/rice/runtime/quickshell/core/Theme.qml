@@ -136,6 +136,10 @@ QtObject {
         return ManifestLoader.manifest.widgets[widgetId] ?? ({});
     }
 
+    // Active theme's wallpaper set (store paths; may be empty) —
+    // build-derived from assets/wallpapers/ (D-019).
+    readonly property var wallpapers: ManifestLoader.manifest.assets.wallpapers ?? []
+
     // ── Theme catalog (switch machinery, D-018) ───────────────
     // Every Nix-built theme from the themes.json index; empty when
     // the index is absent (dev run without a rebuild).

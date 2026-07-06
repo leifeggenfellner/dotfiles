@@ -84,9 +84,9 @@ theme plugins → {core, components, utils} + injected services only
    OSD queue, debug overlay.
 3. **User prefs** — `$XDG_STATE_HOME/rice/`. The active-theme pointer is written
    only by `rice-switch` and read/watched by `core/ManifestLoader` as manifest-
-   resolution input (D-018); `prefs.json` (future) is accessed only by a
-   `PrefsState` service. Nix defines defaults; state files hold user drift;
-   nothing else is mutable.
+   resolution input (D-018); `prefs.json` is written only by the `PrefsState`
+   service and read by `rice-switch` at switch time (D-019). Nix defines
+   defaults; state files hold user drift; nothing else is mutable.
 
 ## Event flow
 

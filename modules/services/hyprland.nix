@@ -206,7 +206,6 @@
                   "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
                   "${mainMod} ${SECONDARY}, D, exec, ${runOnce "pcmanfm"}"
-                  "${mainMod}, W, exec, ${launch "foot -T wallpaper-picker -e wallpaper-picker"}"
                   "${mainMod} ${SECONDARY}, W, exec, ${launch "foot -T theme-switcher -e theme-switcher"}"
 
                   "${mainMod} ${SECONDARY}, L, exec, ${runOnce "lock-screen"}"
@@ -266,9 +265,13 @@
                   # Rice shell surfaces (see docs/architecture/ROADMAP.md)
                   "${mainMod}, Space, exec, quickshell -c rice ipc call shell toggleLauncher"
                   "${mainMod}, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
+                  "${mainMod}, W, exec, quickshell -c rice ipc call shell toggleWallpapers"
+                  "${mainMod} ALT, W, exec, quickshell -c rice ipc call wallpapers next"
                   "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"
                   "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, quickshell -c rice ipc call notifications clearAll"
                 ] else [
+                  # Non-rice hosts keep the fzf wallpaper picker on Super+W.
+                  "${mainMod}, W, exec, ${launch "foot -T wallpaper-picker -e wallpaper-picker"}"
                   "${mainMod}, N, exec, swaync-client -t -sw"
                   "${mainMod} ${SECONDARY}, N, exec, swaync-client -d -sw"
                   "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, swaync-client -C -sw"

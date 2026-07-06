@@ -57,7 +57,9 @@ exclusively through the `Theme` facade.
                                   # plugins and widget settings may reference them.
 
   assets = {                      # role → path. Roles below are known to the runtime;
-    wallpapers = [ ];             # required, ≥1 entry
+    # wallpapers is NOT declared here (D-019): assets/wallpapers/ is
+    # globbed at build (png/jpg/jpeg/webp, sorted) into
+    # assets.wallpapers as store paths; may be empty; never hand-listed.
     logo = null;                  # optional
     launcherIcon = null;          # optional
     icons = { };                  # optional: semantic icon-name overrides (D-016).

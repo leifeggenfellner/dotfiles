@@ -45,10 +45,15 @@ Item {
             wallpaper.busy = false;
             if (code !== 0)
                 wallpaper.error = "wallpaper apply failed (exit " + code + ")";
+            else
+                // A watch set while the persist file was missing does
+                // not fire on creation — reload after our own write.
+                _persist.reload();
         }
     }
 
     FileView {
+        id: _persist
         path: wallpaper.persistPath
         watchChanges: true
         onLoaded: wallpaper.current = text().trim()

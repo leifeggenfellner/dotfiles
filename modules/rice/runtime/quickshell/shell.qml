@@ -5,6 +5,7 @@ import "./modules/dashboard"
 import "./modules/osd"
 import "./modules/notifications"
 import "./modules/switcher"
+import "./modules/wallpapers"
 import "./modules/debug"
 
 // ── shell ─────────────────────────────────────────────────────
@@ -15,6 +16,8 @@ ShellRoot {
     id: root
 
     NotificationIpc {}
+
+    WallpaperIpc {}
 
     Variants {
         model: Quickshell.screens
@@ -54,6 +57,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         ThemeSwitcher {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        WallpaperPicker {}
     }
 
     Variants {

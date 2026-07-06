@@ -12,6 +12,6 @@ Contrast axis vs LOTM (what this theme is meant to stress):
 - hard radii + shorter motion durations (LOTM: soft + calm)
 - display/sans font swap (Orbitron / Chakra Petch)
 
-`assets/` holds role directories as they become needed (wallpapers,
-preview.png for the Phase 10 switcher). It currently ships no files —
-that is the point.
+`assets/` holds role directories as they become needed. As of Phase 11
+it ships `wallpapers/` (globbed into the manifest at build, D-019);
+authored `preview.png` remains optional (derived swatch otherwise).

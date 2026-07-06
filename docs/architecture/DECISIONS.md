@@ -210,6 +210,31 @@ Status values: `active` | `superseded by D-NNN`.
   everything `rice-switch` and the switcher UI need), and no theme should be
   blocked on producing screenshot art before it can appear in the switcher.
 
+### D-019 — Per-theme wallpapers, prefs.json ownership
+
+- Date: 2026-07-06 · Status: active
+- Wallpapers are per-theme, build-derived: `mkThemeManifest` globs
+  `themes/<name>/assets/wallpapers/` (png/jpg/jpeg/webp, natural-sorted) into
+  `assets.wallpapers` as store paths sharing the assets-dir store copy. Themes
+  never hand-list wallpapers; the list may be empty (contract's "required ≥1"
+  amended in the same commit, D-013 procedure). The index inherits the list;
+  browsing/cycling operates on the ACTIVE theme's set only.
+- `$XDG_STATE_HOME/rice/prefs.json` (`{ schemaVersion, wallpapers.<theme> }`)
+  is written ONLY by `services/prefs/PrefsState`. Services never import core,
+  so PrefsState is theme-blind: the module-layer `WallpaperCommands` singleton
+  is the single apply path — `WallpaperState.setWallpaper(path)` +
+  `PrefsState.recordWallpaper(Theme.activeName, path)` in one user-initiated
+  step. Observation-based recording (watching `WallpaperState.current`) was
+  rejected: during a rice switch the pointer and persist-file reloads race and
+  would corrupt the old theme's memory.
+- `rice-switch` READS prefs.json at switch time (jq): remembered wallpaper for
+  the target theme (re-matched by basename if the store path went stale), else
+  `wallpapers[0]`, else keep the current wallpaper. Restoration never writes
+  prefs — no feedback loop.
+- Why: wallpaper identity is part of a rice; cycling across themes' sets or
+  losing your pick on every switch breaks that. One writer keeps the state
+  file debuggable; explicit-apply recording keeps it correct.
+
 ---
 
 ## Legacy imports
