@@ -238,12 +238,40 @@ contract; fix what it breaks.
   rejected; switcher screenshot confirms themed cards + active ring.
 - Requires a rebuild to land on the host (themes.json, rice-switch, keybind).
 
+## Phase 11 — Per-theme wallpapers + wallpaper switcher ⬜
+
+Each rice owns its wallpaper set; browsing/cycling stays inside the active
+theme's set. Builds on machinery that already anticipates it: the D-018 index
+carries `wallpapers` per theme, `rice-switch` applies the first entry, and
+`WallpaperState.setWallpaper` (Phase 5) still has no UI caller.
+
+- Themes ship `assets/wallpapers/` (role dir per theme-authoring skill) and
+  list them in manifest `assets.wallpapers` — both LOTM and cyberpunk need
+  real files before any UI makes sense. Consider directory-globbing in
+  `mkThemeManifest` so themes don't hand-list every file.
+- Wallpaper switcher surface (`modules/wallpapers/`): grid of the ACTIVE
+  theme's wallpapers (from the manifest via `Theme`), current one marked,
+  click applies via injected/imported `WallpaperState` — first real caller of
+  that command path. Open/close like other center-stage surfaces (IPC +
+  keybind, Esc, click-outside, Motion specs).
+- Cycling: `next()` command (surface button + IPC `wallpapers next`, optional
+  keybind) stepping through the active theme's list — never across themes.
+- Per-theme wallpaper memory: remember the last-used wallpaper per theme in
+  `$XDG_STATE_HOME/rice/prefs.json` so switching rice restores *that* theme's
+  wallpaper, not just `wallpapers[0]`. This concretizes the `PrefsState`
+  service (ARCHITECTURE state category 3) and upgrades rice-switch's
+  orchestration from "first entry" to "last used, else first". Who reads
+  prefs.json at switch time (rice-switch via jq vs PrefsState in-shell) is a
+  design decision for the phase — keep one writer.
+- Exit: each theme cycles only its own wallpapers; a rice switch restores the
+  theme's remembered wallpaper; zero hardcoded paths outside theme manifests.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · media controls (MprisState) · power menu · clipboard
-history · wallpaper picker · dashboard widgets (system monitor, weather, dev
-widgets) · optional dock · LOTM plugin widgets (tarot/ritual — proves the plugin
-contract) · ambient effects tier (Phase 4+ of `contracts/motion-contract.md`).
+history · dashboard widgets (system monitor, weather, dev widgets) · optional
+dock · LOTM plugin widgets (tarot/ritual — proves the plugin contract) ·
+ambient effects tier (Phase 4+ of `contracts/motion-contract.md`).
 
 ## Deferred / future
 
