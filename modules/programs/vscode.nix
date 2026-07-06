@@ -126,6 +126,7 @@ _: {
                 [
                   # Copilot
                   github.copilot-chat
+                  anthropic.claude-code
 
                   # Editor
                   editorconfig.editorconfig
@@ -828,8 +829,9 @@ _: {
 
             fish.interactiveShellInit = ''
               if test "$TERM_PROGRAM" = "vscode"
-                # Preserve existing PATH and prepend our tools
-                set -gx PATH "${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}" $PATH
+                # Fish PATH is list-based, so split our colon-delimited path first.
+                set -l vscode_paths (string split : "${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}")
+                set -gx PATH $vscode_paths $PATH
 
                 # Ensure SSH agent is available
                 if test -z "$SSH_AUTH_SOCK"
