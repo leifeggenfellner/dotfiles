@@ -23,8 +23,9 @@ _: {
       handle-monitor = pkgs.callPackage ./_handle-monitor.nix { inherit pkgs; };
       thunderbolt-wait = pkgs.callPackage ./_thunderbolt-wait.nix { inherit pkgs; };
       lock-screen = pkgs.callPackage ./_lock-screen.nix {
-        inherit pkgs;
+        inherit pkgs lib;
         monitorPriority = lockPriority;
+        inherit (config.theme.style) accentPrimary opacityLockscreen;
       };
       gum-scripts = pkgs.callPackage ./_gum-scripts.nix {
         inherit pkgs;

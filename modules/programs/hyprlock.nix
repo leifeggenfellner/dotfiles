@@ -12,14 +12,25 @@
       s = config.theme.style;
       fmt = import ../themes/_fmt.nix lib;
       cfg = config.program.hyprlock;
-      accent = c.${s.accentPrimary};
+
+      # Themeable hyprlang variables (D-020): defaults baked here from
+      # the legacy bridge; lock-screen overrides the definition lines
+      # at lock time from the active rice manifest. Widgets reference
+      # $rice_* only. HM emits "$"-prefixed keys before all sections
+      # (importantPrefixes), so variable-before-use ordering holds.
+      vars = import ./_hyprlock-vars.nix {
+        inherit (s) accentPrimary opacityLockscreen;
+      };
+      varDefaults =
+        lib.mapAttrs' (n: v: lib.nameValuePair ("$" + n) (fmt.rgba c.${v.key} (toString v.alpha))) vars.colors
+        // lib.mapAttrs' (n: _: lib.nameValuePair ("$" + n) s.fontMono) vars.fonts;
 
       statusColors = {
-        check_color = fmt.rgba c.green "1.0";
-        fail_color = fmt.rgba c.red "1.0";
-        bothlock_color = fmt.rgba c.yellow "1.0";
-        capslock_color = fmt.rgba c.peach "1.0";
-        numlock_color = fmt.rgba c.sky "1.0";
+        check_color = "$rice_ok";
+        fail_color = "$rice_danger";
+        bothlock_color = "$rice_warn";
+        capslock_color = "$rice_caps";
+        numlock_color = "$rice_num";
       };
     in
     {
@@ -42,7 +53,7 @@
           enable = true;
           package = inputs.hyprlock.packages.${pkgs.stdenv.hostPlatform.system}.hyprlock;
 
-          settings = {
+          settings = varDefaults // {
             general = {
               immediate_render = true;
               hide_cursor = false;
@@ -52,6 +63,7 @@
               {
                 monitor = "";
                 path = "${wallpaper}";
+                color = "$rice_base";
                 blur_passes = 2;
                 contrast = 0.9;
                 brightness = 0.8;
@@ -68,9 +80,9 @@
                 dots_size = 0.16;
                 dots_spacing = 0.3;
                 dots_center = true;
-                outer_color = fmt.rgba accent "${toString s.opacityLockscreen}";
-                inner_color = fmt.rgba c.surface0 "${toString s.opacityLockscreen}";
-                font_color = fmt.rgba c.text "1.0";
+                outer_color = "$rice_accent";
+                inner_color = "$rice_surface";
+                font_color = "$rice_text";
                 fade_on_empty = false;
                 placeholder_text = "hunter2";
                 hide_input = false;
@@ -86,9 +98,9 @@
               {
                 monitor = cfg.defaultMonitor;
                 text = "$TIME";
-                color = fmt.rgba accent "1.0";
+                color = "$rice_accent_solid";
                 font_size = s.fontSizeLockTime;
-                font_family = s.fontMono;
+                font_family = "$rice_font_display";
                 position = "0, 120";
                 halign = "center";
                 valign = "center";
@@ -97,9 +109,9 @@
               {
                 monitor = cfg.defaultMonitor;
                 text = "cmd[update:60000] TZ='Europe/Oslo' LC_TIME=nb_NO.UTF-8 date +\"%A, %d. %B\"";
-                color = fmt.rgba c.lavender "0.9";
+                color = "$rice_date";
                 font_size = s.fontSizeLockDate;
-                font_family = s.fontMono;
+                font_family = "$rice_font_display";
                 position = "0, 20";
                 halign = "center";
                 valign = "center";
@@ -108,9 +120,9 @@
               {
                 monitor = cfg.defaultMonitor;
                 text = "When the issue is labeled \"Bra for nybegynnere\" ༼ ༎ຶ ᆺ ༎ຶ༽";
-                color = fmt.rgba c.subtext1 "0.5";
+                color = "$rice_quote";
                 font_size = s.fontSizeLockQuote;
-                font_family = s.fontMono;
+                font_family = "$rice_font_mono";
                 position = "0, -60";
                 halign = "center";
                 valign = "center";

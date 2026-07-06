@@ -9,6 +9,8 @@
 #
 # Wallpapers (D-019): assets/wallpapers/ is enumerated at eval into
 # `assets.wallpapers` (sorted store paths); themes never hand-list.
+# Same for assets/lockscreen/ → `assets.lockscreen` (D-020): the
+# lock-screen script prefers its first entry over the live wallpaper.
 { pkgs, lib }:
 { themeName, themeDir }:
 let
@@ -55,21 +57,23 @@ let
 
   rasterize = theme.assets.rasterize or [ ];
 
-  # Build-time wallpaper enumeration (D-019): assets/wallpapers/ is
+  # Build-time image enumeration (D-019/D-020): image-role dirs are
   # globbed, never hand-listed. Missing/empty dir → []. Entries are
-  # "${assetsRoot}/wallpapers/<file>" so they share the assets-dir
+  # "${assetsRoot}/<subdir>/<file>" so they share the assets-dir
   # store copy (and its GC context) with assets.root.
-  wallpaperExts = [ ".png" ".jpg" ".jpeg" ".webp" ];
-  wallpapersSrc = themeDir + "/assets/wallpapers";
+  imageExts = [ ".png" ".jpg" ".jpeg" ".webp" ];
   assetsRoot = "${themeDir + "/assets"}";
-  wallpapers =
-    if builtins.pathExists wallpapersSrc then
-      map (f: "${assetsRoot}/wallpapers/${f}")
+  globImages = subdir:
+    let src = themeDir + "/assets/${subdir}"; in
+    if builtins.pathExists src then
+      map (f: "${assetsRoot}/${subdir}/${f}")
         (lib.naturalSort (lib.filter
-          (n: lib.any (e: lib.hasSuffix e (lib.toLower n)) wallpaperExts)
+          (n: lib.any (e: lib.hasSuffix e (lib.toLower n)) imageExts)
           (lib.attrNames (lib.filterAttrs (_: t: t == "regular")
-            (builtins.readDir wallpapersSrc)))))
+            (builtins.readDir src)))))
     else [ ];
+  wallpapers = globImages "wallpapers";
+  lockscreen = globImages "lockscreen"; # lock-screen uses entry [0]
 
   rasterChecks = map
     (r:
@@ -93,7 +97,7 @@ let
 
   manifest = theme // {
     assets = (removeAttrs (theme.assets or { }) [ "rasterize" ]) // {
-      inherit raster wallpapers;
+      inherit raster wallpapers lockscreen;
       # Interpolation (not toString) so the store-path CONTEXT lands in
       # the JSON — otherwise the source snapshot is not a GC reference
       # of the manifest and can be collected while the manifest lives.

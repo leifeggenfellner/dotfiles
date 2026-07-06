@@ -235,6 +235,35 @@ Status values: `active` | `superseded by D-NNN`.
   losing your pick on every switch breaks that. One writer keeps the state
   file debuggable; explicit-apply recording keeps it correct.
 
+### D-020 — Lockscreen resolves the rice theme at lock time
+
+- Date: 2026-07-07 · Status: active
+- hyprlock.conf declares hyprlang `$rice_*` variables (12 colors + 2 fonts)
+  with rebuild-time defaults from the D-012 legacy bridge; widgets reference
+  variables, never literals. At lock time `lock-screen` resolves
+  pointer → `themes.json` index → active manifest (same order and jq idioms
+  as `rice-switch`, read-only) and rewrites only the variable-definition
+  lines: `.palette.legacy.<key>` → `rgba(<hex><alpha>)`,
+  `.tokens.typography.families.{display,mono}` → font families. The variable
+  spec lives once in `modules/programs/_hyprlock-vars.nix`, shared by the HM
+  config and the script. Absent index/pointer/manifest → defaults stand;
+  non-rice hosts and direct `hyprlock` runs are unchanged.
+- Lock background precedence: the theme's `assets.lockscreen[0]` (new
+  optional image role, globbed at build like D-019 wallpapers — LOTM ships a
+  Klein still derived from authored video; the video itself is not a repo
+  asset since nothing in the stack renders video) → live wallpaper persist
+  file → baked default.
+- Scoping note on D-018: "ManifestLoader is the only pointer reader/watcher"
+  describes the QML runtime. Shell tools (`rice-switch`, `lock-screen`) are
+  invocation-time read-only consumers of pointer + index — never writers
+  (except rice-switch on the pointer), never watchers.
+- D-003's lockscreen clause is delivered lazily: the theme resolves at the
+  next lock, which is the first moment it is visible.
+- Also recorded: the script's original monitor/wallpaper seds matched
+  `key = value` while HM's `toHyprconf` emits `key=value` — both were silent
+  no-ops (the lockscreen never followed the live wallpaper). Patterns are now
+  whitespace-tolerant EREs anchored on the key.
+
 ---
 
 ## Legacy imports
