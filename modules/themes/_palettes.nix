@@ -264,6 +264,6 @@
   };
 }
 
-# Rice theme palettes: derived from each theme's manifest (D-012),
-# never duplicated here.
-// import ../rice/nix/_legacy-palettes.nix
+  # Rice theme palettes: derived from each theme's manifest (D-012),
+  # never duplicated here.
+  // import ../rice/nix/_legacy-palettes.nix
