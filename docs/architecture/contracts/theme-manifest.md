@@ -60,6 +60,9 @@ exclusively through the `Theme` facade.
     # wallpapers is NOT declared here (D-019): assets/wallpapers/ is
     # globbed at build (png/jpg/jpeg/webp, sorted) into
     # assets.wallpapers as store paths; may be empty; never hand-listed.
+    # Likewise assets/lockscreen/ → assets.lockscreen (D-020, optional):
+    # the lock-screen script uses entry [0] as the lock background,
+    # falling back to the live wallpaper when absent.
     logo = null;                  # optional
     launcherIcon = null;          # optional
     icons = { };                  # optional: semantic icon-name overrides (D-016).

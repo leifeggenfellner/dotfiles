@@ -272,6 +272,33 @@ theme's set. Concretized as D-019.
   → lotm restored the remembered (non-first) wallpaper; screenshot confirms
   the themed grid with current-wallpaper ring. Requires a rebuild to land.
 
+## Phase 12 — Live lockscreen theming ✅
+
+Concretized as D-020: the lockscreen joins the rice at lock time.
+
+- ✅ hyprlock.conf declares `$rice_*` hyprlang variables (12 colors + 2
+  fonts) with rebuild defaults from the D-012 bridge; the spec lives once in
+  `modules/programs/_hyprlock-vars.nix`, shared with the lock-screen script.
+- ✅ `lock-screen` resolves pointer → index → active manifest (read-only) and
+  rewrites the variable lines: legacy palette → `rgba(hex+alpha)`, display/
+  mono fonts (LOTM locks in Cinzel, cyberpunk in Orbitron). `--print-config`
+  dry-run flag for testing.
+- ✅ New optional `assets/lockscreen/` role (globbed like D-019 wallpapers via
+  the generalized `globImages`): lock background precedence = theme lockscreen
+  asset → live wallpaper → baked. LOTM ships a 4K Klein/Backlund still
+  (derived from authored video — hyprlock cannot render video) and the four
+  extracted frames joined its wallpaper set.
+- ✅ Latent bug fixed: the script's monitor/wallpaper seds matched
+  `key = value` but HM emits `key=value` — both had been silent no-ops
+  (lockscreen never followed the live wallpaper). Now whitespace-tolerant
+  EREs.
+- Verified: home generation builds; generated conf has vars before sections
+  and only expected diffs; sandboxed dry-runs — lotm → gold/Cinzel/Klein
+  lockscreen, cyberpunk → cyan/Orbitron/live wallpaper, bogus pointer →
+  index default, missing index → defaults byte-stable, monitor sed fires and
+  leaves the background's empty `monitor=` alone. Real-lock check after
+  rebuild: `rice-switch cyberpunk` + lock → cyan/Orbitron without rebuild.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · media controls (MprisState) · power menu · clipboard
