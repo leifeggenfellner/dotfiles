@@ -1,11 +1,10 @@
 _: {
   flake.homeModules.programs-mugge =
-    {
-      osConfig,
-      pkgs,
-      inputs,
-      lib,
-      ...
+    { osConfig
+    , pkgs
+    , inputs
+    , lib
+    , ...
     }:
     let
       muggePkgs = inputs.mugge.packages.${pkgs.stdenv.hostPlatform.system};
