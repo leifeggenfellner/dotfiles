@@ -8,7 +8,7 @@ _: {
           cfg = config.rice;
           themeType = lib.types.enum [
             "lotm"
-            "pokemon"
+            "cyberpunk"
           ];
         in
         {
@@ -52,14 +52,6 @@ _: {
                 };
               };
 
-              pokemon = {
-                assetsDir = lib.mkOption {
-                  type = lib.types.path;
-                  default = ./rice/themes/pokemon/assets;
-                  example = "./modules/rice/themes/pokemon/assets";
-                  description = "Pokemon theme asset directory.";
-                };
-              };
             };
           };
         };
@@ -72,13 +64,6 @@ _: {
           };
         };
 
-      rice-theme-pokemon =
-        { config, lib, ... }:
-        {
-          config = lib.mkIf (config.rice.enable && config.rice.theme == "pokemon") {
-            # Pokemon-specific settings will be added when this theme is implemented.
-          };
-        };
     };
 
     homeModules = {

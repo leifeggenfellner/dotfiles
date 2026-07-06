@@ -4,4 +4,5 @@
 # _theme.nix — never a duplicated color table.
 {
   lotm = (import ../themes/lotm/_theme.nix).palette.legacy;
+  cyberpunk = (import ../themes/cyberpunk/_theme.nix).palette.legacy;
 }

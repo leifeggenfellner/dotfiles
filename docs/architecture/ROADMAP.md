@@ -185,10 +185,31 @@ listed above and get exercised as their surfaces land.
 Phase 8 complete (2026-07-06): the framework exists — descriptor registry,
 injected services, themed popouts, tray, Nix bridge, single runtime tree.
 
-## Phase 9 — Second theme (validation) ⬜
+## Phase 9 — Second theme (validation) ✅
 
-One theme only (pokemon or cyberpunk, not both), data-first. Purpose: prove the
+One theme only (cyberpunk chosen over pokemon), data-first. Purpose: prove the
 contract; fix what it breaks.
+
+- ✅ `modules/rice/themes/cyberpunk/_theme.nix` — deliberately data-ONLY
+  manifest: neon token set, Orbitron/Chakra Petch typography, hard radii,
+  snappier motion durations, glyph-only icon overrides, glyph workspace
+  identities, `palette.legacy` bridge entry. Zero asset files, zero plugins.
+- ✅ Contract gap found and fixed (the phase's purpose): `WorkspacesGlance`
+  rendered identity icons only as images, so a data-only theme couldn't
+  express workspace identity. The widget now applies the D-016 heuristic to
+  `settings.items[].icon` — "/" means assetUrl image, anything else is a font
+  glyph tinted with the item's color. Additive, widget-owned schema; no
+  contract text change needed (widget-contract leaves settings widget-defined).
+- ✅ Nix wiring: `cyberpunk` in the `rice.theme` enum; legacy palette entry in
+  `_legacy-palettes.nix`. The stale pre-contract pokemon scaffold (README-only,
+  described a structure the contract replaced) retired along with its dead
+  enum entry and asset-dir options.
+- Verified: both manifests build via `mkThemeManifest`; `rice-lint` clean;
+  shitbox system evals with either theme active (D-012 scheme follows);
+  12s live shell smoke test per theme (`RICE_MANIFEST` dev path) — zero QML
+  errors on both, confirming the glyph arm and the unchanged image arm.
+- Still open (by design): no wallpapers/preview.png yet — those become
+  meaningful with the Phase 10 switcher.
 
 ## Phase 10 — Rice switcher ⬜
 
