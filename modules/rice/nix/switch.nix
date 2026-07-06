@@ -49,10 +49,25 @@ _: {
         mkdir -p "$state_dir"
         printf %s "$theme" > "$pointer.tmp" && mv "$pointer.tmp" "$pointer"
 
-        # Wallpaper orchestration: first theme wallpaper, same awww flow
-        # and persist file as WallpaperState / wallpaper-restore. Themes
-        # without wallpapers keep the current one.
-        wp="$("$jq" -r --arg n "$theme" '.themes[$n].wallpapers[0] // empty' "$index")"
+        # Wallpaper orchestration (D-019): the theme's remembered
+        # last-used wallpaper (prefs.json — written only by PrefsState;
+        # read-only here), else its first wallpaper from the index. A
+        # remembered path gone stale (rebuilt store hash) is re-matched
+        # by basename before falling back. Themes without wallpapers
+        # keep the current one. Same awww flow and persist file as
+        # WallpaperState / wallpaper-restore.
+        prefs="$state_dir/prefs.json"
+        wp=""
+        if [ -r "$prefs" ]; then
+          wp="$("$jq" -r --arg n "$theme" '.wallpapers[$n] // empty' "$prefs" 2>/dev/null || true)"
+        fi
+        if [ -n "$wp" ] && [ ! -r "$wp" ]; then
+          wp="$("$jq" -r --arg n "$theme" --arg b "$(basename "$wp")" \
+            '.themes[$n].wallpapers[] | select(endswith("/" + $b))' "$index" | head -n1)"
+        fi
+        if [ -z "$wp" ] || [ ! -r "$wp" ]; then
+          wp="$("$jq" -r --arg n "$theme" '.themes[$n].wallpapers[0] // empty' "$index")"
+        fi
         if [ -n "$wp" ] && [ -r "$wp" ] && command -v awww >/dev/null; then
           awww img "$wp" --transition-type fade --transition-duration 1.0 --transition-fps 60 &&
             mkdir -p "$HOME/.config/wallpaper" &&

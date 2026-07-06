@@ -1,0 +1,3 @@
+singleton WallpaperCommands 1.0 WallpaperCommands.qml
+WallpaperPicker 1.0 WallpaperPicker.qml
+WallpaperIpc 1.0 WallpaperIpc.qml
