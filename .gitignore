@@ -201,3 +201,7 @@ Cargo.lock
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
 extension/resources/native-binary/claude
+
+# Exceptions
+!modules/rice/runtime/quickshell/modules/debug/
+!modules/rice/runtime/quickshell/modules/debug/**
