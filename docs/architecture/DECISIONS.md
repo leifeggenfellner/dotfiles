@@ -326,6 +326,32 @@ wallpapers } }`, store paths). The mutable pointer `$XDG_STATE_HOME/rice/active`
   but a parallel `surfaces.*` manifest tree would duplicate machinery and invite
   split ownership.
 
+### D-024 — Sound, media, and correspondence remain event-bound
+
+- Date: 2026-07-07 · Status: active
+- Theme sounds are assets, not tokens: `assets.sounds.<event>` maps a semantic
+  event name to a theme asset path, resolved only through `Theme.soundUrl()`.
+  `core/Sound.qml` is a theme-neutral facade that plays semantic events via the
+  Nix-owned `rice-sound-play` command. Sounds default muted through
+  `PrefsState.sound.muted`; the modules-layer `SoundController` bridges that
+  durable pref onto `ShellState.soundMuted` so core never imports services.
+- Sound may fire only from user-visible, user-driven event edges. Notification
+  sounds are emitted by the toast surface after a toast is appended; DND or any
+  suppressed visual means no sound. Background state loads, boot hydration,
+  timers, and ambient effects never play sound.
+- Media controls use Quickshell's native MPRIS service (D-008 tier 1) wrapped by
+  `services/mpris/MprisState`; widgets receive it by descriptor injection
+  (D-009). The built-in `media` widget is the Gramophone: metadata, progress,
+  previous/play-next controls, no player-specific UI state.
+- Notification parity is completed in the Quickshell path: `NotificationState`
+  exposes actions, inline reply metadata, images/urgency, and command methods;
+  Correspondence UI renders urgency styling, actions, replies, dismiss/clear,
+  and a durable `PrefsState.notifications.dnd` flag bridged into `ShellState`.
+- Why: audio is part of the desktop atmosphere, but it is intrusive by default.
+  Keeping sound event-bound, muted until explicitly enabled, and visually
+  twinned preserves the rice fantasy without creating hidden background noise or
+  a theme-specific runtime path.
+
 ---
 
 ## Legacy imports

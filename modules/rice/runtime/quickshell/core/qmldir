@@ -3,4 +3,5 @@ singleton ManifestLoader 1.0 ManifestLoader.qml
 singleton ShellState 1.0 ShellState.qml
 singleton Motion 1.0 Motion.qml
 singleton Effects 1.0 Effects.qml
+singleton Sound 1.0 Sound.qml
 MotionAnim 1.0 MotionAnim.qml

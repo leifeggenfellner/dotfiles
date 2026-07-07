@@ -8,6 +8,16 @@ _: {
     let
       cfg = osConfig.rice or { enable = false; };
 
+      rice-sound-play = pkgs.writeShellScriptBin "rice-sound-play" ''
+        set -euo pipefail
+        file="''${1:-}"
+        if [ -z "$file" ]; then
+          echo "rice-sound-play: missing sound file" >&2
+          exit 64
+        fi
+        exec ${pkgs.pipewire}/bin/pw-play --volume 0.35 "$file"
+      '';
+
       rice-shell = pkgs.writeShellScriptBin "rice-shell" ''
         set -euo pipefail
 
@@ -59,6 +69,7 @@ _: {
         home.packages = [
           pkgs.quickshell
           rice-shell
+          rice-sound-play
         ];
         xdg.configFile."quickshell/rice".source = ../runtime/quickshell;
       };

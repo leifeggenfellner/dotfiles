@@ -27,6 +27,8 @@ Item {
     // modules layer may import. Core and components only READ these.
     property bool reduceMotion: false
     property bool ambientActive: false
+    property bool soundMuted: true
+    property bool doNotDisturb: false
 
     // One-shot startup reveal: flips shortly after load so surface
     // contents fade in (Motion.awaken) instead of popping. UI binds

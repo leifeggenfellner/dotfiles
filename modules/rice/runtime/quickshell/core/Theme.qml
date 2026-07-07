@@ -164,6 +164,11 @@ QtObject {
         return iconUrl(spec);
     }
 
+    function soundUrl(name) {
+        const spec = (ManifestLoader.manifest.assets.sounds ?? {})[name];
+        return spec ? assetUrl(spec) : "";
+    }
+
     // Per-widget manifest config (contracts/widget-contract.md).
     function widgetConfig(widgetId) {
         return ManifestLoader.manifest.widgets[widgetId] ?? ({});

@@ -3,6 +3,7 @@ import "./modules/ambient"
 import "./modules/bar"
 import "./modules/launcher"
 import "./modules/dashboard"
+import "./modules/sound"
 import "./modules/osd"
 import "./modules/notifications"
 import "./modules/switcher"
@@ -21,6 +22,8 @@ ShellRoot {
     WallpaperIpc {}
 
     AmbientController {}
+
+    SoundController {}
 
     Variants {
         model: Quickshell.screens

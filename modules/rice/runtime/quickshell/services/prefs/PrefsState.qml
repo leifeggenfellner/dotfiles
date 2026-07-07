@@ -6,7 +6,7 @@ import Quickshell.Io
 // ── PrefsState — REAL ─────────────────────────────────────────
 // Sole WRITER of $XDG_STATE_HOME/rice/prefs.json (D-019). Durable
 // user drift that is not theme data and not system state: last-used
-// wallpaper per theme, plus global motion prefs (D-021/D-022).
+// wallpaper per theme, plus global motion/sound/notification prefs.
 // rice-switch READS the file at switch time; nothing else touches it.
 //
 // Theme-blind by layer rule (services never import core): callers
@@ -14,9 +14,11 @@ import Quickshell.Io
 // WallpaperCommands supplies Theme.activeName.
 //
 //   state:    available, lastWallpaper(theme),
-//             reduceMotion, ambientMode ("auto" | "off")
+//             reduceMotion, ambientMode ("auto" | "off"),
+//             soundMuted, doNotDisturb
 //   commands: recordWallpaper(theme, path),
-//             setReduceMotion(on), setAmbientMode(mode)
+//             setReduceMotion(on), setAmbientMode(mode),
+//             setSoundMuted(on), setDoNotDisturb(on)
 
 Item {
     id: prefs
@@ -24,7 +26,7 @@ Item {
     readonly property bool mock: false
     readonly property bool available: true
 
-    property var _data: ({ schemaVersion: 1, wallpapers: {} })
+    property var _data: ({ schemaVersion: 1, wallpapers: {}, sound: { muted: true }, notifications: { dnd: false } })
 
     readonly property string prefsPath: {
         const env = Quickshell.env("XDG_STATE_HOME");
@@ -39,6 +41,8 @@ Item {
     // AmbientController, which pushes them onto ShellState.
     readonly property bool reduceMotion: (_data.motion ?? {}).reduce ?? false
     readonly property string ambientMode: (_data.motion ?? {}).ambient ?? "auto"
+    readonly property bool soundMuted: (_data.sound ?? {}).muted ?? true
+    readonly property bool doNotDisturb: (_data.notifications ?? {}).dnd ?? false
 
     function setReduceMotion(on) {
         _writeMotion("reduce", !!on);
@@ -52,12 +56,24 @@ Item {
         _writeMotion("ambient", mode);
     }
 
+    function setSoundMuted(on) {
+        _writeBucket("sound", "muted", !!on);
+    }
+
+    function setDoNotDisturb(on) {
+        _writeBucket("notifications", "dnd", !!on);
+    }
+
     function _writeMotion(key, value) {
-        if (((_data.motion ?? {})[key] ?? null) === value)
+        _writeBucket("motion", key, value);
+    }
+
+    function _writeBucket(bucket, key, value) {
+        if (((_data[bucket] ?? {})[key] ?? null) === value)
             return;
         const next = JSON.parse(JSON.stringify(_data));
-        next.motion = next.motion ?? {};
-        next.motion[key] = value;
+        next[bucket] = next[bucket] ?? {};
+        next[bucket][key] = value;
         prefs._data = next;
         file.setText(JSON.stringify(next, null, 2) + "\n");
     }

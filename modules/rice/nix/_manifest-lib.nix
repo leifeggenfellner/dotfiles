@@ -93,6 +93,15 @@ let
       else true)
     (theme.assets.icons or { });
 
+  soundChecks = lib.mapAttrsToList
+    (name: value:
+      if !builtins.isString value
+      then fail "sound '${name}' must be a file path string"
+      else if !builtins.pathExists (themeDir + "/assets/${value}")
+      then fail "sound '${name}' points to missing file assets/${value}"
+      else true)
+    (theme.assets.sounds or { });
+
   rasterize = theme.assets.rasterize or [ ];
 
   # Build-time image enumeration (D-019/D-020): image-role dirs are
@@ -143,7 +152,7 @@ let
     };
   };
 
-  checks = tokenChecks ++ metaChecks ++ iconChecks ++ rasterChecks
+  checks = tokenChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
     ++ motionExtraChecks ++ effectChecks;
 in
 {

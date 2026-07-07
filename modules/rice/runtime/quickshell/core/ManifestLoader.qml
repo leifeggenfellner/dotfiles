@@ -81,8 +81,15 @@ Item {
                 "logout": "󰍃",
                 "reboot": "󰜉",
                 "refresh": "󰑐",
+                "play": "󰐊",
+                "pause": "󰏤",
+                "previous": "󰒮",
+                "next": "󰒭",
+                "bell": "󰂚",
+                "bell-off": "󰂛",
                 "unknown": "󰋗"
             },
+            sounds: {},
             raster: {}
         },
         widgets: {}
