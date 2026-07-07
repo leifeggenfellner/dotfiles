@@ -21,6 +21,23 @@ Item {
     property bool osdVisible: false
     property bool debugVisible: false
 
+    // ── Ambient & motion flags (D-021/D-022) ──────────────────
+    // Pushed by modules/ambient/AmbientController: the policy needs
+    // services (prefs, power, compositor), which nothing below the
+    // modules layer may import. Core and components only READ these.
+    property bool reduceMotion: false
+    property bool ambientActive: false
+
+    // One-shot startup reveal: flips shortly after load so surface
+    // contents fade in (Motion.awaken) instead of popping. UI binds
+    // to the flag; with motion disabled the reveal is instant.
+    property bool awakened: false
+    Timer {
+        interval: 120
+        running: !shell.awakened
+        onTriggered: shell.awakened = true
+    }
+
     // Single-open popout (L-002): the widgetId whose popout is up.
     property string activePopout: ""
 

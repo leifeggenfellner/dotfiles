@@ -81,7 +81,8 @@ theme plugins → {core, components, utils} + injected services only
 1. **System state** — owned by services; widgets read, commands go through service
    methods ([service-contract](contracts/service-contract.md)).
 2. **Shell UI state** — `core/ShellState.qml`: active popout, launcher visibility,
-   OSD queue, debug overlay.
+   OSD queue, debug overlay, plus governor-pushed flags (`reduceMotion`,
+   `ambientActive` — written only by `modules/ambient/AmbientController`, D-021).
 3. **User prefs** — `$XDG_STATE_HOME/rice/`. The active-theme pointer is written
    only by `rice-switch` and read/watched by `core/ManifestLoader` as manifest-
    resolution input (D-018); `prefs.json` is written only by the `PrefsState`

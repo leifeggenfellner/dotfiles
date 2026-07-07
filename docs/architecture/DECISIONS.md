@@ -264,6 +264,51 @@ Status values: `active` | `superseded by D-NNN`.
   no-ops (the lockscreen never followed the live wallpaper). Patterns are now
   whitespace-tolerant EREs anchored on the key.
 
+### D-021 — Ambient effects engine (tokens.effects + governor)
+
+- Date: 2026-07-07 · Status: active
+- The motion contract's ambient tier (T1) is realized as: an optional
+  closed-core `tokens.effects = { layers = [ { type; tint; opacity; … } ]; }`
+  block (validated at build; layer types v1: `fog`, `particles`, `vignette`;
+  tints are color TOKEN REFS like `"accent.primary"`, never literals — L-005).
+  Theme-neutral primitives live in `components/effects/`; `core/Effects.qml`
+  is the sole reader of the config and enforces budgets STRUCTURALLY
+  (≤ 4 layers, ≤ 12 particles, opacity caps) — what it does not emit cannot
+  render. Rendering happens in a per-monitor `modules/ambient/AmbientLayer`
+  (layer-shell Bottom, input-transparent, unmapped + unloaded when off, so
+  ambient-off steady state costs exactly zero).
+- The run/pause policy lives in ONE place: `modules/ambient/AmbientController`
+  composes PrefsState (reduce-motion, ambient mode `auto|off`) + PowerState
+  (on battery ⇒ pause) + HyprState (any fullscreen toplevel ⇒ pause) and
+  pushes verdicts onto `ShellState.ambientActive` / `ShellState.reduceMotion`.
+  This bridge exists because core/components may not import services; effect
+  primitives bind ShellState only.
+- prefs.json (D-019 file, same sole-writer rule) gains an additive `motion`
+  block: `{ reduce: bool, ambient: "auto"|"off" }`.
+- Why: atmosphere is the point of a rice, but D-006 forbids theming the
+  runtime and rule-of-import forbids effects reading system state; data-driven
+  neutral primitives + a single modules-layer governor give themes expressive
+  ambience while keeping the runtime boring, budgeted, and pausable.
+
+### D-022 — Motion v2: manifest easings honored, ceremonial, reduce-motion
+
+- Date: 2026-07-07 · Status: active
+- The manifest's named easing curves (`tokens.motion.easings`, declared in the
+  contract since v1 but silently ignored — Theme hardcoded enums) are now
+  resolved by `Theme` from curve-name strings, warn-and-default (OutCubic) on
+  unknown names. Optional `tokens.motion.durations.ceremonial` is added for
+  infrequent, deliberate moments (power menu, theme switch); it defaults to
+  `slow` so undeclaring themes keep one tempo. Both changes are additive —
+  schemaVersion stays 2.
+- The motion contract's global reduce-motion flag is concretized:
+  `PrefsState.reduceMotion` → pushed onto `ShellState.reduceMotion` by the
+  D-021 governor → folded into `Motion.enabled`, so every animation collapses
+  to instant through the existing spec mechanism.
+- Vocabulary: `awaken` joins (one-shot startup reveal of surface contents).
+  The motion vocabulary continues to grow only when a surface needs a name
+  (D-014 anti-speculation) — the LoTM plan's remaining names land with their
+  consuming phases, not ahead of them.
+
 ---
 
 ## Legacy imports

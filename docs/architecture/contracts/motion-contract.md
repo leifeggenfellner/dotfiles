@@ -7,11 +7,18 @@ Motion exists to reinforce state changes and atmosphere — never for its own sa
 
 ```text
 tokens.motion.durations  { fast, base, slow, overlay }      # ms
+tokens.motion.durations.ceremonial   # OPTIONAL (D-022): rare, deliberate
+                                     # moments; defaults to slow
 tokens.motion.easings    { standard, enter, exit, emphasis } # named curve specs
+                                     # (Qt easing names, resolved by Theme;
+                                     # unknown → warn + OutCubic, D-022)
 tokens.motion.intensity  "calm" | "lively"                   # global scaler hint
 tokens.motion.ambient    bool                                 # opt-in ambient tier
 tokens.motion.enabled    bool                                 # theme-level kill switch
 tokens.sound             { event → file }                     # optional event map
+tokens.effects.layers    [ { type, tint, … } ]                # OPTIONAL (D-021):
+                                     # ambient atmosphere config, see
+                                     # theme-manifest.md; budgets below apply
 ```
 
 ## The Motion singleton
@@ -42,9 +49,15 @@ Rules:
 | **T2** | shader effects | Per-theme opt-in. Must ship a T0 degradation path; failure to compile falls back silently. |
 
 **Ambient tier:** themes may declare idle atmosphere effects (T1/T2) via
-`tokens.motion.ambient = true`. Ambient effects run only when ambient is on AND
-reduce-motion is off, pause on fullscreen, and count against the budgets below.
-This is the single governed exception to rule 2 (L-007 generalized by D-010).
+`tokens.motion.ambient = true` plus `tokens.effects.layers` (D-021). Ambient
+effects run only when ambient is on AND reduce-motion is off, pause on
+fullscreen and on battery, and count against the budgets below. This is the
+single governed exception to rule 2 (L-007 generalized by D-010).
+Mechanism (D-021): `core/Effects` resolves and clamps the config;
+`modules/ambient/AmbientController` is the one place the run/pause policy
+lives, pushing `ShellState.ambientActive`; per-monitor
+`modules/ambient/AmbientLayer` windows mount `components/effects/` primitives
+and unload entirely while paused (ambient-off steady state costs zero).
 
 ## Budgets
 

@@ -1,4 +1,5 @@
 import Quickshell
+import "./modules/ambient"
 import "./modules/bar"
 import "./modules/launcher"
 import "./modules/dashboard"
@@ -18,6 +19,13 @@ ShellRoot {
     NotificationIpc {}
 
     WallpaperIpc {}
+
+    AmbientController {}
+
+    Variants {
+        model: Quickshell.screens
+        AmbientLayer {}
+    }
 
     Variants {
         model: Quickshell.screens

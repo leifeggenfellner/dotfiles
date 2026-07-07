@@ -5,16 +5,18 @@ import Quickshell.Io
 
 // ── PrefsState — REAL ─────────────────────────────────────────
 // Sole WRITER of $XDG_STATE_HOME/rice/prefs.json (D-019). Durable
-// user drift that is not theme data and not system state — today:
-// last-used wallpaper per theme. rice-switch READS the file at
-// switch time; nothing else touches it.
+// user drift that is not theme data and not system state: last-used
+// wallpaper per theme, plus global motion prefs (D-021/D-022).
+// rice-switch READS the file at switch time; nothing else touches it.
 //
 // Theme-blind by layer rule (services never import core): callers
 // pass the theme name as an opaque key — the module-layer
 // WallpaperCommands supplies Theme.activeName.
 //
-//   state:    available, lastWallpaper(theme)
-//   commands: recordWallpaper(theme, path)
+//   state:    available, lastWallpaper(theme),
+//             reduceMotion, ambientMode ("auto" | "off")
+//   commands: recordWallpaper(theme, path),
+//             setReduceMotion(on), setAmbientMode(mode)
 
 Item {
     id: prefs
@@ -31,6 +33,33 @@ Item {
 
     function lastWallpaper(theme) {
         return (_data.wallpapers ?? {})[theme] ?? "";
+    }
+
+    // Motion prefs (D-021/D-022). Read by modules/ambient/
+    // AmbientController, which pushes them onto ShellState.
+    readonly property bool reduceMotion: (_data.motion ?? {}).reduce ?? false
+    readonly property string ambientMode: (_data.motion ?? {}).ambient ?? "auto"
+
+    function setReduceMotion(on) {
+        _writeMotion("reduce", !!on);
+    }
+
+    function setAmbientMode(mode) {
+        if (mode !== "auto" && mode !== "off") {
+            console.warn("PrefsState: ambient mode must be 'auto' or 'off', got", mode);
+            return;
+        }
+        _writeMotion("ambient", mode);
+    }
+
+    function _writeMotion(key, value) {
+        if (((_data.motion ?? {})[key] ?? null) === value)
+            return;
+        const next = JSON.parse(JSON.stringify(_data));
+        next.motion = next.motion ?? {};
+        next.motion[key] = value;
+        prefs._data = next;
+        file.setText(JSON.stringify(next, null, 2) + "\n");
     }
 
     function recordWallpaper(theme, path) {

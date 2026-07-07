@@ -107,6 +107,15 @@ PanelWindow {
         anchors.leftMargin: Theme.metrics.space.lg
         anchors.rightMargin: Theme.metrics.space.lg
 
+        // Startup reveal (D-022): the frame above is present and
+        // interactive immediately; only the contents fade in.
+        opacity: ShellState.awakened ? 1 : 0
+        Behavior on opacity {
+            MotionAnim {
+                spec: Motion.awaken
+            }
+        }
+
         Row {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
