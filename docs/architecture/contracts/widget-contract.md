@@ -11,18 +11,18 @@ the **only** interface plugin widgets may rely on (D-004).
 
 Every widget exports a descriptor with:
 
-| Field | Type | Meaning |
-|---|---|---|
-| `id` | string | unique, stable; the key used in manifest `widgets.<id>` |
-| `contractVersion` | int | version of this contract the widget targets (D-013) |
-| `enabled` | bool | resolved from manifest config; default true |
-| `region` | string | `left` / `center` / `right` (surface-defined set) |
-| `priority` | int | ordering within a region |
-| `monitorPolicy` | string | `all` / `primary` / surface-defined |
-| `services` | list<string> | service ids this widget needs, e.g. `["audio"]` (D-009) |
-| `settings` | object | widget-defined schema, filled from manifest `widgets.<id>.settings` |
-| `glanceItem` | Component | the always-visible representation |
-| `popoutContent` | Component? | optional; rendered inside the shared popout shell |
+| Field             | Type               | Meaning                                                                               |
+| ----------------- | ------------------ | ------------------------------------------------------------------------------------- |
+| `id`              | string             | unique, stable; the key used in manifest `widgets.<id>`                               |
+| `contractVersion` | int                | version of this contract the widget targets (D-013)                                   |
+| `enabled`         | bool               | resolved from manifest config; default true                                           |
+| `region`          | string             | surface-defined set: bar uses `left` / `center` / `right`; dashboard uses `dashboard` |
+| `priority`        | int                | ordering within a region                                                              |
+| `monitorPolicy`   | string             | `all` / `primary` / surface-defined                                                   |
+| `services`        | list&lt;string&gt; | service ids this widget needs, e.g. `["audio"]` (D-009)                               |
+| `settings`        | object             | widget-defined schema, filled from manifest `widgets.<id>.settings`                   |
+| `glanceItem`      | Component          | the always-visible representation                                                     |
+| `popoutContent`   | Component?         | optional; rendered inside the shared popout shell                                     |
 
 ## Lifecycle & rendering rules
 

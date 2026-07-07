@@ -371,11 +371,42 @@ namespace. The first daily-use center-stage surface is now real.
   under the available Wayland automation; manual type/launch remains the final
   host check after rebuild.
 
+## Phase 15 — Observatory + Vitals ✅
+
+Dashboard stops being a placeholder: it is now the Observatory, a descriptor-
+driven surface for real system vitals and flavor panels.
+
+- ✅ `services/system/SystemStatsState.qml` — real Linux vitals service: CPU
+  deltas from `/proc/stat`, memory from `/proc/meminfo`, root disk usage, and
+  first valid hwmon temperature. This is the deliberate D-008 tier 4 exception:
+  one short 3s poll because aggregate load/memory/disk/temperature have no
+  native event source in Quickshell.
+- ✅ `widgets/meters/SystemMetersDashboard.qml` — built-in dashboard widget with
+  four vial-style meters and real numbers always visible: CPU %, memory %,
+  temperature °C or `n/a`, and disk %. Danger thresholds tint only the affected
+  meter border/fill (the corruption-edge styling); no dashboard-wide alarm.
+- ✅ `widgets/epigraph/EpigraphDashboard.qml` — generic flavor-text widget fed
+  entirely by settings. Themes with no settings get neutral Observatory copy.
+- ✅ Dashboard compositor migrated to the registry: `Dashboard.qml` renders
+  `Registry.byRegion("dashboard")`, injects `systemStats`, closes on Esc or
+  click-outside, and only appears on the focused monitor. Widget contract text
+  now names `dashboard` as a surface-defined region.
+- ✅ Keybind: on rice hosts Super+D now toggles the dashboard; non-rice hosts keep
+  the old wofi binding. LOTM configures Observatory epigraphs and Beyonder meter
+  labels/colors through `widgets.epigraph.settings` and `widgets.meters.settings`;
+  Cyberpunk gets the plain widgets with no theme changes.
+- Verified: editor diagnostics clean; `rice-lint` clean; LOTM manifest + theme
+  index build; live dev shell with LOTM manifest loads, opens/closes the
+  dashboard through path-specific IPC, and reports no Phase 15 QML/runtime
+  warnings. `nix flake check --print-build-logs` is blocked by the pre-existing
+  `statix` warning in `modules/programs/vscode.nix` for repeated `home` keys;
+  no Phase 15 check failed before that blocker.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · media controls (MprisState) · power menu · clipboard
-history · dashboard widgets (system monitor, weather, dev widgets) · optional
-dock · LOTM plugin widgets (tarot/ritual — proves the plugin contract).
+history · weather/dev dashboard panels · optional dock · LOTM plugin widgets
+(tarot/ritual — proves the plugin contract).
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future

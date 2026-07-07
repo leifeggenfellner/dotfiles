@@ -799,66 +799,77 @@ _: {
             };
           };
 
-          home.packages = [
-            (pkgs.writeShellScriptBin "code-wrapped" ''
-              # Preserve important environment variables
-              export SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}"
-              export SSH_AGENT_PID="''${SSH_AGENT_PID:-}"
-              export GIT_ASKPASS="''${GIT_ASKPASS:-}"
-              export DISPLAY="''${DISPLAY:-}"
-              export XAUTHORITY="''${XAUTHORITY:-}"
+          home = {
+            packages = [
+              (pkgs.writeShellScriptBin "code-wrapped" ''
+                # Preserve important environment variables
+                export SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}"
+                export SSH_AGENT_PID="''${SSH_AGENT_PID:-}"
+                export GIT_ASKPASS="''${GIT_ASKPASS:-}"
+                export DISPLAY="''${DISPLAY:-}"
+                export XAUTHORITY="''${XAUTHORITY:-}"
 
-              # Preserve HOME and user directories
-              export HOME="''${HOME}"
-              export USER="''${USER}"
+                # Preserve HOME and user directories
+                export HOME="''${HOME}"
+                export USER="''${USER}"
 
-              # Add our specific tools to the front of the PATH but preserve the rest
-              export PATH="${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}:$PATH"
+                # Add our specific tools to the front of the PATH but preserve the rest
+                export PATH="${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}:$PATH"
 
-              # Clear Electron/Chrome flags that might cause warnings
-              unset ELECTRON_OZONE_PLATFORM_HINT
-              unset NIXOS_OZONE_WL
+                # Clear Electron/Chrome flags that might cause warnings
+                unset ELECTRON_OZONE_PLATFORM_HINT
+                unset NIXOS_OZONE_WL
 
-              # Use regular vscode package instead of FHS version to avoid permission issues
-              exec ${pkgs.vscode}/bin/code "$@"
-            '')
-          ];
+                # Use regular vscode package instead of FHS version to avoid permission issues
+                exec ${pkgs.vscode}/bin/code "$@"
+              '')
+            ];
 
-          home.activation.trustVscodeSources = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            vscode_state_db="${config.home.homeDirectory}/.config/Code/User/globalStorage/state.vscdb"
-            mkdir -p "$(dirname "$vscode_state_db")"
+            activation.trustVscodeSources = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+              vscode_state_db="${config.home.homeDirectory}/.config/Code/User/globalStorage/state.vscdb"
+              mkdir -p "$(dirname "$vscode_state_db")"
 
-            ${pkgs.sqlite}/bin/sqlite3 "$vscode_state_db" <<'SQL'
-            PRAGMA busy_timeout = 5000;
-            CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);
-            INSERT OR IGNORE INTO ItemTable (key, value)
-            VALUES ('content.trust.model.key', '{"uriTrustInfo":[]}');
-            UPDATE ItemTable
-            SET value = json_set(
-              CASE
-                WHEN json_valid(CAST(value AS TEXT)) THEN CAST(value AS TEXT)
-                ELSE '{"uriTrustInfo":[]}'
-              END,
-              '$.uriTrustInfo',
-              json(COALESCE(json_extract(CAST(value AS TEXT), '$.uriTrustInfo'), '[]'))
-            )
-            WHERE key = 'content.trust.model.key';
-            UPDATE ItemTable
-            SET value = json_set(
-              CAST(value AS TEXT),
-              '$.uriTrustInfo[#]',
-              json('{"uri":{"$mid":1,"scheme":"file","path":"${trustedSourcesPath}"},"trusted":true}')
-            )
-            WHERE key = 'content.trust.model.key'
-              AND NOT EXISTS (
-                SELECT 1
-                FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
-                WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
-                  AND json_extract(json_each.value, '$.uri.path') = '${trustedSourcesPath}'
-                  AND json_extract(json_each.value, '$.trusted') = 1
-              );
-            SQL
-          '';
+              ${pkgs.sqlite}/bin/sqlite3 "$vscode_state_db" <<'SQL'
+              PRAGMA busy_timeout = 5000;
+              CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);
+              INSERT OR IGNORE INTO ItemTable (key, value)
+              VALUES ('content.trust.model.key', '{"uriTrustInfo":[]}');
+              UPDATE ItemTable
+              SET value = json_set(
+                CASE
+                  WHEN json_valid(CAST(value AS TEXT)) THEN CAST(value AS TEXT)
+                  ELSE '{"uriTrustInfo":[]}'
+                END,
+                '$.uriTrustInfo',
+                json(COALESCE(json_extract(CAST(value AS TEXT), '$.uriTrustInfo'), '[]'))
+              )
+              WHERE key = 'content.trust.model.key';
+              UPDATE ItemTable
+              SET value = json_set(
+                CAST(value AS TEXT),
+                '$.uriTrustInfo[#]',
+                json('{"uri":{"$mid":1,"scheme":"file","path":"${trustedSourcesPath}"},"trusted":true}')
+              )
+              WHERE key = 'content.trust.model.key'
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
+                  WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
+                    AND json_extract(json_each.value, '$.uri.path') = '${trustedSourcesPath}'
+                    AND json_extract(json_each.value, '$.trusted') = 1
+                );
+              SQL
+            '';
+
+            persistence."/persist/" = {
+              directories = [
+                ".config/Code"
+                ".config/copilot-chat"
+                ".config/github-copilot"
+                ".claude"
+              ];
+            };
+          };
 
           programs = {
             fish.shellAliases = sharedAliases.fishAliases // {
@@ -911,14 +922,6 @@ _: {
             };
           };
 
-          home.persistence."/persist/" = {
-            directories = [
-              ".config/Code"
-              ".config/copilot-chat"
-              ".config/github-copilot"
-              ".claude"
-            ];
-          };
         };
     };
 }

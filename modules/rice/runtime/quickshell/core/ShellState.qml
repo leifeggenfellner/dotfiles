@@ -67,7 +67,11 @@ Item {
         launcherOpen = false;
         switcherOpen = false;
         wallpapersOpen = false;
+        activePopout = "";
         dashboardOpen = !dashboardOpen;
+    }
+    function closeDashboard() {
+        dashboardOpen = false;
     }
     function toggleSwitcher() {
         launcherOpen = false;
@@ -110,6 +114,9 @@ Item {
         }
         function toggleDashboard(): void {
             shell.toggleDashboard();
+        }
+        function closeDashboard(): void {
+            shell.closeDashboard();
         }
         function toggleSwitcher(): void {
             shell.toggleSwitcher();

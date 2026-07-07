@@ -5,6 +5,8 @@ import "./workspaces" as Workspaces
 import "./clock" as Clock
 import "./system" as System
 import "./power" as Power
+import "./meters" as Meters
+import "./epigraph" as Epigraph
 
 // ── Registry ──────────────────────────────────────────────────
 // The widget registry: built-in descriptors ∪ (later) theme plugins.
@@ -40,6 +42,14 @@ Item {
         id: powerPopout
         Power.PowerMenuPopout {}
     }
+    Component {
+        id: metersDashboard
+        Meters.SystemMetersDashboard {}
+    }
+    Component {
+        id: epigraphDashboard
+        Epigraph.EpigraphDashboard {}
+    }
 
     readonly property list<QtObject> builtins: [
         WidgetDescriptor {
@@ -70,6 +80,19 @@ Item {
             services: ["session"]
             glance: powerGlance
             popout: powerPopout
+        },
+        WidgetDescriptor {
+            widgetId: "epigraph"
+            region: "dashboard"
+            priority: 0
+            glance: epigraphDashboard
+        },
+        WidgetDescriptor {
+            widgetId: "meters"
+            region: "dashboard"
+            priority: 10
+            services: ["systemStats"]
+            glance: metersDashboard
         }
     ]
 

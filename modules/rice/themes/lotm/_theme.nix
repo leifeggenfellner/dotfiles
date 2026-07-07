@@ -143,6 +143,41 @@ in
       maxResults = 16;
     };
 
+    epigraph.settings = {
+      title = "Observatory";
+      lines = [
+        "Above the gray fog, every gauge becomes an omen."
+        "A scholar records the machine before interpreting the miracle."
+        "Quiet instruments reveal what loud rituals conceal."
+      ];
+    };
+
+    meters.settings = {
+      title = "Beyonder Vitals";
+      labels = {
+        cpu = { title = "Spirituality expenditure"; plain = "CPU"; };
+        memory = { title = "Corruption pressure"; plain = "RAM"; };
+        temperature = { title = "Loss of control"; plain = "temperature"; };
+        disk = { title = "The Archive"; plain = "disk /"; };
+      };
+      colors = {
+        cpu = accent.secondary;
+        memory = accent.tertiary;
+        temperature = state.warn;
+        disk = accent.primary;
+      };
+      corruptionColor = "#5e3038";
+      calmText = "stable";
+      dangerText = "corruption edge";
+      danger = {
+        cpu = 0.85;
+        memory = 0.90;
+        temperature = 85;
+        temperatureMax = 100;
+        disk = 0.90;
+      };
+    };
+
     workspaces.settings.items = [
       { id = 1; label = "Fool"; icon = "pathways_png/fool.png"; color = "#756a92"; }
       { id = 2; label = "Door"; icon = "pathways_png/door.png"; color = "#478eb0"; }
