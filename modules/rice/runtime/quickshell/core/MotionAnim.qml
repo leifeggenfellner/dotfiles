@@ -12,6 +12,6 @@ import QtQuick
 NumberAnimation {
     property var spec: Motion.stateChange
 
-    duration: spec.duration
-    easing.type: spec.easing
+    duration: spec && spec.duration !== undefined ? spec.duration : 0
+    easing.type: spec && spec.easing !== undefined ? spec.easing : Easing.Linear
 }

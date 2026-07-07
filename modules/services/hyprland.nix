@@ -201,7 +201,7 @@
                 # === Binds ===
                 bind = [
                   "${mainMod}, Return, exec, ${launch "foot"}"
-                  "${mainMod}, D, exec, ${toggle "wofi --show drun"}"
+                  "${mainMod}, D, exec, ${if config.rice.enable then "quickshell -c rice ipc call shell toggleDashboard" else toggle "wofi --show drun"}"
                   "${mainMod}, B, exec, ${toggle "foot -T btop -e btop"}"
                   "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
