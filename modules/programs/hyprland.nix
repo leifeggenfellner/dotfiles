@@ -28,7 +28,9 @@ _: {
             pkgs.slurp # select a region in a wayland compositor
             pkgs.wayshot # screenshot tool
             pkgs.wgetpaste # paste to pastebin
+            pkgs.cliphist # clipboard history store
             pkgs.wl-clipboard # wayland clipboard manager
+            pkgs.wl-clip-persist # keep clipboard content after clients exit
             pkgs.wl-gammactl # wayland gamma control
           ];
           sessionVariables = {

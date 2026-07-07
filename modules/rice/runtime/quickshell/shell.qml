@@ -6,6 +6,7 @@ import "./modules/dashboard"
 import "./modules/sound"
 import "./modules/osd"
 import "./modules/notifications"
+import "./modules/satchel"
 import "./modules/switcher"
 import "./modules/wallpapers"
 import "./modules/debug"
@@ -58,6 +59,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         NotificationCenter {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        Satchel {}
     }
 
     Variants {
