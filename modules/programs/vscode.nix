@@ -77,6 +77,8 @@ _: {
 
       # Use the nix-profile path for Home Manager packages
       homeManagerPath = "/etc/profiles/per-user/${config.home.username}/bin";
+
+      trustedSourcesPath = "${config.home.homeDirectory}/Sources";
     in
     {
       options.program.vscode = {
@@ -821,6 +823,42 @@ _: {
               exec ${pkgs.vscode}/bin/code "$@"
             '')
           ];
+
+          home.activation.trustVscodeSources = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            vscode_state_db="${config.home.homeDirectory}/.config/Code/User/globalStorage/state.vscdb"
+            mkdir -p "$(dirname "$vscode_state_db")"
+
+            ${pkgs.sqlite}/bin/sqlite3 "$vscode_state_db" <<'SQL'
+            PRAGMA busy_timeout = 5000;
+            CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);
+            INSERT OR IGNORE INTO ItemTable (key, value)
+            VALUES ('content.trust.model.key', '{"uriTrustInfo":[]}');
+            UPDATE ItemTable
+            SET value = json_set(
+              CASE
+                WHEN json_valid(CAST(value AS TEXT)) THEN CAST(value AS TEXT)
+                ELSE '{"uriTrustInfo":[]}'
+              END,
+              '$.uriTrustInfo',
+              json(COALESCE(json_extract(CAST(value AS TEXT), '$.uriTrustInfo'), '[]'))
+            )
+            WHERE key = 'content.trust.model.key';
+            UPDATE ItemTable
+            SET value = json_set(
+              CAST(value AS TEXT),
+              '$.uriTrustInfo[#]',
+              json('{"uri":{"$mid":1,"scheme":"file","path":"${trustedSourcesPath}"},"trusted":true}')
+            )
+            WHERE key = 'content.trust.model.key'
+              AND NOT EXISTS (
+                SELECT 1
+                FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
+                WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
+                  AND json_extract(json_each.value, '$.uri.path') = '${trustedSourcesPath}'
+                  AND json_extract(json_each.value, '$.trusted') = 1
+              );
+            SQL
+          '';
 
           programs = {
             fish.shellAliases = sharedAliases.fishAliases // {
