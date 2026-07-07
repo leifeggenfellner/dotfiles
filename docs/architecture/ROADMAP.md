@@ -322,7 +322,7 @@ runtime gains atmosphere machinery; LOTM opts in as pure data.
   PrefsState (new `motion` prefs block: reduce, ambient auto|off) +
   PowerState (battery ⇒ pause) + HyprState (new `anyFullscreen` via Wayland
   foreign-toplevel watchers, event-driven). IPC `ambient status|setMode|
-  setReduceMotion` for scripting/tests. `Motion.enabled` folds in
+setReduceMotion` for scripting/tests. `Motion.enabled` folds in
   reduce-motion; new `awaken` spec drives the bar's one-shot startup reveal.
 - ✅ LOTM manifest: easings + ceremonial=700 + ambient=true + three layers
   (fog in fog-blue, gold ember motes, sunken vignette). Cyberpunk untouched —
@@ -340,6 +340,36 @@ runtime gains atmosphere machinery; LOTM opts in as pure data.
   design (roll-in beats pop-in; also hides governor restarts). Bug found by
   the smoke test: unqualified `requestPaint()` inside `Connections` is a
   ReferenceError — qualify with the Canvas id.
+
+## Phase 14 — Launcher v2: the Summoning ✅
+
+Concretized as D-023: surface-level settings reuse the existing widget config
+namespace. The first daily-use center-stage surface is now real.
+
+- ✅ `services/apps/AppsState.qml` wraps Quickshell `DesktopEntries` (native
+  tier 1): exposes visible desktop apps, stable sorted rows, and the single
+  `launch(app)` command path. Launcher UI no longer binds to `DesktopEntries`
+  internals.
+- ✅ First `utils/` resident: `Fuzzy.qml`, a pure side-effect-free matcher used
+  by `AppsState.search(query, limit)`. Ranking covers app name, generic name,
+  comment, id, startup class, categories, and keywords.
+- ✅ `modules/launcher/Launcher.qml` replaced the dummy grid with search input,
+  ranked card grid, mouse hover selection, keyboard navigation (arrows), Enter
+  launch, Esc/click-outside close, and desktop icon rendering through
+  `Quickshell.iconPath` with a semantic fallback.
+- ✅ Motion wiring: `Motion.surfaceReveal`/`surfaceConceal` aliases preserve the
+  Phase 13 behavior under the named Phase 14 vocabulary; `Motion.sealPress`
+  drives the activation pulse and collapses under reduce-motion.
+- ✅ LOTM configures the Summoning through `widgets.launcher.settings`
+  (placeholder, epigraphs, result layout). Cyberpunk ships no launcher settings
+  and therefore keeps the neutral launcher copy and behavior.
+- Verified: editor diagnostics clean; `rice-lint` clean; `nix flake check`
+  clean; LOTM manifest + theme index build; live dev shell with LOTM manifest
+  loads with zero launcher QML/icon warnings; path-specific IPC opens/closes the
+  launcher and responds (`ambient status`). Automated typed-launch smoke was
+  attempted with a harmless temporary desktop entry, but the marker did not fire
+  under the available Wayland automation; manual type/launch remains the final
+  host check after rebuild.
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 

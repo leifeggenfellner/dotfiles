@@ -59,9 +59,11 @@ let
         else fail "tokens.motion.easings.${k} must be a curve-name string")
       (theme.tokens.motion.easings or { })
     ++ [
-      (let c = theme.tokens.motion.durations.ceremonial or null; in
-      if c == null || builtins.isInt c then true
-      else fail "tokens.motion.durations.ceremonial must be an int (ms)")
+      (
+        let c = theme.tokens.motion.durations.ceremonial or null; in
+        if c == null || builtins.isInt c then true
+        else fail "tokens.motion.durations.ceremonial must be an int (ms)"
+      )
     ];
 
   effectTypes = [ "fog" "particles" "vignette" ];
@@ -74,14 +76,15 @@ let
     let layers = (theme.tokens.effects or { }).layers or [ ]; in
     if !builtins.isList layers
     then fail "tokens.effects.layers must be a list"
-    else map
-      (l:
-        if !(lib.elem (l.type or null) effectTypes)
-        then fail "tokens.effects layer type must be one of [${lib.concatStringsSep " " effectTypes}], got ${builtins.toJSON (l.type or null)}"
-        else if l ? tint && !isTokenRef l.tint
-        then fail "tokens.effects tint must be a color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON l.tint}"
-        else true)
-      layers;
+    else
+      map
+        (l:
+          if !(lib.elem (l.type or null) effectTypes)
+          then fail "tokens.effects layer type must be one of [${lib.concatStringsSep " " effectTypes}], got ${builtins.toJSON (l.type or null)}"
+          else if l ? tint && !isTokenRef l.tint
+          then fail "tokens.effects tint must be a color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON l.tint}"
+          else true)
+        layers;
 
   iconChecks = lib.mapAttrsToList
     (name: value:

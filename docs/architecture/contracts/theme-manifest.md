@@ -83,7 +83,7 @@ exclusively through the `Theme` facade.
     art = { };                    # OPEN, optional: namespaced artwork used via settings/plugins
   };
 
-  widgets = {                     # per built-in widget id (see widget-contract.md)
+  widgets = {                     # per built-in widget/surface id (D-023; see widget-contract.md)
     "<widgetId>" = {
       enabled = true;
       region = "left" | "center" | "right";
@@ -112,6 +112,9 @@ exclusively through the `Theme` facade.
    exist after validation; the runtime may bind to it unconditionally. `palette`,
    `assets.art`, `assets.icons`, and `widgets.<id>.settings` are open-ended and may
    only be read by the widget/plugin they belong to — never by runtime core.
+   D-023 clarifies that long-lived built-in surfaces with widget-like settings
+   (`launcher`, `dashboard`, `powermenu`, …) use this same id namespace and read
+   their data through `Theme.widgetConfig(surfaceId)`.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

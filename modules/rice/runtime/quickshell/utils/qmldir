@@ -1,1 +1,2 @@
-# Pure, side-effect-free helpers. Empty until needed.
+# Pure, side-effect-free helpers.
+singleton Fuzzy 1.0 Fuzzy.qml
