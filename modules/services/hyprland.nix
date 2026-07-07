@@ -263,7 +263,7 @@
                 ] ++ (if config.rice.enable then [
                   # Rice shell surfaces (see docs/architecture/ROADMAP.md)
                   "${mainMod}, D, exec, quickshell -c rice ipc call shell toggleLauncher"
-                  "${mainMod}, ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
+                  "${mainMod} ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
                   "${mainMod}, W, exec, quickshell -c rice ipc call shell toggleWallpapers"
                   "${mainMod} ALT, W, exec, quickshell -c rice ipc call wallpapers next"
                   "${mainMod}, V, exec, quickshell -c rice ipc call shell toggleSatchel"
