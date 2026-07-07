@@ -83,9 +83,32 @@ in
         base = 280;
         slow = 400;
         overlay = 120;
+        # Reserved for infrequent, deliberate moments (D-022).
+        ceremonial = 700;
       };
+      # Named curve specs (contracts/motion-contract.md): unhurried
+      # entries, sharper exits — a candlelit tempo.
+      easings = {
+        standard = "OutCubic";
+        enter = "OutQuint";
+        exit = "InCubic";
+        emphasis = "InOutBack";
+      };
+      # Opt into the ambient atmosphere tier (D-021); the runtime
+      # governor still pauses it on battery/fullscreen/reduce-motion.
+      ambient = true;
       enabled = true;
     };
+
+    # Ambient atmosphere (D-021): gray fog hugging the desktop floor,
+    # ember motes drifting up, a candlelit vignette. Tints are color
+    # token refs (L-005) — fog wears the fog-blue accent, embers the
+    # antique gold.
+    effects.layers = [
+      { type = "fog"; tint = "accent.secondary"; opacity = 0.10; speed = 1.0; band = "bottom"; }
+      { type = "particles"; tint = "accent.primary"; opacity = 0.30; count = 9; speed = 1.0; }
+      { type = "vignette"; tint = "bg.sunken"; opacity = 0.25; }
+    ];
   };
 
   assets = {

@@ -85,14 +85,47 @@ QtObject {
             readonly property int base: theme._t.motion.durations.base
             readonly property int slow: theme._t.motion.durations.slow
             readonly property int overlay: theme._t.motion.durations.overlay
+            // Optional (D-022): reserved for infrequent, deliberate
+            // moments. Falls back to slow so themes that never
+            // declare it keep one coherent tempo.
+            readonly property int ceremonial: theme._t.motion.durations.ceremonial ?? theme._t.motion.durations.slow
         }
+        // Named curve specs from the manifest (D-022) — previously
+        // declared in the contract but ignored by the runtime.
         readonly property QtObject easings: QtObject {
-            readonly property int standard: Easing.OutCubic
-            readonly property int enter: Easing.OutQuint
-            readonly property int exit: Easing.InCubic
-            readonly property int emphasis: Easing.OutBack
+            readonly property int standard: theme._easing(theme._t.motion.easings.standard)
+            readonly property int enter: theme._easing(theme._t.motion.easings.enter)
+            readonly property int exit: theme._easing(theme._t.motion.easings.exit)
+            readonly property int emphasis: theme._easing(theme._t.motion.easings.emphasis)
         }
+        readonly property bool ambient: theme._t.motion.ambient ?? false
         readonly property bool enabled: theme._t.motion.enabled
+    }
+
+    // Raw ambient-effect config (D-021). Read ONLY by core/Effects,
+    // which resolves tint token refs and enforces the budgets.
+    readonly property var effects: theme._t.effects ?? ({ layers: [] })
+
+    // Curve-name string → Easing enum. Unknown names degrade to
+    // OutCubic with a warning — a theme typo never breaks motion.
+    function _easing(name) {
+        const v = ({
+            "Linear": Easing.Linear,
+            "InQuad": Easing.InQuad, "OutQuad": Easing.OutQuad, "InOutQuad": Easing.InOutQuad,
+            "InCubic": Easing.InCubic, "OutCubic": Easing.OutCubic, "InOutCubic": Easing.InOutCubic,
+            "InQuart": Easing.InQuart, "OutQuart": Easing.OutQuart, "InOutQuart": Easing.InOutQuart,
+            "InQuint": Easing.InQuint, "OutQuint": Easing.OutQuint, "InOutQuint": Easing.InOutQuint,
+            "InExpo": Easing.InExpo, "OutExpo": Easing.OutExpo, "InOutExpo": Easing.InOutExpo,
+            "InSine": Easing.InSine, "OutSine": Easing.OutSine, "InOutSine": Easing.InOutSine,
+            "InBack": Easing.InBack, "OutBack": Easing.OutBack, "InOutBack": Easing.InOutBack,
+            "InElastic": Easing.InElastic, "OutElastic": Easing.OutElastic,
+            "InBounce": Easing.InBounce, "OutBounce": Easing.OutBounce
+        })[name];
+        if (v === undefined) {
+            console.warn("Theme: unknown easing curve '" + name + "' — using OutCubic");
+            return Easing.OutCubic;
+        }
+        return v;
     }
 
     // ── Icons ─────────────────────────────────────────────────

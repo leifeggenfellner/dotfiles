@@ -299,12 +299,54 @@ Concretized as D-020: the lockscreen joins the rice at lock time.
   leaves the background's empty `monitor=` alone. Real-lock check after
   rebuild: `rice-switch cyberpunk` + lock → cyan/Orbitron without rebuild.
 
+## Phase 13 — Motion v2 + ambient foundation ✅
+
+Concretized as D-021 (ambient effects engine) and D-022 (motion v2). First
+phase of the LoTM immersion plan: capability systems before content — the
+runtime gains atmosphere machinery; LOTM opts in as pure data.
+
+- ✅ Manifest easings honored: `Theme` resolves named curve strings
+  (warn-and-default OutCubic); they had been contract-declared but ignored.
+  Optional `durations.ceremonial` (defaults to slow). Validation for both in
+  `mkThemeManifest` — plus `tokens.effects` shape/type checks and the L-005
+  token-ref-only tint rule (negative-tested: literal color and unknown layer
+  type both fail the build with precise messages).
+- ✅ Ambient engine: `core/Effects` (sole effects-config reader; structural
+  budgets ≤4 layers/≤12 particles/opacity caps), theme-neutral T1 primitives
+  `components/effects/{FogLayer,ParticleField,VignetteLayer}` (Canvas painted
+  once, transform/opacity animation only), per-monitor
+  `modules/ambient/AmbientLayer` (layer-shell Bottom, empty input mask,
+  unmapped + Loader-unloaded when paused).
+- ✅ Governor: `modules/ambient/AmbientController` — the one place run/pause
+  policy lives — pushes `ShellState.{ambientActive,reduceMotion}` from
+  PrefsState (new `motion` prefs block: reduce, ambient auto|off) +
+  PowerState (battery ⇒ pause) + HyprState (new `anyFullscreen` via Wayland
+  foreign-toplevel watchers, event-driven). IPC `ambient status|setMode|
+  setReduceMotion` for scripting/tests. `Motion.enabled` folds in
+  reduce-motion; new `awaken` spec drives the bar's one-shot startup reveal.
+- ✅ LOTM manifest: easings + ceremonial=700 + ambient=true + three layers
+  (fog in fog-blue, gold ember motes, sunken vignette). Cyberpunk untouched —
+  manifest evals byte-equivalent (no effects key; loader defaults fill in).
+- Verified: rice-lint clean; both manifests build; sandboxed live run — zero
+  QML warnings, `ambient status` truthful, reduce-motion and mode=off each
+  pause and restore live, three `rice-ambient` windows on the bottom layer
+  unmap to 0 on pause and remap on resume (hyprctl layers). Budget: ambient
+  OFF = 0.0% CPU over 10s (contract steady-state holds); ambient ON = 8.1%
+  of one core across 3 monitors (T1 continuous drift; acceptable for the
+  opt-in tier — the Phase 20 shader path is the planned cheaper fog).
+- Caveats: the fullscreen gate's live flip was not exercised (watchers attach
+  and count correctly over real toplevels; flip is a property binding) — first
+  fullscreen video will confirm. Fog drifts in from offscreen over ~1 min by
+  design (roll-in beats pop-in; also hides governor restarts). Bug found by
+  the smoke test: unqualified `requestPaint()` inside `Connections` is a
+  ReferenceError — qualify with the Canvas id.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · media controls (MprisState) · power menu · clipboard
 history · dashboard widgets (system monitor, weather, dev widgets) · optional
-dock · LOTM plugin widgets (tarot/ritual — proves the plugin contract) ·
-ambient effects tier (Phase 4+ of `contracts/motion-contract.md`).
+dock · LOTM plugin widgets (tarot/ritual — proves the plugin contract).
+The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future
 

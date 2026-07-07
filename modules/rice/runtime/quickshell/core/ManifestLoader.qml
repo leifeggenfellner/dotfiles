@@ -44,8 +44,12 @@ Item {
             },
             motion: {
                 durations: { fast: 150, base: 250, slow: 350, overlay: 110 },
+                easings: { standard: "OutCubic", enter: "OutQuint", exit: "InCubic", emphasis: "OutBack" },
+                ambient: false,
                 enabled: true
-            }
+            },
+            // Ambient-effect config (D-021); read only by core/Effects.
+            effects: { layers: [] }
         },
         assets: {
             root: "",

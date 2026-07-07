@@ -48,6 +48,41 @@ let
     (theme.meta.schemaVersion or (fail "missing meta.schemaVersion"))
   ];
 
+  # Motion v2 (D-022) + ambient effects (D-021): optional keys,
+  # typechecked when present so a theme typo fails the build, never
+  # the running shell. Easing names resolve (warn-and-default) in
+  # the runtime; only the shape is enforced here.
+  motionExtraChecks =
+    lib.mapAttrsToList
+      (k: v:
+        if builtins.isString v then true
+        else fail "tokens.motion.easings.${k} must be a curve-name string")
+      (theme.tokens.motion.easings or { })
+    ++ [
+      (let c = theme.tokens.motion.durations.ceremonial or null; in
+      if c == null || builtins.isInt c then true
+      else fail "tokens.motion.durations.ceremonial must be an int (ms)")
+    ];
+
+  effectTypes = [ "fog" "particles" "vignette" ];
+  # Tints are color TOKEN REFS (L-005: effects derive from tokens,
+  # never literal colors): "<bg|fg|accent|state>.<key>".
+  isTokenRef = v:
+    builtins.isString v
+    && builtins.match "(bg|fg|accent|state)\\.[a-zA-Z0-9]+" v != null;
+  effectChecks =
+    let layers = (theme.tokens.effects or { }).layers or [ ]; in
+    if !builtins.isList layers
+    then fail "tokens.effects.layers must be a list"
+    else map
+      (l:
+        if !(lib.elem (l.type or null) effectTypes)
+        then fail "tokens.effects layer type must be one of [${lib.concatStringsSep " " effectTypes}], got ${builtins.toJSON (l.type or null)}"
+        else if l ? tint && !isTokenRef l.tint
+        then fail "tokens.effects tint must be a color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON l.tint}"
+        else true)
+      layers;
+
   iconChecks = lib.mapAttrsToList
     (name: value:
       if lib.hasInfix "/" value && !builtins.pathExists (themeDir + "/assets/${value}")
@@ -105,7 +140,8 @@ let
     };
   };
 
-  checks = tokenChecks ++ metaChecks ++ iconChecks ++ rasterChecks;
+  checks = tokenChecks ++ metaChecks ++ iconChecks ++ rasterChecks
+    ++ motionExtraChecks ++ effectChecks;
 in
 {
   inherit manifest;

@@ -96,7 +96,15 @@ PanelWindow {
                     ? ManifestLoader.meta.displayName + " (" + ManifestLoader.manifestPath + ")"
                     : "runtime defaults (no manifest)")
             }
-            DebugRow { text: "motion      " + (Motion.enabled ? "enabled" : "disabled") }
+            DebugRow {
+                text: "motion      " + (Motion.enabled ? "enabled" : "disabled")
+                    + (ShellState.reduceMotion ? " (reduce-motion)" : "")
+            }
+            DebugRow {
+                text: "ambient     " + (ShellState.ambientActive ? "active" : "off")
+                    + " · layers:" + Effects.layers.length
+                    + (HyprState.anyFullscreen ? " · fullscreen" : "")
+            }
             DebugRow { text: "overlay fps " + debug.fps }
             DebugRow { text: "" }
             DebugRow {

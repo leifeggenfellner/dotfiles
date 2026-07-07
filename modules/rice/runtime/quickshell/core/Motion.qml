@@ -7,15 +7,20 @@ import QtQuick
 // Specs resolve from Theme motion tokens and collapse to 0ms when
 // motion is disabled, so every animation is correct without motion.
 //
-// v1 vocabulary (grown only when a surface needs a new name):
+// v2 vocabulary (grown only when a surface needs a new name):
 //   panelOpen   — a surface/panel entering
 //   panelClose  — a surface/panel leaving (faster, sharper)
 //   stateChange — small state reactions (hover, value changes)
+//   awaken      — one-shot startup reveal of surface contents
+//
+// enabled folds in the global reduce-motion pref (D-022): the pref
+// lives in PrefsState and is pushed onto ShellState by the modules
+// layer, because core may not import services.
 
 QtObject {
     id: motion
 
-    readonly property bool enabled: Theme.motion.enabled
+    readonly property bool enabled: Theme.motion.enabled && !ShellState.reduceMotion
 
     readonly property QtObject panelOpen: QtObject {
         readonly property int duration: motion.enabled ? Theme.motion.durations.base : 0
@@ -30,5 +35,10 @@ QtObject {
     readonly property QtObject stateChange: QtObject {
         readonly property int duration: motion.enabled ? Theme.motion.durations.fast : 0
         readonly property int easing: Theme.motion.easings.standard
+    }
+
+    readonly property QtObject awaken: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.slow : 0
+        readonly property int easing: Theme.motion.easings.enter
     }
 }

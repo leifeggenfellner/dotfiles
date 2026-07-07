@@ -43,12 +43,24 @@ exclusively through the `Theme` facade.
     };
     motion = {                    # see contracts/motion-contract.md
       durations = { fast; base; slow; overlay; };
+      # OPTIONAL (D-022): infrequent, deliberate moments; defaults to slow.
+      # durations.ceremonial = 700;
       easings   = { standard; enter; exit; emphasis; };   # named curve specs
+      # Curve names are Qt easing names ("OutCubic", "InOutBack", …),
+      # resolved by the runtime; unknown names warn and fall back (D-022).
       intensity = "calm" | "lively";                       # global scaler hint
       ambient   = false;          # opt-in to the ambient effect tier
       enabled   = true;           # theme-level motion kill switch
     };
     sound = { };                  # OPTIONAL: event name → file path (see motion-contract)
+    effects = {                   # OPTIONAL (D-021): ambient atmosphere layers,
+      layers = [                  # rendered only while motion.ambient opts in
+        # type ∈ "fog" | "particles" | "vignette" (v1 set);
+        # tint is a color TOKEN REF ("accent.primary"), never a literal (L-005);
+        # opacity/speed/count are clamped to the motion-contract budgets.
+        # { type = "fog"; tint = "accent.secondary"; opacity = 0.1; speed = 1.0; band = "bottom"; }
+      ];
+    };
   };
 
   palette = { };                  # OPEN, optional: extra named colors, namespaced by the
