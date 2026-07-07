@@ -17,6 +17,7 @@ Item {
     property bool dashboardOpen: false
     property bool switcherOpen: false
     property bool wallpapersOpen: false
+    property bool satchelOpen: false
     property bool notificationsOpen: false
     property bool osdVisible: false
     property bool debugVisible: false
@@ -55,6 +56,7 @@ Item {
         dashboardOpen = false;
         switcherOpen = false;
         wallpapersOpen = false;
+        satchelOpen = false;
         activePopout = "";
         launcherOpen = true;
     }
@@ -69,6 +71,7 @@ Item {
         launcherOpen = false;
         switcherOpen = false;
         wallpapersOpen = false;
+        satchelOpen = false;
         activePopout = "";
         dashboardOpen = !dashboardOpen;
     }
@@ -79,6 +82,7 @@ Item {
         launcherOpen = false;
         dashboardOpen = false;
         wallpapersOpen = false;
+        satchelOpen = false;
         activePopout = "";
         switcherOpen = !switcherOpen;
     }
@@ -89,11 +93,23 @@ Item {
         launcherOpen = false;
         dashboardOpen = false;
         switcherOpen = false;
+        satchelOpen = false;
         activePopout = "";
         wallpapersOpen = !wallpapersOpen;
     }
     function closeWallpapers() {
         wallpapersOpen = false;
+    }
+    function toggleSatchel() {
+        launcherOpen = false;
+        dashboardOpen = false;
+        switcherOpen = false;
+        wallpapersOpen = false;
+        activePopout = "";
+        satchelOpen = !satchelOpen;
+    }
+    function closeSatchel() {
+        satchelOpen = false;
     }
     function toggleNotifications() {
         notificationsOpen = !notificationsOpen;
@@ -125,6 +141,12 @@ Item {
         }
         function toggleWallpapers(): void {
             shell.toggleWallpapers();
+        }
+        function toggleSatchel(): void {
+            shell.toggleSatchel();
+        }
+        function closeSatchel(): void {
+            shell.closeSatchel();
         }
         function toggleNotifications(): void {
             shell.toggleNotifications();

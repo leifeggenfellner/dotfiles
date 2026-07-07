@@ -426,12 +426,42 @@ MPRIS, and the notification parity backlog is closed in the Quickshell runtime.
   inline reply fields, dismiss/clear, and a durable DND toggle
   (`PrefsState.notifications.dnd`). Toasts respect DND and only play sound after
   a visible toast is appended.
-- Verified: editor diagnostics clean for changed QML. Full lint/build/smoke
-  verification happens at phase close.
+- Verified: editor diagnostics clean for changed QML; `rice-lint` clean;
+  LOTM manifest + theme index build; `nix flake check --print-build-logs`
+  clean; live dev shell with LOTM manifest loads, opens/closes the Phase 16
+  surfaces through IPC, and reports no Phase 16 runtime warnings beyond the
+  known notification-owner/portal warnings in an already-running desktop.
+
+## Phase 17 — The Artifact Satchel ✅
+
+Concretized as D-025: clipboard history becomes a first-class center-stage
+surface, with sealed entries persisted through PrefsState extras.
+
+- ✅ `PrefsState.extra(namespace, key, fallback)` and `setExtra(namespace, key,
+value)` add the generic namespaced extras bucket without changing the
+  prefs.json sole-writer rule. First namespace: `satchel.sealed`.
+- ✅ `services/clipboard/ClipboardState.qml` wraps `cliphist` with event-triggered
+  commands: list on surface open, decode/copy on activation, delete on request.
+  The long-lived watcher remains Hyprland's existing
+  `wl-paste --watch cliphist store` process.
+- ✅ `modules/satchel/Satchel.qml` — Super+V surface with search, keyboard
+  selection, Enter to copy, `P` to seal/unseal, Delete/Backspace to forget, and
+  artifact-card styling. It follows the same focused-monitor, Esc, click-outside,
+  and mutual-exclusion pattern as launcher/switcher/wallpapers.
+- ✅ Nix wiring: `cliphist` and `wl-clip-persist` are installed for Hyprland
+  hosts; rice hosts bind Super+V to `shell toggleSatchel`. LOTM configures the
+  Artifact Satchel title, placeholder, empty state, and sealed label through
+  `widgets.satchel.settings`; Cyberpunk gets neutral defaults.
+- Verified: editor diagnostics clean for changed QML/Nix; `rice-lint` clean;
+  LOTM manifest + theme index build; `nix flake check --print-build-logs`
+  clean; seeded `cliphist` with a harmless entry and live-smoked Satchel through
+  IPC using the built LOTM manifest. Because `cliphist` was not in the current
+  user PATH before rebuild, the smoke prepended the Nix store `cliphist` bin;
+  the Home Manager package addition makes that permanent after rebuild.
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Volume/brightness OSDs · clipboard history · weather/dev dashboard panels · optional dock · LOTM plugin widgets
+Volume/brightness OSDs · weather/dev dashboard panels · optional dock · LOTM plugin widgets
 (tarot/ritual — proves the plugin contract).
 The ambient effects tier landed as Phase 13 (D-021).
 

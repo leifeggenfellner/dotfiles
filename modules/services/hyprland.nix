@@ -266,6 +266,7 @@
                   "${mainMod}, ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
                   "${mainMod}, W, exec, quickshell -c rice ipc call shell toggleWallpapers"
                   "${mainMod} ALT, W, exec, quickshell -c rice ipc call wallpapers next"
+                  "${mainMod}, V, exec, quickshell -c rice ipc call shell toggleSatchel"
                   "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"
                   "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, quickshell -c rice ipc call notifications clearAll"
                 ] else [

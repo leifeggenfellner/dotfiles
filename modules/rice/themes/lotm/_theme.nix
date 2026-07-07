@@ -197,6 +197,14 @@ in
       dndEmptyLabel = "The mailbox is sealed.";
     };
 
+    satchel.settings = {
+      title = "Artifact Satchel";
+      placeholder = "Search collected fragments...";
+      emptyText = "No artifacts have been collected.";
+      sealedLabel = "sealed";
+      maxResults = 24;
+    };
+
     workspaces.settings.items = [
       { id = 1; label = "Fool"; icon = "pathways_png/fool.png"; color = "#756a92"; }
       { id = 2; label = "Door"; icon = "pathways_png/door.png"; color = "#478eb0"; }

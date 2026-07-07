@@ -352,6 +352,29 @@ wallpapers } }`, store paths). The mutable pointer `$XDG_STATE_HOME/rice/active`
   twinned preserves the rice fantasy without creating hidden background noise or
   a theme-specific runtime path.
 
+### D-025 — Prefs extras and the Artifact Satchel
+
+- Date: 2026-07-07 · Status: active
+- `$XDG_STATE_HOME/rice/prefs.json` gains an additive `extras` namespace:
+  `extras.<namespace>.<key> = value`. `PrefsState.extra(namespace, key,
+fallback)` and `PrefsState.setExtra(namespace, key, value)` are the only
+  runtime API. The D-019 sole-writer rule remains unchanged: PrefsState writes
+  prefs, modules/surfaces request namespaced changes, and services never persist
+  state directly.
+- Namespaces are owner-defined and must be stable surface/plugin ids. Extras are
+  for durable user drift that is not system state and not theme data: pinned
+  clipboard entries, daily tarot draw state, dismissed flavor hints, and similar
+  small preferences. They are not a database, not an IPC bus, and not a place for
+  service caches.
+- The first consumer is the Artifact Satchel. `services/clipboard/ClipboardState`
+  wraps `cliphist` with event-triggered commands (`list`, `decode | wl-copy`,
+  `delete`), while Hyprland owns the long-lived `wl-paste --watch cliphist
+store` process. The Satchel surface opens on demand, refreshes history, copies
+  on activation, and records sealed/pinned entries in `extras.satchel.sealed`.
+- Why: the plugin contract needs a small durable namespace soon, but adding ad hoc
+  files per surface would erode the state model. A generic extras bucket keeps
+  persistence debuggable and still forces every owner to stay in its namespace.
+
 ---
 
 ## Legacy imports
