@@ -62,7 +62,10 @@ PanelWindow {
         if (next[entry.key] !== undefined)
             delete next[entry.key];
         else
-            next[entry.key] = { preview: entry.preview, kind: entry.kind };
+            next[entry.key] = {
+                preview: entry.preview,
+                kind: entry.kind
+            };
         PrefsState.setExtra("satchel", "sealed", next);
     }
 
@@ -79,7 +82,7 @@ PanelWindow {
             searchField.text = "";
             ClipboardState.clearError();
             ClipboardState.refresh();
-            searchField.forceActiveFocus();
+            keyScope.forceActiveFocus();
             clampSelection();
         }
     }
@@ -202,7 +205,6 @@ PanelWindow {
                 easing.type: Motion.stateChange.easing
             }
         }
-
     }
 
     Rectangle {
@@ -223,6 +225,8 @@ PanelWindow {
     }
 
     FocusScope {
+        id: keyScope
+
         anchors.fill: parent
         focus: satchel.open
         Keys.onEscapePressed: ShellState.closeSatchel()
@@ -281,30 +285,31 @@ PanelWindow {
                 anchors.margins: Theme.metrics.space.lg
                 spacing: Theme.metrics.space.md
 
-                Row {
+                Column {
                     id: header
                     width: parent.width
                     spacing: Theme.metrics.space.md
 
-                    Icon {
-                        anchors.verticalCenter: parent.verticalCenter
-                        name: "clipboard"
-                        color: Theme.colors.accent.primary
+                    Text {
+                        text: satchel.title
+                        color: Theme.colors.fg.primary
+                        font.family: Theme.typography.families.display
+                        font.pointSize: Theme.typography.sizes.heading
                     }
 
-                    Column {
-                        width: parent.width - Theme.metrics.space.md - Theme.typography.sizes.icon
-                        spacing: Theme.metrics.space.sm
+                    Row {
+                        id: searchRow
+                        width: parent.width
+                        spacing: Theme.metrics.space.md
 
-                        Text {
-                            text: satchel.title
-                            color: Theme.colors.fg.primary
-                            font.family: Theme.typography.families.display
-                            font.pointSize: Theme.typography.sizes.heading
+                        Icon {
+                            anchors.verticalCenter: parent.verticalCenter
+                            name: "clipboard"
+                            color: Theme.colors.accent.primary
                         }
 
                         Rectangle {
-                            width: parent.width
+                            width: searchRow.width - Theme.typography.sizes.icon - searchRow.spacing
                             height: 36
                             radius: Theme.metrics.radius.small
                             color: Theme.colors.bg.sunken
