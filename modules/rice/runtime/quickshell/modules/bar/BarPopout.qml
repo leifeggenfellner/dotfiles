@@ -10,6 +10,7 @@ import "../../services/bluetooth"
 import "../../services/power"
 import "../../services/session"
 import "../../services/tray"
+import "../../services/mpris"
 
 // ── BarPopout ─────────────────────────────────────────────────
 // The single anchored popout host (L-002): renders the active
@@ -51,7 +52,8 @@ PanelWindow {
             bluetooth: BluetoothState,
             power: PowerState,
             session: SessionState,
-            tray: TrayState
+            tray: TrayState,
+            mpris: MprisState
         };
         const out = {};
         for (const n of names)

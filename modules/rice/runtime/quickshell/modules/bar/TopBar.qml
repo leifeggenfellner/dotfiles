@@ -11,6 +11,7 @@ import "../../services/power"
 import "../../services/wallpaper"
 import "../../services/notifications"
 import "../../services/tray"
+import "../../services/mpris"
 
 // ── TopBar ────────────────────────────────────────────────────
 // Pure compositor (L-001): renders Registry descriptors by region
@@ -55,7 +56,8 @@ PanelWindow {
             power: PowerState,
             wallpaper: WallpaperState,
             notifications: NotificationState,
-            tray: TrayState
+            tray: TrayState,
+            mpris: MprisState
         };
         const out = {};
         for (const n of names)

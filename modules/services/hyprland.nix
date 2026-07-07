@@ -201,7 +201,6 @@
                 # === Binds ===
                 bind = [
                   "${mainMod}, Return, exec, ${launch "foot"}"
-                  "${mainMod}, D, exec, ${if config.rice.enable then "quickshell -c rice ipc call shell toggleDashboard" else toggle "wofi --show drun"}"
                   "${mainMod}, B, exec, ${toggle "foot -T btop -e btop"}"
                   "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
                   "${mainMod}, S, exec, ${launch "spotify"}"
@@ -263,8 +262,8 @@
                   ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
                 ] ++ (if config.rice.enable then [
                   # Rice shell surfaces (see docs/architecture/ROADMAP.md)
-                  "${mainMod}, Space, exec, quickshell -c rice ipc call shell toggleLauncher"
-                  "${mainMod}, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
+                  "${mainMod}, D, exec, quickshell -c rice ipc call shell toggleLauncher"
+                  "${mainMod}, ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
                   "${mainMod}, W, exec, quickshell -c rice ipc call shell toggleWallpapers"
                   "${mainMod} ALT, W, exec, quickshell -c rice ipc call wallpapers next"
                   "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"

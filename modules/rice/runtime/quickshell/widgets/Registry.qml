@@ -5,6 +5,7 @@ import "./workspaces" as Workspaces
 import "./clock" as Clock
 import "./system" as System
 import "./power" as Power
+import "./media" as Media
 import "./meters" as Meters
 import "./epigraph" as Epigraph
 
@@ -43,6 +44,14 @@ Item {
         Power.PowerMenuPopout {}
     }
     Component {
+        id: mediaGlance
+        Media.MediaGlance {}
+    }
+    Component {
+        id: mediaPopout
+        Media.MediaPopout {}
+    }
+    Component {
         id: metersDashboard
         Meters.SystemMetersDashboard {}
     }
@@ -72,6 +81,14 @@ Item {
             services: ["network", "audio", "bluetooth", "power", "tray"]
             glance: systemGlance
             popout: systemPopout
+        },
+        WidgetDescriptor {
+            widgetId: "media"
+            region: "right"
+            priority: 5
+            services: ["mpris"]
+            glance: mediaGlance
+            popout: mediaPopout
         },
         WidgetDescriptor {
             widgetId: "power"

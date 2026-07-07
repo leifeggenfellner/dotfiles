@@ -121,6 +121,10 @@ in
       settings = "icons/sigil_settings.svg";
       monitor = "icons/sigil_eye.svg";
     };
+    sounds = {
+      notification = "sounds/sealed-letter.wav";
+      notification-critical = "sounds/red-seal.wav";
+    };
     # Build-time SVG→PNG rendering (D-011); output appears in the
     # manifest as assets.raster.<name>.
     rasterize = [
@@ -176,6 +180,21 @@ in
         temperatureMax = 100;
         disk = 0.90;
       };
+    };
+
+    media.settings = {
+      title = "Gramophone";
+      idleTitle = "Silent gramophone";
+      maxTitleWidth = 150;
+    };
+
+    correspondence.settings = {
+      title = "Correspondence";
+      clearLabel = "burn";
+      quietLabel = "sealed";
+      audibleLabel = "open";
+      emptyLabel = "No letters under the door.";
+      dndEmptyLabel = "The mailbox is sealed.";
     };
 
     workspaces.settings.items = [

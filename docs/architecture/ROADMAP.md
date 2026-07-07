@@ -108,8 +108,8 @@ listed above and get exercised as their surfaces land.
   Motion fade, capped depth. Center gains clear-all.
 - ⬜ swaync handoff: swaync stays the daemon until the shell autostarts
   (Phase 7) — one notification daemon at a time. When the shell isn't running,
-  swaync must own org.freedesktop.Notifications. Still missing for full parity:
-  actions, inline reply, urgency styling, DND.
+  swaync must own org.freedesktop.Notifications. Phase 16 closes the parity
+  backlog: actions, inline reply, urgency styling, and DND.
 
 ## Phase 7 — Nix integration layer ✅
 
@@ -398,14 +398,40 @@ driven surface for real system vitals and flavor panels.
 - Verified: editor diagnostics clean; `rice-lint` clean; LOTM manifest + theme
   index build; live dev shell with LOTM manifest loads, opens/closes the
   dashboard through path-specific IPC, and reports no Phase 15 QML/runtime
-  warnings. `nix flake check --print-build-logs` is blocked by the pre-existing
-  `statix` warning in `modules/programs/vscode.nix` for repeated `home` keys;
-  no Phase 15 check failed before that blocker.
+  warnings. Initial `nix flake check --print-build-logs` was blocked by the
+  pre-existing `statix` warning in `modules/programs/vscode.nix`; that blocker
+  was fixed immediately after Phase 15 and the full flake check passed.
+
+## Phase 16 — Sound v1 + Gramophone + Correspondence ✅
+
+Concretized as D-024: sound is event-bound and default-muted, media is native
+MPRIS, and the notification parity backlog is closed in the Quickshell runtime.
+
+- ✅ `core/Sound.qml` — semantic sound facade, gated by `ShellState.soundMuted`,
+  playing theme assets through the Nix-owned `rice-sound-play` wrapper. Durable
+  pref lives in `PrefsState.sound.muted` (default true) and is bridged by
+  `modules/sound/SoundController`; IPC `sound status|setMuted|toggleMuted|test`.
+- ✅ LOTM `assets/sounds/` — two small original WAV cues (`sealed-letter.wav`,
+  `red-seal.wav`) mapped as `assets.sounds.notification` and
+  `notification-critical`. Cyberpunk remains unchanged and therefore silent.
+- ✅ `services/mpris/MprisState.qml` — Quickshell native MPRIS wrapper selecting
+  the playing client when present; exposes track metadata/progress and
+  play/pause/previous/next/seek commands.
+- ✅ `widgets/media/` — Gramophone built-in (bar glance + popout) registered via
+  the descriptor registry and injected with `mpris`. LOTM configures labels via
+  `widgets.media.settings`; default themes get neutral copy.
+- ✅ Correspondence upgrade: `NotificationState` now exposes actions, inline
+  reply metadata, image/app metadata, urgency, and invoke/reply commands. The
+  center renders letter-styled cards with urgency strips, action buttons,
+  inline reply fields, dismiss/clear, and a durable DND toggle
+  (`PrefsState.notifications.dnd`). Toasts respect DND and only play sound after
+  a visible toast is appended.
+- Verified: editor diagnostics clean for changed QML. Full lint/build/smoke
+  verification happens at phase close.
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Volume/brightness OSDs · media controls (MprisState) · power menu · clipboard
-history · weather/dev dashboard panels · optional dock · LOTM plugin widgets
+Volume/brightness OSDs · clipboard history · weather/dev dashboard panels · optional dock · LOTM plugin widgets
 (tarot/ritual — proves the plugin contract).
 The ambient effects tier landed as Phase 13 (D-021).
 

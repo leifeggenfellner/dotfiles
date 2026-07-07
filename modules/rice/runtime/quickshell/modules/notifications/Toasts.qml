@@ -42,12 +42,16 @@ PanelWindow {
     Connections {
         target: NotificationState
         function onReceived(entry) {
+            if (ShellState.doNotDisturb)
+                return;
             toastModel.append({
                 nid: entry.id,
                 app: entry.app,
                 summary: entry.summary,
-                body: entry.body
+                body: entry.body,
+                urgency: entry.urgency
             });
+            Sound.play(entry.urgency === 2 ? "notification-critical" : "notification");
             // Keep the stack shallow; oldest toast yields first.
             if (toastModel.count > 4)
                 toastModel.remove(0);
@@ -79,9 +83,9 @@ PanelWindow {
                 width: stack.width
                 height: content.height + Theme.metrics.space.md * 2
                 radius: Theme.metrics.radius.medium
-                color: Theme.colors.bg.mantle
+                color: card.model.urgency === 2 ? Theme.colors.bg.elevated : Theme.colors.bg.mantle
                 border.width: 1
-                border.color: Theme.colors.bg.surface1
+                border.color: card.model.urgency === 2 ? Theme.colors.state.danger : Theme.colors.bg.surface1
 
                 opacity: 0
                 Component.onCompleted: opacity = 0.97
@@ -93,9 +97,20 @@ PanelWindow {
                 }
 
                 Timer {
-                    interval: 5000
+                    interval: card.model.urgency === 2 ? 8000 : 5000
                     running: true
                     onTriggered: toasts.removeToast(card.model.nid)
+                }
+
+                Rectangle {
+                    width: 4
+                    height: parent.height - Theme.metrics.space.md
+                    anchors.left: parent.left
+                    anchors.leftMargin: Theme.metrics.space.sm
+                    anchors.verticalCenter: parent.verticalCenter
+                    radius: 2
+                    color: card.model.urgency === 2 ? Theme.colors.state.danger
+                        : (card.model.urgency === 0 ? Theme.colors.fg.subtle : Theme.colors.accent.primary)
                 }
 
                 Column {
@@ -103,12 +118,13 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.margins: Theme.metrics.space.md
+                    anchors.leftMargin: Theme.metrics.space.lg
+                    anchors.rightMargin: Theme.metrics.space.md
                     spacing: 2
 
                     Text {
                         text: card.model.app
-                        color: Theme.colors.accent.primary
+                        color: card.model.urgency === 2 ? Theme.colors.state.danger : Theme.colors.accent.primary
                         font.family: Theme.typography.families.sans
                         font.pointSize: Theme.typography.sizes.small
                     }

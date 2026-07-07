@@ -52,7 +52,6 @@ exclusively through the `Theme` facade.
       ambient   = false;          # opt-in to the ambient effect tier
       enabled   = true;           # theme-level motion kill switch
     };
-    sound = { };                  # OPTIONAL: event name → file path (see motion-contract)
     effects = {                   # OPTIONAL (D-021): ambient atmosphere layers,
       layers = [                  # rendered only while motion.ambient opts in
         # type ∈ "fog" | "particles" | "vignette" (v1 set);
@@ -80,6 +79,8 @@ exclusively through the `Theme` facade.
     icons = { };                  # optional: semantic icon-name overrides (D-016).
                                   # value with "/" = file relative to assets root;
                                   # anything else = font glyph
+    sounds = { };                 # optional: semantic event-name → file relative to
+                                  # assets root, resolved by Theme.soundUrl (D-024)
     art = { };                    # OPEN, optional: namespaced artwork used via settings/plugins
   };
 
