@@ -154,7 +154,7 @@ Status values: `active` | `superseded by D-NNN`.
   Contracts are enforced mechanically from the first day of the greenfield tree:
   `scripts/rice-lint.sh` (per-layer import allowlist + theme-literal ban) runs in
   `nix flake check`; the legacy tree is exempt until it retires.
-- Why: skills previously bounded what they *contain*, not what they *influence*,
+- Why: skills previously bounded what they _contain_, not what they _influence_,
   leaving room for bidirectional coupling (e.g. widget guidance quietly defining
   service expectations); and unenforced contracts drift.
 
@@ -191,7 +191,7 @@ Status values: `active` | `superseded by D-NNN`.
 - The D-003 two-layer switch is realized as: `mkThemeIndex` builds EVERY theme
   under `modules/rice/themes/` and installs `~/.config/rice/themes.json`
   (`{ schemaVersion, default, themes.<name> = { displayName, manifest, preview,
-  wallpapers } }`, store paths). The mutable pointer `$XDG_STATE_HOME/rice/active`
+wallpapers } }`, store paths). The mutable pointer `$XDG_STATE_HOME/rice/active`
   holds a theme name; it is written ONLY by `rice-switch` (atomic rename +
   wallpaper orchestration + IPC nudge `rice reload`). Runtime resolution order:
   `$RICE_MANIFEST` env → pointer via index → `~/.config/rice/manifest.json`
@@ -308,6 +308,23 @@ Status values: `active` | `superseded by D-NNN`.
   The motion vocabulary continues to grow only when a surface needs a name
   (D-014 anti-speculation) — the LoTM plan's remaining names land with their
   consuming phases, not ahead of them.
+
+### D-023 — Surface settings share the widget config namespace
+
+- Date: 2026-07-07 · Status: active
+- Built-in surfaces that need theme-provided labels or small content settings
+  read them through the existing `Theme.widgetConfig(surfaceId).settings` path,
+  using the manifest's `widgets.<id>` namespace. Phase 14 first applies this to
+  `widgets.launcher.settings` (`placeholder`, `epigraphs`, result layout), so
+  the launcher can become the Summoning for LOTM while remaining a plain app
+  launcher for themes that provide no surface settings.
+- This is a clarification, not a new contract surface: widget ids and surface ids
+  share one flat id namespace, settings remain open-ended and owner-defined, and
+  runtime core still never reads theme-specific keys. Themes without a matching
+  entry receive the surface's neutral defaults.
+- Why: surfaces sometimes need the same tier-2 content customization as widgets,
+  but a parallel `surfaces.*` manifest tree would duplicate machinery and invite
+  split ownership.
 
 ---
 

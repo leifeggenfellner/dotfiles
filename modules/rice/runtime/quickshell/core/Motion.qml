@@ -10,6 +10,8 @@ import QtQuick
 // v2 vocabulary (grown only when a surface needs a new name):
 //   panelOpen   — a surface/panel entering
 //   panelClose  — a surface/panel leaving (faster, sharper)
+//   surfaceReveal / surfaceConceal — surface-open aliases (D-023)
+//   sealPress   — brief confirm/activation pulse
 //   stateChange — small state reactions (hover, value changes)
 //   awaken      — one-shot startup reveal of surface contents
 //
@@ -30,6 +32,16 @@ QtObject {
     readonly property QtObject panelClose: QtObject {
         readonly property int duration: motion.enabled ? Theme.motion.durations.fast : 0
         readonly property int easing: Theme.motion.easings.exit
+    }
+
+    // D-023 keeps panelOpen/panelClose as aliases for the migration
+    // cycle while new surfaces use the named vocabulary from the plan.
+    readonly property QtObject surfaceReveal: panelOpen
+    readonly property QtObject surfaceConceal: panelClose
+
+    readonly property QtObject sealPress: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.fast : 0
+        readonly property int easing: Theme.motion.easings.emphasis
     }
 
     readonly property QtObject stateChange: QtObject {

@@ -132,6 +132,17 @@ in
   # Workspace identity is the pathway catalog — pure theme data; the
   # runtime's WorkspacesGlance knows nothing about pathways.
   widgets = {
+    launcher.settings = {
+      placeholder = "Speak the honorific name...";
+      epigraphs = [
+        "The fog listens. The desktop answers."
+        "A name, once spoken, becomes a door."
+        "Every summoning begins as a precise request."
+      ];
+      columns = 4;
+      maxResults = 16;
+    };
+
     workspaces.settings.items = [
       { id = 1; label = "Fool"; icon = "pathways_png/fool.png"; color = "#756a92"; }
       { id = 2; label = "Door"; icon = "pathways_png/door.png"; color = "#478eb0"; }

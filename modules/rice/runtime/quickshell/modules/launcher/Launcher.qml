@@ -3,13 +3,14 @@ import Quickshell.Wayland
 import QtQuick
 import "../../core"
 import "../../components"
+import "../../services/apps"
 import "../../services/hypr"
 
 // ── Launcher ──────────────────────────────────────────────────
-// MVP: static grid of dummy apps. Opens/closes via ShellState
-// (IPC / keybind), Esc, or click-outside. No search, no real
-// apps yet — those arrive with the launcher's service phase.
-// Shows only on the focused monitor (HyprState).
+// Real app launcher backed by AppsState/DesktopEntries. Opens/closes
+// via ShellState (IPC / keybind), Esc, click-outside, or launch.
+// Shows only on the focused monitor (HyprState). Theme flavor enters
+// through Theme.widgetConfig("launcher") settings (D-023).
 
 PanelWindow {
     id: launcher
@@ -21,6 +22,14 @@ PanelWindow {
     // is unknown, e.g. outside a Hyprland session).
     readonly property bool onFocusedScreen: !HyprState.available || HyprState.focusedScreenName === launcher.screen.name
     readonly property bool open: ShellState.launcherOpen && onFocusedScreen
+    readonly property var settings: Theme.widgetConfig("launcher").settings ?? ({})
+    readonly property string placeholder: settings.placeholder ?? "Search applications"
+    readonly property var epigraphs: settings.epigraphs ?? ["Type to search applications."]
+    readonly property int columns: settings.columns ?? 4
+    readonly property int maxResults: settings.maxResults ?? 16
+    readonly property string query: searchField.text
+    readonly property var results: AppsState.search(query, maxResults)
+    property int selectedIndex: results.length > 0 ? 0 : -1
 
     // Stay mapped through the fade-out so closing is smooth.
     visible: open || panel.opacity > 0.01
@@ -37,54 +46,140 @@ PanelWindow {
     }
     color: "transparent"
 
-    readonly property var apps: [
-        { name: "Terminal", icon: "terminal" },
-        { name: "Files", icon: "files" },
-        { name: "Browser", icon: "browser" },
-        { name: "Editor", icon: "editor" },
-        { name: "Music", icon: "music" },
-        { name: "Settings", icon: "settings" },
-        { name: "Mail", icon: "mail" },
-        { name: "Chat", icon: "chat" },
-        { name: "Photos", icon: "photos" },
-        { name: "Calendar", icon: "calendar" },
-        { name: "Notes", icon: "notes" },
-        { name: "Monitor", icon: "monitor" }
-    ]
+    function clampSelection() {
+        if (results.length === 0)
+            selectedIndex = -1;
+        else if (selectedIndex < 0 || selectedIndex >= results.length)
+            selectedIndex = 0;
+    }
 
-    component AppTile: Rectangle {
+    function activate(index) {
+        if (index < 0 || index >= results.length)
+            return;
+        pressPulse.restart();
+        AppsState.launch(results[index].app);
+        ShellState.closeLauncher();
+    }
+
+    function epigraphText() {
+        if (epigraphs.length === 0)
+            return "";
+        return epigraphs[Math.abs(query.length) % epigraphs.length];
+    }
+
+    onResultsChanged: clampSelection()
+    onOpenChanged: {
+        if (open) {
+            searchField.text = "";
+            searchField.forceActiveFocus();
+            clampSelection();
+        }
+    }
+
+    SequentialAnimation {
+        id: pressPulse
+        running: false
+        NumberAnimation {
+            target: panel
+            property: "scale"
+            to: 1.025
+            duration: Motion.sealPress.duration / 2
+            easing.type: Motion.sealPress.easing
+        }
+        NumberAnimation {
+            target: panel
+            property: "scale"
+            to: 1
+            duration: Motion.sealPress.duration / 2
+            easing.type: Motion.sealPress.easing
+        }
+    }
+
+    component AppCard: Rectangle {
         required property var modelData
+        required property int index
 
-        width: 120
-        height: 96
+        readonly property bool selected: index === launcher.selectedIndex
+
+        width: 156
+        height: 108
         radius: Theme.metrics.radius.medium
-        color: tileMouse.containsMouse ? Theme.colors.bg.elevated : "transparent"
+        color: selected ? Theme.colors.bg.elevated : (cardMouse.containsMouse ? Theme.colors.bg.surface1 : "transparent")
+        border.width: selected ? 1 : 0
+        border.color: Theme.colors.accent.primary
 
         Column {
-            anchors.centerIn: parent
+            anchors.fill: parent
+            anchors.margins: Theme.metrics.space.md
             spacing: Theme.metrics.space.sm
 
-            Icon {
+            Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                name: modelData.icon
-                size: Theme.typography.sizes.heading + 6
-                color: tileMouse.containsMouse ? Theme.colors.accent.primary : Theme.colors.fg.muted
+                width: 38
+                height: 38
+                radius: Theme.metrics.radius.small
+                color: Theme.colors.bg.sunken
+
+                Image {
+                    visible: modelData.iconPath.length > 0
+                    anchors.centerIn: parent
+                    width: 28
+                    height: 28
+                    source: modelData.iconPath
+                    sourceSize.width: 56
+                    sourceSize.height: 56
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                }
+
+                Icon {
+                    visible: modelData.iconPath.length === 0
+                    anchors.centerIn: parent
+                    name: "settings"
+                    size: Theme.typography.sizes.heading
+                    color: selected ? Theme.colors.accent.primary : Theme.colors.fg.muted
+                }
             }
+
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: modelData.name
-                color: Theme.colors.fg.primary
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                color: selected ? Theme.colors.accent.primary : Theme.colors.fg.primary
                 font.family: Theme.typography.families.sans
                 font.pointSize: Theme.typography.sizes.body
+                elide: Text.ElideRight
+                maximumLineCount: 1
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: modelData.subtitle
+                visible: text.length > 0
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                color: Theme.colors.fg.subtle
+                font.family: Theme.typography.families.sans
+                font.pointSize: Theme.typography.sizes.small
+                elide: Text.ElideRight
+                maximumLineCount: 1
+            }
+        }
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Motion.stateChange.duration
+                easing.type: Motion.stateChange.easing
             }
         }
 
         MouseArea {
-            id: tileMouse
+            id: cardMouse
             anchors.fill: parent
             hoverEnabled: true
-            // Dummy apps: activating just closes the launcher.
-            onClicked: ShellState.closeLauncher()
+            onEntered: launcher.selectedIndex = index
+            onClicked: launcher.activate(index)
         }
     }
 
@@ -96,7 +191,7 @@ PanelWindow {
 
         Behavior on opacity {
             MotionAnim {
-                spec: launcher.open ? Motion.panelOpen : Motion.panelClose
+                spec: launcher.open ? Motion.surfaceReveal : Motion.surfaceConceal
             }
         }
 
@@ -110,29 +205,47 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: ShellState.closeLauncher()
+        Keys.onReturnPressed: launcher.activate(launcher.selectedIndex)
+        Keys.onEnterPressed: launcher.activate(launcher.selectedIndex)
+        Keys.onUpPressed: {
+            if (launcher.results.length > 0)
+                launcher.selectedIndex = Math.max(0, launcher.selectedIndex - launcher.columns);
+        }
+        Keys.onDownPressed: {
+            if (launcher.results.length > 0)
+                launcher.selectedIndex = Math.min(launcher.results.length - 1, launcher.selectedIndex + launcher.columns);
+        }
+        Keys.onLeftPressed: {
+            if (launcher.results.length > 0)
+                launcher.selectedIndex = Math.max(0, launcher.selectedIndex - 1);
+        }
+        Keys.onRightPressed: {
+            if (launcher.results.length > 0)
+                launcher.selectedIndex = Math.min(launcher.results.length - 1, launcher.selectedIndex + 1);
+        }
 
         Rectangle {
             id: panel
 
             anchors.centerIn: parent
-            width: grid.width + Theme.metrics.space.lg * 2
-            height: title.height + grid.height + Theme.metrics.space.lg * 3
+            width: Math.max(720, grid.width) + Theme.metrics.space.lg * 2
+            height: header.height + grid.height + status.height + Theme.metrics.space.lg * 3
             radius: Theme.metrics.radius.large
             color: Theme.colors.bg.mantle
             border.width: 1
             border.color: Theme.colors.bg.surface1
 
             opacity: launcher.open ? 1 : 0
-            scale: launcher.open ? 1 : 0.94
+            scale: launcher.open ? 1 : 0.96
 
             Behavior on opacity {
                 MotionAnim {
-                    spec: launcher.open ? Motion.panelOpen : Motion.panelClose
+                    spec: launcher.open ? Motion.surfaceReveal : Motion.surfaceConceal
                 }
             }
             Behavior on scale {
                 MotionAnim {
-                    spec: launcher.open ? Motion.panelOpen : Motion.panelClose
+                    spec: launcher.open ? Motion.surfaceReveal : Motion.surfaceConceal
                 }
             }
 
@@ -141,29 +254,123 @@ PanelWindow {
                 anchors.fill: parent
             }
 
-            Text {
-                id: title
+            Column {
+                id: header
                 anchors.top: parent.top
                 anchors.topMargin: Theme.metrics.space.lg
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "Applications"
-                color: Theme.colors.fg.subtle
-                font.family: Theme.typography.families.display
-                font.pointSize: Theme.typography.sizes.heading
+                width: parent.width - Theme.metrics.space.lg * 2
+                spacing: Theme.metrics.space.md
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Applications"
+                    color: Theme.colors.fg.subtle
+                    font.family: Theme.typography.families.display
+                    font.pointSize: Theme.typography.sizes.heading
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    height: 44
+                    radius: Theme.metrics.radius.medium
+                    color: Theme.colors.bg.sunken
+                    border.width: 1
+                    border.color: searchField.activeFocus ? Theme.colors.accent.primary : Theme.colors.bg.surface1
+
+                    TextInput {
+                        id: searchField
+                        anchors.fill: parent
+                        anchors.leftMargin: Theme.metrics.space.md
+                        anchors.rightMargin: Theme.metrics.space.md
+                        verticalAlignment: TextInput.AlignVCenter
+                        focus: launcher.open
+                        color: Theme.colors.fg.primary
+                        selectionColor: Theme.colors.accent.primary
+                        selectedTextColor: Theme.colors.bg.sunken
+                        font.family: Theme.typography.families.sans
+                        font.pointSize: Theme.typography.sizes.body
+                        clip: true
+                        Keys.onEscapePressed: ShellState.closeLauncher()
+                        Keys.onReturnPressed: launcher.activate(launcher.selectedIndex)
+                        Keys.onEnterPressed: launcher.activate(launcher.selectedIndex)
+                        Keys.onUpPressed: {
+                            if (launcher.results.length > 0)
+                                launcher.selectedIndex = Math.max(0, launcher.selectedIndex - launcher.columns);
+                        }
+                        Keys.onDownPressed: {
+                            if (launcher.results.length > 0)
+                                launcher.selectedIndex = Math.min(launcher.results.length - 1, launcher.selectedIndex + launcher.columns);
+                        }
+                        Keys.onLeftPressed: {
+                            if (launcher.results.length > 0)
+                                launcher.selectedIndex = Math.max(0, launcher.selectedIndex - 1);
+                        }
+                        Keys.onRightPressed: {
+                            if (launcher.results.length > 0)
+                                launcher.selectedIndex = Math.min(launcher.results.length - 1, launcher.selectedIndex + 1);
+                        }
+
+                        Text {
+                            anchors.fill: parent
+                            verticalAlignment: Text.AlignVCenter
+                            text: launcher.placeholder
+                            visible: searchField.text.length === 0
+                            color: Theme.colors.fg.subtle
+                            font.family: Theme.typography.families.sans
+                            font.pointSize: Theme.typography.sizes.body
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width
+                    text: launcher.query.length === 0 ? launcher.epigraphText() : (launcher.results.length + " result" + (launcher.results.length === 1 ? "" : "s"))
+                    color: Theme.colors.fg.subtle
+                    font.family: Theme.typography.families.sans
+                    font.pointSize: Theme.typography.sizes.small
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                }
             }
 
             Grid {
                 id: grid
-                anchors.top: title.bottom
+                anchors.top: header.bottom
                 anchors.topMargin: Theme.metrics.space.lg
                 anchors.horizontalCenter: parent.horizontalCenter
-                columns: 4
+                columns: launcher.columns
                 spacing: Theme.metrics.space.md
 
                 Repeater {
-                    model: launcher.apps
-                    AppTile {}
+                    model: launcher.results
+                    AppCard {}
                 }
+
+                Text {
+                    visible: launcher.results.length === 0
+                    width: 640
+                    text: AppsState.apps.length === 0 ? "no desktop entries found" : "no matches"
+                    color: Theme.colors.fg.muted
+                    font.family: Theme.typography.families.mono
+                    font.pointSize: Theme.typography.sizes.body
+                    horizontalAlignment: Text.AlignHCenter
+                }
+            }
+
+            Text {
+                id: status
+                anchors.top: grid.bottom
+                anchors.topMargin: Theme.metrics.space.sm
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: implicitHeight
+                text: AppsState.error
+                color: Theme.colors.state.danger
+                font.family: Theme.typography.families.mono
+                font.pointSize: Theme.typography.sizes.small
             }
         }
     }
