@@ -459,9 +459,38 @@ value)` add the generic namespaced extras bucket without changing the
   user PATH before rebuild, the smoke prepended the Nix store `cliphist` bin;
   the Home Manager package addition makes that permanent after rebuild.
 
+## Phase 18 — Ritual & Divination Dressing ✅
+
+Concretized as D-026: delegate slots are runtime-owned visual variants, not theme
+behavior overrides, and divination panels are ordinary dashboard widgets fed by
+injected services.
+
+- ✅ Power-menu delegate slot: `PowerMenuPopout` keeps the default linear list for
+  unconfigured themes and adds a known `radial` delegate selected by
+  `widgets.power.settings.delegate`. Both delegates call the same injected
+  `SessionState` actions, so the LOTM ritual circle is visual dressing only.
+- ✅ `Motion.ritualAssemble` adds the ceremonial motion name used by the radial
+  power delegate and collapses under the existing reduce-motion governor.
+- ✅ `services/weather/WeatherState.qml` owns weather and sky state: hourly/on-
+  demand wttr.in current conditions when curl/network are available, graceful
+  fallback errors when absent, and local moon phase via `utils/Moon.qml`.
+- ✅ `widgets/divination/WeatherDashboard.qml` and `CalendarDashboard.qml` extend
+  the Observatory through the descriptor registry with injected `weather` data.
+  The calendar panel shows real date data plus local lunar phase/illumination.
+- ✅ LOTM manifest configures the ritual labels, weather/calendar panel copy, an
+  authored `assets/preview.png`, and completed semantic sigil icon overrides for
+  power, calendar, moon, and weather roles. Cyberpunk remains unconfigured and
+  therefore keeps default widgets/delegates.
+- Verified: editor diagnostics clean for changed QML; `rice-lint` clean; LOTM
+  manifest + theme index build; `nix flake check --print-build-logs` clean;
+  live dev shell with the built LOTM manifest loads, opens/closes dashboard and
+  power popout through path-scoped IPC, and reports no Phase 18 runtime warnings
+  beyond the expected duplicate notification-owner/portal warnings in an
+  already-running desktop.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Volume/brightness OSDs · weather/dev dashboard panels · optional dock · LOTM plugin widgets
+Volume/brightness OSDs · optional dock · LOTM plugin widgets
 (tarot/ritual — proves the plugin contract).
 The ambient effects tier landed as Phase 13 (D-021).
 

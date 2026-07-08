@@ -118,8 +118,23 @@ in
     # Icon-name overrides: values with a "/" are files relative to
     # assets.root; anything else is a font glyph.
     icons = {
+      calendar = "icons/sigil_calendar.svg";
+      lock = "icons/sigil_lock.svg";
       settings = "icons/sigil_settings.svg";
+      logout = "icons/sigil_logout.svg";
       monitor = "icons/sigil_eye.svg";
+      moon = "icons/sigil_moon.svg";
+      moon-new = "icons/sigil_moon.svg";
+      moon-waxing-crescent = "icons/sigil_moon.svg";
+      moon-first-quarter = "icons/sigil_moon.svg";
+      moon-waxing-gibbous = "icons/sigil_moon.svg";
+      moon-full = "icons/sigil_moon.svg";
+      moon-waning-gibbous = "icons/sigil_moon.svg";
+      moon-last-quarter = "icons/sigil_moon.svg";
+      moon-waning-crescent = "icons/sigil_moon.svg";
+      power = "icons/sigil_power.svg";
+      reboot = "icons/sigil_reboot.svg";
+      weather = "icons/sigil_weather.svg";
     };
     sounds = {
       notification = "sounds/sealed-letter.wav";
@@ -203,6 +218,27 @@ in
       emptyText = "No artifacts have been collected.";
       sealedLabel = "sealed";
       maxResults = 24;
+    };
+
+    power.settings = {
+      delegate = "radial";
+      centerLabel = "Ritual";
+      labels = {
+        lock = "Seal";
+        logout = "Depart";
+        reboot = "Recast";
+        poweroff = "Extinguish";
+      };
+    };
+
+    weather.settings = {
+      title = "Sky Omens";
+      unavailableText = "The weather is veiled beyond the fog.";
+    };
+
+    calendar.settings = {
+      title = "Almanac";
+      moonLabel = "Lunar divination";
     };
 
     workspaces.settings.items = [

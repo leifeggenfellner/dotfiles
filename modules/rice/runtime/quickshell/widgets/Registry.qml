@@ -8,6 +8,7 @@ import "./power" as Power
 import "./media" as Media
 import "./meters" as Meters
 import "./epigraph" as Epigraph
+import "./divination" as Divination
 
 // ── Registry ──────────────────────────────────────────────────
 // The widget registry: built-in descriptors ∪ (later) theme plugins.
@@ -58,6 +59,14 @@ Item {
     Component {
         id: epigraphDashboard
         Epigraph.EpigraphDashboard {}
+    }
+    Component {
+        id: weatherDashboard
+        Divination.WeatherDashboard {}
+    }
+    Component {
+        id: calendarDashboard
+        Divination.CalendarDashboard {}
     }
 
     readonly property list<QtObject> builtins: [
@@ -110,6 +119,20 @@ Item {
             priority: 10
             services: ["systemStats"]
             glance: metersDashboard
+        },
+        WidgetDescriptor {
+            widgetId: "weather"
+            region: "dashboard"
+            priority: 20
+            services: ["weather"]
+            glance: weatherDashboard
+        },
+        WidgetDescriptor {
+            widgetId: "calendar"
+            region: "dashboard"
+            priority: 30
+            services: ["weather"]
+            glance: calendarDashboard
         }
     ]
 
@@ -135,9 +158,6 @@ Item {
     }
 
     function byRegion(region) {
-        return builtins
-            .map(effective)
-            .filter(w => w.enabled && w.region === region && w.glance !== null)
-            .sort((a, b) => a.priority - b.priority);
+        return builtins.map(effective).filter(w => w.enabled && w.region === region && w.glance !== null).sort((a, b) => a.priority - b.priority);
     }
 }
