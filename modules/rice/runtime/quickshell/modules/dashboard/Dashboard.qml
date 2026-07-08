@@ -5,6 +5,7 @@ import "../../core"
 import "../../widgets"
 import "../../services/hypr"
 import "../../services/system"
+import "../../services/weather"
 
 // ── Dashboard ─────────────────────────────────────────────────
 // Observatory surface: descriptor-driven dashboard widgets rendered
@@ -36,7 +37,8 @@ PanelWindow {
 
     function resolveServices(names) {
         const table = {
-            systemStats: SystemStatsState
+            systemStats: SystemStatsState,
+            weather: WeatherState
         };
         const out = {};
         for (const n of names)

@@ -46,7 +46,12 @@ Every widget exports a descriptor with:
 2. **Settings** — manifest `widgets.<id>.settings` per the widget's own schema
    (e.g. icon set, labels, per-workspace colors for the workspace indicator).
 3. **Delegate slots** — a built-in may expose an optional visual delegate property
-   a theme can supply through settings; the widget's logic is untouched.
+   a theme can select through settings; the widget's logic is untouched. Delegate
+   values are runtime-known names, not arbitrary QML paths. The built-in remains
+   responsible for service injection, command dispatch, fallbacks, and empty-state
+   behavior. First tier-3 use: `widgets.power.settings.delegate = "radial"`
+   selects the ritual-circle power menu while preserving the same SessionState
+   actions as the default list.
 4. **Plugins** — a genuinely new widget shipped by the theme. Never use a plugin
    to restyle a built-in.
 

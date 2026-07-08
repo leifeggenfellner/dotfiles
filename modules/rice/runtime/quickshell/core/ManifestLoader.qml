@@ -24,80 +24,153 @@ Item {
     id: loader
 
     readonly property var _defaults: ({
-        meta: { name: "", displayName: "runtime defaults" },
-        tokens: {
-            colors: {
-                bg: { base: "#1e1e2e", mantle: "#181825", elevated: "#313244", sunken: "#11111b", surface1: "#45475a", surface2: "#585b70" },
-                fg: { primary: "#cdd6f4", muted: "#a6adc8", subtle: "#7f849c" },
-                accent: { primary: "#cba6f7", secondary: "#89b4fa", tertiary: "#74c7ec" },
-                state: { ok: "#a6e3a1", warn: "#f9e2af", danger: "#f38ba8", info: "#89dceb" }
+            meta: {
+                name: "",
+                displayName: "runtime defaults"
             },
-            typography: {
-                families: { display: "Inter", sans: "Inter", mono: "JetBrainsMono Nerd Font" },
-                sizes: { small: 10, body: 13, bar: 14, heading: 18, icon: 18 },
-                weights: { regular: Font.Normal, medium: Font.Medium, bold: Font.Bold }
+            tokens: {
+                colors: {
+                    bg: {
+                        base: "#1e1e2e",
+                        mantle: "#181825",
+                        elevated: "#313244",
+                        sunken: "#11111b",
+                        surface1: "#45475a",
+                        surface2: "#585b70"
+                    },
+                    fg: {
+                        primary: "#cdd6f4",
+                        muted: "#a6adc8",
+                        subtle: "#7f849c"
+                    },
+                    accent: {
+                        primary: "#cba6f7",
+                        secondary: "#89b4fa",
+                        tertiary: "#74c7ec"
+                    },
+                    state: {
+                        ok: "#a6e3a1",
+                        warn: "#f9e2af",
+                        danger: "#f38ba8",
+                        info: "#89dceb"
+                    }
+                },
+                typography: {
+                    families: {
+                        display: "Inter",
+                        sans: "Inter",
+                        mono: "JetBrainsMono Nerd Font"
+                    },
+                    sizes: {
+                        small: 10,
+                        body: 13,
+                        bar: 14,
+                        heading: 18,
+                        icon: 18
+                    },
+                    weights: {
+                        regular: Font.Normal,
+                        medium: Font.Medium,
+                        bold: Font.Bold
+                    }
+                },
+                metrics: {
+                    radius: {
+                        small: 8,
+                        medium: 10,
+                        large: 14
+                    },
+                    space: {
+                        xs: 4,
+                        sm: 8,
+                        md: 12,
+                        lg: 16
+                    },
+                    bar: {
+                        height: 56,
+                        margin: 8,
+                        spacing: 12,
+                        opacity: 0.85
+                    }
+                },
+                motion: {
+                    durations: {
+                        fast: 150,
+                        base: 250,
+                        slow: 350,
+                        overlay: 110
+                    },
+                    easings: {
+                        standard: "OutCubic",
+                        enter: "OutQuint",
+                        exit: "InCubic",
+                        emphasis: "OutBack"
+                    },
+                    ambient: false,
+                    enabled: true
+                },
+                // Ambient-effect config (D-021); read only by core/Effects.
+                effects: {
+                    layers: []
+                }
             },
-            metrics: {
-                radius: { small: 8, medium: 10, large: 14 },
-                space: { xs: 4, sm: 8, md: 12, lg: 16 },
-                bar: { height: 56, margin: 8, spacing: 12, opacity: 0.85 }
+            assets: {
+                root: "",
+                // Semantic icon names → glyphs. Themes remap freely; values
+                // containing "/" are files relative to assets.root.
+                icons: {
+                    "terminal": "󰆍",
+                    "files": "󰉋",
+                    "browser": "󰈹",
+                    "editor": "󰷈",
+                    "music": "󰝚",
+                    "settings": "󰒓",
+                    "mail": "󰇮",
+                    "chat": "󰭹",
+                    "photos": "󰋩",
+                    "calendar": "󰃭",
+                    "weather": "󰖐",
+                    "moon": "󰽥",
+                    "moon-new": "󰽤",
+                    "moon-waxing-crescent": "󰽧",
+                    "moon-first-quarter": "󰽡",
+                    "moon-waxing-gibbous": "󰽨",
+                    "moon-full": "󰽢",
+                    "moon-waning-gibbous": "󰽦",
+                    "moon-last-quarter": "󰽣",
+                    "moon-waning-crescent": "󰽩",
+                    "notes": "󰠮",
+                    "clipboard": "󰅌",
+                    "pin": "󰐃",
+                    "pin-off": "󰤱",
+                    "trash": "󰆴",
+                    "monitor": "󰍛",
+                    "volume": "󰕾",
+                    "volume-muted": "󰝟",
+                    "wifi": "󰤨",
+                    "wifi-off": "󰤭",
+                    "ethernet": "󰈀",
+                    "bluetooth": "󰂯",
+                    "battery": "󰁹",
+                    "battery-charging": "󰂄",
+                    "power": "󰐥",
+                    "lock": "󰌾",
+                    "logout": "󰍃",
+                    "reboot": "󰜉",
+                    "refresh": "󰑐",
+                    "play": "󰐊",
+                    "pause": "󰏤",
+                    "previous": "󰒮",
+                    "next": "󰒭",
+                    "bell": "󰂚",
+                    "bell-off": "󰂛",
+                    "unknown": "󰋗"
+                },
+                sounds: {},
+                raster: {}
             },
-            motion: {
-                durations: { fast: 150, base: 250, slow: 350, overlay: 110 },
-                easings: { standard: "OutCubic", enter: "OutQuint", exit: "InCubic", emphasis: "OutBack" },
-                ambient: false,
-                enabled: true
-            },
-            // Ambient-effect config (D-021); read only by core/Effects.
-            effects: { layers: [] }
-        },
-        assets: {
-            root: "",
-            // Semantic icon names → glyphs. Themes remap freely; values
-            // containing "/" are files relative to assets.root.
-            icons: {
-                "terminal": "󰆍",
-                "files": "󰉋",
-                "browser": "󰈹",
-                "editor": "󰷈",
-                "music": "󰝚",
-                "settings": "󰒓",
-                "mail": "󰇮",
-                "chat": "󰭹",
-                "photos": "󰋩",
-                "calendar": "󰃭",
-                "notes": "󰠮",
-                "clipboard": "󰅌",
-                "pin": "󰐃",
-                "pin-off": "󰤱",
-                "trash": "󰆴",
-                "monitor": "󰍛",
-                "volume": "󰕾",
-                "volume-muted": "󰝟",
-                "wifi": "󰤨",
-                "wifi-off": "󰤭",
-                "ethernet": "󰈀",
-                "bluetooth": "󰂯",
-                "battery": "󰁹",
-                "battery-charging": "󰂄",
-                "power": "󰐥",
-                "lock": "󰌾",
-                "logout": "󰍃",
-                "reboot": "󰜉",
-                "refresh": "󰑐",
-                "play": "󰐊",
-                "pause": "󰏤",
-                "previous": "󰒮",
-                "next": "󰒭",
-                "bell": "󰂚",
-                "bell-off": "󰂛",
-                "unknown": "󰋗"
-            },
-            sounds: {},
-            raster: {}
-        },
-        widgets: {}
-    })
+            widgets: {}
+        })
 
     property var _fileManifest: ({})
     property bool loaded: false

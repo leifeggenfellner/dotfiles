@@ -12,6 +12,7 @@ import QtQuick
 //   panelClose  — a surface/panel leaving (faster, sharper)
 //   surfaceReveal / surfaceConceal — surface-open aliases (D-023)
 //   sealPress   — brief confirm/activation pulse
+//   ritualAssemble — infrequent radial/delegate assembly motion
 //   stateChange — small state reactions (hover, value changes)
 //   awaken      — one-shot startup reveal of surface contents
 //
@@ -42,6 +43,11 @@ QtObject {
     readonly property QtObject sealPress: QtObject {
         readonly property int duration: motion.enabled ? Theme.motion.durations.fast : 0
         readonly property int easing: Theme.motion.easings.emphasis
+    }
+
+    readonly property QtObject ritualAssemble: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.ceremonial : 0
+        readonly property int easing: Theme.motion.easings.enter
     }
 
     readonly property QtObject stateChange: QtObject {

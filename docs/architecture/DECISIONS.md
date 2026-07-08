@@ -375,6 +375,28 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   files per surface would erode the state model. A generic extras bucket keeps
   persistence debuggable and still forces every owner to stay in its namespace.
 
+### D-026 — Delegate slots stay logic-neutral
+
+- Date: 2026-07-08 · Status: active
+- A built-in widget may expose a small named delegate slot through
+  `widgets.<id>.settings` when tokens/settings cannot express the desired visual
+  shape but a plugin would be too much authority. Delegate slots are owned by the
+  built-in: the runtime selects from known delegate names, keeps the same service
+  injection and command methods, and preserves the default delegate for themes
+  that configure nothing.
+- The first real tier-3 use is the power widget. `widgets.power.settings.delegate
+= "radial"` swaps the default linear menu for a radial ritual layout, but every
+  action still calls the same injected `SessionState` commands (`lock`, `logout`,
+  `reboot`, `poweroff`). LOTM supplies only labels and semantic icon overrides;
+  non-LOTM themes keep the linear menu unchanged.
+- Phase 18 also adds divination dashboard panels as ordinary built-ins, not theme
+  plugins: `WeatherState` owns weather and local moon state, while `weather` and
+  `calendar` dashboard widgets render injected service data through tokens and
+  widget settings.
+- Why: delegate slots give themes a stronger visual dialect for existing
+  workflows without letting theme data replace behavior. This keeps D-006 intact
+  and saves plugins for genuinely new widgets.
+
 ---
 
 ## Legacy imports
