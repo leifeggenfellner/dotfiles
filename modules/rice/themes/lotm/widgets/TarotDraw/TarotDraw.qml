@@ -90,45 +90,66 @@ Rectangle {
             name: "The Fool",
             sequence: "0",
             phrase: "A door opens above the gray fog.",
-            face: "fool.svg"
+            face: "fool.webp",
+            back: "fool.webp"
         },
         {
             name: "The Magician",
             sequence: "I",
             phrase: "A precise hand turns chance into ritual.",
-            face: "magician.svg"
+            face: "magician.webp",
+            back: "magician.webp"
         },
         {
             name: "The High Priestess",
             sequence: "II",
             phrase: "Silence keeps the safer half of knowledge.",
-            face: "priestess.svg"
+            face: "priestess.webp",
+            back: "priestess.webp"
         },
         {
             name: "The Hermit",
             sequence: "IX",
             phrase: "A lamp is enough when the path is honest.",
-            face: "hermit.svg"
+            face: "hermit.webp",
+            back: "hermit.webp"
         },
         {
             name: "Wheel of Fortune",
             sequence: "X",
             phrase: "The machine turns; the omen is timing.",
-            face: "wheel.svg"
+            face: "wheel.webp",
+            back: "wheel.webp"
         },
         {
             name: "The Moon",
             sequence: "XVIII",
             phrase: "Not every shadow belongs to a monster.",
-            face: "moon.svg"
+            face: "moon.webp",
+            back: "moon.webp"
         },
         {
             name: "The World",
             sequence: "XXI",
             phrase: "A circle closes without becoming a cage.",
-            face: "world.svg"
+            face: "world.webp",
+            back: "world.webp"
         }
     ]
+
+    function facePath(card) {
+        return "assets/faces/" + card.face;
+    }
+
+    function backPath(card) {
+        return card && card.back ? "assets/backs/" + card.back : "assets/back.svg";
+    }
+
+    function visibleCardPath() {
+        if (root.hasDaily && root.revealed && root.currentCard)
+            return facePath(root.currentCard);
+        return backPath(root.currentCard);
+    }
 
     function draw() {
         if (!prefs)
@@ -169,7 +190,7 @@ Rectangle {
             Image {
                 anchors.fill: parent
                 anchors.margins: root.theme.metrics.space.xs
-                source: root.hasDaily && root.revealed && root.currentCard ? Qt.resolvedUrl("assets/faces/" + root.currentCard.face) : Qt.resolvedUrl("assets/back.svg")
+                source: Qt.resolvedUrl(root.visibleCardPath())
                 fillMode: Image.PreserveAspectFit
                 smooth: true
             }
