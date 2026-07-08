@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import QtQuick
 import "../../core"
 import "../../components"
+import "../../components/effects"
 import "../../services/clipboard"
 import "../../services/hypr"
 import "../../services/prefs"
@@ -261,6 +262,7 @@ PanelWindow {
             color: Theme.colors.bg.mantle
             border.width: 1
             border.color: Theme.colors.bg.surface1
+            clip: true
 
             opacity: satchel.open ? 1 : 0
             scale: satchel.open ? 1 : 0.96
@@ -274,6 +276,12 @@ PanelWindow {
                 MotionAnim {
                     spec: satchel.open ? Motion.surfaceReveal : Motion.surfaceConceal
                 }
+            }
+
+            InkReveal {
+                anchors.fill: parent
+                open: satchel.open
+                tint: Theme.colors.fg.subtle
             }
 
             MouseArea {

@@ -42,11 +42,11 @@ Rules:
 
 ## Effect tiers
 
-| Tier | What | Rules |
-|---|---|---|
-| **T0** | transform + opacity animations | Always allowed. The baseline every effect must degrade to. |
-| **T1** | canvas/particle effects (fog, embers, drift) | Budgeted and pausable. Paused when a fullscreen client is active and under reduce-motion. |
-| **T2** | shader effects | Per-theme opt-in. Must ship a T0 degradation path; failure to compile falls back silently. |
+| Tier   | What                                         | Rules                                                                                                                                                          |
+| ------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **T0** | transform + opacity animations               | Always allowed. The baseline every effect must degrade to.                                                                                                     |
+| **T1** | canvas/particle effects (fog, embers, drift) | Budgeted and pausable. Paused when a fullscreen client is active and under reduce-motion.                                                                      |
+| **T2** | runtime-owned shader effects                 | Theme-selected via `tokens.effects`; shader code is precompiled by Nix and must ship a T0/T1 degradation path. Failure to compile or load falls back silently. |
 
 **Ambient tier:** themes may declare idle atmosphere effects (T1/T2) via
 `tokens.motion.ambient = true` plus `tokens.effects.layers` (D-021). Ambient
@@ -58,6 +58,10 @@ Mechanism (D-021): `core/Effects` resolves and clamps the config;
 lives, pushing `ShellState.ambientActive`; per-monitor
 `modules/ambient/AmbientLayer` windows mount `components/effects/` primitives
 and unload entirely while paused (ambient-off steady state costs zero).
+Shader tier realization (D-028): GLSL lives only in the runtime under
+`components/effects/shaders/`; production config builds compile `.qsb` files with
+Qt Shader Tools, and QML loaders activate only when the generated shader manifest
+is present.
 
 ## Budgets
 

@@ -23,9 +23,32 @@ Item {
     clip: true
 
     readonly property real _bandH: band === "full" ? height : height * 0.45
+    readonly property real _bandStart: band === "top" || band === "full" ? 0 : 0.55
+    readonly property real _bandEnd: band === "bottom" || band === "full" ? 1 : 0.45
+    property real _shaderTime: 0
+
+    ShaderSurface {
+        id: shaderFog
+        anchors.fill: parent
+        shaderName: "fog"
+        tint: fog.tint
+        strength: fog.strength
+        speed: fog.speed
+        time: fog._shaderTime
+        bandStart: fog._bandStart
+        bandEnd: fog._bandEnd
+    }
+
+    Timer {
+        id: fogClock
+        interval: 33
+        repeat: true
+        running: shaderFog.usingShader && fog.running && fog.visible
+        onTriggered: fog._shaderTime += interval / 1000
+    }
 
     Repeater {
-        model: 3
+        model: shaderFog.usingShader ? 0 : 3
 
         Canvas {
             id: blob
@@ -40,9 +63,7 @@ Item {
             onPaint: {
                 const ctx = getContext("2d");
                 ctx.reset();
-                const g = ctx.createRadialGradient(
-                    width / 2, height * 0.62, 0,
-                    width / 2, height * 0.62, width / 2);
+                const g = ctx.createRadialGradient(width / 2, height * 0.62, 0, width / 2, height * 0.62, width / 2);
                 g.addColorStop(0, Qt.rgba(fog.tint.r, fog.tint.g, fog.tint.b, 1));
                 g.addColorStop(1, Qt.rgba(fog.tint.r, fog.tint.g, fog.tint.b, 0));
                 ctx.fillStyle = g;

@@ -3,6 +3,7 @@ import Quickshell.Wayland
 import QtQuick
 import "../../core"
 import "../../components"
+import "../../components/effects"
 import "../../services/apps"
 import "../../services/hypr"
 
@@ -234,6 +235,7 @@ PanelWindow {
             color: Theme.colors.bg.mantle
             border.width: 1
             border.color: Theme.colors.bg.surface1
+            clip: true
 
             opacity: launcher.open ? 1 : 0
             scale: launcher.open ? 1 : 0.96
@@ -247,6 +249,12 @@ PanelWindow {
                 MotionAnim {
                     spec: launcher.open ? Motion.surfaceReveal : Motion.surfaceConceal
                 }
+            }
+
+            InkReveal {
+                anchors.fill: parent
+                open: launcher.open
+                tint: Theme.colors.fg.subtle
             }
 
             // Absorb clicks so they don't fall through to the scrim.

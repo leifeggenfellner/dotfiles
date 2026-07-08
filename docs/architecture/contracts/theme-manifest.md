@@ -57,6 +57,8 @@ exclusively through the `Theme` facade.
         # type ∈ "fog" | "particles" | "vignette" (v1 set);
         # tint is a color TOKEN REF ("accent.primary"), never a literal (L-005);
         # opacity/speed/count are clamped to the motion-contract budgets.
+        # Shader-capable layer types use runtime-owned shaders when compiled
+        # (D-028); themes never ship shader source or bytecode.
         # { type = "fog"; tint = "accent.secondary"; opacity = 0.1; speed = 1.0; band = "bottom"; }
       ];
     };
@@ -132,6 +134,8 @@ exclusively through the `Theme` facade.
    asserts required keys, color formats, and file existence at eval/build time.
 5. **No behavior in the manifest.** The manifest is data. Anything executable
    belongs in a plugin widget under the widget contract.
+   Shader programs are the D-028 exception in the other direction: they are
+   runtime-owned assets selected only by manifest data, never theme-provided code.
 6. **Plugin packaging (D-027).** The manifest builder validates theme-relative
    plugin source directories and entry files at build time, then serializes the
    containing `modules/rice` package root as a Nix store path. Keep plugin-local

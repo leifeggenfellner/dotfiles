@@ -512,6 +512,36 @@ QML files, loaded fail-soft by the registry, and limited to injected services.
   plugin-load errors or duplicate runtime singleton warnings beyond the expected
   duplicate notification-owner/portal warnings in an already-running desktop.
 
+## Phase 20 — Shaders: fog + ink reveal ✅
+
+Concretized as D-028: the shader tier is runtime-owned, precompiled by Nix, and
+always backed by the existing T1/T0 visuals.
+
+- ✅ Runtime shader packaging: the installed `quickshell/rice` config is now a
+  small derivation that copies the runtime tree, runs `qsb --qt6` over
+  `components/effects/shaders/*.frag`, and writes a generated shader manifest
+  beside the compiled `.qsb` files. Dev path runs still work without generated
+  shaders.
+- ✅ `components/effects/ShaderSurface.qml` is the fail-soft T2 loader. It reads
+  the generated shader manifest and creates a `ShaderEffect` only for compiled
+  runtime-owned shaders, so missing dev assets silently leave callers on their
+  T1/T0 fallback path.
+- ✅ Fog now prefers the compiled `fog.qsb` layer when present and falls back to
+  the existing Canvas blob drift when absent. It remains governed by
+  `ShellState.ambientActive`, so reduce-motion/battery/fullscreen pauses still
+  unload the ambient layer.
+- ✅ `InkReveal.qml` adds a brief shader garnish for `Motion.surfaceReveal` on the
+  launcher, dashboard, and satchel panels. Their normal fade/scale transitions
+  remain the authoritative T0 behavior.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; `nixpkgs-fmt`
+  clean for `modules/rice/nix/shell.nix`; `rice-lint` clean; production runtime
+  build emits `fog.qsb`, `ink-reveal.qsb`, and a generated shader manifest with
+  both shader names; active LOTM manifest + theme index build; `nix flake check
+--print-build-logs` clean; live dev-path smoke with an empty shader manifest
+  falls back without shader warnings; live production store-path smoke opens the
+  launcher, dashboard, and satchel against compiled shaders without
+  `ShaderEffect` errors.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · optional dock · additional LOTM plugin widgets.
