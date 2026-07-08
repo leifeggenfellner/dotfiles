@@ -102,6 +102,43 @@ let
       else true)
     (theme.assets.sounds or { });
 
+  pluginSourcePath = plugin:
+    let source = plugin.source or (fail "plugin '${plugin.id or "<missing-id>"}' is missing source"); in
+    if builtins.isString source then themeDir + "/${source}"
+    else fail "plugin '${plugin.id or "<missing-id>"}' source must be a theme-relative string";
+
+  pluginEntry = plugin:
+    "themes/${themeName}/${plugin.source}/${plugin.entry or "main.qml"}";
+
+  pluginRoot = themeDir + "/../..";
+
+  plugins = map
+    (plugin:
+      plugin // {
+        contractVersion = plugin.contractVersion or 1;
+        enabled = plugin.enabled or true;
+        region = plugin.region or "dashboard";
+        priority = plugin.priority or 50;
+        services = plugin.services or [ ];
+        entry = pluginEntry plugin;
+        source = "${pluginRoot}";
+      })
+    (theme.plugins or [ ]);
+
+  pluginChecks = map
+    (plugin:
+      let sourcePath = pluginSourcePath plugin; in
+      if !(builtins.isString (plugin.id or null)) || plugin.id == ""
+      then fail "plugins entries must have a non-empty string id"
+      else if !(builtins.pathExists sourcePath)
+      then fail "plugin '${plugin.id}' source does not exist: ${toString sourcePath}"
+      else if !(builtins.pathExists (sourcePath + "/${plugin.entry or "main.qml"}"))
+      then fail "plugin '${plugin.id}' entry does not exist: ${toString sourcePath}/${plugin.entry or "main.qml"}"
+      else if !(builtins.isList (plugin.services or [ ]))
+      then fail "plugin '${plugin.id}' services must be a list"
+      else true)
+    (theme.plugins or [ ]);
+
   rasterize = theme.assets.rasterize or [ ];
 
   # Build-time image enumeration (D-019/D-020): image-role dirs are
@@ -143,6 +180,7 @@ let
     rasterize);
 
   manifest = theme // {
+    inherit plugins;
     assets = (removeAttrs (theme.assets or { }) [ "rasterize" ]) // {
       inherit raster wallpapers lockscreen;
       # Interpolation (not toString) so the store-path CONTEXT lands in
@@ -153,7 +191,7 @@ let
   };
 
   checks = tokenChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
-    ++ motionExtraChecks ++ effectChecks;
+    ++ motionExtraChecks ++ effectChecks ++ pluginChecks;
 in
 {
   inherit manifest;

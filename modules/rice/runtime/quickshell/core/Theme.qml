@@ -104,23 +104,41 @@ QtObject {
 
     // Raw ambient-effect config (D-021). Read ONLY by core/Effects,
     // which resolves tint token refs and enforces the budgets.
-    readonly property var effects: theme._t.effects ?? ({ layers: [] })
+    readonly property var effects: theme._t.effects ?? ({
+            layers: []
+        })
 
     // Curve-name string → Easing enum. Unknown names degrade to
     // OutCubic with a warning — a theme typo never breaks motion.
     function _easing(name) {
         const v = ({
-            "Linear": Easing.Linear,
-            "InQuad": Easing.InQuad, "OutQuad": Easing.OutQuad, "InOutQuad": Easing.InOutQuad,
-            "InCubic": Easing.InCubic, "OutCubic": Easing.OutCubic, "InOutCubic": Easing.InOutCubic,
-            "InQuart": Easing.InQuart, "OutQuart": Easing.OutQuart, "InOutQuart": Easing.InOutQuart,
-            "InQuint": Easing.InQuint, "OutQuint": Easing.OutQuint, "InOutQuint": Easing.InOutQuint,
-            "InExpo": Easing.InExpo, "OutExpo": Easing.OutExpo, "InOutExpo": Easing.InOutExpo,
-            "InSine": Easing.InSine, "OutSine": Easing.OutSine, "InOutSine": Easing.InOutSine,
-            "InBack": Easing.InBack, "OutBack": Easing.OutBack, "InOutBack": Easing.InOutBack,
-            "InElastic": Easing.InElastic, "OutElastic": Easing.OutElastic,
-            "InBounce": Easing.InBounce, "OutBounce": Easing.OutBounce
-        })[name];
+                "Linear": Easing.Linear,
+                "InQuad": Easing.InQuad,
+                "OutQuad": Easing.OutQuad,
+                "InOutQuad": Easing.InOutQuad,
+                "InCubic": Easing.InCubic,
+                "OutCubic": Easing.OutCubic,
+                "InOutCubic": Easing.InOutCubic,
+                "InQuart": Easing.InQuart,
+                "OutQuart": Easing.OutQuart,
+                "InOutQuart": Easing.InOutQuart,
+                "InQuint": Easing.InQuint,
+                "OutQuint": Easing.OutQuint,
+                "InOutQuint": Easing.InOutQuint,
+                "InExpo": Easing.InExpo,
+                "OutExpo": Easing.OutExpo,
+                "InOutExpo": Easing.InOutExpo,
+                "InSine": Easing.InSine,
+                "OutSine": Easing.OutSine,
+                "InOutSine": Easing.InOutSine,
+                "InBack": Easing.InBack,
+                "OutBack": Easing.OutBack,
+                "InOutBack": Easing.InOutBack,
+                "InElastic": Easing.InElastic,
+                "OutElastic": Easing.OutElastic,
+                "InBounce": Easing.InBounce,
+                "OutBounce": Easing.OutBounce
+            })[name];
         if (v === undefined) {
             console.warn("Theme: unknown easing curve '" + name + "' — using OutCubic");
             return Easing.OutCubic;
@@ -174,6 +192,8 @@ QtObject {
         return ManifestLoader.manifest.widgets[widgetId] ?? ({});
     }
 
+    readonly property var plugins: ManifestLoader.manifest.plugins ?? []
+
     // Active theme's wallpaper set (store paths; may be empty) —
     // build-derived from assets/wallpapers/ (D-019).
     readonly property var wallpapers: ManifestLoader.manifest.assets.wallpapers ?? []
@@ -185,9 +205,9 @@ QtObject {
     readonly property var catalog: {
         const idx = ManifestLoader.themesIndex;
         return Object.keys(idx).sort().map(n => ({
-            name: n,
-            displayName: idx[n].displayName ?? n,
-            preview: idx[n].preview ? "file://" + idx[n].preview : ""
-        }));
+                    name: n,
+                    displayName: idx[n].displayName ?? n,
+                    preview: idx[n].preview ? "file://" + idx[n].preview : ""
+                }));
     }
 }

@@ -241,6 +241,13 @@ in
       moonLabel = "Lunar divination";
     };
 
+    tarotDraw.settings = {
+      title = "Tarot Draw";
+      prompt = "Draw today's omen";
+      redrawLabel = "redraw";
+      emptyLabel = "The deck waits under the fog.";
+    };
+
     workspaces.settings.items = [
       { id = 1; label = "Fool"; icon = "pathways_png/fool.png"; color = "#756a92"; }
       { id = 2; label = "Door"; icon = "pathways_png/door.png"; color = "#478eb0"; }
@@ -251,6 +258,17 @@ in
       { id = 7; label = "Error"; icon = "pathways_png/error.png"; color = "#8a96a7"; }
     ];
   };
+
+  plugins = [
+    {
+      id = "tarotDraw";
+      source = "widgets/TarotDraw";
+      entry = "TarotDraw.qml";
+      region = "dashboard";
+      priority = 40;
+      services = [ "prefs" ];
+    }
+  ];
 
   # Legacy palette bridge (D-012): fills the repo's classic palette
   # key space so GTK/Qt/hyprlock/Hyprland recolor from this theme.

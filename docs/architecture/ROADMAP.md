@@ -488,10 +488,33 @@ injected services.
   beyond the expected duplicate notification-owner/portal warnings in an
   already-running desktop.
 
+## Phase 19 — Tarot Draw Plugin ✅
+
+Concretized as D-027: theme plugins are validated source directories with entry
+QML files, loaded fail-soft by the registry, and limited to injected services.
+
+- ✅ Manifest plugin packaging: `mkThemeManifest` validates `plugins[].source`
+  directories and `entry` files, serializes source directories as store paths,
+  and keeps plugin-local assets available at runtime.
+- ✅ Registry plugin loading: `Registry.byRegion()` now merges built-ins with
+  ready plugin components from `Theme.plugins`; broken plugin components warn
+  and skip without taking down the shell.
+- ✅ `themes/lotm/widgets/TarotDraw/` proves the contract with a dashboard plugin
+  that receives `prefs`, `theme`, and `motion` from the dashboard mount and
+  persists one daily draw in `extras.tarotDraw.daily`.
+- ✅ LOTM ships seven authored tarot face SVGs plus a derived-style card back,
+  `Motion.cardFlip`, and `widgets.tarotDraw.settings` copy. Cyberpunk remains
+  plugin-free and unchanged.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; `rice-lint`
+  clean; LOTM manifest + theme index build; `nix flake check --print-build-logs`
+  clean; live dev shell with the built LOTM manifest loads, opens/closes the
+  dashboard through path-scoped IPC, instantiates `tarotDraw`, and reports no
+  plugin-load errors or duplicate runtime singleton warnings beyond the expected
+  duplicate notification-owner/portal warnings in an already-running desktop.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Volume/brightness OSDs · optional dock · LOTM plugin widgets
-(tarot/ritual — proves the plugin contract).
+Volume/brightness OSDs · optional dock · additional LOTM plugin widgets.
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future

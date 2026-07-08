@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 230">
+  <rect x="4" y="4" width="152" height="222" rx="12" fill="#1b1510" stroke="#c79a3a" stroke-width="4"/>
+  <path d="M80 38v116M49 70h62M58 151h44" stroke="#9db4c0" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="80" cy="70" r="20" fill="none" stroke="#c79a3a" stroke-width="3"/>
+  <path d="M58 128l22-22 22 22-22 22z" fill="none" stroke="#8a3b3b" stroke-width="3"/>
+  <text x="80" y="204" text-anchor="middle" fill="#e6d7b8" font-family="serif" font-size="18">I Magician</text>
+</svg>

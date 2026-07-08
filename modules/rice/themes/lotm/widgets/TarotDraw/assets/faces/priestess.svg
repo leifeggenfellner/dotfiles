@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 230">
+  <rect x="4" y="4" width="152" height="222" rx="12" fill="#1b1510" stroke="#c79a3a" stroke-width="4"/>
+  <path d="M47 164V66M113 164V66" stroke="#9db4c0" stroke-width="7" stroke-linecap="round"/>
+  <path d="M42 66h76M42 164h76" stroke="#c79a3a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M80 82c18 18 18 42 0 60-18-18-18-42 0-60z" fill="none" stroke="#8a3b3b" stroke-width="3"/>
+  <text x="80" y="204" text-anchor="middle" fill="#e6d7b8" font-family="serif" font-size="17">II Priestess</text>
+</svg>
