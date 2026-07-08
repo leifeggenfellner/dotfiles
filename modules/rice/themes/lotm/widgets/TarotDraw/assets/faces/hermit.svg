@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 230">
+  <rect x="4" y="4" width="152" height="222" rx="12" fill="#1b1510" stroke="#c79a3a" stroke-width="4"/>
+  <path d="M80 48l30 118H50z" fill="none" stroke="#9db4c0" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="80" cy="87" r="17" fill="none" stroke="#c79a3a" stroke-width="4"/>
+  <path d="M80 70v34M63 87h34" stroke="#8a3b3b" stroke-width="3"/>
+  <text x="80" y="204" text-anchor="middle" fill="#e6d7b8" font-family="serif" font-size="18">IX Hermit</text>
+</svg>

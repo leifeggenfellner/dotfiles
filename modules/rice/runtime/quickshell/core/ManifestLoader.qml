@@ -169,7 +169,8 @@ Item {
                 sounds: {},
                 raster: {}
             },
-            widgets: {}
+            widgets: {},
+            plugins: []
         })
 
     property var _fileManifest: ({})

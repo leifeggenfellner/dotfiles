@@ -58,11 +58,15 @@ Every widget exports a descriptor with:
 ## Plugins
 
 - Declared in the manifest `plugins` list; source lives under
-  `modules/rice/themes/<name>/widgets/<Dir>/`.
-- A plugin may import runtime `core/`, `components/`, `utils/` and receives its
-  declared services by injection — nothing else. It may not import runtime
-  `modules/`, `widgets/`, or `services/` internals; those may be refactored freely
-  without notice.
+  `modules/rice/themes/<name>/widgets/<Dir>/`. Theme manifests specify `source`
+  as a theme-relative plugin directory; the runtime receives a Nix store root and
+  an `entry` path to the QML file inside that root (D-027).
+- A plugin receives `theme` and `motion` facades from the mount plus its declared
+  services by injection — nothing else. It must not import runtime `core/`,
+  `components/`, `modules/`, `widgets/`, or `services/` internals from its store
+  path; those imports instantiate separate singleton copies and may be refactored
+  freely without notice. Pure `utils/` imports may be introduced later only with a
+  tested shared import path.
 - A plugin failing to load disables that widget with a logged warning; it must
   never take down the shell.
 

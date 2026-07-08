@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 230">
+  <rect x="4" y="4" width="152" height="222" rx="12" fill="#1b1510" stroke="#c79a3a" stroke-width="4"/>
+  <circle cx="80" cy="105" r="47" fill="none" stroke="#9db4c0" stroke-width="4"/>
+  <circle cx="80" cy="105" r="20" fill="none" stroke="#8a3b3b" stroke-width="3"/>
+  <path d="M80 58v94M33 105h94M47 72l66 66M113 72l-66 66" stroke="#c79a3a" stroke-width="3"/>
+  <text x="80" y="204" text-anchor="middle" fill="#e6d7b8" font-family="serif" font-size="17">X Wheel</text>
+</svg>

@@ -95,7 +95,14 @@ exclusively through the `Theme` facade.
   };
 
   plugins = [                     # theme-shipped widgets (widget-contract.md §Plugins)
-    { id = "<widgetId>"; source = ./widgets/<Dir>; }
+    {
+      id = "<widgetId>";
+      source = "widgets/<Dir>";   # theme-relative plugin directory
+      entry = "main.qml";         # optional, defaults to main.qml
+      region = "dashboard";
+      priority = 50;
+      services = [ ];
+    }
   ];
 
   integration = {                 # consumed at rebuild by the Nix propagation layer (D-012)
@@ -125,6 +132,10 @@ exclusively through the `Theme` facade.
    asserts required keys, color formats, and file existence at eval/build time.
 5. **No behavior in the manifest.** The manifest is data. Anything executable
    belongs in a plugin widget under the widget contract.
+6. **Plugin packaging (D-027).** The manifest builder validates theme-relative
+   plugin source directories and entry files at build time, then serializes the
+   containing `modules/rice` package root as a Nix store path. Keep plugin-local
+   assets under the plugin directory and resolve them from QML with relative URLs.
 
 ## Versioning (D-013)
 

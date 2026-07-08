@@ -397,6 +397,28 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   workflows without letting theme data replace behavior. This keeps D-006 intact
   and saves plugins for genuinely new widgets.
 
+### D-027 — Theme plugins are packaged directories with injected services
+
+- Date: 2026-07-08 · Status: active
+- `plugins[]` entries in a theme manifest name a stable widget id, a theme-
+  relative source directory, an entry QML file, placement metadata, and service
+  ids. The Nix manifest builder validates the source directory and entry file,
+  then serializes the containing `modules/rice` package root as a store path so
+  plugin-local assets and allowed runtime imports travel together.
+- The runtime registry merges built-ins with ready plugin components from the
+  active manifest. Plugins that fail to load are skipped with a warning; they do
+  not take down the shell and do not affect built-in widgets. Widget mounts
+  provide `theme`/`motion` facades plus only the services declared by the
+  descriptor, avoiding duplicate runtime singleton imports from plugin store
+  paths.
+- The first plugin is LOTM `tarotDraw`, rendered in the dashboard. It receives
+  `prefs`, `theme`, and `motion` by injection, persists a daily draw under
+  `extras.tarotDraw.daily`, and keeps card faces/back art inside its theme plugin
+  directory.
+- Why: a plugin is the contract's escape hatch for genuinely new theme-specific
+  widgets. Packaging the plugin as a directory keeps authored assets and QML
+  together, while injected services preserve the runtime layering rules.
+
 ---
 
 ## Legacy imports

@@ -1,8 +1,8 @@
 # Rice Framework — Architecture Map
 
 The map of the theme-agnostic desktop framework (NixOS + Home Manager + Hyprland +
-Quickshell). This file is the *what*, kept short enough to read in three minutes.
-The *why* lives in [DECISIONS.md](DECISIONS.md). Exact interfaces live in
+Quickshell). This file is the _what_, kept short enough to read in three minutes.
+The _why_ lives in [DECISIONS.md](DECISIONS.md). Exact interfaces live in
 [contracts/](contracts/). Build order lives in [ROADMAP.md](ROADMAP.md).
 
 ## Layers
@@ -59,7 +59,7 @@ docs/architecture/        # Law: this map, DECISIONS, ROADMAP, contracts/
 ```text
 utils ← core ← components ← widgets ← modules ← shell.qml
 utils ← services            (services import ONLY utils; never core/UI)
-theme plugins → {core, components, utils} + injected services only
+theme plugins → injected services + mount-provided theme/motion facades
 ```
 
 ## Import rules
@@ -68,6 +68,9 @@ theme plugins → {core, components, utils} + injected services only
 - `services/` may import `utils/` only. No `core/`, no UI, no `Theme`.
 - `core/` may import `utils/`. `ManifestLoader` is the only file that reads
   manifest JSON; `Theme` is the only facade other code reads theme data from.
+- Theme plugins are loaded from the active manifest by widget mounts. They do not
+  import runtime singletons from their store path; mounts provide `theme` and
+  `motion` facades plus declared service injections.
 - `components/` may import `core/`, `utils/`. Never services.
 - `widgets/` may import `components/`, `core/`, `utils/`. Services arrive by
   injection only (D-009).
@@ -114,15 +117,15 @@ Each rice skill declares direction of authority: **Controls** (final say — no 
 skills' Controls overlap), **Reads** (may depend on, never redefine), **May not
 influence** (must defer; wanting change there is a contract-change proposal).
 
-| Skill | Controls | Reads | May not influence |
-|---|---|---|---|
-| `rice-architecture` | layer ownership, file placement, skill routing | DECISIONS, all contracts | any per-domain rule |
-| `quickshell-runtime` | runtime tree layout, import direction, state-ownership placement | contracts, ARCHITECTURE | theme content, Nix option surface, widget/service internals |
-| `theme-authoring` | theme package contents (tokens, assets, settings, plugin packaging) | theme-manifest + widget contracts | runtime structure, widget internals, service behavior |
-| `widget-authoring` | widget internals (descriptor impl, glance/popout composition, settings schema) | widget + motion contracts, Theme/Motion facades, service state shapes | service backends/behavior, runtime layering, manifest schema |
-| `service-authoring` | service internals (backends, state shape, command methods) | service contract | UI/presentation, widget structure, theme data |
-| `motion-and-effects` | Motion/Sound/Effects facades, semantic animation vocabulary, tiers/budgets | motion contract, `tokens.motion` shape | token values, widget layout, service behavior |
-| `rice-nix` | `rice.*` options, manifest generation, switch machinery, propagation | theme-manifest contract, repo Nix conventions | QML structure, runtime behavior, widget/service internals |
+| Skill                | Controls                                                                       | Reads                                                                 | May not influence                                            |
+| -------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `rice-architecture`  | layer ownership, file placement, skill routing                                 | DECISIONS, all contracts                                              | any per-domain rule                                          |
+| `quickshell-runtime` | runtime tree layout, import direction, state-ownership placement               | contracts, ARCHITECTURE                                               | theme content, Nix option surface, widget/service internals  |
+| `theme-authoring`    | theme package contents (tokens, assets, settings, plugin packaging)            | theme-manifest + widget contracts                                     | runtime structure, widget internals, service behavior        |
+| `widget-authoring`   | widget internals (descriptor impl, glance/popout composition, settings schema) | widget + motion contracts, Theme/Motion facades, service state shapes | service backends/behavior, runtime layering, manifest schema |
+| `service-authoring`  | service internals (backends, state shape, command methods)                     | service contract                                                      | UI/presentation, widget structure, theme data                |
+| `motion-and-effects` | Motion/Sound/Effects facades, semantic animation vocabulary, tiers/budgets     | motion contract, `tokens.motion` shape                                | token values, widget layout, service behavior                |
+| `rice-nix`           | `rice.*` options, manifest generation, switch machinery, propagation           | theme-manifest contract, repo Nix conventions                         | QML structure, runtime behavior, widget/service internals    |
 
 ## Design principles
 

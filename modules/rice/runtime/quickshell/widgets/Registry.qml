@@ -11,7 +11,7 @@ import "./epigraph" as Epigraph
 import "./divination" as Divination
 
 // ── Registry ──────────────────────────────────────────────────
-// The widget registry: built-in descriptors ∪ (later) theme plugins.
+// The widget registry: built-in descriptors ∪ theme plugins.
 // Surfaces render ONLY from this — no hardcoded widget lists (L-001).
 // Manifest `widgets.<id>` config overrides placement/settings via
 // effective(); Theme.widgetConfig keeps manifest access behind the
@@ -136,8 +136,10 @@ Item {
         }
     ]
 
+    property var _pluginCache: ({})
+
     function effectiveById(widgetId) {
-        const d = builtins.find(b => b.widgetId === widgetId);
+        const d = builtins.find(b => b.widgetId === widgetId) ?? _pluginDescriptors().find(p => p.widgetId === widgetId);
         return d ? effective(d) : null;
     }
 
@@ -158,6 +160,49 @@ Item {
     }
 
     function byRegion(region) {
-        return builtins.map(effective).filter(w => w.enabled && w.region === region && w.glance !== null).sort((a, b) => a.priority - b.priority);
+        return builtins.concat(_pluginDescriptors()).map(effective).filter(w => w.enabled && w.region === region && w.glance !== null).sort((a, b) => a.priority - b.priority);
+    }
+
+    function _pluginComponent(plugin) {
+        if (!plugin || !plugin.source || plugin.source.length === 0)
+            return null;
+        const entry = plugin.entry ?? "main.qml";
+        const key = plugin.id + "|" + plugin.source + "/" + entry;
+        let component = _pluginCache[key];
+        if (!component) {
+            component = Qt.createComponent("file://" + plugin.source + "/" + entry);
+            _pluginCache[key] = component;
+        }
+        if (component.status === Component.Error) {
+            console.warn("Registry: plugin", plugin.id, "failed to load:", component.errorString());
+            return null;
+        }
+        if (component.status !== Component.Ready)
+            return null;
+        return component;
+    }
+
+    function _pluginDescriptors() {
+        const out = [];
+        const plugins = Theme.plugins;
+        for (let i = 0; i < plugins.length; i++) {
+            const plugin = plugins[i];
+            const component = _pluginComponent(plugin);
+            if (!component)
+                continue;
+            out.push({
+                widgetId: plugin.id,
+                contractVersion: plugin.contractVersion ?? 1,
+                enabled: plugin.enabled ?? true,
+                region: plugin.region ?? "dashboard",
+                priority: plugin.priority ?? 50,
+                monitorPolicy: plugin.monitorPolicy ?? "all",
+                services: plugin.services ?? [],
+                settings: plugin.settings ?? ({}),
+                glance: component,
+                popout: null
+            });
+        }
+        return out;
     }
 }

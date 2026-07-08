@@ -4,6 +4,7 @@ import QtQuick
 import "../../core"
 import "../../widgets"
 import "../../services/hypr"
+import "../../services/prefs"
 import "../../services/system"
 import "../../services/weather"
 
@@ -37,6 +38,7 @@ PanelWindow {
 
     function resolveServices(names) {
         const table = {
+            prefs: PrefsState,
             systemStats: SystemStatsState,
             weather: WeatherState
         };
@@ -60,6 +62,10 @@ PanelWindow {
             onLoaded: {
                 item.services = dashboard.resolveServices(mount.modelData.services);
                 item.settings = mount.modelData.settings;
+                if (item.theme !== undefined)
+                    item.theme = Theme;
+                if (item.motion !== undefined)
+                    item.motion = Motion;
             }
         }
     }
