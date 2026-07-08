@@ -419,6 +419,25 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   widgets. Packaging the plugin as a directory keeps authored assets and QML
   together, while injected services preserve the runtime layering rules.
 
+### D-028 — Shader tier uses runtime-owned precompiled assets
+
+- Date: 2026-07-08 · Status: active
+- T2 shader effects are runtime capabilities, not theme code. Shader source files
+  live under `components/effects/shaders/`, are reviewed with the runtime, and are
+  precompiled by the rice Quickshell config derivation with Qt Shader Tools
+  (`qsb --qt6`) into adjacent `.qsb` assets plus a generated shader manifest.
+- Themes select and parameterize shader-capable effects only through the existing
+  `tokens.effects.layers` data. They never ship GLSL/QSB files, and plugin widgets
+  may not load arbitrary shader code. This keeps GPU code reviewable, cached, and
+  covered by Nix build failures instead of runtime surprises.
+- Runtime loaders must be fail-soft. `ShaderSurface` activates only when the
+  generated shader manifest says a compiled asset exists; dev runs from the repo
+  and driver/runtime failures fall back to the existing T1/T0 visuals. Phase 20
+  first applies this to fog and a brief ink-reveal garnish on `surfaceReveal`.
+- Why: shader ambience can lower the steady-state cost of fog, but it must remain
+  garnish. The desktop's legibility and the motion/reduce-motion contract are
+  carried by the existing non-shader paths.
+
 ---
 
 ## Legacy imports

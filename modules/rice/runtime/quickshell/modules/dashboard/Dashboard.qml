@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../../core"
+import "../../components/effects"
 import "../../widgets"
 import "../../services/hypr"
 import "../../services/prefs"
@@ -102,6 +103,7 @@ PanelWindow {
             color: Theme.colors.bg.mantle
             border.width: 1
             border.color: Theme.colors.bg.surface1
+            clip: true
 
             opacity: dashboard.open ? 0.96 : 0
             scale: dashboard.open ? 1 : 0.96
@@ -115,6 +117,12 @@ PanelWindow {
                 MotionAnim {
                     spec: dashboard.open ? Motion.surfaceReveal : Motion.surfaceConceal
                 }
+            }
+
+            InkReveal {
+                anchors.fill: parent
+                open: dashboard.open
+                tint: Theme.colors.fg.subtle
             }
 
             MouseArea {

@@ -18,6 +18,34 @@ _: {
         exec ${pkgs.pipewire}/bin/pw-play --volume 0.35 "$file"
       '';
 
+      rice-runtime = pkgs.runCommand "rice-quickshell-runtime"
+        { nativeBuildInputs = [ pkgs.qt6.qtshadertools ]; } ''
+        cp -R ${../runtime/quickshell} "$out"
+        chmod -R u+w "$out"
+
+        shader_dir="$out/components/effects/shaders"
+        if [ -d "$shader_dir" ]; then
+          compiled=()
+          for shader in "$shader_dir"/*.frag; do
+            [ -e "$shader" ] || continue
+            name="$(basename "$shader" .frag)"
+            qsb --qt6 --silent -o "$shader_dir/$name.qsb" "$shader"
+            compiled+=("$name")
+          done
+
+          printf '{"compiled":[' > "$shader_dir/manifest.json"
+          first=1
+          for name in "''${compiled[@]}"; do
+            if [ "$first" -eq 0 ]; then
+              printf ',' >> "$shader_dir/manifest.json"
+            fi
+            first=0
+            printf '"%s"' "$name" >> "$shader_dir/manifest.json"
+          done
+          printf ']}' >> "$shader_dir/manifest.json"
+        fi
+      '';
+
       rice-shell = pkgs.writeShellScriptBin "rice-shell" ''
         set -euo pipefail
 
@@ -71,7 +99,7 @@ _: {
           rice-shell
           rice-sound-play
         ];
-        xdg.configFile."quickshell/rice".source = ../runtime/quickshell;
+        xdg.configFile."quickshell/rice".source = rice-runtime;
       };
     };
 }
