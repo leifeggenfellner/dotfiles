@@ -19,7 +19,11 @@ in
     themes-palette =
       { lib, osConfig, ... }:
       let
-        palette = import ./_palette.nix osConfig.environment.desktop.theme.scheme;
+        themeLib = import ../rice/nix/_themes-lib.nix { inherit lib; };
+        palette = import ./_palette.nix {
+          scheme = osConfig.environment.desktop.theme.scheme;
+          themePackages = if (osConfig.rice.enable or false) then themeLib.themePackages osConfig.rice else { };
+        };
       in
       {
         options.theme.colors = lib.mkOption {

@@ -9,14 +9,12 @@
 # derived from the theme's own tokens at build time (D-011 — never
 # hand-maintained).
 { pkgs, lib }:
-{ defaultTheme }:
+{ defaultTheme, themePackages ? null }:
 let
-  themesDir = ../themes;
+  themeLib = import ./_themes-lib.nix { inherit lib; };
   mkThemeManifest = import ./_manifest-lib.nix { inherit pkgs lib; };
-
-  themeNames = lib.attrNames (lib.filterAttrs
-    (name: type: type == "directory" && builtins.pathExists (themesDir + "/${name}/_theme.nix"))
-    (builtins.readDir themesDir));
+  packages = if themePackages == null then themeLib.bundledThemePackages else themePackages;
+  themeNames = lib.attrNames packages;
 
   swatchPreview = name: tokens:
     let c = tokens.colors; in
@@ -36,7 +34,7 @@ let
 
   entry = name:
     let
-      themeDir = themesDir + "/${name}";
+      themeDir = packages.${name};
       built = mkThemeManifest { themeName = name; inherit themeDir; };
       authored = themeDir + "/assets/preview.png";
     in
@@ -57,7 +55,7 @@ let
   };
 in
 assert lib.assertMsg (lib.elem defaultTheme themeNames)
-  "rice: default theme '${defaultTheme}' has no package under modules/rice/themes/";
+  "rice: default theme '${defaultTheme}' has no configured theme package";
 {
   inherit index;
   json = pkgs.writeText "rice-themes-index.json" (builtins.toJSON index);

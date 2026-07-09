@@ -1,7 +1,11 @@
-{ osConfig, ... }:
+{ lib, osConfig, ... }:
 let
   inherit (osConfig.environment.desktop.theme) scheme;
-  c = import ./_palette.nix scheme;
+  themeLib = import ../rice/nix/_themes-lib.nix { inherit lib; };
+  c = import ./_palette.nix {
+    inherit scheme;
+    themePackages = if (osConfig.rice.enable or false) then themeLib.themePackages osConfig.rice else { };
+  };
 in
 {
   colorScheme = {

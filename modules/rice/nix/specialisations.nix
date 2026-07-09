@@ -7,7 +7,10 @@ _: {
     { lib, config, ... }:
     let
       cfg = config.rice;
-      themes = lib.unique cfg.specialisations.themes;
+      themeLib = import ./_themes-lib.nix { inherit lib; };
+      packagedThemes = themeLib.themeNames cfg;
+      configuredThemes = if cfg.specialisations.themes == [ ] then packagedThemes else cfg.specialisations.themes;
+      themes = lib.unique configuredThemes;
       specialisationName = theme: "${cfg.specialisations.prefix}${theme}";
     in
     {

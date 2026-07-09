@@ -3,12 +3,14 @@
 schemaVersion: 2 (v1 = the ad-hoc `theme.json` generated before this contract).
 
 The manifest is the **only** interface between a theme package and the runtime
-(D-004, D-006). A theme is a directory under `modules/rice/themes/<name>/` whose
-`_theme.nix` evaluates to the attrset below (underscore prefix keeps import-tree
-from loading it as a flake-parts module — D-016); `mkThemeManifest`
-(`modules/rice/nix/manifest.nix`) validates it and writes JSON into the Nix store.
-The runtime reads it exclusively through `core/ManifestLoader.qml`, and exposes it
-exclusively through the `Theme` facade.
+(D-004, D-006). A theme package is a directory whose root contains `_theme.nix`
+evaluating to the attrset below. Bundled themes live under
+`modules/rice/themes/<name>/` (underscore prefix keeps import-tree from loading
+them as flake-parts modules — D-016); external packages are supplied through
+`rice.themes.<name>.package` (D-035). `mkThemeManifest`
+(`modules/rice/nix/manifest.nix`) validates the package and writes JSON into the
+Nix store. The runtime reads it exclusively through `core/ManifestLoader.qml`,
+and exposes it exclusively through the `Theme` facade.
 
 ## Shape
 
@@ -136,10 +138,11 @@ exclusively through the `Theme` facade.
    belongs in a plugin widget under the widget contract.
    Shader programs are the D-028 exception in the other direction: they are
    runtime-owned assets selected only by manifest data, never theme-provided code.
-6. **Plugin packaging (D-027).** The manifest builder validates theme-relative
-   plugin source directories and entry files at build time, then serializes the
-   containing `modules/rice` package root as a Nix store path. Keep plugin-local
-   assets under the plugin directory and resolve them from QML with relative URLs.
+6. **Plugin packaging (D-027, D-035).** The manifest builder validates
+   theme-relative plugin source directories and entry files at build time, then
+   serializes the containing theme package root as a Nix store path plus a
+   theme-root-relative entry path. Keep plugin-local assets under the plugin
+   directory and resolve them from QML with relative URLs.
 
 ## Versioning (D-013)
 

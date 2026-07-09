@@ -537,6 +537,23 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   while GTK/Qt/Home Manager-derived chrome needs an explicit rebuild-backed path
   when exact theme fidelity matters.
 
+### D-035 — Theme packages may come from outside the repo
+
+- Date: 2026-07-09 · Status: active
+- Bundled themes remain the default package set, discovered under
+  `modules/rice/themes/*/_theme.nix`. External theme packages join the same set
+  through `rice.themes.<name>.package`, where the package root contains `_theme.nix`,
+  `assets/`, and optional `widgets/`. External package names must match
+  `meta.name` because manifest validation stays theme-name keyed.
+- Manifest and index builders consume a shared theme package map. Plugin widgets
+  are serialized as `{ source = <theme package root>; entry = <theme-relative qml>; }`,
+  so bundled and external widgets use the same runtime loading path. The legacy
+  color bridge resolves static palettes first, then falls back to
+  `palette.legacy` from configured rice theme packages.
+- Why: themes should be distributable as flakes or package roots without copying
+  them into this dotfiles repo, but external packages must still pass the same
+  manifest validation and runtime contract as bundled themes.
+
 ---
 
 ## Legacy imports

@@ -108,9 +108,7 @@ let
     else fail "plugin '${plugin.id or "<missing-id>"}' source must be a theme-relative string";
 
   pluginEntry = plugin:
-    "themes/${themeName}/${plugin.source}/${plugin.entry or "main.qml"}";
-
-  pluginRoot = themeDir + "/../..";
+    "${plugin.source}/${plugin.entry or "main.qml"}";
 
   plugins = map
     (plugin:
@@ -121,7 +119,7 @@ let
         priority = plugin.priority or 50;
         services = plugin.services or [ ];
         entry = pluginEntry plugin;
-        source = "${pluginRoot}";
+        source = "${themeDir}";
       })
     (theme.plugins or [ ]);
 

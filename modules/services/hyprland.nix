@@ -3,7 +3,11 @@
   flake.nixosModules.services-hyprland =
     { lib, pkgs, config, ... }:
     let
-      c = import ../themes/_palette.nix config.environment.desktop.theme.scheme;
+      themeLib = import ../rice/nix/_themes-lib.nix { inherit lib; };
+      c = import ../themes/_palette.nix {
+        scheme = config.environment.desktop.theme.scheme;
+        themePackages = if (config.rice.enable or false) then themeLib.themePackages config.rice else { };
+      };
       fmt = import ../themes/_fmt.nix lib;
       s = config.environment.desktop.theme.style;
       accent1 = c.${s.accentPrimary};

@@ -668,8 +668,8 @@ inside the plugin contract.
 Concretized as D-034: generated NixOS/Home Manager specialisations provide the
 explicit full-chrome theme switch path while preserving fast pointer switching.
 
-- ✅ Rice theme names now derive from packaged theme directories, keeping the
-  option enum aligned with `modules/rice/themes/*/_theme.nix`.
+- ✅ Rice theme names derive from packaged theme directories, keeping generated
+  specialisations aligned with available theme packages.
 - ✅ `rice.specialisations.*` adds configurable generation of `rice-<theme>`
   NixOS specialisations. Each generated config forces `rice.theme` and
   `environment.desktop.theme.scheme` to the target theme and disables recursive
@@ -684,10 +684,31 @@ explicit full-chrome theme switch path while preserving fast pointer switching.
   `--specialise`; shitbox toplevel builds and contains switchers for both rice
   theme specialisations.
 
+## Phase 27 — External theme packages ✅
+
+Concretized as D-035: rice themes can now be supplied as package roots outside
+the bundled `modules/rice/themes` tree.
+
+- ✅ `rice.themes.<name>.package` accepts an external theme package root containing
+  `_theme.nix`; bundled themes remain auto-discovered.
+- ✅ Manifest and theme-index builders consume one shared theme package map, so
+  active manifests, `themes.json`, and generated Phase 26 specialisations can see
+  bundled plus external packages.
+- ✅ Plugin manifests now serialize the theme package root and a
+  theme-root-relative QML entry, making bundled and external plugins load through
+  the same runtime path.
+- ✅ The legacy palette bridge can resolve `palette.legacy` from configured rice
+  theme packages, allowing external themes to drive rebuild-time Hyprland and HM
+  colors as long as they expose the existing legacy palette shape.
+- Verified: editor diagnostics clean for changed Nix/docs; `nixpkgs-fmt` clean;
+  active LOTM manifest, theme index, production runtime, Home Manager activation,
+  and shitbox toplevel build; built LOTM manifest contains theme-root-relative
+  plugin entries; runtime smoke opens the dashboard without plugin load errors;
+  inline external-package probe confirms `rice.themes.<name>.package` participates
+  in the package map and theme index builder.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future
-
-- Themes as external flakes (`rice.themes.<name>.package`).

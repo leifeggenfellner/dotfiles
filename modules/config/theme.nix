@@ -1,9 +1,11 @@
 _: {
   flake.nixosModules.config-theme =
-    { lib, ... }:
+    { lib, config, ... }:
     let
       palettes = import ../themes/_palettes.nix;
       schemeNames = builtins.attrNames palettes;
+      themeLib = import ../rice/nix/_themes-lib.nix { inherit lib; };
+      riceThemePackages = if (config.rice.enable or false) then themeLib.themePackages config.rice else { };
       activeScheme = import ../themes/_active-scheme.nix;
       defaults = import ../themes/_style.nix;
       t = lib.types;
@@ -19,9 +21,9 @@ _: {
         };
 
         scheme = lib.mkOption {
-          type = t.enum schemeNames;
+          type = t.str;
           default = activeScheme;
-          description = "Active color scheme name. Available: ${builtins.concatStringsSep ", " schemeNames}";
+          description = "Active color scheme name. Static schemes: ${builtins.concatStringsSep ", " schemeNames}; rice theme packages may add more.";
         };
 
         wallpaper = lib.mkOption {
@@ -103,5 +105,14 @@ _: {
           barPosition = mkS t.str "bar_position" "Bar position (top/bottom)";
         };
       };
+
+      config.assertions = [
+        {
+          assertion =
+            let scheme = config.environment.desktop.theme.scheme; in
+            lib.hasAttr scheme palettes || lib.hasAttr scheme riceThemePackages;
+          message = "environment.desktop.theme.scheme '${config.environment.desktop.theme.scheme}' is neither a static palette nor a configured rice theme package.";
+        }
+      ];
     };
 }

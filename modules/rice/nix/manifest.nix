@@ -9,6 +9,8 @@ _: {
     { lib, pkgs, osConfig, ... }:
     let
       cfg = osConfig.rice or { enable = false; };
+      themeLib = import ./_themes-lib.nix { inherit lib; };
+      themePackages = themeLib.themePackages cfg;
       mkThemeManifest = import ./_manifest-lib.nix { inherit pkgs lib; };
       mkThemeIndex = import ./_index-lib.nix { inherit pkgs lib; };
     in
@@ -16,10 +18,10 @@ _: {
       config = lib.mkIf (cfg.enable or false) {
         xdg.configFile."rice/manifest.json".source = (mkThemeManifest {
           themeName = cfg.theme;
-          themeDir = ../themes + "/${cfg.theme}";
+          themeDir = themeLib.themePackage cfg cfg.theme;
         }).json;
         xdg.configFile."rice/themes.json".source =
-          (mkThemeIndex { defaultTheme = cfg.theme; }).json;
+          (mkThemeIndex { defaultTheme = cfg.theme; inherit themePackages; }).json;
       };
     };
 }
