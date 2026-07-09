@@ -97,7 +97,7 @@ Phase 5 complete (2026-07-03): all system services real except
 NotificationState (Phase 6 by design). Command paths without UI callers are
 listed above and get exercised as their surfaces land.
 
-## Phase 6 — Notification Center ✅ (swaync handoff pending)
+## Phase 6 — Notification Center ✅
 
 - ✅ `NotificationState` real on Quickshell's `NotificationServer` (D-008
   tier 1): tracked notifications in the mock's wrapper shape (UI unchanged),
@@ -106,10 +106,10 @@ listed above and get exercised as their surfaces land.
   not look it up.
 - ✅ Toasts surface: top-right stack, auto-expire (5s), click-to-dismiss,
   Motion fade, capped depth. Center gains clear-all.
-- ⬜ swaync handoff: swaync stays the daemon until the shell autostarts
-  (Phase 7) — one notification daemon at a time. When the shell isn't running,
-  swaync must own org.freedesktop.Notifications. Phase 16 closes the parity
-  backlog: actions, inline reply, urgency styling, and DND.
+- ✅ swaync handoff path defined: one notification daemon at a time. Phase 7
+  disables swaync on rice hosts once the shell autostarts, while non-rice hosts
+  keep swaync. Phase 16 closes the remaining notification parity backlog:
+  actions, inline reply, urgency styling, and DND.
 
 ## Phase 7 — Nix integration layer ✅
 
@@ -721,11 +721,12 @@ popout rather than reimplemented by the shell.
   adding tray chrome to the bar.
 - Verified: editor diagnostics clean for changed QML/docs; `rice-lint` clean;
   production runtime and active LOTM manifest build; runtime smoke opens the
-  system popout without QML errors; `git diff --check`; `nix flake check
---print-build-logs`.
+  system popout without QML errors; `git diff --check`; `nix flake check --print-build-logs`.
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future
+
+No deferred items currently tracked.
