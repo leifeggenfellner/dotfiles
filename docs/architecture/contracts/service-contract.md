@@ -42,8 +42,9 @@ Services are the only place system state lives (L-003).
 - Widgets declare service ids in their descriptor and receive the singletons by
   injection (D-009, widget-contract.md).
 - Surface modules (`modules/`) may import services directly.
-- OSD-style consumers subscribe to change *signals* carrying a user-initiated
-  hint, so initial boot-time reads do not trigger popups.
+- OSD-style consumers subscribe to explicit user-initiated UI edges and read the
+  displayed value from services, so initial boot-time reads do not trigger
+  popups (D-031).
 
 ## Adding a service
 

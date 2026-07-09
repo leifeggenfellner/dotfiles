@@ -84,7 +84,8 @@ theme plugins → injected services + mount-provided theme/motion facades
 1. **System state** — owned by services; widgets read, commands go through service
    methods ([service-contract](contracts/service-contract.md)).
 2. **Shell UI state** — `core/ShellState.qml`: active popout, launcher visibility,
-   OSD queue, debug overlay, plus governor-pushed flags (`reduceMotion`,
+   OSD event edges (`osdKind`, `osdSerial`, `osdVisible`, D-031), debug overlay,
+   plus governor-pushed flags (`reduceMotion`,
    `ambientActive`, `idleApproaching` — written only by
    `modules/ambient/AmbientController`, D-021/D-029) and transient flavor-event
    edges (`flavorEventSerial`, `fogSurgeSerial`, D-030).
@@ -102,8 +103,8 @@ theme plugins → injected services + mount-provided theme/motion facades
 - User → System: widget interaction → service command method → external system →
   real event returns via the same downward path. No optimistic UI state; loading
   comes from service `busy` flags.
-- OSDs subscribe to service change signals with a user-initiated hint so they do
-  not fire on boot-time initial reads.
+- OSDs subscribe to explicit user-initiated UI edges and read the displayed value
+  from services, so they do not fire on boot-time initial reads (D-031).
 
 ## Theme switching (two-layer, D-003)
 

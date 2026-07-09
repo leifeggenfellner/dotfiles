@@ -4,11 +4,10 @@ import QtQuick
 import "../../core"
 import "../../components"
 import "../../services/audio"
+import "../../services/brightness"
 
 // ── Osd ───────────────────────────────────────────────────────
-// Placeholder OSD pill. Reads mock AudioState so the service→UI
-// data flow is exercised from day one. Real trigger logic (volume
-// change events) arrives with the OSD phase.
+// Input-transparent feedback for user-initiated volume and brightness changes.
 
 PanelWindow {
     id: osd
@@ -17,6 +16,11 @@ PanelWindow {
     screen: modelData
 
     readonly property bool open: ShellState.osdVisible
+    readonly property bool brightness: ShellState.osdKind === "brightness"
+    readonly property bool available: brightness ? BrightnessState.available : AudioState.available
+    readonly property real value: brightness ? BrightnessState.value : AudioState.volume
+    readonly property string iconName: brightness ? "brightness" : (AudioState.muted ? "volume-muted" : "volume")
+    readonly property string label: available ? Math.round(value * 100) + "%" : "n/a"
 
     // Stay mapped through the fade-out so hiding is smooth.
     visible: open || pill.opacity > 0.01
@@ -31,6 +35,21 @@ PanelWindow {
     implicitWidth: 280
     implicitHeight: 48
     color: "transparent"
+
+    Connections {
+        target: ShellState
+        function onOsdSerialChanged() {
+            if (osd.brightness)
+                BrightnessState.refresh();
+            hideTimer.restart();
+        }
+    }
+
+    Timer {
+        id: hideTimer
+        interval: 1200
+        onTriggered: ShellState.hideOsd()
+    }
 
     Rectangle {
         id: pill
@@ -55,8 +74,8 @@ PanelWindow {
 
             Icon {
                 anchors.verticalCenter: parent.verticalCenter
-                name: AudioState.muted ? "volume-muted" : "volume"
-                color: AudioState.muted ? Theme.colors.fg.subtle : Theme.colors.accent.primary
+                name: osd.iconName
+                color: (!osd.brightness && AudioState.muted) || !osd.available ? Theme.colors.fg.subtle : Theme.colors.accent.primary
             }
 
             Rectangle {
@@ -67,10 +86,10 @@ PanelWindow {
                 color: Theme.colors.bg.surface1
 
                 Rectangle {
-                    width: parent.width * AudioState.volume
+                    width: parent.width * osd.value
                     height: parent.height
                     radius: parent.radius
-                    color: Theme.colors.accent.primary
+                    color: osd.available ? Theme.colors.accent.primary : Theme.colors.fg.subtle
 
                     Behavior on width {
                         MotionAnim {}
@@ -80,7 +99,7 @@ PanelWindow {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: Math.round(AudioState.volume * 100) + "%"
+                text: osd.label
                 color: Theme.colors.fg.muted
                 font.family: Theme.typography.families.mono
                 font.pointSize: Theme.typography.sizes.small

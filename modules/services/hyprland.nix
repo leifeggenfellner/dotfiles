@@ -47,6 +47,7 @@
 
                 runOnce = program: "pgrep ${program} || uwsm app -- ${program}";
                 launch = program: "uwsm app -- ${program}";
+                riceOsd = action: fallback: "sh -c '${pkgs.quickshell}/bin/quickshell -c rice ipc call osd ${action} >/dev/null 2>&1 || ${fallback}'";
               in
               {
                 # === Settings ===
@@ -250,17 +251,16 @@
                   "${mainMod} ${SECONDARY}, 8, exec, hyprctl dispatch movetoworkspace 8"
                   "${mainMod} ${SECONDARY}, 9, exec, hyprctl dispatch movetoworkspace 9"
 
-                  ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-                  ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-                  ", XF86AudioMute,        exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-
                   ", XF86AudioPlay, exec, playerctl play-pause"
                   ", XF86AudioNext, exec, playerctl next"
                   ", XF86AudioPrev, exec, playerctl previous"
-
-                  ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
-                  ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
                 ] ++ (if config.rice.enable then [
+                  ", XF86AudioRaiseVolume, exec, ${riceOsd "volumeUp" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"}"
+                  ", XF86AudioLowerVolume, exec, ${riceOsd "volumeDown" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"}"
+                  ", XF86AudioMute,        exec, ${riceOsd "toggleMute" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"}"
+                  ", XF86MonBrightnessUp,   exec, ${riceOsd "brightnessUp" "brightnessctl set +10%"}"
+                  ", XF86MonBrightnessDown, exec, ${riceOsd "brightnessDown" "brightnessctl set 10%-"}"
+
                   # Rice shell surfaces (see docs/architecture/ROADMAP.md)
                   "${mainMod}, D, exec, quickshell -c rice ipc call shell toggleLauncher"
                   "${mainMod} ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
@@ -270,6 +270,12 @@
                   "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"
                   "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, quickshell -c rice ipc call notifications clearAll"
                 ] else [
+                  ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+                  ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+                  ", XF86AudioMute,        exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+                  ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
+                  ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
+
                   # Non-rice hosts keep the fzf wallpaper picker on Super+W.
                   "${mainMod}, W, exec, ${launch "foot -T wallpaper-picker -e wallpaper-picker"}"
                   "${mainMod}, N, exec, swaync-client -t -sw"

@@ -29,6 +29,8 @@ ShellRoot {
 
     LoreController {}
 
+    OsdController {}
+
     Variants {
         model: Quickshell.screens
         AmbientLayer {}

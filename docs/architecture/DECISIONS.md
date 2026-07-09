@@ -475,6 +475,20 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   data may provide phrases and copy; it must not install behavior code or change
   core workflows.
 
+### D-031 — OSDs render explicit user-initiated edges
+
+- Date: 2026-07-09 · Status: active
+- Volume and brightness OSDs are not raw service-change listeners. The `osd`
+  module owns a path-scoped controller IPC target for user-initiated controls
+  and show hints. It mutates through services when the shell is running, and
+  Hyprland bindings keep direct system-command fallbacks when it is not.
+- `ShellState` carries only transient OSD UI state (`osdKind`, `osdSerial`,
+  `osdVisible`). Audio and brightness values remain owned by their services, so
+  boot-time service reads and external background changes do not pop the OSD.
+- Why: media keys need immediate feedback, but the OSD must never become a second
+  source of system truth or make volume/brightness keys depend on the shell being
+  alive.
+
 ---
 
 ## Legacy imports

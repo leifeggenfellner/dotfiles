@@ -598,9 +598,34 @@ theme settings, with every hook defaulting off.
   flavor/surge counters without QML warnings; `rice-lint` and `nix flake check
 --print-build-logs` clean.
 
+## Phase 23 — Volume/brightness OSDs ✅
+
+Concretized as D-031: OSDs render explicit user-initiated control edges while
+services remain the source of displayed system values.
+
+- ✅ `BrightnessState` adds a small real service around `brightnessctl`, exposing
+  `value`, `percent`, `available`, `busy`, `error`, plus `refresh`, `setValue`,
+  and `step` commands.
+- ✅ `OsdController` owns the path-scoped `osd` IPC target for `volumeUp`,
+  `volumeDown`, `toggleMute`, `brightnessUp`, `brightnessDown`, `showVolume`,
+  `showBrightness`, and `status`. Per-monitor OSD windows stay
+  presentation-only.
+- ✅ `Osd.qml` now renders either volume or brightness with themed icon, value
+  bar, unavailable state, and a short auto-hide edge from `ShellState.osdSerial`.
+- ✅ Rice-enabled Hyprland media keys route through OSD IPC with direct `wpctl` /
+  `brightnessctl` fallbacks when the shell is not running; non-rice hosts keep
+  their previous direct bindings.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; `nixpkgs-fmt`
+  clean for `modules/services/hyprland.nix`; `rice-lint` clean; production
+  runtime and LOTM manifest build; rice-enabled host eval routes XF86 volume and
+  brightness keys through `osd` IPC with direct fallbacks, while the non-rice host
+  keeps direct `wpctl`/`brightnessctl` bindings; production store-path smoke shows
+  `osd status`, `osd showVolume`, and `osd showBrightness` increment
+  `osdSerial` and switch `osdKind` without QML warnings.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Volume/brightness OSDs · optional dock · additional LOTM plugin widgets.
+Optional dock · additional LOTM plugin widgets.
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future

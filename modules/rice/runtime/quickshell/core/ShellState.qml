@@ -20,6 +20,8 @@ Item {
     property bool satchelOpen: false
     property bool notificationsOpen: false
     property bool osdVisible: false
+    property string osdKind: "volume"
+    property int osdSerial: 0
     property bool debugVisible: false
 
     // ── Ambient & motion flags (D-021/D-022) ──────────────────
@@ -138,8 +140,16 @@ Item {
     function toggleNotifications() {
         notificationsOpen = !notificationsOpen;
     }
+    function showOsd(kind) {
+        osdKind = kind === "brightness" ? "brightness" : "volume";
+        osdVisible = true;
+        osdSerial++;
+    }
+    function hideOsd() {
+        osdVisible = false;
+    }
     function toggleOsd() {
-        osdVisible = !osdVisible;
+        osdVisible ? hideOsd() : showOsd(osdKind);
     }
     function toggleTopBar() {
         topBarVisible = !topBarVisible;
@@ -177,6 +187,12 @@ Item {
         }
         function toggleOsd(): void {
             shell.toggleOsd();
+        }
+        function showOsd(kind: string): void {
+            shell.showOsd(kind);
+        }
+        function hideOsd(): void {
+            shell.hideOsd();
         }
         function toggleTopBar(): void {
             shell.toggleTopBar();

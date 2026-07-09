@@ -147,6 +147,7 @@ Item {
                     "monitor": "󰍛",
                     "volume": "󰕾",
                     "volume-muted": "󰝟",
+                    "brightness": "󰃠",
                     "wifi": "󰤨",
                     "wifi-off": "󰤭",
                     "ethernet": "󰈀",
