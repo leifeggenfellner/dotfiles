@@ -243,6 +243,20 @@ in
       maxTitleWidth = 150;
     };
 
+    dock.settings = {
+      enabled = true;
+      monitorPolicy = "focused";
+      maxItems = 6;
+      apps = [
+        { match = "Code"; label = "Scriptorium"; }
+        { match = "foot"; label = "Terminal"; }
+        { match = "Zen Browser"; label = "Browser"; }
+        { match = "Slack"; label = "Correspondence"; }
+        { match = "Discord"; label = "Gathering"; }
+        { match = "Spotify"; label = "Gramophone"; }
+      ];
+    };
+
     correspondence.settings = {
       title = "Correspondence";
       clearLabel = "burn";

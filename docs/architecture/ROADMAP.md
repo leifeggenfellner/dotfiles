@@ -623,9 +623,30 @@ services remain the source of displayed system values.
   `osd status`, `osd showVolume`, and `osd showBrightness` increment
   `osdSerial` and switch `osdKind` without QML warnings.
 
+## Phase 24 — Optional dock ✅
+
+Concretized as D-032: the dock is an opt-in app-launch surface fed by theme
+settings and backed by `AppsState`.
+
+- ✅ `AppsState` now exposes `findApp(match)` and `rowForApp(app)` helpers so
+  surfaces can resolve app specs without binding to `DesktopEntries` internals.
+- ✅ `modules/dock/Dock.qml` adds a bottom app dock with stable icon buttons,
+  hover labels, focused-monitor/all-monitor policy, and optional exclusive-zone
+  reservation. It launches through `AppsState.launch`.
+- ✅ LOTM enables a six-item focused-monitor dock through `widgets.dock.settings`.
+  Themes without `dock.settings.enabled = true` map no dock and keep the Phase 23
+  desktop unchanged.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; `nixpkgs-fmt`
+  clean for `modules/rice/themes/lotm/_theme.nix`; `rice-lint` clean; LOTM
+  manifest, production runtime, and theme index build; LOTM manifest contains
+  six focused dock entries while Cyberpunk leaves `widgets.dock` unconfigured;
+  production store-path smoke maps one `rice-dock` layer surface with all six
+  configured entries resolved, and the rebuilt runtime starts without dock QML
+  or zero-size font warnings; `nix flake check --print-build-logs` clean.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Optional dock · additional LOTM plugin widgets.
+Additional LOTM plugin widgets.
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future

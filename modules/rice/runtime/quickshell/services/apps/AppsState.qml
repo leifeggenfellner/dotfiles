@@ -10,7 +10,7 @@ import "../../utils"
 // to DesktopEntries' model details.
 //
 //   state:    available, apps, error
-//   commands: search(query, limit), launch(app)
+//   commands: search(query, limit), findApp(match), rowForApp(app), launch(app)
 
 Item {
     id: appsState
@@ -46,6 +46,29 @@ Item {
             error = "failed to launch " + (app.name || "application");
             console.warn("AppsState:", error, e);
         }
+    }
+
+    function findApp(match) {
+        const normalized = Fuzzy.normalize(match);
+        if (normalized.length === 0)
+            return null;
+
+        const list = apps;
+        for (let i = 0; i < list.length; i++) {
+            const app = list[i];
+            if (_fields(app).some(field => Fuzzy.normalize(field) === normalized))
+                return app;
+        }
+        for (let i = 0; i < list.length; i++) {
+            const app = list[i];
+            if (_fields(app).some(field => Fuzzy.normalize(field).indexOf(normalized) >= 0))
+                return app;
+        }
+        return null;
+    }
+
+    function rowForApp(app) {
+        return app ? _row(app, 0) : null;
     }
 
     function _visibleApps(values) {
