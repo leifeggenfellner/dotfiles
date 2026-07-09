@@ -519,6 +519,24 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   theming, but every plugin should prove the contract instead of expanding the
   runtime API surface.
 
+### D-034 — Theme specialisations are the full-chrome switch path
+
+- Date: 2026-07-09 · Status: active
+- The fast rice switch remains pointer-based: `rice-switch <theme>` updates the
+  active theme pointer, wallpaper, and running shell without requiring root.
+  Full rebuild-time chrome fidelity uses generated NixOS/Home Manager
+  specialisations named `rice-<theme>`. Each specialisation forces both
+  `rice.theme` and `environment.desktop.theme.scheme` to the selected theme.
+- `rice.specialisations.*` controls this machinery. The theme list is derived
+  from packaged rice themes by default, the prefix defaults to `rice-`, and each
+  generated specialisation disables recursive specialisation generation inside
+  its specialised config. `rice-switch --specialise <theme>` activates the
+  matching system specialisation first, then performs the normal pointer and
+  wallpaper update.
+- Why: live theme switching should stay quick and user-scoped for daily play,
+  while GTK/Qt/Home Manager-derived chrome needs an explicit rebuild-backed path
+  when exact theme fidelity matters.
+
 ---
 
 ## Legacy imports

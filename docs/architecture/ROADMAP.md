@@ -663,12 +663,31 @@ inside the plugin contract.
   the dashboard layer and opens it without plugin load errors, QML exceptions, or
   zero-size font warnings; `nix flake check --print-build-logs` clean.
 
+## Phase 26 — Theme specialisations ✅
+
+Concretized as D-034: generated NixOS/Home Manager specialisations provide the
+explicit full-chrome theme switch path while preserving fast pointer switching.
+
+- ✅ Rice theme names now derive from packaged theme directories, keeping the
+  option enum aligned with `modules/rice/themes/*/_theme.nix`.
+- ✅ `rice.specialisations.*` adds configurable generation of `rice-<theme>`
+  NixOS specialisations. Each generated config forces `rice.theme` and
+  `environment.desktop.theme.scheme` to the target theme and disables recursive
+  specialisation generation.
+- ✅ `rice-switch --specialise <theme>` activates the matching generated system
+  specialisation, then performs the existing active-pointer, wallpaper, and shell
+  reload flow.
+- Verified: editor diagnostics clean for changed Nix/docs; `nixpkgs-fmt` clean;
+  `nix eval` shows `rice-cyberpunk`, `rice-lotm`, and the existing
+  `with-nvidia`; generated cyberpunk config forces both rice and desktop schemes;
+  Home Manager activation package builds and `rice-switch --help` exposes
+  `--specialise`; shitbox toplevel builds and contains switchers for both rice
+  theme specialisations.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future
 
-- HM specialisations per theme for full live-switch fidelity — only if
-  post-switch chrome lag proves annoying (D-003).
 - Themes as external flakes (`rice.themes.<name>.package`).

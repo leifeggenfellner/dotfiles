@@ -6,10 +6,11 @@ _: {
         { lib, config, ... }:
         let
           cfg = config.rice;
-          themeType = lib.types.enum [
-            "lotm"
-            "cyberpunk"
-          ];
+          themesDir = ./rice/themes;
+          themeNames = lib.attrNames (lib.filterAttrs
+            (name: type: type == "directory" && builtins.pathExists (themesDir + "/${name}/_theme.nix"))
+            (builtins.readDir themesDir));
+          themeType = lib.types.enum themeNames;
         in
         {
           options.rice = {
@@ -19,6 +20,26 @@ _: {
               type = themeType;
               default = "lotm";
               description = "Active rice theme profile.";
+            };
+
+            specialisations = {
+              enable = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = "Build NixOS/Home Manager specialisations for packaged rice themes.";
+              };
+
+              themes = lib.mkOption {
+                type = lib.types.listOf themeType;
+                default = themeNames;
+                description = "Rice themes that should receive generated NixOS specialisations.";
+              };
+
+              prefix = lib.mkOption {
+                type = lib.types.str;
+                default = "rice-";
+                description = "Prefix used for generated NixOS specialisation names.";
+              };
             };
 
             shared = {

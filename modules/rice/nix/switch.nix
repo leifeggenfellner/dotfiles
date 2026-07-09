@@ -9,11 +9,15 @@ _: {
     { lib, pkgs, osConfig, ... }:
     let
       cfg = osConfig.rice or { enable = false; };
+      specialisationsEnabled = if (cfg.specialisations.enable or false) then "1" else "0";
+      specialisationPrefix = cfg.specialisations.prefix or "rice-";
 
       rice-switch = pkgs.writeShellScriptBin "rice-switch" ''
         set -euo pipefail
 
         jq=${pkgs.jq}/bin/jq
+        specialisations_enabled=${specialisationsEnabled}
+        specialisation_prefix=${lib.escapeShellArg specialisationPrefix}
         index="$HOME/.config/rice/themes.json"
         state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/rice"
         pointer="$state_dir/active"
@@ -33,17 +37,61 @@ _: {
             done
         }
 
-        case "''${1:-}" in
-          ""|-h|--help)
-            echo "Usage: rice-switch <theme> | --list"; list; exit 0 ;;
-          -l|--list)
-            list; exit 0 ;;
-        esac
+        usage() {
+          echo "Usage: rice-switch [--specialise] <theme> | --list"
+          list
+        }
 
-        theme="$1"
+        specialise=0
+        theme=""
+        while [ "$#" -gt 0 ]; do
+          case "$1" in
+            -h|--help)
+              usage; exit 0 ;;
+            -l|--list)
+              list; exit 0 ;;
+            --specialise|--specialize|--system)
+              specialise=1; shift ;;
+            --)
+              shift; break ;;
+            -*)
+              echo "rice-switch: unknown option: $1" >&2; usage >&2; exit 64 ;;
+            *)
+              if [ -n "$theme" ]; then
+                echo "rice-switch: expected one theme, got '$theme' and '$1'" >&2
+                usage >&2
+                exit 64
+              fi
+              theme="$1"; shift ;;
+          esac
+        done
+
+        if [ -z "$theme" ]; then
+          usage
+          exit 0
+        fi
+
         "$jq" -e --arg n "$theme" '.themes[$n]' "$index" >/dev/null || {
           echo "rice-switch: unknown theme '$theme'" >&2; list >&2; exit 1
         }
+
+        if [ "$specialise" -eq 1 ]; then
+          [ "$specialisations_enabled" = "1" ] || {
+            echo "rice-switch: rice specialisations are disabled in this generation" >&2
+            exit 69
+          }
+          spec="$specialisation_prefix$theme"
+          switcher="/run/current-system/specialisation/$spec/bin/switch-to-configuration"
+          [ -x "$switcher" ] || {
+            echo "rice-switch: no generated specialisation '$spec' in /run/current-system" >&2
+            exit 69
+          }
+          if [ "''${EUID:-$(id -u)}" -eq 0 ]; then
+            "$switcher" switch
+          else
+            sudo "$switcher" switch
+          fi
+        fi
 
         # Atomic pointer write: the shell watches this file (live re-bind).
         mkdir -p "$state_dir"
