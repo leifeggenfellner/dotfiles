@@ -67,6 +67,10 @@ the ambient governor. The resulting `idleApproaching` visual is an input-
 transparent overlay, obeys the reduce-motion/fullscreen/ambient-off gates, and
 clears on hypridle resume. It is allowed on battery because it is transient and
 precedes a system idle timeout. It does not replace or delay hypridle/hyprlock.
+World-event realization (D-030): experimental hidden-lore hooks emit transient
+flavor events into `ShellState` and may request a short fog surge. All hooks
+default off and are enabled only through theme settings; overlays remain
+input-transparent and unmapped when inactive.
 
 ## Budgets
 

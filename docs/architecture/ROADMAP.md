@@ -572,6 +572,32 @@ flake check --print-build-logs` clean; live dev-path smoke toggles
   production store-path smoke toggles the same state against the compiled shader
   runtime without `ShaderEffect` errors.
 
+## Phase 22 — World events & hidden lore ✅
+
+Concretized as D-030: hidden lore is runtime-owned flavor-event plumbing fed by
+theme settings, with every hook defaulting off.
+
+- ✅ Launcher incantations: `widgets.launcher.settings.incantations` maps exact
+  normalized phrases to generic flavor events. LOTM enables two phrases; themes
+  without entries keep ordinary launcher behavior.
+- ✅ Hour bell and daily fog surge: `modules/lore/LoreController.qml` owns timed
+  hooks from `widgets.worldEvents.settings`, plays optional semantic sounds, and
+  emits the same transient event edges as manual hooks. `lore status` and
+  `lore trigger ...` provide path-scoped smoke controls.
+- ✅ `LoreOverlay.qml` renders short input-transparent flavor messages and fog
+  surges, then unmaps itself. With all hooks disabled it has no active timers or
+  visible surface.
+- ✅ Calendar secret: `widgets.calendar.settings.secret` turns a dashboard
+  calendar click into the same flavor-event path. LOTM uses the Klein-calendar
+  copy; unconfigured themes do nothing on click.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; LOTM manifest,
+  production runtime, and theme index build; LOTM manifest reports all four
+  hidden-lore hooks enabled while Cyberpunk leaves them unconfigured; dev-path
+  and production store-path smoke tests show `lore status` and `lore trigger`
+  for `hourBell`, `calendarSecret`, and `dailyFogSurge` increment the transient
+  flavor/surge counters without QML warnings; `rice-lint` and `nix flake check
+--print-build-logs` clean.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · optional dock · additional LOTM plugin widgets.

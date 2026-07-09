@@ -10,6 +10,7 @@ import "./modules/satchel"
 import "./modules/switcher"
 import "./modules/wallpapers"
 import "./modules/debug"
+import "./modules/lore"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -26,6 +27,8 @@ ShellRoot {
 
     SoundController {}
 
+    LoreController {}
+
     Variants {
         model: Quickshell.screens
         AmbientLayer {}
@@ -34,6 +37,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         IdleOverlay {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        LoreOverlay {}
     }
 
     Variants {

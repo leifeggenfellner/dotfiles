@@ -458,6 +458,23 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   belongs to hypridle and session locking belongs to hyprlock. Keeping rice to a
   cancellable hint avoids timing races and preserves ordinary input cancellation.
 
+### D-030 — Hidden lore hooks are settings-driven flavor events
+
+- Date: 2026-07-09 · Status: active
+- Phase 22 adds experimental world events as runtime-owned flavor hooks. Themes
+  may configure launcher incantation phrases, an hourly bell, a daily fog surge,
+  and a calendar click secret through ordinary `widgets.*.settings` data. Runtime
+  defaults keep every hook off; disabling all hook settings leaves the Phase 21
+  desktop behavior unchanged.
+- Hooks emit transient edges through `ShellState` (`flavorEventSerial` and
+  `fogSurgeSerial`). `modules/lore/LoreController` owns clock-driven events and
+  exposes path-scoped IPC for smoke tests; launcher and calendar surfaces may
+  trigger the same generic flavor-event path from their own settings. The overlay
+  is input-transparent and unmapped while inactive.
+- Why: hidden lore should feel discoverable, but it must remain garnish. Theme
+  data may provide phrases and copy; it must not install behavior code or change
+  core workflows.
+
 ---
 
 ## Legacy imports

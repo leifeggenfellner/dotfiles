@@ -21,6 +21,7 @@ Rectangle {
         })
     readonly property string title: settings.title ?? "Calendar"
     readonly property string moonLabel: settings.moonLabel ?? "moon"
+    readonly property var secret: settings.secret ?? ({})
 
     width: 672
     height: 156
@@ -39,6 +40,19 @@ Rectangle {
         repeat: true
         running: true
         onTriggered: localClock.now = new Date()
+    }
+
+    function revealSecret() {
+        if (secret.enabled !== true)
+            return;
+        Sound.play(secret.sound ?? "");
+        ShellState.triggerFlavorEvent(secret.text ?? "", secret.event ?? "calendarSecret", secret.surge ?? true);
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        onClicked: root.revealSecret()
     }
 
     Row {

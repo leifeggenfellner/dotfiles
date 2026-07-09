@@ -32,6 +32,29 @@ Item {
     property bool soundMuted: true
     property bool doNotDisturb: false
 
+    // ── Flavor events (D-030) ────────────────────────────────
+    // Runtime-owned garnish triggered by modules/lore and surfaces.
+    // Themes provide only settings text/phrases; shell state carries
+    // the transient event edge for overlays to observe.
+    property int flavorEventSerial: 0
+    property string flavorEventText: ""
+    property string flavorEventKind: ""
+    property int fogSurgeSerial: 0
+
+    function triggerFlavorEvent(text, kind, surge) {
+        if (!text || text.length === 0)
+            return;
+        flavorEventText = text;
+        flavorEventKind = kind && kind.length > 0 ? kind : "flavor";
+        flavorEventSerial++;
+        if (surge)
+            triggerFogSurge();
+    }
+
+    function triggerFogSurge() {
+        fogSurgeSerial++;
+    }
+
     // One-shot startup reveal: flips shortly after load so surface
     // contents fade in (Motion.awaken) instead of popping. UI binds
     // to the flag; with motion disabled the reveal is instant.

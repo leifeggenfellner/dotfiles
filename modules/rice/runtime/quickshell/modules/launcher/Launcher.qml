@@ -26,11 +26,14 @@ PanelWindow {
     readonly property var settings: Theme.widgetConfig("launcher").settings ?? ({})
     readonly property string placeholder: settings.placeholder ?? "Search applications"
     readonly property var epigraphs: settings.epigraphs ?? ["Type to search applications."]
+    readonly property var incantationConfig: settings.incantations ?? ({})
+    readonly property var incantations: incantationConfig.entries ?? []
     readonly property int columns: settings.columns ?? 4
     readonly property int maxResults: settings.maxResults ?? 16
     readonly property string query: searchField.text
     readonly property var results: AppsState.search(query, maxResults)
     property int selectedIndex: results.length > 0 ? 0 : -1
+    property string _lastIncantationKey: ""
 
     // Stay mapped through the fade-out so closing is smooth.
     visible: open || panel.opacity > 0.01
@@ -68,10 +71,50 @@ PanelWindow {
         return epigraphs[Math.abs(query.length) % epigraphs.length];
     }
 
+    function normalizePhrase(value) {
+        return String(value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+    }
+
+    function maybeTriggerIncantation() {
+        if (!open || incantationConfig.enabled !== true) {
+            _lastIncantationKey = "";
+            return;
+        }
+
+        const normalizedQuery = normalizePhrase(query);
+        if (normalizedQuery.length === 0) {
+            _lastIncantationKey = "";
+            return;
+        }
+
+        for (const entry of incantations) {
+            if ((entry.enabled ?? true) === false)
+                continue;
+            const normalizedPhrase = normalizePhrase(entry.phrase);
+            if (normalizedPhrase.length === 0 || normalizedPhrase !== normalizedQuery)
+                continue;
+
+            const key = normalizedPhrase + "|" + (entry.event ?? "incantation");
+            if (_lastIncantationKey === key)
+                return;
+
+            _lastIncantationKey = key;
+            Sound.play(entry.sound ?? "");
+            ShellState.triggerFlavorEvent(entry.text ?? entry.message ?? "", entry.event ?? "incantation", entry.surge ?? true);
+            if (entry.closeOnMatch === true)
+                ShellState.closeLauncher();
+            return;
+        }
+
+        _lastIncantationKey = "";
+    }
+
     onResultsChanged: clampSelection()
+    onQueryChanged: maybeTriggerIncantation()
     onOpenChanged: {
         if (open) {
             searchField.text = "";
+            _lastIncantationKey = "";
             searchField.forceActiveFocus();
             clampSelection();
         }

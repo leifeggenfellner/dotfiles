@@ -139,6 +139,8 @@ in
     sounds = {
       notification = "sounds/sealed-letter.wav";
       notification-critical = "sounds/red-seal.wav";
+      hour-bell = "sounds/sealed-letter.wav";
+      lore = "sounds/red-seal.wav";
     };
     # Build-time SVG→PNG rendering (D-011); output appears in the
     # manifest as assets.raster.<name>.
@@ -158,8 +160,46 @@ in
         "A name, once spoken, becomes a door."
         "Every summoning begins as a precise request."
       ];
+      incantations = {
+        enabled = true;
+        entries = [
+          {
+            phrase = "the fool above the gray fog";
+            event = "incantation";
+            text = "A ripple crosses the gray fog.";
+            sound = "lore";
+            surge = true;
+          }
+          {
+            phrase = "the world needs a door";
+            event = "incantation";
+            text = "Somewhere, a brass key turns without a hand.";
+            sound = "lore";
+            surge = false;
+          }
+        ];
+      };
       columns = 4;
       maxResults = 16;
+    };
+
+    worldEvents.settings = {
+      hourBell = {
+        enabled = true;
+        event = "hourBell";
+        text = "The hour bell tolls beyond the fog.";
+        sound = "hour-bell";
+        surge = false;
+      };
+      dailyFogSurge = {
+        enabled = true;
+        event = "dailyFogSurge";
+        text = "The gray fog rises for the new day.";
+        sound = "lore";
+        surge = true;
+        hour = 6;
+        minute = 0;
+      };
     };
 
     epigraph.settings = {
@@ -239,6 +279,13 @@ in
     calendar.settings = {
       title = "Almanac";
       moonLabel = "Lunar divination";
+      secret = {
+        enabled = true;
+        event = "calendarSecret";
+        text = "Klein's calendar has one more page than it should.";
+        sound = "lore";
+        surge = true;
+      };
     };
 
     tarotDraw.settings = {
