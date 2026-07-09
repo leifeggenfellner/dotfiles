@@ -438,6 +438,26 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   garnish. The desktop's legibility and the motion/reduce-motion contract are
   carried by the existing non-shader paths.
 
+### D-029 — Idle warning is a transient ambient hint
+
+- Date: 2026-07-09 · Status: active
+- Phase 21 connects hypridle to the rice runtime through a best-effort IPC hint:
+  an additive hypridle listener calls `ambient setIdleHint on` shortly before the
+  primary idle timeout and `ambient setIdleHint off` on resume. The hint is raw
+  session state, never a pref. `modules/ambient/AmbientController` remains the
+  sole policy owner and publishes `ShellState.idleApproaching` only when the
+  existing ambient gates allow it: theme motion/ambient enabled, reduce-motion
+  off, ambient mode not off, and not fullscreen. Unlike continuous ambient fog,
+  the short idle warning is allowed on battery because it precedes an explicit
+  system idle timeout and must remain visible on laptops.
+- The warning renders as per-monitor, input-transparent `rice-idle` overlay
+  windows. It may use runtime-owned precompiled shaders when available and must
+  keep a T1 fallback. It never samples or owns client windows, never intercepts
+  input, and never replaces or delays hypridle/hyprlock behavior.
+- Why: the desktop can foreshadow lock/DPMS with atmosphere, but idle authority
+  belongs to hypridle and session locking belongs to hyprlock. Keeping rice to a
+  cancellable hint avoids timing races and preserves ordinary input cancellation.
+
 ---
 
 ## Legacy imports

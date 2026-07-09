@@ -20,13 +20,16 @@ import "../../services/hypr"
 Item {
     id: governor
 
-    readonly property bool ambientAllowed: Theme.motion.ambient
-        && Theme.motion.enabled
-        && Effects.layers.length > 0
-        && !PrefsState.reduceMotion
-        && PrefsState.ambientMode !== "off"
-        && !PowerState.onBattery
-        && !HyprState.anyFullscreen
+    property bool idleHint: false
+
+    readonly property bool ambientAllowed: Theme.motion.ambient && Theme.motion.enabled && Effects.layers.length > 0 && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !PowerState.onBattery && !HyprState.anyFullscreen
+
+    readonly property bool idleAllowed: governor.idleHint && Theme.motion.ambient && Theme.motion.enabled && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !HyprState.anyFullscreen
+
+    function parseToggle(value) {
+        const normalized = String(value).toLowerCase();
+        return normalized === "on" || normalized === "true" || normalized === "1" || normalized === "yes";
+    }
 
     Binding {
         target: ShellState
@@ -40,6 +43,12 @@ Item {
         value: governor.ambientAllowed
     }
 
+    Binding {
+        target: ShellState
+        property: "idleApproaching"
+        value: governor.idleAllowed
+    }
+
     IpcHandler {
         target: "ambient"
 
@@ -51,14 +60,19 @@ Item {
                 themeAmbient: Theme.motion.ambient,
                 layers: Effects.layers.length,
                 onBattery: PowerState.onBattery,
-                fullscreen: HyprState.anyFullscreen
+                fullscreen: HyprState.anyFullscreen,
+                idleHint: governor.idleHint,
+                idleApproaching: ShellState.idleApproaching
             });
         }
         function setMode(mode: string): void {
             PrefsState.setAmbientMode(mode);
         }
         function setReduceMotion(v: string): void {
-            PrefsState.setReduceMotion(v === "on" || v === "true" || v === "1");
+            PrefsState.setReduceMotion(governor.parseToggle(v));
+        }
+        function setIdleHint(v: string): void {
+            governor.idleHint = governor.parseToggle(v);
         }
     }
 }

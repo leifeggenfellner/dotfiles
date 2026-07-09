@@ -542,6 +542,36 @@ always backed by the existing T1/T0 visuals.
   launcher, dashboard, and satchel against compiled shaders without
   `ShaderEffect` errors.
 
+## Phase 21 — Idle: the fog rises ✅
+
+Concretized as D-029: idle warning is a transient hypridle hint handled by the
+ambient governor, not a new lock owner.
+
+- ✅ Hypridle integration is additive and rice-gated. A pre-timeout listener sends
+  `ambient setIdleHint on` before the primary idle timeout and clears it on
+  resume, leaving existing DPMS, suspend, lock, before-sleep, and after-sleep
+  behavior intact.
+- ✅ `AmbientController` now tracks the raw idle hint and publishes
+  `ShellState.idleApproaching` only through the same governor gates used for
+  atmosphere except the battery pause: motion/ambient enabled, reduce-motion
+  off, ambient mode not off, and not fullscreen. `ambient status` reports both
+  the raw hint and the gated effective state.
+- ✅ `IdleOverlay.qml` mounts one input-transparent `rice-idle` overlay per
+  monitor, so ordinary input still reaches the compositor and cancels hypridle.
+- ✅ `IdleVeil.qml` provides the visual warning: a compiled `idle-veil.qsb` wash
+  when the production shader path is available, with a T1 fallback of fog plus
+  vignette when shaders are absent.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; `nixpkgs-fmt`
+  clean for `modules/services/hypridle.nix`; `rice-lint` clean; production
+  runtime build emits `idle-veil.qsb` and a generated shader manifest containing
+  `fog`, `idle-veil`, and `ink-reveal`; active LOTM manifest + theme index build;
+  hypridle eval shows the rice-enabled host gets the 3540s idle-warning listener
+  while the non-rice host keeps only its existing DPMS/suspend listeners; `nix
+flake check --print-build-logs` clean; live dev-path smoke toggles
+  `idleHint/idleApproaching` on and off through IPC with shader fallback; live
+  production store-path smoke toggles the same state against the compiled shader
+  runtime without `ShaderEffect` errors.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 Volume/brightness OSDs · optional dock · additional LOTM plugin widgets.

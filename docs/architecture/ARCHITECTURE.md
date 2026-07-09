@@ -85,7 +85,8 @@ theme plugins → injected services + mount-provided theme/motion facades
    methods ([service-contract](contracts/service-contract.md)).
 2. **Shell UI state** — `core/ShellState.qml`: active popout, launcher visibility,
    OSD queue, debug overlay, plus governor-pushed flags (`reduceMotion`,
-   `ambientActive` — written only by `modules/ambient/AmbientController`, D-021).
+   `ambientActive`, `idleApproaching` — written only by
+   `modules/ambient/AmbientController`, D-021/D-029).
 3. **User prefs** — `$XDG_STATE_HOME/rice/`. The active-theme pointer is written
    only by `rice-switch` and read/watched by `core/ManifestLoader` as manifest-
    resolution input (D-018); `prefs.json` is written only by the `PrefsState`

@@ -1,4 +1,5 @@
 FogLayer 1.0 FogLayer.qml
+IdleVeil 1.0 IdleVeil.qml
 InkReveal 1.0 InkReveal.qml
 ParticleField 1.0 ParticleField.qml
 ShaderSurface 1.0 ShaderSurface.qml

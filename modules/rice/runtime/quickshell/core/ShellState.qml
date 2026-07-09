@@ -28,6 +28,7 @@ Item {
     // modules layer may import. Core and components only READ these.
     property bool reduceMotion: false
     property bool ambientActive: false
+    property bool idleApproaching: false
     property bool soundMuted: true
     property bool doNotDisturb: false
 

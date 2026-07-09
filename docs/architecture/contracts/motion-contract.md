@@ -62,6 +62,11 @@ Shader tier realization (D-028): GLSL lives only in the runtime under
 `components/effects/shaders/`; production config builds compile `.qsb` files with
 Qt Shader Tools, and QML loaders activate only when the generated shader manifest
 is present.
+Idle-warning realization (D-029): hypridle may send a transient idle hint into
+the ambient governor. The resulting `idleApproaching` visual is an input-
+transparent overlay, obeys the reduce-motion/fullscreen/ambient-off gates, and
+clears on hypridle resume. It is allowed on battery because it is transient and
+precedes a system idle timeout. It does not replace or delay hypridle/hyprlock.
 
 ## Budgets
 

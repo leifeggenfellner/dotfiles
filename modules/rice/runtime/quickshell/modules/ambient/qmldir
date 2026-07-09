@@ -1,2 +1,3 @@
 AmbientController 1.0 AmbientController.qml
 AmbientLayer 1.0 AmbientLayer.qml
+IdleOverlay 1.0 IdleOverlay.qml

@@ -33,6 +33,11 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
+        IdleOverlay {}
+    }
+
+    Variants {
+        model: Quickshell.screens
         TopBar {}
     }
 

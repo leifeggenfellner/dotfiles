@@ -11,6 +11,8 @@
       lock = "${pkgs.systemd}/bin/systemctl suspend";
 
       cfg = config.service.hypridle;
+      riceCfg = osConfig.rice or { enable = false; };
+      riceIdleHint = value: "${pkgs.quickshell}/bin/quickshell -c rice ipc call ambient setIdleHint ${value} >/dev/null 2>&1 || true";
     in
     {
       options.service.hypridle = {
@@ -39,6 +41,16 @@
           default = 300;
           description = "Idle timeout in seconds before suspend actions.";
         };
+        idleWarning = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "Show a rice idle-warning veil before hypridle performs its idle action.";
+        };
+        idleWarningLeadTime = lib.mkOption {
+          type = lib.types.int;
+          default = 60;
+          description = "Seconds before the primary idle timeout to show the rice idle-warning veil.";
+        };
       };
 
       config = lib.mkIf (cfg.enable && osConfig.environment.desktop.windowManager == "hyprland") {
@@ -54,6 +66,12 @@
               ignore_dbus_inhibit = true;
             };
             listener =
+              (lib.optional ((riceCfg.enable or false) && cfg.idleWarning) {
+                timeout = lib.max 1 (cfg.timeout - cfg.idleWarningLeadTime);
+                on-timeout = riceIdleHint "on";
+                on-resume = riceIdleHint "off";
+              })
+              ++
               (lib.optional cfg.dpms {
                 inherit (cfg) timeout;
                 on-timeout = "${hyprctl} dispatch dpms off";
