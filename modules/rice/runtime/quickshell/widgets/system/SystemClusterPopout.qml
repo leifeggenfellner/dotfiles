@@ -5,9 +5,9 @@ import "../../components"
 // ── SystemClusterPopout ───────────────────────────────────────
 // Controls behind the system glance: volume, wifi, bluetooth, tray.
 // Services: network, audio, bluetooth, tray (injected).
-// Tray lives here, not in the bar (L-009); click = activate
-// (context menus not exposed yet). Secured new networks expand an
-// inline password prompt.
+// Tray lives here, not in the bar (L-009); left click activates,
+// right click opens the app-native menu. Secured new networks expand
+// an inline password prompt.
 
 Column {
     id: root
@@ -22,6 +22,21 @@ Column {
 
     width: 340
     spacing: Theme.metrics.space.md
+
+    function trayMenuPosition(itemNode) {
+        const p = itemNode.mapToItem(null, itemNode.width, itemNode.height);
+        return {
+            x: Math.round(p.x),
+            y: Math.round(p.y)
+        };
+    }
+
+    function openTrayMenu(item, itemNode) {
+        if (!root.tray || !item || !item.hasMenu)
+            return false;
+        const pos = trayMenuPosition(itemNode);
+        return root.tray.displayMenu(item.id, itemNode.Window.window, pos.x, pos.y);
+    }
 
     // Popout content is created fresh on every open — drop stale
     // errors/prompts from previous interactions.
@@ -127,9 +142,7 @@ Column {
                 id: netEntry
 
                 required property var modelData
-                readonly property bool wantsPassword: root.net !== null
-                    && root.net.passwordNeededFor.length > 0
-                    && root.net.passwordNeededFor === modelData.ssid
+                readonly property bool wantsPassword: root.net !== null && root.net.passwordNeededFor.length > 0 && root.net.passwordNeededFor === modelData.ssid
 
                 width: parent.width
                 spacing: 2
@@ -140,8 +153,7 @@ Column {
                     width: parent.width
                     height: 32
                     radius: Theme.metrics.radius.small
-                    color: netMouse.containsMouse ? Theme.colors.bg.elevated
-                        : (netEntry.modelData.active ? Theme.colors.bg.elevated : "transparent")
+                    color: netMouse.containsMouse ? Theme.colors.bg.elevated : (netEntry.modelData.active ? Theme.colors.bg.elevated : "transparent")
 
                     Row {
                         anchors.verticalCenter: parent.verticalCenter
@@ -179,9 +191,7 @@ Column {
                         id: netMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: netEntry.modelData.active
-                            ? root.net.disconnect()
-                            : root.net.connect(netEntry.modelData.ssid)
+                        onClicked: netEntry.modelData.active ? root.net.disconnect() : root.net.connect(netEntry.modelData.ssid)
                     }
                 }
 
@@ -260,8 +270,7 @@ Column {
             Text {
                 anchors.right: parent.right
                 text: root.bt && root.bt.powered ? "on" : "off"
-                color: btPowerMouse.containsMouse ? Theme.colors.accent.primary
-                    : (root.bt && root.bt.powered ? Theme.colors.state.ok : Theme.colors.fg.subtle)
+                color: btPowerMouse.containsMouse ? Theme.colors.accent.primary : (root.bt && root.bt.powered ? Theme.colors.state.ok : Theme.colors.fg.subtle)
                 font.family: Theme.typography.families.mono
                 font.pointSize: Theme.typography.sizes.small
 
@@ -312,9 +321,7 @@ Column {
                     id: btMouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: btRow.modelData.connected
-                        ? root.bt.disconnect(btRow.modelData.address)
-                        : root.bt.connect(btRow.modelData.address)
+                    onClicked: btRow.modelData.connected ? root.bt.disconnect(btRow.modelData.address) : root.bt.connect(btRow.modelData.address)
                 }
             }
         }
@@ -341,11 +348,15 @@ Column {
                     id: trayItem
 
                     required property var modelData
+                    readonly property bool hasMenu: modelData.hasMenu === true
+                    readonly property bool onlyMenu: modelData.onlyMenu === true
 
                     width: 36
                     height: 36
                     radius: Theme.metrics.radius.small
                     color: trayMouse.containsMouse ? Theme.colors.bg.elevated : "transparent"
+                    border.width: hasMenu && trayMouse.containsMouse ? 1 : 0
+                    border.color: Theme.colors.accent.primary
 
                     Image {
                         anchors.centerIn: parent
@@ -362,7 +373,23 @@ Column {
                         id: trayMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: trayItem.modelData.activate()
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.RightButton) {
+                                if (!root.openTrayMenu(trayItem.modelData, trayItem))
+                                    root.tray.secondaryActivate(trayItem.modelData.id);
+                                return;
+                            }
+                            if (mouse.button === Qt.MiddleButton) {
+                                root.tray.secondaryActivate(trayItem.modelData.id);
+                                return;
+                            }
+                            if (trayItem.onlyMenu)
+                                root.openTrayMenu(trayItem.modelData, trayItem);
+                            else
+                                root.tray.activate(trayItem.modelData.id);
+                        }
+                        onPressAndHold: root.openTrayMenu(trayItem.modelData, trayItem)
                     }
                 }
             }

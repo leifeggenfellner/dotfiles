@@ -554,6 +554,20 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   them into this dotfiles repo, but external packages must still pass the same
   manifest validation and runtime contract as bundled themes.
 
+### D-036 — Tray menus remain app-native
+
+- Date: 2026-07-09 · Status: active
+- System tray items live in the system popout, never directly in the bar (L-009).
+  Phase 28 exposes native StatusNotifier menus through Quickshell's tray item
+  `display()` path instead of rendering DBus menu entries with custom QML.
+- `TrayState` owns tray commands: activate, secondary activate, and display menu.
+  The system popout maps left click to activate, right click and long-press to the
+  app-native menu when present, middle click to secondary activation, and
+  `onlyMenu` items to menu display on left click.
+- Why: tray menus are application-owned command surfaces. Delegating menu display
+  to Quickshell preserves app behavior, avoids duplicating DBus menu semantics,
+  and keeps the bar free of unbounded tray chrome.
+
 ---
 
 ## Legacy imports

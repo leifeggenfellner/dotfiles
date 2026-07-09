@@ -166,8 +166,8 @@ listed above and get exercised as their surfaces land.
   semantic `passwordNeededFor`; the row expands a masked input (Enter joins).
   Other errors collapse to one line; popout clears stale state on open.
 - ✅ Tray inside the system popout (L-009, never bar icons): native
-  `Quickshell.Services.SystemTray` via `TrayState`; click = activate.
-  Context menus not exposed yet (backlog, Later surfaces).
+  `Quickshell.Services.SystemTray` via `TrayState`; click = activate. Phase 28
+  closes context menus through app-native menu display.
 - ✅ D-012 bridge: themes ship `palette.legacy` (derived from their tokens in
   `_theme.nix`); `modules/rice/nix/_legacy-palettes.nix` merges them into the
   classic palette registry; `rice-bridge` points `environment.desktop.theme.scheme`
@@ -706,6 +706,23 @@ the bundled `modules/rice/themes` tree.
   plugin entries; runtime smoke opens the dashboard without plugin load errors;
   inline external-package probe confirms `rice.themes.<name>.package` participates
   in the package map and theme index builder.
+
+## Phase 28 — Tray context menus ✅
+
+Concretized as D-036: tray menus stay app-native and are opened from the system
+popout rather than reimplemented by the shell.
+
+- ✅ `TrayState` now exposes `itemById`, `secondaryActivate`, and `displayMenu`
+  alongside existing activation.
+- ✅ System popout tray icons keep left-click activation, open native menus on
+  right-click or long-press, use middle-click for secondary activation, and honor
+  `onlyMenu` tray items by opening the menu on left click.
+- ✅ Menu-capable tray icons get a subtle hover border in the popout without
+  adding tray chrome to the bar.
+- Verified: editor diagnostics clean for changed QML/docs; `rice-lint` clean;
+  production runtime and active LOTM manifest build; runtime smoke opens the
+  system popout without QML errors; `git diff --check`; `nix flake check
+--print-build-logs`.
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
