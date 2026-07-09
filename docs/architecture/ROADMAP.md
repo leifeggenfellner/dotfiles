@@ -644,9 +644,27 @@ settings and backed by `AppsState`.
   configured entries resolved, and the rebuilt runtime starts without dock QML
   or zero-size font warnings; `nix flake check --print-build-logs` clean.
 
+## Phase 25 — LOTM plugin widget pack ✅
+
+Concretized as D-033: theme-specific LOTM dashboard widgets stay self-contained
+inside the plugin contract.
+
+- ✅ `widgets/RitualLedger/RitualLedger.qml` adds a compact daily ritual checklist
+  that persists namespaced daily state through injected `prefs` only.
+- ✅ `widgets/PathwayCompass/PathwayCompass.qml` adds a compact pathway compass
+  that is driven entirely by manifest settings and requires no services.
+- ✅ LOTM registers both plugins through the manifest plugin list and configures
+  their copy/data under `widgets.ritualLedger.settings` and
+  `widgets.pathwayCompass.settings`.
+- Verified: editor diagnostics clean for changed QML/Nix/docs; `nixpkgs-fmt`
+  clean for `modules/rice/themes/lotm/_theme.nix`; `rice-lint` clean; LOTM
+  manifest, production runtime, and theme index build; built LOTM manifest
+  contains both plugin descriptors and settings; production store-path smoke maps
+  the dashboard layer and opens it without plugin load errors, QML exceptions, or
+  zero-size font warnings; `nix flake check --print-build-logs` clean.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
-Additional LOTM plugin widgets.
 The ambient effects tier landed as Phase 13 (D-021).
 
 ## Deferred / future

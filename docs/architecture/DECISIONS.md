@@ -503,6 +503,22 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: a dock is useful daily chrome, but it should remain an optional surface on
   top of the existing app service rather than a second launcher model.
 
+### D-033 — LOTM plugin widgets stay self-contained
+
+- Date: 2026-07-09 · Status: active
+- Additional LOTM dashboard widgets ship as theme plugins, not runtime built-ins,
+  when they are specific to LOTM flavor or lore. They receive only the public
+  widget injection surface: theme, motion, settings, and explicitly declared
+  services. They must not import runtime internals from their packaged store path.
+- Phase 25 adds a persisted `ritualLedger` plugin and a data-only
+  `pathwayCompass` plugin. The ledger may use `PrefsState` through service
+  injection for namespaced daily checklist state; the compass reads manifest
+  settings only. Both remain ordinary dashboard descriptors registered through
+  the manifest plugin list.
+- Why: theme-specific widgets are the intended escape hatch from data-only
+  theming, but every plugin should prove the contract instead of expanding the
+  runtime API surface.
+
 ---
 
 ## Legacy imports

@@ -309,6 +309,26 @@ in
       emptyLabel = "The deck waits under the fog.";
     };
 
+    ritualLedger.settings = {
+      title = "Daily Ritual";
+      entries = [
+        { id = "observe"; label = "Observe"; }
+        { id = "record"; label = "Record"; }
+        { id = "anchor"; label = "Anchor"; }
+        { id = "seal"; label = "Seal"; }
+      ];
+    };
+
+    pathwayCompass.settings = {
+      title = "Pathway Compass";
+      activeIndex = 0;
+      pathways = [
+        { name = "Fool"; sequence = "9"; state = "acting"; color = "#756a92"; }
+        { name = "Door"; sequence = "8"; state = "listening"; color = "#478eb0"; }
+        { name = "Visionary"; sequence = "7"; state = "recording"; color = "#8a9aa9"; }
+      ];
+    };
+
     workspaces.settings.items = [
       { id = 1; label = "Fool"; icon = "pathways_png/fool.png"; color = "#756a92"; }
       { id = 2; label = "Door"; icon = "pathways_png/door.png"; color = "#478eb0"; }
@@ -328,6 +348,22 @@ in
       region = "dashboard";
       priority = 40;
       services = [ "prefs" ];
+    }
+    {
+      id = "ritualLedger";
+      source = "widgets/RitualLedger";
+      entry = "RitualLedger.qml";
+      region = "dashboard";
+      priority = 50;
+      services = [ "prefs" ];
+    }
+    {
+      id = "pathwayCompass";
+      source = "widgets/PathwayCompass";
+      entry = "PathwayCompass.qml";
+      region = "dashboard";
+      priority = 60;
+      services = [ ];
     }
   ];
 
