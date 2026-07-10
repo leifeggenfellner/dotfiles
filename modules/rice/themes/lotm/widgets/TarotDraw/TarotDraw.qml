@@ -90,50 +90,50 @@ Rectangle {
             name: "The Fool",
             sequence: "0",
             phrase: "A door opens above the gray fog.",
-            face: "fool.webp",
-            back: "fool.webp"
+            face: "fool.png",
+            back: "fool.png"
         },
         {
             name: "The Magician",
             sequence: "I",
             phrase: "A precise hand turns chance into ritual.",
-            face: "magician.webp",
-            back: "magician.webp"
+            face: "magician.png",
+            back: "magician.png"
         },
         {
             name: "The High Priestess",
             sequence: "II",
             phrase: "Silence keeps the safer half of knowledge.",
-            face: "priestess.webp",
-            back: "priestess.webp"
+            face: "priestess.png",
+            back: "priestess.png"
         },
         {
             name: "The Hermit",
             sequence: "IX",
             phrase: "A lamp is enough when the path is honest.",
-            face: "hermit.webp",
-            back: "hermit.webp"
+            face: "hermit.png",
+            back: "hermit.png"
         },
         {
             name: "Wheel of Fortune",
             sequence: "X",
             phrase: "The machine turns; the omen is timing.",
-            face: "wheel.webp",
-            back: "wheel.webp"
+            face: "wheel.png",
+            back: "wheel.png"
         },
         {
             name: "The Moon",
             sequence: "XVIII",
             phrase: "Not every shadow belongs to a monster.",
-            face: "moon.webp",
-            back: "moon.webp"
+            face: "moon.png",
+            back: "moon.png"
         },
         {
             name: "The World",
             sequence: "XXI",
             phrase: "A circle closes without becoming a cage.",
-            face: "world.webp",
-            back: "world.webp"
+            face: "world.png",
+            back: "world.png"
         }
     ]
 

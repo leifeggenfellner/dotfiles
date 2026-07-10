@@ -5,6 +5,9 @@ _: {
       inputsFrom = [ ];
       nativeBuildInputs = with pkgs; [
         nixpkgs-fmt
+        (python3.withPackages (pythonPackages: [
+          pythonPackages.pillow
+        ]))
       ];
     };
   };
