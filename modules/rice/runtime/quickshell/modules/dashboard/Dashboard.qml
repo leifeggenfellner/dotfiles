@@ -10,8 +10,7 @@ import "../../services/system"
 import "../../services/weather"
 
 // ── Dashboard ─────────────────────────────────────────────────
-// Observatory surface: descriptor-driven dashboard widgets rendered
-// from Registry.byRegion("dashboard") with service injection.
+// Dashboard v2: Observatory surface rendered from descriptor-driven cards.
 
 PanelWindow {
     id: dashboard
@@ -37,6 +36,8 @@ PanelWindow {
     }
     color: "transparent"
 
+    readonly property bool surfaceActive: open
+
     function resolveServices(names) {
         const table = {
             prefs: PrefsState,
@@ -44,40 +45,9 @@ PanelWindow {
             weather: WeatherState
         };
         const out = {};
-        for (const n of names)
+        for (const n of (names ?? []))
             out[n] = table[n] ?? null;
         return out;
-    }
-
-    component DashboardMount: Item {
-        id: mount
-
-        required property var modelData
-        property real slotWidth: 320
-        readonly property bool wide: modelData.widgetId === "epigraph"
-        readonly property real naturalWidth: content.item ? Math.max(content.item.width, content.item.implicitWidth) : slotWidth
-        readonly property real naturalHeight: content.item ? Math.max(content.item.height, content.item.implicitHeight) : 0
-        readonly property real fitScale: naturalWidth > 0 ? Math.min(1, slotWidth / naturalWidth) : 1
-
-        width: slotWidth
-        height: Math.ceil(naturalHeight * fitScale)
-        clip: true
-
-        Loader {
-            id: content
-            x: Math.max(0, (mount.width - mount.naturalWidth * mount.fitScale) / 2)
-            transformOrigin: Item.TopLeft
-            scale: mount.fitScale
-            sourceComponent: mount.modelData.glance
-            onLoaded: {
-                item.services = dashboard.resolveServices(mount.modelData.services);
-                item.settings = mount.modelData.settings;
-                if (item.theme !== undefined)
-                    item.theme = Theme;
-                if (item.motion !== undefined)
-                    item.motion = Motion;
-            }
-        }
     }
 
     Rectangle {
@@ -101,6 +71,36 @@ PanelWindow {
         anchors.fill: parent
         focus: dashboard.open
         Keys.onEscapePressed: ShellState.closeDashboard()
+        Keys.onPressed: event => {
+            if (event.key === Qt.Key_Left) {
+                dashboardGrid.moveFocus("left");
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Right) {
+                dashboardGrid.moveFocus("right");
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Up) {
+                dashboardGrid.moveFocus("up");
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Down) {
+                dashboardGrid.moveFocus("down");
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Tab) {
+                dashboardGrid.focusNext(event.modifiers & Qt.ShiftModifier ? -1 : 1);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Backtab) {
+                dashboardGrid.focusNext(-1);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                dashboardGrid.activateFocused();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_PageDown) {
+                viewport.contentY = Math.min(viewport.contentHeight - viewport.height, viewport.contentY + viewport.height * 0.82);
+                event.accepted = true;
+            } else if (event.key === Qt.Key_PageUp) {
+                viewport.contentY = Math.max(0, viewport.contentY - viewport.height * 0.82);
+                event.accepted = true;
+            }
+        }
 
         Rectangle {
             id: panel
@@ -109,10 +109,11 @@ PanelWindow {
             readonly property real targetRatio: 1.6
             readonly property int availableWidth: Math.max(1, parent.width - outerMargin * 2)
             readonly property int availableHeight: Math.max(1, parent.height - outerMargin * 2)
+            readonly property bool compactPanel: availableWidth < 900
 
             anchors.centerIn: parent
             width: Math.min(availableWidth, 1184, Math.floor(availableHeight * targetRatio))
-            height: Math.min(availableHeight, Math.round(width / targetRatio))
+            height: compactPanel ? Math.min(availableHeight, Math.max(Math.round(width / 0.72), Math.round(width / targetRatio))) : Math.min(availableHeight, Math.round(width / targetRatio))
             radius: Theme.metrics.radius.large
             color: Theme.colors.bg.mantle
             border.width: 1
@@ -139,6 +140,70 @@ PanelWindow {
                 tint: Theme.colors.fg.subtle
             }
 
+            Item {
+                anchors.fill: parent
+                opacity: 0.16
+
+                Repeater {
+                    model: 64
+
+                    Rectangle {
+                        width: 1 + (index % 3)
+                        height: 1
+                        x: (index * 47) % Math.max(1, panel.width)
+                        y: (index * 89) % Math.max(1, panel.height)
+                        radius: 1
+                        color: index % 2 === 0 ? Theme.colors.fg.subtle : Theme.colors.accent.secondary
+                        opacity: 0.18 + (index % 5) * 0.03
+                    }
+                }
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: "☉"
+                color: Theme.colors.accent.secondary
+                opacity: 0.055
+                font.family: Theme.typography.families.display
+                font.pointSize: Math.min(panel.width, panel.height) * 0.46
+            }
+
+            Rectangle {
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: Theme.metrics.space.lg * 2
+                color: Theme.colors.bg.sunken
+                opacity: 0.16
+            }
+
+            Rectangle {
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: Theme.metrics.space.lg * 2
+                color: Theme.colors.bg.sunken
+                opacity: 0.18
+            }
+
+            Rectangle {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                width: Theme.metrics.space.lg * 2
+                color: Theme.colors.bg.sunken
+                opacity: 0.12
+            }
+
+            Rectangle {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                width: Theme.metrics.space.lg * 2
+                color: Theme.colors.bg.sunken
+                opacity: 0.12
+            }
+
             MouseArea {
                 anchors.fill: parent
             }
@@ -150,23 +215,31 @@ PanelWindow {
                 anchors.margins: Theme.metrics.space.lg
                 clip: true
                 contentWidth: width
-                contentHeight: dashboardFlow.height
+                contentHeight: dashboardGrid.contentHeight
                 boundsBehavior: Flickable.StopAtBounds
                 interactive: contentHeight > height
 
-                Flow {
-                    id: dashboardFlow
+                function ensureVisible(y, h) {
+                    const top = Math.max(0, y - Theme.metrics.space.md);
+                    const bottom = y + h + Theme.metrics.space.md;
+                    if (top < contentY)
+                        contentY = top;
+                    else if (bottom > contentY + height)
+                        contentY = Math.min(contentHeight - height, bottom - height);
+                }
 
+                DashboardGrid {
+                    id: dashboardGrid
+
+                    anchors.top: parent.top
+                    anchors.left: parent.left
                     width: viewport.width
-                    spacing: Theme.metrics.space.md
-
-                    Repeater {
-                        model: Registry.byRegion("dashboard")
-
-                        DashboardMount {
-                            slotWidth: wide ? dashboardFlow.width : (dashboardFlow.width - dashboardFlow.spacing) / 2
-                        }
-                    }
+                    descriptors: Registry.byRegion("dashboard")
+                    serviceResolver: dashboard.resolveServices
+                    surfaceActive: dashboard.surfaceActive
+                    surfaceMapped: panel.opacity > 0.01
+                    reducedMotion: PrefsState.reduceMotion
+                    onRequestVisible: (y, h) => viewport.ensureVisible(y, h)
                 }
             }
         }

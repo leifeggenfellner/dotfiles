@@ -24,13 +24,6 @@ Column {
     }
 
     Text {
-        text: settings.title ?? "Observatory"
-        color: Theme.colors.fg.subtle
-        font.family: Theme.typography.families.display
-        font.pointSize: Theme.typography.sizes.heading
-    }
-
-    Text {
         width: parent.width
         text: lines.length > 0 ? lines[lineIndex] : ""
         color: Theme.colors.fg.muted

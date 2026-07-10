@@ -6,7 +6,7 @@ import "../../components"
 // Calendar and moon panel for the Observatory. Services: weather
 // supplies the local lunar phase even when weather is unavailable.
 
-Rectangle {
+Item {
     id: root
 
     property var services: ({})
@@ -24,11 +24,7 @@ Rectangle {
     readonly property var secret: settings.secret ?? ({})
 
     width: 672
-    height: 156
-    radius: Theme.metrics.radius.medium
-    color: Theme.colors.bg.base
-    border.width: 1
-    border.color: Theme.colors.bg.surface1
+    height: 124
 
     QtObject {
         id: localClock
@@ -57,7 +53,6 @@ Rectangle {
 
     Row {
         anchors.fill: parent
-        anchors.margins: Theme.metrics.space.lg
         spacing: Theme.metrics.space.lg
 
         Column {
@@ -65,12 +60,6 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             spacing: Theme.metrics.space.xs
 
-            Text {
-                text: root.title
-                color: Theme.colors.fg.primary
-                font.family: Theme.typography.families.display
-                font.pointSize: Theme.typography.sizes.heading
-            }
             Text {
                 text: Qt.formatDate(root.now, "dddd")
                 color: Theme.colors.fg.muted

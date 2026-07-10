@@ -37,7 +37,12 @@ Column {
         border.width: danger ? 2 : 1
         border.color: danger ? root.dangerColor : Theme.colors.bg.surface1
 
-        Behavior on border.color { ColorAnimation { duration: Motion.stateChange.duration; easing.type: Motion.stateChange.easing } }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: Motion.stateChange.duration
+                easing.type: Motion.stateChange.easing
+            }
+        }
 
         Column {
             anchors.fill: parent
@@ -78,8 +83,17 @@ Column {
                     radius: parent.radius
                     color: danger ? root.dangerColor : fillColor
 
-                    Behavior on width { MotionAnim { spec: Motion.stateChange } }
-                    Behavior on color { ColorAnimation { duration: Motion.stateChange.duration; easing.type: Motion.stateChange.easing } }
+                    Behavior on width {
+                        MotionAnim {
+                            spec: Motion.stateChange
+                        }
+                    }
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Motion.stateChange.duration
+                            easing.type: Motion.stateChange.easing
+                        }
+                    }
                 }
             }
 
@@ -92,13 +106,6 @@ Column {
                 width: parent.width
             }
         }
-    }
-
-    Text {
-        text: settings.title ?? "System Vitals"
-        color: Theme.colors.fg.subtle
-        font.family: Theme.typography.families.display
-        font.pointSize: Theme.typography.sizes.heading
     }
 
     Grid {

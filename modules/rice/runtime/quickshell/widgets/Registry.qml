@@ -111,6 +111,10 @@ Item {
             widgetId: "epigraph"
             region: "dashboard"
             priority: 0
+            layout: ({
+                    colSpan: 12,
+                    minHeight: 128
+                })
             glance: epigraphDashboard
         },
         WidgetDescriptor {
@@ -118,6 +122,10 @@ Item {
             region: "dashboard"
             priority: 10
             services: ["systemStats"]
+            layout: ({
+                    colSpan: 6,
+                    minHeight: 340
+                })
             glance: metersDashboard
         },
         WidgetDescriptor {
@@ -125,6 +133,10 @@ Item {
             region: "dashboard"
             priority: 20
             services: ["weather"]
+            layout: ({
+                    colSpan: 6,
+                    minHeight: 196
+                })
             glance: weatherDashboard
         },
         WidgetDescriptor {
@@ -132,6 +144,10 @@ Item {
             region: "dashboard"
             priority: 30
             services: ["weather"]
+            layout: ({
+                    colSpan: 6,
+                    minHeight: 220
+                })
             glance: calendarDashboard
         }
     ]
@@ -154,6 +170,9 @@ Item {
             monitorPolicy: cfg.monitorPolicy ?? d.monitorPolicy,
             services: d.services,
             settings: cfg.settings ?? d.settings,
+            layout: cfg.layout ?? d.layout ?? ({}),
+            unloadWhenClosed: cfg.unloadWhenClosed ?? d.unloadWhenClosed ?? false,
+            primaryAction: cfg.primaryAction ?? d.primaryAction ?? null,
             glance: d.glance,
             popout: d.popout
         };
@@ -199,6 +218,9 @@ Item {
                 monitorPolicy: plugin.monitorPolicy ?? "all",
                 services: plugin.services ?? [],
                 settings: plugin.settings ?? ({}),
+                layout: plugin.layout ?? ({}),
+                unloadWhenClosed: plugin.unloadWhenClosed ?? false,
+                primaryAction: plugin.primaryAction ?? null,
                 glance: component,
                 popout: null
             });

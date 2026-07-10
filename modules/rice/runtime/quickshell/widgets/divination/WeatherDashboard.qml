@@ -5,7 +5,7 @@ import "../../components"
 // ── WeatherDashboard ─────────────────────────────────────────
 // Weather panel for the Observatory. Services: weather.
 
-Rectangle {
+Item {
     id: root
 
     property var services: ({})
@@ -17,20 +17,15 @@ Rectangle {
     readonly property bool hasWeather: weather !== null && weather.available
 
     width: 672
-    height: 132
-    radius: Theme.metrics.radius.medium
-    color: Theme.colors.bg.base
-    border.width: 1
-    border.color: Theme.colors.bg.surface1
+    height: 96
 
     Row {
         anchors.fill: parent
-        anchors.margins: Theme.metrics.space.lg
         spacing: Theme.metrics.space.lg
 
         Rectangle {
-            width: 72
-            height: 72
+            width: 64
+            height: 64
             radius: width / 2
             color: Theme.colors.bg.sunken
             border.width: 1
@@ -39,7 +34,7 @@ Rectangle {
             Icon {
                 anchors.centerIn: parent
                 name: "weather"
-                size: Theme.typography.sizes.heading + 8
+                size: Theme.typography.sizes.heading + 4
                 color: Theme.colors.accent.secondary
             }
         }
@@ -48,26 +43,6 @@ Rectangle {
             width: parent.width - 72 - parent.spacing
             anchors.verticalCenter: parent.verticalCenter
             spacing: Theme.metrics.space.xs
-
-            Row {
-                width: parent.width
-                spacing: Theme.metrics.space.md
-
-                Text {
-                    text: root.title
-                    color: Theme.colors.fg.primary
-                    font.family: Theme.typography.families.display
-                    font.pointSize: Theme.typography.sizes.heading
-                }
-                Text {
-                    visible: root.weather !== null && root.weather.busy
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "refreshing"
-                    color: Theme.colors.fg.subtle
-                    font.family: Theme.typography.families.mono
-                    font.pointSize: Theme.typography.sizes.small
-                }
-            }
 
             Text {
                 width: parent.width

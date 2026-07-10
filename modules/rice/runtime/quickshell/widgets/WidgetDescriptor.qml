@@ -15,6 +15,9 @@ QtObject {
     property string monitorPolicy: "all"
     property var services: []
     property var settings: ({})
+    property var layout: ({})
+    property bool unloadWhenClosed: false
+    property var primaryAction: null
     property Component glance: null
     property Component popout: null
 }
