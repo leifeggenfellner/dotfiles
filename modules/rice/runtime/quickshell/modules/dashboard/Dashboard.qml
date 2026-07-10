@@ -53,12 +53,21 @@ PanelWindow {
         id: mount
 
         required property var modelData
+        property real slotWidth: 320
+        readonly property bool wide: modelData.widgetId === "epigraph"
+        readonly property real naturalWidth: content.item ? Math.max(content.item.width, content.item.implicitWidth) : slotWidth
+        readonly property real naturalHeight: content.item ? Math.max(content.item.height, content.item.implicitHeight) : 0
+        readonly property real fitScale: naturalWidth > 0 ? Math.min(1, slotWidth / naturalWidth) : 1
 
-        width: content.item ? Math.max(content.item.width, content.item.implicitWidth) : 0
-        height: content.item ? Math.max(content.item.height, content.item.implicitHeight) : 0
+        width: slotWidth
+        height: Math.ceil(naturalHeight * fitScale)
+        clip: true
 
         Loader {
             id: content
+            x: Math.max(0, (mount.width - mount.naturalWidth * mount.fitScale) / 2)
+            transformOrigin: Item.TopLeft
+            scale: mount.fitScale
             sourceComponent: mount.modelData.glance
             onLoaded: {
                 item.services = dashboard.resolveServices(mount.modelData.services);
@@ -96,9 +105,14 @@ PanelWindow {
         Rectangle {
             id: panel
 
+            readonly property int outerMargin: Theme.metrics.space.lg * 2
+            readonly property real targetRatio: 1.6
+            readonly property int availableWidth: Math.max(1, parent.width - outerMargin * 2)
+            readonly property int availableHeight: Math.max(1, parent.height - outerMargin * 2)
+
             anchors.centerIn: parent
-            width: contentColumn.width + Theme.metrics.space.lg * 2
-            height: contentColumn.height + Theme.metrics.space.lg * 2
+            width: Math.min(availableWidth, 1184, Math.floor(availableHeight * targetRatio))
+            height: Math.min(availableHeight, Math.round(width / targetRatio))
             radius: Theme.metrics.radius.large
             color: Theme.colors.bg.mantle
             border.width: 1
@@ -129,15 +143,30 @@ PanelWindow {
                 anchors.fill: parent
             }
 
-            Column {
-                id: contentColumn
-                anchors.centerIn: parent
-                width: 672
-                spacing: Theme.metrics.space.lg
+            Flickable {
+                id: viewport
 
-                Repeater {
-                    model: Registry.byRegion("dashboard")
-                    DashboardMount {}
+                anchors.fill: parent
+                anchors.margins: Theme.metrics.space.lg
+                clip: true
+                contentWidth: width
+                contentHeight: dashboardFlow.height
+                boundsBehavior: Flickable.StopAtBounds
+                interactive: contentHeight > height
+
+                Flow {
+                    id: dashboardFlow
+
+                    width: viewport.width
+                    spacing: Theme.metrics.space.md
+
+                    Repeater {
+                        model: Registry.byRegion("dashboard")
+
+                        DashboardMount {
+                            slotWidth: wide ? dashboardFlow.width : (dashboardFlow.width - dashboardFlow.spacing) / 2
+                        }
+                    }
                 }
             }
         }

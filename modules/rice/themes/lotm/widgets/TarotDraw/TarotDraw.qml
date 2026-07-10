@@ -73,6 +73,10 @@ Rectangle {
     readonly property var daily: prefs ? prefs.extra(namespace, key, ({})) : ({})
     readonly property bool hasDaily: daily.date === today && daily.card !== undefined
     readonly property var currentCard: hasDaily ? cards[Math.max(0, Math.min(cards.length - 1, daily.card))] : null
+    readonly property real cardAspect: 1000 / 1778
+    readonly property int cardHeight: 220
+    readonly property int cardWidth: Math.round(cardHeight * cardAspect)
+    readonly property color cardMatte: "#d9c59b"
 
     property bool revealed: hasDaily
 
@@ -178,21 +182,24 @@ Rectangle {
 
         Rectangle {
             id: cardFrame
-            width: 144
-            height: 204
-            radius: root.theme.metrics.radius.medium
-            color: root.theme.colors.bg.sunken
-            border.width: 1
-            border.color: root.hasDaily ? root.theme.colors.accent.primary : root.theme.colors.bg.surface1
+            width: root.cardWidth
+            height: root.cardHeight
+            radius: 4
+            color: root.cardMatte
+            border.width: 0
+            clip: true
             scale: drawMouse.pressed ? 0.96 : 1
             rotation: root.revealed ? 0 : 2
 
             Image {
                 anchors.fill: parent
-                anchors.margins: root.theme.metrics.space.xs
+                anchors.margins: 1
                 source: Qt.resolvedUrl(root.visibleCardPath())
-                fillMode: Image.PreserveAspectFit
+                fillMode: Image.PreserveAspectCrop
+                horizontalAlignment: Image.AlignHCenter
+                verticalAlignment: Image.AlignVCenter
                 smooth: true
+                mipmap: true
             }
 
             MouseArea {

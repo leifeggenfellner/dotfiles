@@ -3,7 +3,6 @@ import "./modules/ambient"
 import "./modules/bar"
 import "./modules/launcher"
 import "./modules/dashboard"
-import "./modules/dock"
 import "./modules/sound"
 import "./modules/osd"
 import "./modules/notifications"
@@ -65,11 +64,6 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         Dashboard {}
-    }
-
-    Variants {
-        model: Quickshell.screens
-        Dock {}
     }
 
     Variants {

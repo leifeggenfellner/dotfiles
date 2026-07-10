@@ -489,19 +489,16 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   source of system truth or make volume/brightness keys depend on the shell being
   alive.
 
-### D-032 — The dock is an optional app-launch surface
+### D-032 — The dock is retired
 
-- Date: 2026-07-09 · Status: active
-- The dock is a runtime-owned surface, enabled only by ordinary
-  `widgets.dock.settings` data. Themes provide a bounded list of app match specs
-  and optional labels; the runtime resolves those specs through `AppsState` and
-  launches through the same command path as the launcher.
-- Dock presence is not core shell state. Unconfigured themes do not map a dock,
-  and configured themes may choose focused-monitor or all-monitor placement. The
-  dock may show theme-provided labels as hover affordances, but it must not own
-  pinned-app persistence or bind directly to `DesktopEntries` internals.
-- Why: a dock is useful daily chrome, but it should remain an optional surface on
-  top of the existing app service rather than a second launcher model.
+- Date: 2026-07-09 · Status: retired 2026-07-10
+- The optional dock experiment proved that `AppsState.findApp()` and
+  `rowForApp()` are useful reusable app-resolution helpers, but the desktop no
+  longer maps an application dock. The shell does not import or instantiate a
+  dock surface, and LOTM no longer carries `widgets.dock.settings`.
+- Why: the launcher is the single app-launch surface for this rice. Removing the
+  dock keeps daily chrome quieter while preserving the app service helpers for
+  launcher-style surfaces.
 
 ### D-033 — LOTM plugin widgets stay self-contained
 
