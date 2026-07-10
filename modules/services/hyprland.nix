@@ -266,7 +266,8 @@
                   ", XF86MonBrightnessDown, exec, ${riceOsd "brightnessDown" "brightnessctl set 10%-"}"
 
                   # Rice shell surfaces (see docs/architecture/ROADMAP.md)
-                  "${mainMod}, D, exec, quickshell -c rice ipc call shell toggleLauncher"
+                  "${mainMod}, Space, exec, quickshell -c rice ipc call shell toggleLauncher"
+                  "${mainMod}, D, exec, quickshell -c rice ipc call shell toggleDashboard"
                   "${mainMod} ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
                   "${mainMod}, W, exec, quickshell -c rice ipc call shell toggleWallpapers"
                   "${mainMod} ALT, W, exec, quickshell -c rice ipc call wallpapers next"
