@@ -234,6 +234,7 @@ PanelWindow {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     width: viewport.width
+                    height: Math.max(viewport.height, contentHeight)
                     descriptors: Registry.byRegion("dashboard")
                     serviceResolver: dashboard.resolveServices
                     surfaceActive: dashboard.surfaceActive

@@ -276,11 +276,10 @@ Item {
 
     Repeater {
         id: widgetRepeater
-        model: root.placements
+        model: root.placements.length
 
         DashboardMount {
             grid: root
-            modelData: modelData
         }
     }
 
@@ -288,16 +287,30 @@ Item {
         id: mount
 
         required property var grid
-        required property var modelData
+        required property int index
+        readonly property var placement: grid.placements[index] ?? ({
+                key: "missing:" + index,
+                widget: ({
+                        widgetId: "missing",
+                        services: [],
+                        settings: ({}),
+                        glance: null
+                    }),
+                placementIndex: index,
+                x: 0,
+                y: 0,
+                width: 1,
+                height: 1
+            })
 
-        readonly property var descriptor: modelData.widget
+        readonly property var descriptor: placement.widget
         readonly property var requestedServices: descriptor.services ?? []
         readonly property var resolvedServices: grid.serviceResolver ? grid.serviceResolver(requestedServices) : ({})
         readonly property var missingServices: requestedServices.filter(name => resolvedServices[name] === null || resolvedServices[name] === undefined)
         readonly property bool hasMissingServices: missingServices.length > 0
         readonly property bool loadAllowed: (!descriptor.unloadWhenClosed || grid.surfaceActive || grid.surfaceMapped) && !hasMissingServices
         readonly property bool loaderError: content.status === Loader.Error
-        readonly property bool loaderBusy: loadAllowed && (content.status === Loader.Loading || content.status === Loader.Null)
+        readonly property bool loaderBusy: loadAllowed && !content.item && (content.status === Loader.Loading || content.status === Loader.Null)
         readonly property bool loaderEmpty: descriptor.glance === null || descriptor.glance === undefined
         readonly property real contentWidth: Math.max(1, card.width - card._pad * 2)
         readonly property real widgetHeight: content.item ? Math.max(content.item.implicitHeight, content.item.height, content.implicitHeight) : 0
@@ -311,53 +324,33 @@ Item {
             return out;
         }
 
-        x: modelData.x
-        y: modelData.y
-        width: modelData.width
+        x: placement.x
+        y: placement.y
+        width: placement.width
         height: reportedHeight
         opacity: revealProgress
 
         property real revealProgress: 1
         property bool retryPulse: true
 
-        Behavior on x {
-            MotionAnim {
-                spec: grid.reducedMotion ? ({
-                        duration: 0,
-                        easing: Easing.Linear
-                    }) : Motion.stateChange
-            }
-        }
-        Behavior on y {
-            MotionAnim {
-                spec: grid.reducedMotion ? ({
-                        duration: 0,
-                        easing: Easing.Linear
-                    }) : Motion.stateChange
-            }
-        }
-        Behavior on revealProgress {
-            MotionAnim {
-                spec: grid.reducedMotion ? ({
-                        duration: 0,
-                        easing: Easing.Linear
-                    }) : Motion.surfaceReveal
-            }
-        }
+        Behavior on x { NumberAnimation { duration: grid.reducedMotion ? 0 : Motion.stateChange.duration; easing.type: grid.reducedMotion ? Easing.Linear : Motion.stateChange.easing } }
+        Behavior on y { NumberAnimation { duration: grid.reducedMotion ? 0 : Motion.stateChange.duration; easing.type: grid.reducedMotion ? Easing.Linear : Motion.stateChange.easing } }
+        Behavior on revealProgress { NumberAnimation { duration: grid.reducedMotion ? 0 : Motion.surfaceReveal.duration; easing.type: grid.reducedMotion ? Easing.Linear : Motion.surfaceReveal.easing } }
 
-        onReportedHeightChanged: grid.setMeasuredHeight(modelData.key, reportedHeight)
-        onWidgetHeightChanged: Qt.callLater(() => grid.setMeasuredHeight(modelData.key, reportedHeight))
+        onReportedHeightChanged: grid.setMeasuredHeight(placement.key, reportedHeight)
+        onWidgetHeightChanged: Qt.callLater(() => grid.setMeasuredHeight(placement.key, reportedHeight))
         Component.onCompleted: {
-            grid.setMeasuredHeight(modelData.key, reportedHeight);
+            grid.setMeasuredHeight(placement.key, reportedHeight);
             if (grid.surfaceActive)
                 startEntrance();
         }
-        onModelDataChanged: grid.setMeasuredHeight(modelData.key, reportedHeight)
-        onLoadAllowedChanged: Qt.callLater(() => grid.setMeasuredHeight(modelData.key, reportedHeight))
+        onPlacementChanged: grid.setMeasuredHeight(placement.key, reportedHeight)
+        onLoadAllowedChanged: Qt.callLater(() => grid.setMeasuredHeight(placement.key, reportedHeight))
 
         Connections {
             target: grid
             function onSurfaceActiveChanged() {
+                mount.injectContent(content.item);
                 if (grid.surfaceActive)
                     mount.startEntrance();
                 else {
@@ -367,13 +360,32 @@ Item {
             }
         }
 
+        function assignIfPossible(item, propertyName, value) {
+            if (!item)
+                return;
+            try {
+                item[propertyName] = value;
+            } catch (error) {
+                if (propertyName !== "theme" && propertyName !== "motion" && propertyName !== "surfaceActive")
+                    console.warn("DashboardGrid: failed to inject", propertyName, "into", descriptor.widgetId, "-", error);
+            }
+        }
+
+        function injectContent(item) {
+            assignIfPossible(item, "services", resolvedServices);
+            assignIfPossible(item, "settings", injectedSettings);
+            assignIfPossible(item, "theme", Theme);
+            assignIfPossible(item, "motion", Motion);
+            assignIfPossible(item, "surfaceActive", grid.surfaceActive);
+        }
+
         function startEntrance() {
             if (grid.reducedMotion) {
                 revealProgress = 1;
                 return;
             }
             revealProgress = 0;
-            entranceTimer.interval = Math.min(360, modelData.placementIndex * 38);
+            entranceTimer.interval = Math.min(360, placement.placementIndex * 38);
             entranceTimer.restart();
         }
 
@@ -383,11 +395,11 @@ Item {
         }
 
         function activatePrimary() {
-            if (content.item && content.item.primaryAction !== undefined && content.item.primaryAction !== null) {
+            if (content.item && content.item.primaryAction) {
                 content.item.primaryAction();
                 return;
             }
-            if (descriptor.primaryAction !== undefined && descriptor.primaryAction !== null)
+            if (descriptor.primaryAction)
                 descriptor.primaryAction();
         }
 
@@ -401,7 +413,7 @@ Item {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton
             onClicked: {
-                grid.setFocusIndex(modelData.placementIndex);
+                grid.setFocusIndex(placement.placementIndex);
                 mount.activatePrimary();
             }
         }
@@ -420,60 +432,27 @@ Item {
             error: mount.hasMissingServices || mount.loaderError
             errorText: mount.hasMissingServices ? "The mirror is clouded: missing " + mount.missingServices.join(", ") : "The mirror is clouded."
             retryAction: mount.loaderError ? mount.retry : null
-            focusRing: grid.focusIndex === modelData.placementIndex
+            focusRing: grid.focusIndex === placement.placementIndex
 
             Loader {
                 id: content
 
                 width: parent ? parent.width : mount.contentWidth
-                height: mount.widgetHeight
                 active: mount.retryPulse && mount.loadAllowed && !mount.loaderEmpty
                 asynchronous: true
                 sourceComponent: descriptor.glance
 
-                onLoaded: Qt.callLater(() => grid.setMeasuredHeight(modelData.key, mount.reportedHeight))
-                onStatusChanged: Qt.callLater(() => grid.setMeasuredHeight(modelData.key, mount.reportedHeight))
+                onLoaded: {
+                    mount.injectContent(item);
+                    Qt.callLater(() => grid.setMeasuredHeight(placement.key, mount.reportedHeight));
+                }
+                onStatusChanged: Qt.callLater(() => grid.setMeasuredHeight(placement.key, mount.reportedHeight))
 
                 Binding {
                     target: content.item
                     property: "width"
                     value: mount.contentWidth
                     when: content.item !== null
-                }
-
-                Binding {
-                    target: content.item
-                    property: "services"
-                    value: mount.resolvedServices
-                    when: content.item !== null && content.item.services !== undefined
-                }
-
-                Binding {
-                    target: content.item
-                    property: "settings"
-                    value: mount.injectedSettings
-                    when: content.item !== null && content.item.settings !== undefined
-                }
-
-                Binding {
-                    target: content.item
-                    property: "theme"
-                    value: Theme
-                    when: content.item !== null && content.item.theme !== undefined
-                }
-
-                Binding {
-                    target: content.item
-                    property: "motion"
-                    value: Motion
-                    when: content.item !== null && content.item.motion !== undefined
-                }
-
-                Binding {
-                    target: content.item
-                    property: "surfaceActive"
-                    value: grid.surfaceActive
-                    when: content.item !== null && content.item.surfaceActive !== undefined
                 }
             }
         }
