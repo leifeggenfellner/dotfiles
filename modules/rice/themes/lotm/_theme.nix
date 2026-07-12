@@ -105,9 +105,9 @@ in
     # token refs (L-005) — fog wears the fog-blue accent, embers the
     # antique gold.
     effects.layers = [
-      { type = "fog"; tint = "accent.secondary"; opacity = 0.10; speed = 1.0; band = "bottom"; }
-      { type = "particles"; tint = "accent.primary"; opacity = 0.30; count = 9; speed = 1.0; }
-      { type = "vignette"; tint = "bg.sunken"; opacity = 0.25; }
+      { type = "fog"; tint = "accent.secondary"; opacity = 0.18; speed = 1.15; band = "bottom"; }
+      { type = "particles"; tint = "accent.primary"; opacity = 0.42; count = 12; speed = 1.1; }
+      { type = "vignette"; tint = "bg.sunken"; opacity = 0.30; }
     ];
   };
 
