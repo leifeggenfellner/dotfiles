@@ -8,13 +8,14 @@ Item {
 
     property string pendingResponse: ""
     property bool success: false
+    property bool releasing: false
     property int failureNonce: 0
     readonly property bool authenticating: pam.active
     readonly property string authMessage: pam.message
     readonly property bool authMessageIsError: pam.messageIsError
 
     function submit(password) {
-        if (password.length === 0 || root.success || !sessionLock.secure)
+        if (password.length === 0 || root.success || root.releasing || !sessionLock.secure)
             return;
 
         if (pam.active)
@@ -41,8 +42,12 @@ Item {
     }
 
     function finish() {
+        if (root.releasing)
+            return;
+        root.releasing = true;
         sessionLock.unlock();
-        Qt.quit();
+        sessionLock.locked = false;
+        releaseTimer.restart();
     }
 
     WlSessionLock {
@@ -59,7 +64,7 @@ Item {
                     anchors.fill: parent
                     screenName: lockSurface.screen ? lockSurface.screen.name : ""
                     authenticating: root.authenticating
-                    success: root.success
+                    success: root.success || root.releasing
                     failureNonce: root.failureNonce
                     authMessage: root.authMessage
                     authMessageIsError: root.authMessageIsError
@@ -92,5 +97,12 @@ Item {
         interval: 760
         repeat: false
         onTriggered: root.finish()
+    }
+
+    Timer {
+        id: releaseTimer
+        interval: 340
+        repeat: false
+        onTriggered: Qt.quit()
     }
 }

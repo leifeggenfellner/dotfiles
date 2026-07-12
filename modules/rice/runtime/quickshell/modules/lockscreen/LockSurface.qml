@@ -22,6 +22,9 @@ FocusScope {
 
     focus: true
 
+    readonly property bool compactLayout: width < 920
+    readonly property real sideMargin: compactLayout ? Math.max(26, width * 0.06) : Math.max(64, Math.min(width * 0.085, 128))
+    readonly property real topMargin: compactLayout ? Math.max(70, height * 0.11) : Math.max(82, height * 0.13)
     readonly property real parallaxX: Config.enableParallax ? cursorX * 22 : 0
     readonly property real parallaxY: Config.enableParallax ? cursorY * 14 : 0
 
@@ -128,8 +131,10 @@ FocusScope {
     }
 
     RitualCircle {
-        anchors.centerIn: parent
-        width: Math.min(parent.width, parent.height) * 0.78
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: root.compactLayout ? parent.horizontalCenter : parent.left
+        anchors.horizontalCenterOffset: root.compactLayout ? 0 : parent.width * 0.34
+        width: Math.min(parent.width, parent.height) * (root.compactLayout ? 0.76 : 0.92)
         height: width
         time: root.time
         parallaxX: root.parallaxX * -0.22
@@ -139,12 +144,16 @@ FocusScope {
         running: root.visible
     }
 
-    Column {
-        id: content
+    Item {
+        id: clockCluster
 
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: -Math.min(parent.height * 0.025, 28)
-        spacing: Math.max(18, Math.round(parent.height * 0.026))
+        width: root.compactLayout ? root.width - root.sideMargin * 2 : Math.min(root.width * 0.39, 620)
+        height: clock.implicitHeight + 48
+        anchors.top: parent.top
+        anchors.topMargin: root.topMargin
+        anchors.right: root.compactLayout ? undefined : parent.right
+        anchors.rightMargin: root.sideMargin
+        anchors.horizontalCenter: root.compactLayout ? parent.horizontalCenter : undefined
         opacity: root.success ? 0 : 1
         scale: root.success ? 1.04 : 1
 
@@ -154,6 +163,7 @@ FocusScope {
                 easing.type: Easing.OutCubic
             }
         }
+
         Behavior on scale {
             NumberAnimation {
                 duration: 520
@@ -161,28 +171,65 @@ FocusScope {
             }
         }
 
+        Rectangle {
+            width: 1
+            height: clock.height * 0.82
+            anchors.right: root.compactLayout ? undefined : parent.right
+            anchors.left: root.compactLayout ? parent.left : undefined
+            anchors.verticalCenter: clock.verticalCenter
+            color: Config.accentColor
+            opacity: 0.48
+        }
+
+        Repeater {
+            model: 3
+
+            Rectangle {
+                required property int index
+                width: 8 + index * 4
+                height: width
+                radius: width / 2
+                anchors.right: root.compactLayout ? undefined : parent.right
+                anchors.left: root.compactLayout ? parent.left : undefined
+                y: clock.y + 18 + index * 34
+                color: "transparent"
+                border.width: 1
+                border.color: Config.accentColor
+                opacity: 0.26
+            }
+        }
+
         Clock {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(root.width * 0.84, 900)
+            id: clock
+
+            anchors.right: root.compactLayout ? undefined : parent.right
+            anchors.left: root.compactLayout ? undefined : parent.left
+            anchors.horizontalCenter: root.compactLayout ? parent.horizontalCenter : undefined
+            width: parent.width - 34
+            alignRight: !root.compactLayout
             reveal: root.userAwake || password.text.length > 0
             time: root.time
         }
+    }
 
-        PasswordField {
-            id: password
+    PasswordField {
+        id: password
 
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(root.width * 0.34, 420)
-            revealed: root.userAwake || text.length > 0 || root.authenticating
-            authenticating: root.authenticating
-            success: root.success
-            failureNonce: root.failureNonce
-            message: root.authMessage
-            messageIsError: root.authMessageIsError
-            enabled: root.secure && !root.success
-            onSubmit: value => root.submitPassword(value)
-            onKeyPulse: (x, y) => sparks.emitAt(x, y)
-        }
+        anchors.right: root.compactLayout ? undefined : parent.right
+        anchors.rightMargin: root.compactLayout ? 0 : root.sideMargin
+        anchors.horizontalCenter: root.compactLayout ? parent.horizontalCenter : undefined
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: root.compactLayout ? Math.max(82, root.height * 0.13) : Math.max(96, root.height * 0.16)
+        width: root.compactLayout ? Math.min(root.width - root.sideMargin * 2, 420) : Math.min(root.width * 0.31, 430)
+        revealed: root.userAwake || text.length > 0 || root.authenticating
+        authenticating: root.authenticating
+        success: root.success
+        failureNonce: root.failureNonce
+        message: root.authMessage
+        messageIsError: root.authMessageIsError
+        enabled: root.secure && !root.success
+        onSubmit: value => root.submitPassword(value)
+        onKeyPulse: (x, y) => sparks.emitAt(x + password.x, y + password.y)
     }
 
     ParticleLayer {

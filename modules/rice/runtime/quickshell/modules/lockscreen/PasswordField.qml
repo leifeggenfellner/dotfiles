@@ -97,6 +97,23 @@ Item {
     }
 
     Rectangle {
+        anchors.fill: field
+        anchors.margins: -10
+        radius: 10
+        color: "transparent"
+        border.width: 1
+        border.color: Config.accentColor
+        opacity: input.activeFocus ? 0.30 : 0.16
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 240
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+    Rectangle {
         id: field
 
         anchors.left: parent.left
@@ -108,6 +125,23 @@ Item {
         opacity: 0.62
         border.width: 1
         border.color: root.messageIsError ? Theme.colors.state.danger : Config.accentColor
+    }
+
+    Repeater {
+        model: 4
+
+        Rectangle {
+            required property int index
+            readonly property bool leftSide: index < 2
+            readonly property bool topSide: index % 2 === 0
+
+            width: 18
+            height: 1
+            x: leftSide ? -2 : field.width - width + 2
+            y: topSide ? -5 : field.height + 5
+            color: root.messageIsError ? Theme.colors.state.danger : Config.accentColor
+            opacity: 0.55
+        }
     }
 
     TextInput {

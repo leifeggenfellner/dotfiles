@@ -18,7 +18,7 @@ QtObject {
     property bool enableBloom: _boolEnv("RICE_LOCK_BLOOM", true)
     property int fpsLimit: Math.max(24, Math.min(120, _intEnv("RICE_LOCK_FPS", 60)))
     property color accentColor: _colorEnv("RICE_LOCK_ACCENT", Theme.colors.accent.secondary)
-    property string font: _env("RICE_LOCK_FONT", Theme.typography.families.display)
+    property string font: _env("RICE_LOCK_FONT", "Cinzel Decorative")
     property string clockFormat: _env("RICE_LOCK_CLOCK_FORMAT", "HH:mm")
     property string pamService: _env("RICE_LOCK_PAM_SERVICE", "login")
 
