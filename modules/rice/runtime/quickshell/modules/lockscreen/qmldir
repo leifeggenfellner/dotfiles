@@ -1,0 +1,13 @@
+module lockscreen
+singleton Config 1.0 Config.qml
+Background 1.0 Background.qml
+Clock 1.0 Clock.qml
+FogLayer 1.0 FogLayer.qml
+ImageBackground 1.0 ImageBackground.qml
+Lockscreen 1.0 Lockscreen.qml
+LockSurface 1.0 LockSurface.qml
+ParticleLayer 1.0 ParticleLayer.qml
+PasswordField 1.0 PasswordField.qml
+RitualCircle 1.0 RitualCircle.qml
+ShaderEffects 1.0 ShaderEffects.qml
+VideoBackground 1.0 VideoBackground.qml

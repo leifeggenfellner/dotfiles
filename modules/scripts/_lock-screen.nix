@@ -35,6 +35,10 @@ pkgs.writeShellScriptBin "lock-screen" ''
     DYNAMIC_CONF="''${TMPDIR:-/tmp}/hyprlock-dynamic.conf"
     MODE="''${1:-}"
 
+    if [ "$MODE" != "--print-config" ] && [ "$MODE" != "--dry-run" ] && command -v rice-lock-screen >/dev/null 2>&1; then
+      exec rice-lock-screen "$@"
+    fi
+
     # Ordered monitor descriptors to prefer for the lock UI (injected from Nix)
     PRIORITY=(${builtins.concatStringsSep " " (map (d: ''"${d}"'') monitorPriority)})
 

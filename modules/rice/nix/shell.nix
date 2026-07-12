@@ -8,6 +8,12 @@ _: {
     let
       cfg = osConfig.rice or { enable = false; };
 
+      qtMediaDeps = [
+        pkgs.qt6.qtmultimedia
+      ];
+      qtMediaQmlPath = lib.makeSearchPath "lib/qt-6/qml" qtMediaDeps;
+      qtMediaPluginPath = lib.makeSearchPath "lib/qt-6/plugins" qtMediaDeps;
+
       rice-sound-play = pkgs.writeShellScriptBin "rice-sound-play" ''
         set -euo pipefail
         file="''${1:-}"
@@ -91,11 +97,54 @@ _: {
           setsid -f quickshell "''${args[@]}" >/dev/null 2>&1
         fi
       '';
+
+      rice-lock-screen = pkgs.writeShellScriptBin "rice-lock-screen" ''
+        set -euo pipefail
+
+        mode="prod"
+
+        while [ "$#" -gt 0 ]; do
+          case "$1" in
+            --dev) mode="dev" ;;
+            --prod) mode="prod" ;;
+            -h|--help)
+              cat <<'USAGE'
+        Usage: rice-lock-screen [--dev|--prod]
+
+          --prod       Run the installed ~/.config/quickshell/rice/lock.qml root.
+          --dev        Run lock.qml directly from the dotfiles checkout.
+
+        Optional environment overrides:
+          RICE_LOCK_MODE=image|video
+          RICE_LOCK_IMAGE=/path/to/image
+          RICE_LOCK_VIDEO=/path/to/loop.mp4
+        USAGE
+              exit 0 ;;
+            *) echo "rice-lock-screen: unknown option: $1" >&2; exit 1 ;;
+          esac
+          shift
+        done
+
+        export QML2_IMPORT_PATH="${qtMediaQmlPath}''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
+        export QT_PLUGIN_PATH="${qtMediaPluginPath}''${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+        export QT_MEDIA_BACKEND="''${QT_MEDIA_BACKEND:-ffmpeg}"
+
+        if [ "$mode" = "dev" ]; then
+          repo_root="''${DOTFILES:-$HOME/Sources/dotfiles}"
+          lock_root="$repo_root/modules/rice/runtime/quickshell/lock.qml"
+        else
+          lock_root="$HOME/.config/quickshell/rice/lock.qml"
+        fi
+
+        exec ${pkgs.quickshell}/bin/quickshell --no-duplicate --path "$lock_root"
+      '';
     in
     {
       config = lib.mkIf (cfg.enable or false) {
         home.packages = [
           pkgs.quickshell
+          pkgs.qt6.qtmultimedia
+          rice-lock-screen
           rice-shell
           rice-sound-play
         ];
