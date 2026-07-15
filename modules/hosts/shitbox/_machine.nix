@@ -26,6 +26,36 @@
     "nvidia_modeset"
     "nvidia_uvm"
   ];
+  boot.kernelModules = [
+    "hp_bioscfg"
+    "hp_wmi"
+  ];
+
+  system.activationScripts.hpFnKeyMode.text = ''
+    hp_bios_attrs=/sys/class/firmware-attributes/hp-bioscfg/attributes
+
+    set_hp_bios_attr() {
+      name="$1"
+      wanted="$2"
+      path="$hp_bios_attrs/$name/current_value"
+
+      if [ ! -e "$path" ]; then
+        return 0
+      fi
+
+      current=$(cat "$path" 2>/dev/null || true)
+      if [ "$current" = "$wanted" ]; then
+        return 0
+      fi
+
+      if ! printf '%s' "$wanted" > "$path" 2>/dev/null; then
+        echo "warning: unable to set HP BIOS attribute '$name' to '$wanted'" >&2
+      fi
+    }
+
+    set_hp_bios_attr "Launch Hotkeys without Fn Keypress" "Disable"
+    set_hp_bios_attr "Special Keys mapped to Fn + keypress" "Enable"
+  '';
 
   services.xserver.videoDrivers = [ "modesetting" ];
 

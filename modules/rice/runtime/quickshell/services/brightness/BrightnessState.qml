@@ -16,6 +16,7 @@ Item {
     readonly property bool mock: false
     property bool available: false
     property bool busy: false
+    property bool refreshQueued: false
     property string error: ""
 
     property real value: 0
@@ -24,27 +25,35 @@ Item {
     property real maximum: 0
 
     function refresh() {
-        if (!probe.running)
+        if (probe.running) {
+            refreshQueued = true;
+        } else {
             probe.running = true;
+        }
     }
 
     function setValue(v) {
         const clamped = Math.max(0, Math.min(1, v));
-        _run(["brightnessctl", "set", Math.round(clamped * 100) + "%"]);
+        if (_run(["brightnessctl", "set", Math.round(clamped * 100) + "%"]))
+            value = clamped;
     }
 
     function step(delta) {
         const amount = Math.max(1, Math.round(Math.abs(delta) * 100)) + "%";
-        _run(delta >= 0 ? ["brightnessctl", "set", "+" + amount] : ["brightnessctl", "set", amount + "-"]);
+        if (_run(delta >= 0 ? ["brightnessctl", "set", "+" + amount] : ["brightnessctl", "set", amount + "-"]))
+            value = Math.max(0, Math.min(1, value + delta));
     }
 
     function _run(command) {
-        if (action.running)
-            return;
+        if (action.running) {
+            refreshQueued = true;
+            return false;
+        }
         busy = true;
         error = "";
         action.command = command;
         action.running = true;
+        return true;
     }
 
     function _parse(text) {
@@ -55,9 +64,11 @@ Item {
             return;
         }
 
+        const percentIndex = String(fields[3]).indexOf("%") >= 0 ? 3 : 4;
+        const maximumIndex = percentIndex === 3 ? 4 : 3;
         const rawCurrent = Number(fields[2]);
-        const rawMaximum = Number(fields[3]);
-        const rawPercent = Number(String(fields[4]).replace("%", ""));
+        const rawMaximum = Number(fields[maximumIndex]);
+        const rawPercent = Number(String(fields[percentIndex]).replace("%", ""));
         current = Number.isFinite(rawCurrent) ? rawCurrent : 0;
         maximum = Number.isFinite(rawMaximum) ? rawMaximum : 0;
         value = Number.isFinite(rawPercent) ? Math.max(0, Math.min(1, rawPercent / 100)) : (maximum > 0 ? Math.max(0, Math.min(1, current / maximum)) : 0);
@@ -85,6 +96,10 @@ Item {
             }
             brightness.error = "";
             brightness._parse(probeOut.text);
+            if (brightness.refreshQueued) {
+                brightness.refreshQueued = false;
+                brightness.refresh();
+            }
         }
     }
 

@@ -29,12 +29,16 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
+    exclusionMode: ExclusionMode.Ignore
+
     anchors.bottom: true
     margins.bottom: 64
 
     implicitWidth: 280
     implicitHeight: 48
     color: "transparent"
+
+    mask: Region {}
 
     Connections {
         target: ShellState
