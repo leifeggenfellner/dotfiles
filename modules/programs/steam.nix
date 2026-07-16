@@ -4,6 +4,8 @@ _: {
     {
       config = lib.mkIf config.environment.gaming.enable {
         programs = {
+          gamemode.enable = true;
+
           steam = {
             enable = true;
             extraCompatPackages = [

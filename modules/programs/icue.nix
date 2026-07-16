@@ -1,13 +1,13 @@
 _: {
   flake.homeModules.programs-icue =
-    { osConfig, config, pkgs, lib, ... }:
+    { osConfig, pkgs, lib, ... }:
     {
       config = lib.mkIf osConfig.environment.gaming.enable {
         home = {
           packages = with pkgs; [
             ckb-next
           ];
-          persistence."/persist/${config.home.homeDirectory}" = {
+          persistence."/persist/" = {
             directories = [
               ".config/ckb-next"
             ];

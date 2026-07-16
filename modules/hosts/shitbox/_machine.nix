@@ -33,6 +33,8 @@
   # Specialisation:  Enable NVIDIA offload
   ########################################
   specialisation.with-nvidia.configuration = {
+    environment.gaming.enable = true;
+
     boot.blacklistedKernelModules = lib.mkForce [ ];
     services.xserver.videoDrivers = lib.mkForce [ "nvidia" ];
 
@@ -84,6 +86,7 @@
   rice = {
     enable = true;
     theme = "lotm";
+    specialisations.enable = false;
   };
 
   system = {
