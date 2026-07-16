@@ -1,10 +1,11 @@
 _: {
   flake.homeModules.programs-vscode =
-    { osConfig
-    , config
-    , lib
-    , pkgs
-    , ...
+    {
+      osConfig,
+      config,
+      lib,
+      pkgs,
+      ...
     }:
     let
       inherit (osConfig.environment) desktop;
@@ -105,824 +106,871 @@ _: {
         };
       };
 
-      config = lib.mkIf (cfg.enable && desktop.enable && desktop.develop)
-        {
+      config = lib.mkIf (cfg.enable && desktop.enable && desktop.develop) {
 
-          programs.vscode = {
-            enable = true;
-            package = pkgs.vscode;
-            mutableExtensionsDir = false;
-            profiles.default = {
-              enableUpdateCheck = false;
-              enableExtensionUpdateCheck = false;
+        programs.vscode = {
+          enable = true;
+          package = pkgs.vscode;
+          mutableExtensionsDir = false;
+          profiles.default = {
+            enableUpdateCheck = false;
+            enableExtensionUpdateCheck = false;
 
-              keybindings = [
+            keybindings = [
+              {
+                key = "ctrl+n";
+                command = "explorer.newFile";
+              }
+            ];
+
+            extensions =
+              with pkgs.vscode-extensions;
+              [
+                # Copilot
+                github.copilot-chat
+                anthropic.claude-code
+
+                # Editor
+                editorconfig.editorconfig
+                ms-vscode-remote.remote-ssh
+                ms-vscode-remote.remote-ssh-edit
+                ms-vscode-remote.remote-containers
+                ms-vscode.makefile-tools
+                mkhl.direnv
+                bmalehorn.vscode-fish
+
+                # Git extensions
+                eamodio.gitlens
+                donjayamanne.githistory
+                github.vscode-github-actions
+                github.vscode-pull-request-github
+
+                # Formatters
+                esbenp.prettier-vscode
+
+                # Java
+                redhat.java
+                vscjava.vscode-java-debug
+                vscjava.vscode-java-dependency
+                vscjava.vscode-java-pack
+
+                # Javascript/CSS/TypeScript
+                vue.volar
+                astro-build.astro-vscode
+                bradlc.vscode-tailwindcss
+                svelte.svelte-vscode
+                dbaeumer.vscode-eslint
+                usernamehw.errorlens
+                christian-kohler.path-intellisense
+                christian-kohler.npm-intellisense
+                ritwickdey.liveserver
+
+                # Kotlin
+                mathiasfrohlich.kotlin
+
+                # Nix
+                bbenoist.nix
+                jnoortheen.nix-ide
+
+                # Python
+                ms-python.python
+                ms-pyright.pyright
+                ms-python.black-formatter
+
+                # Rust
+                rust-lang.rust-analyzer
+                tamasfe.even-better-toml
+
+                # Scala/Metals/Haskell
+                scalameta.metals
+                scala-lang.scala
+                justusadam.language-haskell
+                haskell.haskell
+
+                # Docker
+                ms-azuretools.vscode-docker
+
+                # Yaml/Markdown/CSV/Org
+                redhat.vscode-yaml
+                davidanson.vscode-markdownlint
+                bierner.github-markdown-preview
+                bierner.markdown-checkbox
+                bierner.markdown-emoji
+                bierner.markdown-footnotes
+                bierner.markdown-mermaid
+                bierner.markdown-preview-github-styles
+                unifiedjs.vscode-mdx
+                mechatroner.rainbow-csv
+
+                # i18n
+                lokalise.i18n-ally
+
+                # Shell/spelling/binary editing
+                ms-vscode.hexeditor
+              ]
+              ++ lib.optionals cfg.godMode [ vscodevim.vim ]
+              ++ [
+                # QML
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "qt-core";
+                  publisher = "TheQtCompany";
+                  version = "1.13.0";
+                  sha256 = "sha256-/SAoJmKfOfLtbYn4jvtbAFIa6O7kDouv0xQVhnxFOKM=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "qt";
+                  publisher = "TheQtCompany";
+                  version = "1.3.0";
+                  sha256 = "sha256-rwAEZ/HAqNUfjrrctbt/GyZRZPPTnEqhho/UTSlXfR0=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "qt-qml";
+                  publisher = "TheQtCompany";
+                  version = "1.12.0";
+                  sha256 = "sha256-LNfVsmM4Wiv5RWk5ne2Z0lOonPEFH2405xKX/D3eCgY=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "QML";
+                  publisher = "bbenoist";
+                  version = "1.0.0";
+                  sha256 = "sha256-tphnVlD5LA6Au+WDrLZkAxnMJeTCd3UTyTN1Jelditk=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "qml-format";
+                  publisher = "Delgan";
+                  version = "1.1.0";
+                  sha256 = "sha256-QOovj9loSWAgaBCwW3HBPD/Wr7GwVppSRcCJ4R5X/as=";
+                })
+
+                # Theme extensions — all palettes
+                arcticicestudio.nord-visual-studio-code
+                enkia.tokyo-night
+                mvllow.rose-pine
+                jdinhlife.gruvbox
+                dracula-theme.theme-dracula
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "catppuccin-vsc";
+                  publisher = "Catppuccin";
+                  version = "3.18.0";
+                  sha256 = "sha256-57c0HRdEABLz03qozeQgFJH1NaWUbA+7tDJv0V4At8M=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "catppuccin-vsc-icons";
+                  publisher = "Catppuccin";
+                  version = "1.24.0";
+                  sha256 = "sha256-2M7N4Ccw9FAaMmG36hGHi6i0i1qR+uPCSgXELAA03Xk=";
+                })
+
+                # Testing tools - Quokka
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "quokka-vscode";
+                  publisher = "WallabyJs";
+                  version = "1.0.742";
+                  sha256 = "sha256-wNyKxMbop4P9snHt2z/4ATdUNgAwvgqU3LppoXYqIKQ=";
+                })
+
+                # Vue/TypeScript/Web Development extensions
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "headwind";
+                  publisher = "heybourn";
+                  version = "1.7.0";
+                  sha256 = "sha256-yXsZoSuJQTdbHLjEERXX2zVheqNYmcPXs97/uQYa7og=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "pretty-ts-errors";
+                  publisher = "yoavbls";
+                  version = "0.6.1";
+                  sha256 = "sha256-LvX21nEjgayNd9q+uXkahmdYwzfWBZOhQaF+clFUUF4=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "vscode-css-peek";
+                  publisher = "pranaygp";
+                  version = "4.4.3";
+                  sha256 = "sha256-oY+mpDv2OTy5hFEk2DMNHi9epFm4Ay4qi0drCXPuYhU=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "color-highlight";
+                  publisher = "naumovs";
+                  version = "2.8.0";
+                  sha256 = "sha256-mT2P1lEdW66YkDRN6fi0rmmvvyBfXiJjAUHns8a8ipE=";
+                })
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "dotenv";
+                  publisher = "mikestead";
+                  version = "1.0.1";
+                  sha256 = "sha256-dieCzNOIcZiTGu4Mv5zYlG7jLhaEsJR05qbzzzQ7RWc=";
+                })
+                # Org mode
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "org-mode";
+                  publisher = "tootone";
+                  version = "0.5.0";
+                  sha256 = "sha256-vXwo3oFLwK/wY7XEph9lGvXYIxjZsxeIE4TVAROmV2o=";
+                })
+              ]
+              ++ [
+                # Mugge chat
+                inputs.vsmugge.packages.${pkgs.stdenv.hostPlatform.system}.default
+              ];
+
+            userSettings = {
+              # Theme settings — derived from environment.desktop.theme.scheme
+              "workbench.colorTheme" = activeVscodeTheme;
+              "workbench.preferredDarkColorTheme" = activeVscodeTheme;
+              "workbench.preferredLightColorTheme" = "Light Modern";
+              "window.autoDetectColorScheme" = false;
+
+              # Icon theme
+              "workbench.iconTheme" = "catppuccin-mocha";
+
+              # Sidebar placement
+              "workbench.sideBar.location" = "right";
+
+              # Performance improvements for Scala/Metals
+              "files.watcherExclude" = {
+                "**/.bloop" = true;
+                "**/.metals" = true;
+                "**/.ammonite" = true;
+                "**/node_modules" = true;
+                "**/.git" = true;
+              };
+
+              # Git improvements
+              "git.autofetch" = true;
+              "git.confirmSync" = false;
+              "git.enableSmartCommit" = true;
+              "git.path" = "${pkgs.git}/bin/git";
+              "git.decorations.enabled" = true;
+              "git.showPushSuccessNotification" = true;
+
+              # Editor improvements
+              "workbench.tree.indent" = 20;
+              "workbench.editorAssociations" = {
+                "*.copilotmd" = "vscode.markdown.preview.editor";
+                "{git,gitlens,chat-editing-snapshot-text-model,copilot,git-graph,git-graph-3}:/**/*.qrc" =
+                  "default";
+                "*.qrc" = "qt-core.qrcEditor";
+              };
+              "workbench.startupEditor" = "none";
+              "editor.formatOnSave" = true;
+              "editor.formatOnPaste" = true;
+              "editor.minimap.enabled" = false;
+              "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              "editor.lineNumbers" = "relative";
+              "editor.linkedEditing" = true;
+              "editor.bracketPairColorization.enabled" = true;
+              "editor.guides.bracketPairs" = "active";
+              "editor.inlineSuggest.enabled" = true;
+              "editor.suggestSelection" = "first";
+              "editor.quickSuggestions" = {
+                "other" = true;
+                "comments" = false;
+                "strings" = false;
+              };
+
+              # Search improvements
+              "search.exclude" = {
+                "**/node_modules" = true;
+                "**/bower_components" = true;
+                "**/dist" = true;
+                "**/coverage" = true;
+                "**/.git" = true;
+                "**/.svn" = true;
+                "**/.hg" = true;
+                "**/CVS" = true;
+                "**/.DS_Store" = true;
+                "**/Thumbs.db" = true;
+                "**/.metals" = true;
+                "**/.bloop" = true;
+              };
+
+              # Explorer improvements
+              "explorer.fileNesting.enabled" = true;
+              "explorer.fileNesting.patterns" = {
+                "*.ts" = "\${capture}.js, \${capture}.d.ts, \${capture}.js.map";
+                "*.tsx" = "\${capture}.jsx";
+                "package.json" = "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb";
+                "tsconfig.json" = "tsconfig.*.json";
+                ".env" = ".env.*";
+              };
+
+              # Editor font configuration for nerd icons
+              "editor.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', 'Courier New', monospace";
+              "editor.fontSize" = 14;
+              "editor.fontLigatures" = true;
+              "editor.renderWhitespace" = "selection";
+              "editor.renderControlCharacters" = true;
+
+              # Terminal font configuration for nerd icons
+              "terminal.integrated.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', monospace";
+              "terminal.integrated.fontSize" = 14;
+
+              # Terminal environment configuration
+              "terminal.integrated.env.linux" = {
+                "TERM_PROGRAM" = "vscode";
+                # Preserve SSH agent socket
+                "SSH_AUTH_SOCK" = "\${SSH_AUTH_SOCK}";
+                # Preserve git configuration
+                "GIT_ASKPASS" = "\${GIT_ASKPASS}";
+                "GIT_SSH" = "${pkgs.openssh}/bin/ssh";
+              };
+
+              # Use external terminal for better compatibility
+              "terminal.integrated.defaultProfile.linux" = "fish";
+              "terminal.integrated.profiles.linux" = {
+                "fish" = {
+                  "path" = "${pkgs.fish}/bin/fish";
+                  "args" = [ "--login" ];
+                };
+              };
+
+              "terminal.integrated.inheritEnv" = true;
+              "terminal.integrated.shellIntegration.enabled" = true;
+
+              # Code lens for better navigation
+              "java.referencesCodeLens.enabled" = true;
+              "java.implementationsCodeLens.enabled" = true;
+              "typescript.implementationsCodeLens.enabled" = true;
+              "typescript.referencesCodeLens.enabled" = true;
+              "typescript.referencesCodeLens.showOnAllFunctions" = true;
+
+              # File type associations
+              "files.associations" = {
+                "*.astro" = "astro";
+                "*.kt" = "gradle-kotlin-dsl";
+                "*.css" = "tailwindcss";
+                "*.mdx" = "mdx";
+                "*.svelte" = "svelte";
+                "*.vue" = "vue";
+              };
+
+              # Auto-import improvements
+              "javascript.updateImportsOnFileMove.enabled" = "always";
+              "typescript.updateImportsOnFileMove.enabled" = "always";
+
+              # TypeScript/Javascript specific settings
+              "typescript.preferences.importModuleSpecifier" = "shortest";
+              "javascript.preferences.importModuleSpecifier" = "shortest";
+              "typescript.suggest.autoImports" = true;
+
+              # ESLint configuration
+              "eslint.validate" = [
+                "astro"
+                "javascript"
+                "javascriptreact"
+                "mdx"
+                "typescript"
+                "typescriptreact"
+                "svelte"
+                "vue"
+              ];
+              "eslint.probe" = [
+                "astro"
+                "javascript"
+                "javascriptreact"
+                "mdx"
+                "typescript"
+                "typescriptreact"
+                "svelte"
+                "vue"
+              ];
+
+              # disable built-in auto-closing and HTML auto-closing
+              "typescript.autoClosingTags" = false;
+              "javascript.autoClosingTags" = false;
+              "html.autoClosingTags" = false;
+
+              # UX improvements
+              "explorer.confirmDelete" = false;
+              "explorer.confirmDragAndDrop" = false;
+              "diffEditor.ignoreTrimWhitespace" = false;
+              "security.workspace.trust.untrustedFiles" = "open";
+
+              # Error Lens configuration
+              "errorLens.enabledDiagnosticLevels" = [
+                "error"
+                "warning"
+                "info"
+              ];
+              "errorLens.excludeBySource" = [ "eslint(prettier/prettier)" ];
+
+              # Metals configuration - let it use environment JAVA_HOME
+              "metals.sbtScript" = "${pkgs.sbt}/bin/sbt";
+              "metals.javaHome" = null;
+              "metals.customRepositories" = [ ];
+              "metals.bloopSbtLocation" = "${pkgs.bloop}/bin/bloop";
+              "metals.scalafixConfigPath" = ".scalafix.conf";
+              "metals.scalafixOnCompile" = false;
+              "metals.scalafixConfig" = ''
+                rules = [
+                  OrganizeImports
+                ]
+
+                OrganizeImports {
+                  targetDialect = Scala3
+                  removeUnused = true
+                  groupedImports = Merge
+                  groups = [
+                    "re:javax?\\."
+                    "scala."
+                    "re:^(?!scala\\.).*"
+                  ]
+                }
+              '';
+              "metals.serverProperties" = [
+                "-Dmetals.client=vscode"
+                "-Xmx2G"
+                "-Xms2G"
+                "-XX:MaxMetaspaceSize=512m"
+                "-Dscalafix.timeout=30s"
+              ];
+
+              # Nix Language Server
+              "nix.enableLanguageServer" = true;
+              "nix.serverPath" = "${pkgs.nil}/bin/nil";
+              "nil.formatting.command" = [ "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
+              "nix.serverSettings" = {
+                "nil" = {
+                  "formatting" = {
+                    "command" = [ "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
+                  };
+                };
+              };
+
+              # Prettier configuration
+              "prettier.semi" = true;
+              "prettier.singleQuote" = true;
+              "prettier.tabWidth" = 4;
+              "prettier.useTabs" = false;
+              "prettier.trailingComma" = "es5";
+              "prettier.printWidth" = 130;
+
+              # Java extension configuration to use environment variables
+              "java.configuration.detectJdksAtStart" = true;
+              "java.configuration.runtimes" = [ ];
+              "java.import.gradle.java.home" = null;
+              "java.import.maven.java.home" = null;
+              "java.format.settings.url" =
+                "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
+              "java.format.settings.profile" = "GoogleStyle";
+
+              # Docker
+              "docker.dockerPath" = "${pkgs.docker}/bin/docker";
+
+              # Mugge chat
+              "mugge.dtachProgram" = "${pkgs.dtach}/bin/dtach";
+
+              # Remote SSH
+              "remote.SSH.path" = "${pkgs.openssh}/bin/ssh";
+              "remote.SSH.configFile" = "~/.ssh/config";
+
+              # Markdown configuration
+              "markdown.preview.fontSize" = 14;
+              "markdown.preview.lineHeight" = 1.6;
+
+              # Vue/JavaScript configuration
+              "vue.server.petiteVue.supportHtmlFile" = true;
+              "typescript.preferences.includePackageJsonAutoImports" = "auto";
+              "javascript.preferences.includePackageJsonAutoImports" = "auto";
+
+              # Vue specific settings
+              "vue.autoInsert.dotValue" = true;
+              "vue.inlayHints.missingRequired" = true;
+              "vue.updateImportsOnFileMove.enabled" = true;
+
+              # EditorConfig
+              "editorconfig.generateAuto" = false;
+
+              # Svelte configuration
+              "[svelte]" = {
+                "editor.defaultFormatter" = "svelte.svelte-vscode";
+                "editor.formatOnSave" = true;
+              };
+              "svelte.enable-ts-plugin" = true;
+              "svelte.format.enable" = true;
+              "svelte.plugin.typescript.enable" = true;
+              "svelte.plugin.typescript.diagnostics.enable" = true;
+              "svelte.plugin.typescript.hover.enable" = true;
+              "svelte.plugin.typescript.completions.enable" = true;
+              "svelte.plugin.typescript.rename.enable" = true;
+              "svelte.plugin.css.enable" = true;
+              "svelte.plugin.html.enable" = true;
+              "javascript.suggest.autoImports" = true;
+
+              # Astro configuration
+              "[astro]" = {
+                "editor.defaultFormatter" = "astro-build.astro-vscode";
+                "editor.formatOnSave" = true;
+              };
+
+              # MDX configuration
+              "[mdx]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+                "editor.formatOnSave" = true;
+              };
+
+              # Live Server configuration
+              "liveServer.settings.donotShowInfoMsg" = true;
+              "liveServer.settings.donotVerifyTags" = true;
+              "liveServer.settings.port" = 5500;
+
+              # TailwindCSS configuration
+              "tailwindCSS.includeLanguages" = {
+                "astro" = "html";
+                "html" = "html";
+                "javascript" = "javascript";
+                "typescript" = "typescript";
+                "svelte" = "html";
+                "vue" = "vue";
+                "scala" = "html";
+              };
+              "tailwindCSS.experimental.classRegex" = [
+                "class:\\s*?[\"'`]([^\"'`]*.*?)[\"'`]"
+                "className:\\s*?[\"'`]([^\"'`]*.*?)[\"'`]"
+                "tw`([^`]*)`"
+                "tw\\.\\w+`([^`]*)`"
+                "tw\\([\"'`]([^\"'`]*)[\"'`]\\)"
+              ];
+              "tailwindCSS.emmetCompletions" = true;
+
+              # Headwind (Tailwind CSS class sorter)
+              "headwind.runOnSave" = true;
+
+              # Disable auto-updates (settings.json is read-only on NixOS)
+              "extensions.autoCheckUpdates" = false;
+              "extensions.autoUpdate" = false;
+              "extensions.ignoreRecommendations" = true;
+              "extensions.showRecommendationsOnlyOnDemand" = true;
+              "update.mode" = "none";
+              "workbench.enableExperiments" = false;
+              "telemetry.telemetryLevel" = "off";
+              "gitlens.telemetry.enabled" = false;
+              "redhat.telemetry.enabled" = false;
+
+              # Vim extension configuration
+              "vim.easyMotion" = true;
+              "vim.incsearch" = true;
+              "vim.useSystemClipboard" = true;
+              "vim.useCtrlKeys" = true;
+              "vim.hlsearch" = true;
+              "vim.leader" = "<space>";
+
+              # Performance settings
+              "extensions.experimental.affinity" = {
+                "vscodevim.vim" = 1;
+              };
+
+              # Insert mode keybindings
+              "vim.insertModeKeyBindings" = [
                 {
-                  key = "ctrl+n";
-                  command = "explorer.newFile";
+                  before = [
+                    "j"
+                    "j"
+                  ];
+                  after = [ "<Esc>" ];
+                }
+                {
+                  before = [
+                    "j"
+                    "k"
+                  ];
+                  after = [ "<Esc>" ];
                 }
               ];
 
-              extensions =
-                with pkgs.vscode-extensions;
-                [
-                  # Copilot
-                  github.copilot-chat
-                  anthropic.claude-code
-
-                  # Editor
-                  editorconfig.editorconfig
-                  ms-vscode-remote.remote-ssh
-                  ms-vscode-remote.remote-ssh-edit
-                  ms-vscode-remote.remote-containers
-                  ms-vscode.makefile-tools
-                  mkhl.direnv
-                  bmalehorn.vscode-fish
-
-                  # Git extensions
-                  eamodio.gitlens
-                  donjayamanne.githistory
-                  github.vscode-github-actions
-                  github.vscode-pull-request-github
-
-                  # Formatters
-                  esbenp.prettier-vscode
-
-                  # Java
-                  redhat.java
-                  vscjava.vscode-java-debug
-                  vscjava.vscode-java-dependency
-                  vscjava.vscode-java-pack
-
-                  # Javascript/CSS/TypeScript
-                  vue.volar
-                  astro-build.astro-vscode
-                  bradlc.vscode-tailwindcss
-                  svelte.svelte-vscode
-                  dbaeumer.vscode-eslint
-                  usernamehw.errorlens
-                  christian-kohler.path-intellisense
-                  christian-kohler.npm-intellisense
-                  ritwickdey.liveserver
-
-                  # Kotlin
-                  mathiasfrohlich.kotlin
-
-                  # Nix
-                  bbenoist.nix
-                  jnoortheen.nix-ide
-
-                  # Python
-                  ms-python.python
-                  ms-pyright.pyright
-                  ms-python.black-formatter
-
-                  # Rust
-                  rust-lang.rust-analyzer
-                  tamasfe.even-better-toml
-
-                  # Scala/Metals/Haskell
-                  scalameta.metals
-                  scala-lang.scala
-                  justusadam.language-haskell
-                  haskell.haskell
-
-                  # Docker
-                  ms-azuretools.vscode-docker
-
-                  # Yaml/Markdown/CSV/Org
-                  redhat.vscode-yaml
-                  davidanson.vscode-markdownlint
-                  bierner.github-markdown-preview
-                  bierner.markdown-checkbox
-                  bierner.markdown-emoji
-                  bierner.markdown-footnotes
-                  bierner.markdown-mermaid
-                  bierner.markdown-preview-github-styles
-                  unifiedjs.vscode-mdx
-                  mechatroner.rainbow-csv
-
-                  # i18n
-                  lokalise.i18n-ally
-
-                  # Shell/spelling/binary editing
-                  ms-vscode.hexeditor
-                ]
-                ++ lib.optionals cfg.godMode [ vscodevim.vim ]
-                ++ [
-                  # QML
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "qt-core";
-                    publisher = "TheQtCompany";
-                    version = "1.13.0";
-                    sha256 = "sha256-/SAoJmKfOfLtbYn4jvtbAFIa6O7kDouv0xQVhnxFOKM=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "qt";
-                    publisher = "TheQtCompany";
-                    version = "1.3.0";
-                    sha256 = "sha256-rwAEZ/HAqNUfjrrctbt/GyZRZPPTnEqhho/UTSlXfR0=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "qt-qml";
-                    publisher = "TheQtCompany";
-                    version = "1.12.0";
-                    sha256 = "sha256-LNfVsmM4Wiv5RWk5ne2Z0lOonPEFH2405xKX/D3eCgY=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "QML";
-                    publisher = "bbenoist";
-                    version = "1.0.0";
-                    sha256 = "sha256-tphnVlD5LA6Au+WDrLZkAxnMJeTCd3UTyTN1Jelditk=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "qml-format";
-                    publisher = "Delgan";
-                    version = "1.1.0";
-                    sha256 = "sha256-QOovj9loSWAgaBCwW3HBPD/Wr7GwVppSRcCJ4R5X/as=";
-                  })
-
-                  # Theme extensions — all palettes
-                  arcticicestudio.nord-visual-studio-code
-                  enkia.tokyo-night
-                  mvllow.rose-pine
-                  jdinhlife.gruvbox
-                  dracula-theme.theme-dracula
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "catppuccin-vsc";
-                    publisher = "Catppuccin";
-                    version = "3.18.0";
-                    sha256 = "sha256-57c0HRdEABLz03qozeQgFJH1NaWUbA+7tDJv0V4At8M=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "catppuccin-vsc-icons";
-                    publisher = "Catppuccin";
-                    version = "1.24.0";
-                    sha256 = "sha256-2M7N4Ccw9FAaMmG36hGHi6i0i1qR+uPCSgXELAA03Xk=";
-                  })
-
-                  # Testing tools - Quokka
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "quokka-vscode";
-                    publisher = "WallabyJs";
-                    version = "1.0.742";
-                    sha256 = "sha256-wNyKxMbop4P9snHt2z/4ATdUNgAwvgqU3LppoXYqIKQ=";
-                  })
-
-                  # Vue/TypeScript/Web Development extensions
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "headwind";
-                    publisher = "heybourn";
-                    version = "1.7.0";
-                    sha256 = "sha256-yXsZoSuJQTdbHLjEERXX2zVheqNYmcPXs97/uQYa7og=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "pretty-ts-errors";
-                    publisher = "yoavbls";
-                    version = "0.6.1";
-                    sha256 = "sha256-LvX21nEjgayNd9q+uXkahmdYwzfWBZOhQaF+clFUUF4=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "vscode-css-peek";
-                    publisher = "pranaygp";
-                    version = "4.4.3";
-                    sha256 = "sha256-oY+mpDv2OTy5hFEk2DMNHi9epFm4Ay4qi0drCXPuYhU=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "color-highlight";
-                    publisher = "naumovs";
-                    version = "2.8.0";
-                    sha256 = "sha256-mT2P1lEdW66YkDRN6fi0rmmvvyBfXiJjAUHns8a8ipE=";
-                  })
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "dotenv";
-                    publisher = "mikestead";
-                    version = "1.0.1";
-                    sha256 = "sha256-dieCzNOIcZiTGu4Mv5zYlG7jLhaEsJR05qbzzzQ7RWc=";
-                  })
-                  # Org mode
-                  (pkgs.vscode-utils.extensionFromVscodeMarketplace {
-                    name = "org-mode";
-                    publisher = "tootone";
-                    version = "0.5.0";
-                    sha256 = "sha256-vXwo3oFLwK/wY7XEph9lGvXYIxjZsxeIE4TVAROmV2o=";
-                  })
-                ];
-
-              userSettings = {
-                # Theme settings — derived from environment.desktop.theme.scheme
-                "workbench.colorTheme" = activeVscodeTheme;
-                "workbench.preferredDarkColorTheme" = activeVscodeTheme;
-                "workbench.preferredLightColorTheme" = "Light Modern";
-                "window.autoDetectColorScheme" = false;
-
-                # Icon theme
-                "workbench.iconTheme" = "catppuccin-mocha";
-
-                # Sidebar placement
-                "workbench.sideBar.location" = "right";
-
-                # Performance improvements for Scala/Metals
-                "files.watcherExclude" = {
-                  "**/.bloop" = true;
-                  "**/.metals" = true;
-                  "**/.ammonite" = true;
-                  "**/node_modules" = true;
-                  "**/.git" = true;
-                };
-
-                # Git improvements
-                "git.autofetch" = true;
-                "git.confirmSync" = false;
-                "git.enableSmartCommit" = true;
-                "git.path" = "${pkgs.git}/bin/git";
-                "git.decorations.enabled" = true;
-                "git.showPushSuccessNotification" = true;
-
-                # Editor improvements
-                "workbench.tree.indent" = 20;
-                "workbench.editorAssociations" = {
-                  "*.copilotmd" = "vscode.markdown.preview.editor";
-                  "{git,gitlens,chat-editing-snapshot-text-model,copilot,git-graph,git-graph-3}:/**/*.qrc" = "default";
-                  "*.qrc" = "qt-core.qrcEditor";
-                };
-                "workbench.startupEditor" = "none";
-                "editor.formatOnSave" = true;
-                "editor.formatOnPaste" = true;
-                "editor.minimap.enabled" = false;
-                "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                "editor.lineNumbers" = "relative";
-                "editor.linkedEditing" = true;
-                "editor.bracketPairColorization.enabled" = true;
-                "editor.guides.bracketPairs" = "active";
-                "editor.inlineSuggest.enabled" = true;
-                "editor.suggestSelection" = "first";
-                "editor.quickSuggestions" = {
-                  "other" = true;
-                  "comments" = false;
-                  "strings" = false;
-                };
-
-                # Search improvements
-                "search.exclude" = {
-                  "**/node_modules" = true;
-                  "**/bower_components" = true;
-                  "**/dist" = true;
-                  "**/coverage" = true;
-                  "**/.git" = true;
-                  "**/.svn" = true;
-                  "**/.hg" = true;
-                  "**/CVS" = true;
-                  "**/.DS_Store" = true;
-                  "**/Thumbs.db" = true;
-                  "**/.metals" = true;
-                  "**/.bloop" = true;
-                };
-
-                # Explorer improvements
-                "explorer.fileNesting.enabled" = true;
-                "explorer.fileNesting.patterns" = {
-                  "*.ts" = "\${capture}.js, \${capture}.d.ts, \${capture}.js.map";
-                  "*.tsx" = "\${capture}.jsx";
-                  "package.json" = "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb";
-                  "tsconfig.json" = "tsconfig.*.json";
-                  ".env" = ".env.*";
-                };
-
-                # Editor font configuration for nerd icons
-                "editor.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', 'Courier New', monospace";
-                "editor.fontSize" = 14;
-                "editor.fontLigatures" = true;
-                "editor.renderWhitespace" = "selection";
-                "editor.renderControlCharacters" = true;
-
-                # Terminal font configuration for nerd icons
-                "terminal.integrated.fontFamily" = "RobotoMono Nerd Font, 'RobotoMono Nerd Font Mono', monospace";
-                "terminal.integrated.fontSize" = 14;
-
-                # Terminal environment configuration
-                "terminal.integrated.env.linux" = {
-                  "TERM_PROGRAM" = "vscode";
-                  # Preserve SSH agent socket
-                  "SSH_AUTH_SOCK" = "\${SSH_AUTH_SOCK}";
-                  # Preserve git configuration
-                  "GIT_ASKPASS" = "\${GIT_ASKPASS}";
-                  "GIT_SSH" = "${pkgs.openssh}/bin/ssh";
-                };
-
-                # Use external terminal for better compatibility
-                "terminal.integrated.defaultProfile.linux" = "fish";
-                "terminal.integrated.profiles.linux" = {
-                  "fish" = {
-                    "path" = "${pkgs.fish}/bin/fish";
-                    "args" = [ "--login" ];
-                  };
-                };
-
-                "terminal.integrated.inheritEnv" = true;
-                "terminal.integrated.shellIntegration.enabled" = true;
-
-                # Code lens for better navigation
-                "java.referencesCodeLens.enabled" = true;
-                "java.implementationsCodeLens.enabled" = true;
-                "typescript.implementationsCodeLens.enabled" = true;
-                "typescript.referencesCodeLens.enabled" = true;
-                "typescript.referencesCodeLens.showOnAllFunctions" = true;
-
-                # File type associations
-                "files.associations" = {
-                  "*.astro" = "astro";
-                  "*.kt" = "gradle-kotlin-dsl";
-                  "*.css" = "tailwindcss";
-                  "*.mdx" = "mdx";
-                  "*.svelte" = "svelte";
-                  "*.vue" = "vue";
-                };
-
-                # Auto-import improvements
-                "javascript.updateImportsOnFileMove.enabled" = "always";
-                "typescript.updateImportsOnFileMove.enabled" = "always";
-
-                # TypeScript/Javascript specific settings
-                "typescript.preferences.importModuleSpecifier" = "shortest";
-                "javascript.preferences.importModuleSpecifier" = "shortest";
-                "typescript.suggest.autoImports" = true;
-
-                # ESLint configuration
-                "eslint.validate" = [
-                  "astro"
-                  "javascript"
-                  "javascriptreact"
-                  "mdx"
-                  "typescript"
-                  "typescriptreact"
-                  "svelte"
-                  "vue"
-                ];
-                "eslint.probe" = [
-                  "astro"
-                  "javascript"
-                  "javascriptreact"
-                  "mdx"
-                  "typescript"
-                  "typescriptreact"
-                  "svelte"
-                  "vue"
-                ];
-
-                # disable built-in auto-closing and HTML auto-closing
-                "typescript.autoClosingTags" = false;
-                "javascript.autoClosingTags" = false;
-                "html.autoClosingTags" = false;
-
-                # UX improvements
-                "explorer.confirmDelete" = false;
-                "explorer.confirmDragAndDrop" = false;
-                "diffEditor.ignoreTrimWhitespace" = false;
-                "security.workspace.trust.untrustedFiles" = "open";
-
-                # Error Lens configuration
-                "errorLens.enabledDiagnosticLevels" = [
-                  "error"
-                  "warning"
-                  "info"
-                ];
-                "errorLens.excludeBySource" = [ "eslint(prettier/prettier)" ];
-
-                # Metals configuration - let it use environment JAVA_HOME
-                "metals.sbtScript" = "${pkgs.sbt}/bin/sbt";
-                "metals.javaHome" = null;
-                "metals.customRepositories" = [ ];
-                "metals.bloopSbtLocation" = "${pkgs.bloop}/bin/bloop";
-                "metals.scalafixConfigPath" = ".scalafix.conf";
-                "metals.scalafixOnCompile" = false;
-                "metals.scalafixConfig" = ''
-                  rules = [
-                    OrganizeImports
-                  ]
-
-                  OrganizeImports {
-                    targetDialect = Scala3
-                    removeUnused = true
-                    groupedImports = Merge
-                    groups = [
-                      "re:javax?\\."
-                      "scala."
-                      "re:^(?!scala\\.).*"
-                    ]
-                  }
-                '';
-                "metals.serverProperties" = [
-                  "-Dmetals.client=vscode"
-                  "-Xmx2G"
-                  "-Xms2G"
-                  "-XX:MaxMetaspaceSize=512m"
-                  "-Dscalafix.timeout=30s"
-                ];
-
-                # Nix Language Server
-                "nix.enableLanguageServer" = true;
-                "nix.serverPath" = "${pkgs.nil}/bin/nil";
-                "nil.formatting.command" = [ "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
-                "nix.serverSettings" = {
-                  "nil" = {
-                    "formatting" = {
-                      "command" = [ "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt" ];
-                    };
-                  };
-                };
-
-                # Prettier configuration
-                "prettier.semi" = true;
-                "prettier.singleQuote" = true;
-                "prettier.tabWidth" = 4;
-                "prettier.useTabs" = false;
-                "prettier.trailingComma" = "es5";
-                "prettier.printWidth" = 130;
-
-                # Java extension configuration to use environment variables
-                "java.configuration.detectJdksAtStart" = true;
-                "java.configuration.runtimes" = [ ];
-                "java.import.gradle.java.home" = null;
-                "java.import.maven.java.home" = null;
-                "java.format.settings.url" =
-                  "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml";
-                "java.format.settings.profile" = "GoogleStyle";
-
-                # Docker
-                "docker.dockerPath" = "${pkgs.docker}/bin/docker";
-
-                # Remote SSH
-                "remote.SSH.path" = "${pkgs.openssh}/bin/ssh";
-                "remote.SSH.configFile" = "~/.ssh/config";
-
-                # Markdown configuration
-                "markdown.preview.fontSize" = 14;
-                "markdown.preview.lineHeight" = 1.6;
-
-                # Vue/JavaScript configuration
-                "vue.server.petiteVue.supportHtmlFile" = true;
-                "typescript.preferences.includePackageJsonAutoImports" = "auto";
-                "javascript.preferences.includePackageJsonAutoImports" = "auto";
-
-                # Vue specific settings
-                "vue.autoInsert.dotValue" = true;
-                "vue.inlayHints.missingRequired" = true;
-                "vue.updateImportsOnFileMove.enabled" = true;
-
-                # EditorConfig
-                "editorconfig.generateAuto" = false;
-
-                # Svelte configuration
-                "[svelte]" = {
-                  "editor.defaultFormatter" = "svelte.svelte-vscode";
-                  "editor.formatOnSave" = true;
-                };
-                "svelte.enable-ts-plugin" = true;
-                "svelte.format.enable" = true;
-                "svelte.plugin.typescript.enable" = true;
-                "svelte.plugin.typescript.diagnostics.enable" = true;
-                "svelte.plugin.typescript.hover.enable" = true;
-                "svelte.plugin.typescript.completions.enable" = true;
-                "svelte.plugin.typescript.rename.enable" = true;
-                "svelte.plugin.css.enable" = true;
-                "svelte.plugin.html.enable" = true;
-                "javascript.suggest.autoImports" = true;
-
-                # Astro configuration
-                "[astro]" = {
-                  "editor.defaultFormatter" = "astro-build.astro-vscode";
-                  "editor.formatOnSave" = true;
-                };
-
-                # MDX configuration
-                "[mdx]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                  "editor.formatOnSave" = true;
-                };
-
-                # Live Server configuration
-                "liveServer.settings.donotShowInfoMsg" = true;
-                "liveServer.settings.donotVerifyTags" = true;
-                "liveServer.settings.port" = 5500;
-
-                # TailwindCSS configuration
-                "tailwindCSS.includeLanguages" = {
-                  "astro" = "html";
-                  "html" = "html";
-                  "javascript" = "javascript";
-                  "typescript" = "typescript";
-                  "svelte" = "html";
-                  "vue" = "vue";
-                  "scala" = "html";
-                };
-                "tailwindCSS.experimental.classRegex" = [
-                  "class:\\s*?[\"'`]([^\"'`]*.*?)[\"'`]"
-                  "className:\\s*?[\"'`]([^\"'`]*.*?)[\"'`]"
-                  "tw`([^`]*)`"
-                  "tw\\.\\w+`([^`]*)`"
-                  "tw\\([\"'`]([^\"'`]*)[\"'`]\\)"
-                ];
-                "tailwindCSS.emmetCompletions" = true;
-
-                # Headwind (Tailwind CSS class sorter)
-                "headwind.runOnSave" = true;
-
-                # Disable auto-updates (settings.json is read-only on NixOS)
-                "extensions.autoCheckUpdates" = false;
-                "extensions.autoUpdate" = false;
-                "extensions.ignoreRecommendations" = true;
-                "extensions.showRecommendationsOnlyOnDemand" = true;
-                "update.mode" = "none";
-                "workbench.enableExperiments" = false;
-                "telemetry.telemetryLevel" = "off";
-                "gitlens.telemetry.enabled" = false;
-                "redhat.telemetry.enabled" = false;
-
-                # Vim extension configuration
-                "vim.easyMotion" = true;
-                "vim.incsearch" = true;
-                "vim.useSystemClipboard" = true;
-                "vim.useCtrlKeys" = true;
-                "vim.hlsearch" = true;
-                "vim.leader" = "<space>";
-
-                # Performance settings
-                "extensions.experimental.affinity" =
-                  {
-                    "vscodevim.vim" = 1;
-                  };
-
-                # Insert mode keybindings
-                "vim.insertModeKeyBindings" = [
-                  {
-                    before = [ "j" "j" ];
-                    after = [ "<Esc>" ];
-                  }
-                  {
-                    before = [ "j" "k" ];
-                    after = [ "<Esc>" ];
-                  }
-                ];
-
-                # Normal mode key bindings (non-recursive)
-                "vim.normalModeKeyBindingsNonRecursive" = [
-                  {
-                    before = [ "<leader>" "d" ];
-                    after = [ "d" "d" ];
-                  }
-                  {
-                    before = [ "<C-n>" ];
-                    commands = [ ":nohl" ];
-                  }
-                  {
-                    before = [ "K" ];
-                    commands = [ "lineBreakInsert" ];
-                    silent = true;
-                  }
-                  # Additional useful bindings
-                  {
-                    before = [ "<leader>" "w" ];
-                    commands = [ "workbench.action.files.save" ];
-                  }
-                  {
-                    before = [ "<leader>" "q" ];
-                    commands = [ "workbench.action.closeActiveEditor" ];
-                  }
-                  {
-                    before = [ "<leader>" "t" ];
-                    commands = [ "workbench.action.terminal.toggleTerminal" ];
-                  }
-                  {
-                    before = [ "<leader>" "f" ];
-                    commands = [ "workbench.action.findInFiles" ];
-                  }
-                  {
-                    before = [ "<leader>" "p" ];
-                    commands = [ "workbench.action.quickOpen" ];
-                  }
-                  {
-                    before = [ "<leader>" "e" ];
-                    commands = [ "workbench.explorer.fileView.focus" ];
-                  }
-                  {
-                    before = [ "<leader>" "c" ];
-                    commands = [ "editor.action.commentLine" ];
-                  }
-                  {
-                    before = [ "<leader>" "r" ];
-                    commands = [ "editor.action.rename" ];
-                  }
-                  {
-                    before = [ "<leader>" "=" ];
-                    commands = [ "editor.action.formatDocument" ];
-                  }
-                  {
-                    before = [ "<leader>" "i" ];
-                    commands = [ "editor.action.quickFix" ];
-                  }
-                ];
-
-                # Handle keys that should bypass vim
-                "vim.handleKeys" = {
-                  "<C-a>" = false;
-                  "<C-f>" = false;
-                  "<C-c>" = false;
-                  "<C-v>" = false;
-                  "<C-x>" = false;
-                  "<C-i>" = false;
-                  "<C-w>" = false;
-                };
-
-                # Better scrolling
-                "vim.scroll" = 5;
-
-                # Formatter configuration
-                "[css]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[html]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[java]" = {
-                  "editor.defaultFormatter" = "redhat.java";
-                };
-                "[javascript]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[json]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[jsonc]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[kotlin]" = {
-                  "editor.defaultFormatter" = "mathiasfrohlich.kotlin";
-                };
-                "[markdown]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[nix]" = {
-                  "editor.defaultFormatter" = "jnoortheen.nix-ide";
-                };
-                "[python]" = {
-                  "editor.defaultFormatter" = "ms-python.black-formatter";
-                };
-                "[qml]" = {
-                  "editor.defaultFormatter" = "Delgan.qml-format";
-                };
-                "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
-                "[rust]" = {
-                  "editor.defaultFormatter" = "rust-lang.rust-analyzer";
-                };
-                "[scala]" = {
-                  "editor.defaultFormatter" = "scalameta.metals";
-                };
-                "[toml]" = {
-                  "editor.defaultFormatter" = "tamasfe.even-better-toml";
-                };
-                "[typescript]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[typescriptreact]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[vue]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-                "[yaml]" = {
-                  "editor.defaultFormatter" = "esbenp.prettier-vscode";
-                };
-
-                "rust-analyzer.rustfmt.extraArgs" = [ "+nightly" ];
-              };
-            };
-          };
-
-          home = {
-            packages = [
-              (pkgs.writeShellScriptBin "code-wrapped" ''
-                # Preserve important environment variables
-                export SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}"
-                export SSH_AGENT_PID="''${SSH_AGENT_PID:-}"
-                export GIT_ASKPASS="''${GIT_ASKPASS:-}"
-                export DISPLAY="''${DISPLAY:-}"
-                export XAUTHORITY="''${XAUTHORITY:-}"
-
-                # Preserve HOME and user directories
-                export HOME="''${HOME}"
-                export USER="''${USER}"
-
-                # Add our specific tools to the front of the PATH but preserve the rest
-                export PATH="${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}:$PATH"
-
-                # Clear Electron/Chrome flags that might cause warnings
-                unset ELECTRON_OZONE_PLATFORM_HINT
-                unset NIXOS_OZONE_WL
-
-                # Use regular vscode package instead of FHS version to avoid permission issues
-                exec ${pkgs.vscode}/bin/code "$@"
-              '')
-            ];
-
-            activation.trustVscodeSources = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-              vscode_state_db="${config.home.homeDirectory}/.config/Code/User/globalStorage/state.vscdb"
-              mkdir -p "$(dirname "$vscode_state_db")"
-
-              ${pkgs.sqlite}/bin/sqlite3 "$vscode_state_db" <<'SQL'
-              PRAGMA busy_timeout = 5000;
-              CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);
-              INSERT OR IGNORE INTO ItemTable (key, value)
-              VALUES ('content.trust.model.key', '{"uriTrustInfo":[]}');
-              UPDATE ItemTable
-              SET value = json_set(
-                CASE
-                  WHEN json_valid(CAST(value AS TEXT)) THEN CAST(value AS TEXT)
-                  ELSE '{"uriTrustInfo":[]}'
-                END,
-                '$.uriTrustInfo',
-                json(COALESCE(json_extract(CAST(value AS TEXT), '$.uriTrustInfo'), '[]'))
-              )
-              WHERE key = 'content.trust.model.key';
-              UPDATE ItemTable
-              SET value = json_set(
-                CAST(value AS TEXT),
-                '$.uriTrustInfo[#]',
-                json('{"uri":{"$mid":1,"scheme":"file","path":"${trustedSourcesPath}"},"trusted":true}')
-              )
-              WHERE key = 'content.trust.model.key'
-                AND NOT EXISTS (
-                  SELECT 1
-                  FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
-                  WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
-                    AND json_extract(json_each.value, '$.uri.path') = '${trustedSourcesPath}'
-                    AND json_extract(json_each.value, '$.trusted') = 1
-                );
-              SQL
-            '';
-
-            persistence."/persist/" = {
-              directories = [
-                ".config/Code"
-                ".config/copilot-chat"
-                ".config/github-copilot"
-                ".claude"
+              # Normal mode key bindings (non-recursive)
+              "vim.normalModeKeyBindingsNonRecursive" = [
+                {
+                  before = [
+                    "<leader>"
+                    "d"
+                  ];
+                  after = [
+                    "d"
+                    "d"
+                  ];
+                }
+                {
+                  before = [ "<C-n>" ];
+                  commands = [ ":nohl" ];
+                }
+                {
+                  before = [ "K" ];
+                  commands = [ "lineBreakInsert" ];
+                  silent = true;
+                }
+                # Additional useful bindings
+                {
+                  before = [
+                    "<leader>"
+                    "w"
+                  ];
+                  commands = [ "workbench.action.files.save" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "q"
+                  ];
+                  commands = [ "workbench.action.closeActiveEditor" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "t"
+                  ];
+                  commands = [ "workbench.action.terminal.toggleTerminal" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "f"
+                  ];
+                  commands = [ "workbench.action.findInFiles" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "p"
+                  ];
+                  commands = [ "workbench.action.quickOpen" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "e"
+                  ];
+                  commands = [ "workbench.explorer.fileView.focus" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "c"
+                  ];
+                  commands = [ "editor.action.commentLine" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "r"
+                  ];
+                  commands = [ "editor.action.rename" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "="
+                  ];
+                  commands = [ "editor.action.formatDocument" ];
+                }
+                {
+                  before = [
+                    "<leader>"
+                    "i"
+                  ];
+                  commands = [ "editor.action.quickFix" ];
+                }
               ];
+
+              # Handle keys that should bypass vim
+              "vim.handleKeys" = {
+                "<C-a>" = false;
+                "<C-f>" = false;
+                "<C-c>" = false;
+                "<C-v>" = false;
+                "<C-x>" = false;
+                "<C-i>" = false;
+                "<C-w>" = false;
+              };
+
+              # Better scrolling
+              "vim.scroll" = 5;
+
+              # Formatter configuration
+              "[css]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[html]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[java]" = {
+                "editor.defaultFormatter" = "redhat.java";
+              };
+              "[javascript]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[json]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[jsonc]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[kotlin]" = {
+                "editor.defaultFormatter" = "mathiasfrohlich.kotlin";
+              };
+              "[markdown]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[nix]" = {
+                "editor.defaultFormatter" = "jnoortheen.nix-ide";
+              };
+              "[python]" = {
+                "editor.defaultFormatter" = "ms-python.black-formatter";
+              };
+              "[qml]" = {
+                "editor.defaultFormatter" = "Delgan.qml-format";
+              };
+              "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
+              "[rust]" = {
+                "editor.defaultFormatter" = "rust-lang.rust-analyzer";
+              };
+              "[scala]" = {
+                "editor.defaultFormatter" = "scalameta.metals";
+              };
+              "[toml]" = {
+                "editor.defaultFormatter" = "tamasfe.even-better-toml";
+              };
+              "[typescript]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[typescriptreact]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[vue]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+              "[yaml]" = {
+                "editor.defaultFormatter" = "esbenp.prettier-vscode";
+              };
+
+              "rust-analyzer.rustfmt.extraArgs" = [ "+nightly" ];
             };
           };
+        };
 
-          programs = {
-            fish.shellAliases = sharedAliases.fishAliases // {
-              code = "code-wrapped";
-            };
+        home = {
+          packages = [
+            (pkgs.writeShellScriptBin "code-wrapped" ''
+              # Preserve important environment variables
+              export SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-}"
+              export SSH_AGENT_PID="''${SSH_AGENT_PID:-}"
+              export GIT_ASKPASS="''${GIT_ASKPASS:-}"
+              export DISPLAY="''${DISPLAY:-}"
+              export XAUTHORITY="''${XAUTHORITY:-}"
 
-            fish.interactiveShellInit = ''
-              if test "$TERM_PROGRAM" = "vscode"
-                # Fish PATH is list-based, so split our colon-delimited path first.
-                set -l vscode_paths (string split : "${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}")
-                set -gx PATH $vscode_paths $PATH
+              # Preserve HOME and user directories
+              export HOME="''${HOME}"
+              export USER="''${USER}"
 
-                # Ensure SSH agent is available
-                if test -z "$SSH_AUTH_SOCK"
-                  if test -S "$XDG_RUNTIME_DIR/ssh-agent"
-                    set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent"
-                  end
-                end
+              # Add our specific tools to the front of the PATH but preserve the rest
+              export PATH="${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}:$PATH"
 
-                # Source system fish config if it exists
-                if test -f /etc/fish/config.fish
-                  source /etc/fish/config.fish
+              # Clear Electron/Chrome flags that might cause warnings
+              unset ELECTRON_OZONE_PLATFORM_HINT
+              unset NIXOS_OZONE_WL
+
+              # Use regular vscode package instead of FHS version to avoid permission issues
+              exec ${pkgs.vscode}/bin/code "$@"
+            '')
+          ];
+
+          activation.trustVscodeSources = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            vscode_state_db="${config.home.homeDirectory}/.config/Code/User/globalStorage/state.vscdb"
+            mkdir -p "$(dirname "$vscode_state_db")"
+
+            ${pkgs.sqlite}/bin/sqlite3 "$vscode_state_db" <<'SQL'
+            PRAGMA busy_timeout = 5000;
+            CREATE TABLE IF NOT EXISTS ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB);
+            INSERT OR IGNORE INTO ItemTable (key, value)
+            VALUES ('content.trust.model.key', '{"uriTrustInfo":[]}');
+            UPDATE ItemTable
+            SET value = json_set(
+              CASE
+                WHEN json_valid(CAST(value AS TEXT)) THEN CAST(value AS TEXT)
+                ELSE '{"uriTrustInfo":[]}'
+              END,
+              '$.uriTrustInfo',
+              json(COALESCE(json_extract(CAST(value AS TEXT), '$.uriTrustInfo'), '[]'))
+            )
+            WHERE key = 'content.trust.model.key';
+            UPDATE ItemTable
+            SET value = json_set(
+              CAST(value AS TEXT),
+              '$.uriTrustInfo[#]',
+              json('{"uri":{"$mid":1,"scheme":"file","path":"${trustedSourcesPath}"},"trusted":true}')
+            )
+            WHERE key = 'content.trust.model.key'
+              AND NOT EXISTS (
+                SELECT 1
+                FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
+                WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
+                  AND json_extract(json_each.value, '$.uri.path') = '${trustedSourcesPath}'
+                  AND json_extract(json_each.value, '$.trusted') = 1
+              );
+            SQL
+          '';
+
+          persistence."/persist/" = {
+            directories = [
+              ".config/Code"
+              ".config/copilot-chat"
+              ".config/github-copilot"
+              ".claude"
+            ];
+          };
+        };
+
+        programs = {
+          fish.shellAliases = sharedAliases.fishAliases // {
+            code = "code-wrapped";
+          };
+
+          fish.interactiveShellInit = ''
+            if test "$TERM_PROGRAM" = "vscode"
+              # Fish PATH is list-based, so split our colon-delimited path first.
+              set -l vscode_paths (string split : "${vscodeOnlyPath}:${wrappersPath}:${systemToolsPath}:${homeManagerPath}")
+              set -gx PATH $vscode_paths $PATH
+
+              # Ensure SSH agent is available
+              if test -z "$SSH_AUTH_SOCK"
+                if test -S "$XDG_RUNTIME_DIR/ssh-agent"
+                  set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent"
                 end
               end
-            '';
-          };
 
-          xdg.desktopEntries."code" = {
-            name = "Visual Studio Code";
-            comment = "Code Editing. Redefined.";
-            genericName = "Text Editor";
-            exec = "code-wrapped %F";
-            icon = "code";
-            startupNotify = true;
-            categories = [
-              "Utility"
-              "TextEditor"
-              "Development"
-              "IDE"
-            ];
-            mimeType = [
-              "text/plain"
-              "inode/directory"
-            ];
-            actions = {
-              new-empty-window = {
-                exec = "code-wrapped --new-window %F";
-                name = "New Empty Window";
-              };
+              # Source system fish config if it exists
+              if test -f /etc/fish/config.fish
+                source /etc/fish/config.fish
+              end
+            end
+          '';
+        };
+
+        xdg.desktopEntries."code" = {
+          name = "Visual Studio Code";
+          comment = "Code Editing. Redefined.";
+          genericName = "Text Editor";
+          exec = "code-wrapped %F";
+          icon = "code";
+          startupNotify = true;
+          categories = [
+            "Utility"
+            "TextEditor"
+            "Development"
+            "IDE"
+          ];
+          mimeType = [
+            "text/plain"
+            "inode/directory"
+          ];
+          actions = {
+            new-empty-window = {
+              exec = "code-wrapped --new-window %F";
+              name = "New Empty Window";
             };
           };
-
         };
+
+      };
     };
 }
-
