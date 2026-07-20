@@ -79,6 +79,7 @@
       homeManagerPath = "/etc/profiles/per-user/${config.home.username}/bin";
 
       trustedSourcesPath = "${config.home.homeDirectory}/Sources";
+      trustedProjectsPath = "${config.home.homeDirectory}/Projects/workspace";
     in
     {
       options.program.vscode = {
@@ -904,6 +905,20 @@
                 FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
                 WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
                   AND json_extract(json_each.value, '$.uri.path') = '${trustedSourcesPath}'
+                  AND json_extract(json_each.value, '$.trusted') = 1
+              );
+            UPDATE ItemTable
+            SET value = json_set(
+              CAST(value AS TEXT),
+              '$.uriTrustInfo[#]',
+              json('{"uri":{"$mid":1,"scheme":"file","path":"${trustedProjectsPath}"},"trusted":true}')
+            )
+            WHERE key = 'content.trust.model.key'
+              AND NOT EXISTS (
+                SELECT 1
+                FROM json_each(CAST(value AS TEXT), '$.uriTrustInfo')
+                WHERE json_extract(json_each.value, '$.uri.scheme') = 'file'
+                  AND json_extract(json_each.value, '$.uri.path') = '${trustedProjectsPath}'
                   AND json_extract(json_each.value, '$.trusted') = 1
               );
             SQL
