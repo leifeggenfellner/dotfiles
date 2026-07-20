@@ -1,11 +1,10 @@
-_: {
+{ inputs, ... }: {
   flake.homeModules.programs-vscode =
-    {
-      osConfig,
-      config,
-      lib,
-      pkgs,
-      ...
+    { osConfig
+    , config
+    , lib
+    , pkgs
+    , ...
     }:
     let
       inherit (osConfig.environment) desktop;
