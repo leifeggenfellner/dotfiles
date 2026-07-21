@@ -115,6 +115,10 @@ in
     # root is set by mkThemeManifest (path context must survive into
     # the JSON, or GC can sweep the source snapshot — see
     # _manifest-lib.nix).
+    # Official LOTM lockscreen. The launcher still allows CLI/env
+    # overrides, and the rice-native lockscreen remains available as
+    # `rice-lock-screen --variant default` for recovery/debugging.
+    lockscreenVariant = "lotm";
     # Icon-name overrides: values with a "/" are files relative to
     # assets.root; anything else is a font glyph.
     icons = {
@@ -264,6 +268,11 @@ in
           reboot = "Recast";
           poweroff = "Extinguish";
         };
+      };
+
+      "session-lock".settings = {
+        label = "Sanctify";
+        hint = "Seal the sanctuary against the gray fog.";
       };
 
       weather.settings = {

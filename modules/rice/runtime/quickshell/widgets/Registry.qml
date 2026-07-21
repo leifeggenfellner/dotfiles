@@ -9,6 +9,7 @@ import "./media" as Media
 import "./meters" as Meters
 import "./epigraph" as Epigraph
 import "./divination" as Divination
+import "./session" as Session
 
 // ── Registry ──────────────────────────────────────────────────
 // The widget registry: built-in descriptors ∪ theme plugins.
@@ -67,6 +68,10 @@ Item {
     Component {
         id: calendarDashboard
         Divination.CalendarDashboard {}
+    }
+    Component {
+        id: sessionLockTile
+        Session.SessionLockTile {}
     }
 
     readonly property list<QtObject> builtins: [
@@ -149,6 +154,17 @@ Item {
                     minHeight: 220
                 })
             glance: calendarDashboard
+        },
+        WidgetDescriptor {
+            widgetId: "session-lock"
+            region: "dashboard"
+            priority: 40
+            services: ["session"]
+            layout: ({
+                    colSpan: 3,
+                    minHeight: 168
+                })
+            glance: sessionLockTile
         }
     ]
 

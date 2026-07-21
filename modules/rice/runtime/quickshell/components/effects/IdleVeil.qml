@@ -3,8 +3,8 @@ import "../../core"
 
 // ── IdleVeil ─────────────────────────────────────────────────
 // Transient idle-warning wash for Phase 21. It is a visual hint,
-// not lock ownership: hypridle/hyprlock still perform the real
-// session actions, while this effect dissolves as soon as the
+// not lock ownership: hypridle owns timing and lock-screen owns the
+// selected lock command, while this effect dissolves as soon as the
 // ambient governor clears ShellState.idleApproaching.
 
 Item {

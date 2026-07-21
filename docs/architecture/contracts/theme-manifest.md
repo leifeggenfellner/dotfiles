@@ -78,6 +78,9 @@ and exposes it exclusively through the `Theme` facade.
     # Likewise assets/lockscreen/ → assets.lockscreen (D-020, optional):
     # the lock-screen script uses entry [0] as the lock background,
     # falling back to the live wallpaper when absent.
+    lockscreenVariant = "default"; # optional, D-037: "default" | "lotm".
+                    # Selects the theme's canonical rice-lock-screen
+                    # root; CLI/env overrides still win.
     logo = null;                  # optional
     launcherIcon = null;          # optional
     icons = { };                  # optional: semantic icon-name overrides (D-016).

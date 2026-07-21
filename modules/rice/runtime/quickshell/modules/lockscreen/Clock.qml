@@ -21,8 +21,8 @@ Item {
 
         anchors.right: root.alignRight ? parent.right : undefined
         anchors.horizontalCenter: root.alignRight ? undefined : parent.horizontalCenter
-        spacing: 8
-        opacity: 0.92
+        spacing: 5
+        opacity: 0.88
         y: root.reveal ? 0 : 8
 
         Behavior on y {
@@ -39,36 +39,20 @@ Item {
             color: Theme.colors.fg.primary
             opacity: 0.96
             font.family: Config.font
-            font.pixelSize: Math.max(92, Math.min(root.width * 0.30, 184))
+            font.pixelSize: Math.max(68, Math.min(root.width * 0.22, 108))
+            font.letterSpacing: 2
             font.weight: Font.Light
-        }
-
-        Row {
-            anchors.right: root.alignRight ? parent.right : undefined
-            anchors.horizontalCenter: root.alignRight ? undefined : parent.horizontalCenter
-            spacing: 10
-
-            Repeater {
-                model: 5
-
-                Rectangle {
-                    required property int index
-                    width: index === 2 ? 42 : 18
-                    height: 1
-                    color: Config.accentColor
-                    opacity: index === 2 ? 0.58 : 0.28
-                }
-            }
         }
 
         Text {
             anchors.right: root.alignRight ? parent.right : undefined
             anchors.horizontalCenter: root.alignRight ? undefined : parent.horizontalCenter
-            text: Qt.formatDateTime(clock.date, "dddd, d MMMM")
+            text: Qt.formatDateTime(clock.date, "dddd, d MMMM").toUpperCase()
             color: Theme.colors.fg.muted
             opacity: root.reveal ? 0.82 : 0.58
-            font.family: Theme.typography.families.sans
-            font.pixelSize: Math.max(15, Math.min(root.width * 0.032, 28))
+            font.family: Config.font
+            font.pixelSize: Math.max(12, Math.min(root.width * 0.026, 18))
+            font.letterSpacing: 4
             font.weight: Font.Normal
 
             Behavior on opacity {

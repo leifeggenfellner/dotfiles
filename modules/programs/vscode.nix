@@ -537,6 +537,10 @@
                 };
               };
 
+              # QML formatter used by Delgan.qml-format. The extension defaults
+              # to `qmlformat` on PATH, but VS Code may not inherit a shell env.
+              "qmlFormat.command" = "${pkgs.qt6.qtdeclarative}/bin/qmlformat";
+
               # Prettier configuration
               "prettier.semi" = true;
               "prettier.singleQuote" = true;

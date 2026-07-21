@@ -212,7 +212,7 @@
                   "${mainMod} ${SECONDARY}, D, exec, ${runOnce "pcmanfm"}"
                   "${mainMod} ${SECONDARY}, W, exec, ${launch "foot -T theme-switcher -e theme-switcher"}"
 
-                  "${mainMod} ${SECONDARY}, L, exec, ${runOnce "lock-screen"}"
+                  "${mainMod} ${SECONDARY}, L, exec, lock-screen"
 
 
                   "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copy area"}"

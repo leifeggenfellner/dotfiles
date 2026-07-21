@@ -10,7 +10,9 @@
 # Wallpapers (D-019): assets/wallpapers/ is enumerated at eval into
 # `assets.wallpapers` (sorted store paths); themes never hand-list.
 # Same for assets/lockscreen/ → `assets.lockscreen` (D-020): the
-# lock-screen script prefers its first entry over the live wallpaper.
+# lock-screen script prefers its first image entry over the live
+# wallpaper, and Quickshell may use `assets.lockscreenVideos[0]` as an
+# animated background when present.
 { pkgs, lib }:
 { themeName, themeDir }:
 let
@@ -144,18 +146,21 @@ let
   # "${assetsRoot}/<subdir>/<file>" so they share the assets-dir
   # store copy (and its GC context) with assets.root.
   imageExts = [ ".png" ".jpg" ".jpeg" ".webp" ];
+  videoExts = [ ".mp4" ".webm" ".mkv" ];
   assetsRoot = "${themeDir + "/assets"}";
-  globImages = subdir:
+  globMedia = exts: subdir:
     let src = themeDir + "/assets/${subdir}"; in
     if builtins.pathExists src then
       map (f: "${assetsRoot}/${subdir}/${f}")
         (lib.naturalSort (lib.filter
-          (n: lib.any (e: lib.hasSuffix e (lib.toLower n)) imageExts)
+          (n: lib.any (e: lib.hasSuffix e (lib.toLower n)) exts)
           (lib.attrNames (lib.filterAttrs (_: t: t == "regular")
             (builtins.readDir src)))))
     else [ ];
+  globImages = globMedia imageExts;
   wallpapers = globImages "wallpapers";
   lockscreen = globImages "lockscreen"; # lock-screen uses entry [0]
+  lockscreenVideos = globMedia videoExts "lockscreen";
 
   rasterChecks = map
     (r:
@@ -163,6 +168,19 @@ let
       then true
       else fail "rasterize source assets/${r.src} does not exist")
     rasterize;
+
+  # Optional theme-declared lock variant. Selects which
+  # ~/.config/quickshell/rice/lock-*.qml root the rice-lock-screen
+  # launcher starts. CLI --variant and RICE_LOCK_VARIANT still win.
+  lockscreenVariants = [ "default" "lotm" ];
+  lockscreenVariant =
+    let v = theme.assets.lockscreenVariant or null; in
+    if v == null then null
+    else if !(builtins.isString v)
+    then fail "assets.lockscreenVariant must be a string"
+    else if !(lib.elem v lockscreenVariants)
+    then fail "assets.lockscreenVariant must be one of [${lib.concatStringsSep " " lockscreenVariants}], got ${builtins.toJSON v}"
+    else v;
 
   raster = lib.listToAttrs (map
     (r: {
@@ -179,13 +197,15 @@ let
 
   manifest = theme // {
     inherit plugins;
-    assets = (removeAttrs (theme.assets or { }) [ "rasterize" ]) // {
-      inherit raster wallpapers lockscreen;
+    assets = (removeAttrs (theme.assets or { }) [ "rasterize" "lockscreenVariant" ]) // {
+      inherit raster wallpapers lockscreen lockscreenVideos;
       # Interpolation (not toString) so the store-path CONTEXT lands in
       # the JSON — otherwise the source snapshot is not a GC reference
       # of the manifest and can be collected while the manifest lives.
       root = assetsRoot;
-    };
+    } // (lib.optionalAttrs (lockscreenVariant != null) {
+      inherit lockscreenVariant;
+    });
   };
 
   checks = tokenChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks

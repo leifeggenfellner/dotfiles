@@ -10,14 +10,16 @@ Item {
     property int failureNonce: 0
     property string message: ""
     property bool messageIsError: false
+    property bool alignRight: false
     property real failAmount: 0
     property alias text: input.text
     readonly property bool inputActiveFocus: input.activeFocus
+    readonly property color markColor: root.messageIsError ? Theme.colors.state.danger : Theme.colors.accent.primary
 
     signal submit(string value)
     signal keyPulse(real x, real y)
 
-    implicitHeight: 68
+    implicitHeight: 64
     opacity: shown ? 1 : 0
     y: shown ? 0 : 18
     scale: shown ? 1 : 0.985
@@ -72,38 +74,24 @@ Item {
         failPulse.restart();
     }
 
-    Rectangle {
-        id: aura
+    Item {
+        id: field
 
-        anchors.fill: field
-        anchors.margins: -16
-        radius: height / 2
-        color: root.messageIsError ? Theme.colors.state.danger : Config.accentColor
-        opacity: (input.activeFocus ? 0.10 : 0.045) + root.failAmount * 0.08
-        scale: input.activeFocus ? 1.02 : 0.96
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 220
-                easing.type: Easing.OutCubic
-            }
-        }
-        Behavior on scale {
-            NumberAnimation {
-                duration: 280
-                easing.type: Easing.OutCubic
-            }
-        }
+        width: Math.min(parent.width, 272)
+        anchors.right: root.alignRight ? parent.right : undefined
+        anchors.horizontalCenter: root.alignRight ? undefined : parent.horizontalCenter
+        anchors.top: parent.top
+        height: 42
     }
 
     Rectangle {
         anchors.fill: field
-        anchors.margins: -10
-        radius: 10
-        color: "transparent"
-        border.width: 1
-        border.color: Config.accentColor
-        opacity: input.activeFocus ? 0.30 : 0.16
+        anchors.margins: -5
+        radius: 2
+        color: Theme.colors.bg.sunken
+        opacity: input.activeFocus ? 0.42 : 0.30
+        border.width: 2
+        border.color: root.markColor
 
         Behavior on opacity {
             NumberAnimation {
@@ -113,81 +101,101 @@ Item {
         }
     }
 
-    Rectangle {
-        id: field
-
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        height: 46
-        radius: 8
-        color: Theme.colors.bg.mantle
-        opacity: 0.62
-        border.width: 1
-        border.color: root.messageIsError ? Theme.colors.state.danger : Config.accentColor
-    }
-
-    Repeater {
-        model: 4
-
-        Rectangle {
-            required property int index
-            readonly property bool leftSide: index < 2
-            readonly property bool topSide: index % 2 === 0
-
-            width: 18
-            height: 1
-            x: leftSide ? -2 : field.width - width + 2
-            y: topSide ? -5 : field.height + 5
-            color: root.messageIsError ? Theme.colors.state.danger : Config.accentColor
-            opacity: 0.55
-        }
-    }
-
     TextInput {
         id: input
 
-        anchors.fill: field
-        anchors.leftMargin: 22
-        anchors.rightMargin: 22
+        anchors.left: field.left
+        anchors.leftMargin: 6
+        anchors.right: field.right
+        anchors.rightMargin: 34
+        anchors.verticalCenter: field.verticalCenter
+        height: 28
         color: Theme.colors.fg.primary
         selectionColor: Config.accentColor
         selectedTextColor: Theme.colors.bg.sunken
         echoMode: TextInput.Password
-        passwordCharacter: "*"
-        font.family: Theme.typography.families.mono
+        passwordCharacter: "•"
+        font.family: Config.font
         font.pixelSize: 20
-        horizontalAlignment: TextInput.AlignHCenter
+        font.letterSpacing: 7
+        horizontalAlignment: root.alignRight ? TextInput.AlignRight : TextInput.AlignHCenter
         verticalAlignment: TextInput.AlignVCenter
         clip: true
         enabled: root.enabled && !root.authenticating && !root.success
-        onTextEdited: root.keyPulse(width * 0.5 + (cursorPosition - text.length / 2) * 8, height * 0.5)
+        onTextEdited: root.keyPulse(x + width * 0.5 + (cursorPosition - text.length / 2) * 8, y + height * 0.5)
         Keys.onReturnPressed: root.submitNow()
         Keys.onEnterPressed: root.submitNow()
     }
 
-    Rectangle {
+    Text {
         anchors.left: field.left
+        anchors.leftMargin: 6
         anchors.right: field.right
-        anchors.top: field.bottom
-        anchors.topMargin: 8
-        height: 1
-        color: root.messageIsError ? Theme.colors.state.danger : Config.accentColor
-        opacity: input.activeFocus ? 0.86 : 0.34
+        anchors.rightMargin: 34
+        anchors.verticalCenter: field.verticalCenter
+        height: 24
+        text: "PASSWORD"
+        visible: input.text.length === 0
+        color: Theme.colors.fg.muted
+        opacity: input.activeFocus ? 0.46 : 0.32
+        font.family: Config.font
+        font.pixelSize: 10
+        font.letterSpacing: 4
+        horizontalAlignment: root.alignRight ? Text.AlignRight : Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+    }
+
+    Item {
+        anchors.right: field.right
+        anchors.rightMargin: 10
+        anchors.verticalCenter: field.verticalCenter
+        width: 15
+        height: 15
+        opacity: input.text.length > 0 || input.activeFocus ? 0.78 : 0.48
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 260
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Rectangle {
+            id: glyphDiamond
+
+            anchors.centerIn: parent
+            width: 12
+            height: 12
+            color: "transparent"
+            border.width: 1
+            border.color: root.markColor
+            opacity: 0.82
+            rotation: 45
+        }
+
+        Rectangle {
+            anchors.centerIn: glyphDiamond
+            width: 4
+            height: 4
+            radius: 2
+            color: root.markColor
+            opacity: 0.86
+        }
     }
 
     Text {
         anchors.top: field.bottom
-        anchors.topMargin: 14
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        text: root.authenticating ? "..." : root.message
-        visible: text.length > 0
+        anchors.topMargin: 10
+        anchors.horizontalCenter: field.horizontalCenter
+        width: field.width
+        text: root.message
+        visible: root.messageIsError && text.length > 0
         color: root.messageIsError ? Theme.colors.state.danger : Theme.colors.fg.subtle
-        opacity: 0.86
-        font.family: Theme.typography.families.sans
-        font.pixelSize: 12
-        horizontalAlignment: Text.AlignHCenter
+        opacity: 0.76
+        font.family: Theme.typography.families.mono
+        font.pixelSize: 11
+        font.letterSpacing: 2
+        horizontalAlignment: root.alignRight ? Text.AlignRight : Text.AlignHCenter
         elide: Text.ElideRight
     }
 

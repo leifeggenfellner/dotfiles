@@ -97,6 +97,9 @@ in
   assets = {
     # root is set by mkThemeManifest. Glyph-only overrides (D-016):
     # no value contains "/", so this theme ships zero icon files.
+    # The rice-native lockscreen fits cyberpunk's palette, so we opt
+    # out explicitly rather than relying on the "default" default.
+    lockscreenVariant = "default";
     icons = {
       settings = "";
       monitor = "󰍹";

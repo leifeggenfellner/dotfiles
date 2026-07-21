@@ -565,6 +565,25 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   to Quickshell preserves app behavior, avoids duplicating DBus menu semantics,
   and keeps the bar free of unbounded tray chrome.
 
+### D-037 — LOTM lockscreen uses the LOTM Quickshell variant
+
+- Date: 2026-07-21 · Status: active
+- LOTM's canonical lockscreen is the `lotm` Quickshell session-lock variant,
+  selected through theme data with `assets.lockscreenVariant = "lotm"`. The
+  canonical command remains `lock-screen` → `rice-lock-screen`; callers do not
+  invoke variant roots directly. CLI/env overrides still win for recovery and
+  debugging.
+- The rice-native/default lock root remains supported as `rice-lock-screen
+--variant default` and as the explicit Cyberpunk choice. This preserves the
+  D-020 hyprlock-themed/default path as a recovery and non-LOTM variant instead
+  of deleting it.
+- The LOTM lockscreen keeps a non-locking preview root and dry-run launcher mode for smoke
+  tests before any real `WlSessionLock` acquisition. Session lock failures must
+  fail open where possible by releasing `WlSessionLock` before process exit.
+- Supersedes the lockscreen-only clauses in D-014 and D-029 that assumed session
+  locking would remain hyprlock-only. Hypridle still owns idle timing; the lock
+  command owns the selected lock implementation.
+
 ---
 
 ## Legacy imports

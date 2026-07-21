@@ -45,7 +45,6 @@ Item {
         if (root.releasing)
             return;
         root.releasing = true;
-        sessionLock.unlock();
         sessionLock.locked = false;
         releaseTimer.restart();
     }
@@ -62,7 +61,6 @@ Item {
 
                 LockSurface {
                     anchors.fill: parent
-                    screenName: lockSurface.screen ? lockSurface.screen.name : ""
                     authenticating: root.authenticating
                     success: root.success || root.releasing
                     failureNonce: root.failureNonce

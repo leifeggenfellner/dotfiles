@@ -6,6 +6,7 @@ import "../../components/effects"
 import "../../widgets"
 import "../../services/hypr"
 import "../../services/prefs"
+import "../../services/session"
 import "../../services/system"
 import "../../services/weather"
 
@@ -41,6 +42,7 @@ PanelWindow {
     function resolveServices(names) {
         const table = {
             prefs: PrefsState,
+            session: SessionState,
             systemStats: SystemStatsState,
             weather: WeatherState
         };

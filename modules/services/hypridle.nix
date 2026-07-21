@@ -60,9 +60,14 @@
 
           settings = {
             general = {
-              before_sleep_cmd = "${pkgs.systemd}/bin/loginctl lock-session";
-              after-sleep-cmd = "${hyprctl} dispatch dpms on";
-              lock_cmd = "pgrep hyprlock || lock-screen";
+              # Phase 7: fire a suspend fast-path lock (no veil) via
+              # setsid so hypridle isn't blocked by the child; then
+              # emit the systemd Lock signal for anything that watches
+              # the loginctl session state. lock_cmd's pgrep guard
+              # short-circuits the redundant relaunch.
+              before_sleep_cmd = "${pkgs.util-linux}/bin/setsid -f lock-screen --fast >/dev/null 2>&1; ${pkgs.systemd}/bin/loginctl lock-session";
+              after_sleep_cmd = "${hyprctl} dispatch dpms on";
+              lock_cmd = "pgrep -x hyprlock || pgrep -f '[q]uickshell.*lock[.]qml' || lock-screen";
               ignore_dbus_inhibit = true;
             };
             listener =

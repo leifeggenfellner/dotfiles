@@ -35,7 +35,53 @@ pkgs.writeShellScriptBin "lock-screen" ''
     DYNAMIC_CONF="''${TMPDIR:-/tmp}/hyprlock-dynamic.conf"
     MODE="''${1:-}"
 
+    # Phase 7: `--fast` opts out of the veil handoff. Suspend-driven
+    # locks pass it via hypridle's before_sleep_cmd — there is no
+    # point animating 280 ms of fog when DPMS is about to blank the
+    # screen. The flag is stripped from rice-lock-screen's argv since
+    # rice-lock-screen doesn't recognise it.
+    _fast=0
+    _rice_args=()
+    for _arg in "$@"; do
+      case "$_arg" in
+        --fast) _fast=1 ;;
+        *) _rice_args+=("$_arg") ;;
+      esac
+    done
+
+    lock_active() {
+      pgrep -x hyprlock >/dev/null 2>&1 || pgrep -f '[q]uickshell.*lock[.]qml' >/dev/null 2>&1
+    }
+
+    if [ "$MODE" != "--print-config" ] && [ "$MODE" != "--dry-run" ] && lock_active; then
+      exit 0
+    fi
+
+    if [ "$_fast" = "1" ] && command -v rice-lock-screen >/dev/null 2>&1; then
+      exec rice-lock-screen "''${_rice_args[@]}"
+    fi
+
     if [ "$MODE" != "--print-config" ] && [ "$MODE" != "--dry-run" ] && command -v rice-lock-screen >/dev/null 2>&1; then
+      # Phase 6: prefer veil-then-lock handoff when the rice shell is
+      # reachable. IPC to ambient.lockWithVeil is fire-and-forget; the
+      # shell schedules the veil fade and spawns rice-lock-screen. If
+      # rice isn't up we fall through to direct exec (no veil).
+      _variant=""
+      _prev=""
+      for _arg in "$@"; do
+        case "$_arg" in
+          --variant=*) _variant="''${_arg#--variant=}" ;;
+        esac
+        if [ "$_prev" = "--variant" ]; then
+          _variant="$_arg"
+        fi
+        _prev="$_arg"
+      done
+      if command -v quickshell >/dev/null 2>&1 \
+        && ${pkgs.coreutils}/bin/timeout 0.5 quickshell -c rice ipc call ambient status >/dev/null 2>&1; then
+        quickshell -c rice ipc call ambient lockWithVeil "$_variant" >/dev/null 2>&1 || true
+        exit 0
+      fi
       exec rice-lock-screen "$@"
     fi
 

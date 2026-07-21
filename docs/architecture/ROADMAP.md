@@ -298,6 +298,10 @@ Concretized as D-020: the lockscreen joins the rice at lock time.
   index default, missing index → defaults byte-stable, monitor sed fires and
   leaves the background's empty `monitor=` alone. Real-lock check after
   rebuild: `rice-switch cyberpunk` + lock → cyan/Orbitron without rebuild.
+- Later integration (D-037): LOTM's official lockscreen is now the LOTM
+  Quickshell variant selected by `assets.lockscreenVariant = "lotm"`; the
+  rice-native/hyprlock-themed path remains available as `--variant default` and
+  is still used by Cyberpunk.
 
 ## Phase 13 — Motion v2 + ambient foundation ✅
 
