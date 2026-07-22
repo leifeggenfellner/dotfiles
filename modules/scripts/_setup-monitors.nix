@@ -17,6 +17,10 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
   MONITORS_JSON=$(hyprctl monitors -j)
 
+  refresh_monitors() {
+    MONITORS_JSON=$(hyprctl monitors -j)
+  }
+
   has_desc() {
     echo "$MONITORS_JSON" | $JQ -e --arg d "$1" \
       '.[] | select(.description | contains($d))' >/dev/null
@@ -62,6 +66,19 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
   echo "Detected monitors:"
   echo "$MONITORS_JSON" | $JQ -r '.[].description'
+
+  if [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ]; then
+    if { has_desc "$MONITOR_WORK_CENTER_DESC" && ! has_desc "$MONITOR_WORK_RIGHT_DESC"; } || { ! has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; }; then
+      echo "Partial work setup detected; waiting for the second work display..."
+      for _ in $(seq 1 25); do
+        sleep 0.2
+        refresh_monitors
+        if has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
+          break
+        fi
+      done
+    fi
+  fi
 
   if [ -n "$MONITOR_HOME_DESC" ] && has_desc "$MONITOR_HOME_DESC"; then
     echo "Home setup detected"
@@ -110,6 +127,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     set_ws "1,monitor:$CENTER_MON,default:true"
     set_ws "6,monitor:$CENTER_MON"
     set_ws "3,monitor:$RIGHT_MON,default:true"
+    set_ws "7,monitor:$RIGHT_MON"
     set_ws "2,monitor:$LAPTOP,default:true"
     set_ws "4,monitor:$LAPTOP"
     set_ws "5,monitor:$LAPTOP"
@@ -118,6 +136,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     ensure_ws 1 "$CENTER_MON"
     ensure_ws 6 "$CENTER_MON"
     ensure_ws 3 "$RIGHT_MON"
+    ensure_ws 7 "$RIGHT_MON"
     ensure_ws 2 "$LAPTOP"
     ensure_ws 4 "$LAPTOP"
     ensure_ws 5 "$LAPTOP"
@@ -125,9 +144,69 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     move_ws 1 "$CENTER_MON"
     move_ws 6 "$CENTER_MON"
     move_ws 3 "$RIGHT_MON"
+    move_ws 7 "$RIGHT_MON"
     move_ws 2 "$LAPTOP"
     move_ws 4 "$LAPTOP"
     move_ws 5 "$LAPTOP"
+
+    cleanup_empty
+
+  elif [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] && { has_desc "$MONITOR_WORK_CENTER_DESC" || has_desc "$MONITOR_WORK_RIGHT_DESC"; }; then
+    echo "Partial work setup detected"
+
+    set_mon "$LAPTOP,1920x1200@60,0x0,1"
+
+    if has_desc "$MONITOR_WORK_CENTER_DESC"; then
+      CENTER_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")
+      echo "Center monitor: $CENTER_MON"
+
+      set_mon "$CENTER_MON,2560x1440@60,1920x0,1"
+
+      set_ws "1,monitor:$CENTER_MON,default:true"
+      set_ws "6,monitor:$CENTER_MON"
+      set_ws "2,monitor:$LAPTOP,default:true"
+      set_ws "3,monitor:$LAPTOP"
+      set_ws "4,monitor:$LAPTOP"
+      set_ws "5,monitor:$LAPTOP"
+      set_ws "7,monitor:$LAPTOP"
+
+      ensure_ws 1 "$CENTER_MON"
+      ensure_ws 6 "$CENTER_MON"
+      for i in 2 3 4 5 7; do
+        ensure_ws "$i" "$LAPTOP"
+      done
+
+      move_ws 1 "$CENTER_MON"
+      move_ws 6 "$CENTER_MON"
+      for i in 2 3 4 5 7; do
+        move_ws "$i" "$LAPTOP"
+      done
+    else
+      RIGHT_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
+      echo "Right monitor: $RIGHT_MON"
+
+      set_mon "$RIGHT_MON,2560x1440@60,1920x0,1"
+
+      set_ws "3,monitor:$RIGHT_MON,default:true"
+      set_ws "7,monitor:$RIGHT_MON"
+      set_ws "1,monitor:$LAPTOP,default:true"
+      set_ws "2,monitor:$LAPTOP"
+      set_ws "4,monitor:$LAPTOP"
+      set_ws "5,monitor:$LAPTOP"
+      set_ws "6,monitor:$LAPTOP"
+
+      ensure_ws 3 "$RIGHT_MON"
+      ensure_ws 7 "$RIGHT_MON"
+      for i in 1 2 4 5 6; do
+        ensure_ws "$i" "$LAPTOP"
+      done
+
+      move_ws 3 "$RIGHT_MON"
+      move_ws 7 "$RIGHT_MON"
+      for i in 1 2 4 5 6; do
+        move_ws "$i" "$LAPTOP"
+      done
+    fi
 
     cleanup_empty
 

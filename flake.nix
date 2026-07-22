@@ -48,16 +48,6 @@
         systems.follows = "hyprland/systems";
       };
     };
-    hyprpaper = {
-      url = "github:hyprwm/hyprpaper/1733e0025b194c9bc083f4cd8782c5f151858a58";
-      inputs = {
-        hyprgraphics.follows = "hyprland/hyprgraphics";
-        hyprlang.follows = "hyprland/hyprlang";
-        hyprutils.follows = "hyprland/hyprutils";
-        nixpkgs.follows = "hyprland/nixpkgs";
-        systems.follows = "hyprland/systems";
-      };
-    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

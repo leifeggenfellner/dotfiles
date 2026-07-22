@@ -1,54 +1,54 @@
 { pkgs, ... }:
-let
-  awww = "${pkgs.awww}/bin/awww";
-in
 pkgs.writeShellScriptBin "handle-monitor" ''
   set -euo pipefail
 
   SOCKET="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
-  PERSIST_WP="$HOME/.config/wallpaper/current"
 
   DEBOUNCE_PID=""
 
-  restore_wallpaper() {
-    if [ -f "$PERSIST_WP" ]; then
-      WP=$(cat "$PERSIST_WP")
-      if [ -f "$WP" ]; then
-        # awww img sets wallpaper on ALL outputs by default
-        ${awww} img "$WP" \
-          --transition-type fade \
-          --transition-duration 1.0 \
-          --transition-fps 60 2>/dev/null || true
-      fi
+  cleanup() {
+    if [ -n "$DEBOUNCE_PID" ] && kill -0 "$DEBOUNCE_PID" 2>/dev/null; then
+      kill "$DEBOUNCE_PID" 2>/dev/null || true
     fi
   }
+  trap cleanup EXIT
 
-  on_monitor_change() {
-    # Wake any DPMS-off monitors
+  reconcile_displays() {
+    echo "Reconciling display topology..."
     hyprctl dispatch dpms on 2>/dev/null || true
-
-    # Reconfigure layout
-    setup-monitors
-
-    # Restore wallpaper to all outputs (including new ones)
-    sleep 0.5
-    restore_wallpaper
+    setup-monitors || true
+    wallpaper-restore || true
   }
 
-  echo "Monitoring for display changes..."
+  schedule_reconcile() {
+    local delay="''${1:-2}"
+    if [ -n "$DEBOUNCE_PID" ] && kill -0 "$DEBOUNCE_PID" 2>/dev/null; then
+      kill "$DEBOUNCE_PID" 2>/dev/null || true
+    fi
+    (sleep "$delay" && reconcile_displays) &
+    DEBOUNCE_PID=$!
+  }
 
-  ${pkgs.socat}/bin/socat - "UNIX-CONNECT:$SOCKET" | while read -r line; do
+  wait_for_socket() {
+    for _ in $(seq 1 50); do
+      [ -S "$SOCKET" ] && return 0
+      sleep 0.1
+    done
+    echo "Hyprland event socket not found: $SOCKET" >&2
+    return 1
+  }
+
+  wait_for_socket || exit 0
+
+  echo "Monitoring for display changes..."
+  schedule_reconcile 1
+
+  while read -r line; do
     case "$line" in
       monitoradded*|monitorremoved*)
         echo "Monitor event: $line"
-        # Kill any pending debounced run
-        if [ -n "$DEBOUNCE_PID" ] && kill -0 "$DEBOUNCE_PID" 2>/dev/null; then
-          kill "$DEBOUNCE_PID" 2>/dev/null || true
-        fi
-        # Debounce: wait for events to settle before running setup
-        (sleep 2 && on_monitor_change) &
-        DEBOUNCE_PID=$!
+        schedule_reconcile 2
         ;;
     esac
-  done
+  done < <(${pkgs.socat}/bin/socat - "UNIX-CONNECT:$SOCKET")
 ''
