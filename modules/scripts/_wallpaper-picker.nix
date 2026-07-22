@@ -28,11 +28,21 @@ let
 
   # Standalone live-preview script for awww
   liveScript = pkgs.writeShellScript "wp-live" ''
-    ${awww} img "$1" \
-      --transition-type fade \
-      --transition-duration 0.8 \
-      --transition-fps 60 \
-      --transition-bezier ".42,0,.58,1" 2>/dev/null || true
+    outputs=$(${awww} query 2>/dev/null | ${pkgs.gnused}/bin/sed -n 's/^: \([^:]*\):.*/\1/p' | ${pkgs.coreutils}/bin/paste -sd, -)
+    if [ -n "$outputs" ]; then
+      ${awww} img "$1" \
+        --outputs "$outputs" \
+        --transition-type fade \
+        --transition-duration 0.8 \
+        --transition-fps 60 \
+        --transition-bezier ".42,0,.58,1" 2>/dev/null || true
+    else
+      ${awww} img "$1" \
+        --transition-type fade \
+        --transition-duration 0.8 \
+        --transition-fps 60 \
+        --transition-bezier ".42,0,.58,1" 2>/dev/null || true
+    fi
   '';
 in
 pkgs.writeShellScriptBin "wallpaper-picker" ''
@@ -45,16 +55,27 @@ pkgs.writeShellScriptBin "wallpaper-picker" ''
 
   mkdir -p "$(dirname "$PERSIST_FILE")" "$CACHE_DIR"
 
+  ensure_awww() {
+    ${awww}-daemon 2>/dev/null &
+    disown || true
+    for _ in $(seq 1 50); do
+      ${awww} query >/dev/null 2>&1 && return 0
+      sleep 0.1
+    done
+    return 1
+  }
+
+  if ! ensure_awww; then
+    ${notify} "Wallpaper Picker" "Could not start awww daemon" -t 3000
+    exit 1
+  fi
+
   # ── Restore original wallpaper on cancel ──────────────────────────
   cleanup() {
     if [ -n "$ORIGINAL" ] && [ -f "$PERSIST_FILE" ]; then
       current=$(cat "$PERSIST_FILE")
       if [ "$current" != "$ORIGINAL" ]; then
-        echo "$ORIGINAL" > "$PERSIST_FILE"
-        ${awww} img "$ORIGINAL" \
-          --transition-type fade \
-          --transition-duration 0.5 \
-          --transition-fps 60 2>/dev/null || true
+        wallpaper-apply "$ORIGINAL" fade 0.5 || true
       fi
     fi
   }
@@ -107,23 +128,13 @@ pkgs.writeShellScriptBin "wallpaper-picker" ''
   if [ -z "''${SELECTED:-}" ]; then
     # User cancelled — revert
     if [ -n "$ORIGINAL" ]; then
-      ${awww} img "$ORIGINAL" \
-        --transition-type fade \
-        --transition-duration 0.5 \
-        --transition-fps 60 2>/dev/null || true
+      wallpaper-apply "$ORIGINAL" fade 0.5 || true
     fi
     exit 0
   fi
 
   # ── Apply and persist ─────────────────────────────────────────────
-  echo "$SELECTED" > "$PERSIST_FILE"
-
-  # Final set with a nicer transition
-  ${awww} img "$SELECTED" \
-    --transition-type grow \
-    --transition-duration 1.2 \
-    --transition-fps 60 \
-    --transition-pos center 2>/dev/null || true
+  wallpaper-apply "$SELECTED" grow 1.2
 
   ${notify} "Wallpaper" "Set: $(basename "$SELECTED")" -t 3000
 ''

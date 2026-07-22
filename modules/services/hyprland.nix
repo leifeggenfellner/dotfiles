@@ -62,10 +62,12 @@
                   "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
                 ];
                 exec-once = [
+                  "wallpaper-restore"
                   "hyprctl setcursor ${s.cursorName} ${toString s.cursorSize}"
                   "wl-clip-persist --clipboard both &"
                   "wl-paste --watch cliphist store &"
                   "uwsm finalize"
+                  "thunderbolt-wait && setup-monitors"
                   "handle-monitor &"
                 ] ++ lib.optionals config.rice.enable [
                   "uwsm app -- rice-shell"

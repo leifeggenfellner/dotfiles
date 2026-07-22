@@ -40,10 +40,8 @@ Item {
         error = "";
         passwordNeededFor = "";
         _pendingSsid = target;
-        _action.command = (password && password.length > 0)
-            ? ["nmcli", "device", "wifi", "connect", target, "password", password]
-            : ["nmcli", "device", "wifi", "connect", target];
-        _action.running = true;
+        actionProc.command = (password && password.length > 0) ? ["nmcli", "device", "wifi", "connect", target, "password", password] : ["nmcli", "device", "wifi", "connect", target];
+        actionProc.running = true;
     }
 
     function clearError() {
@@ -56,12 +54,12 @@ Item {
             return;
         busy = true;
         error = "";
-        _action.command = ["nmcli", "device", "disconnect", activeDevice];
-        _action.running = true;
+        actionProc.command = ["nmcli", "device", "disconnect", activeDevice];
+        actionProc.running = true;
     }
 
     function rescan() {
-        _wifi.rescanMode = "yes";
+        wifiProc.rescanMode = "yes";
         _refresh();
     }
 
@@ -87,12 +85,12 @@ Item {
     }
 
     function _refresh() {
-        _status.running = true;
+        statusProc.running = true;
     }
 
     // ── device status (which connection is active) ────────────
     Process {
-        id: _status
+        id: statusProc
         command: ["nmcli", "-t", "--escape", "yes", "-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -105,7 +103,11 @@ Item {
                         continue;
                     const [dev, type, state, conn] = f;
                     if (state === "connected" && (type === "wifi" || type === "ethernet")) {
-                        found = { dev, type, conn };
+                        found = {
+                            dev,
+                            type,
+                            conn
+                        };
                         if (type === "wifi")
                             break; // prefer wifi row for ssid/strength detail
                     }
@@ -115,7 +117,7 @@ Item {
                     network.activeType = found.type;
                     network.activeDevice = found.dev;
                     if (found.type === "wifi") {
-                        _wifi.running = true;
+                        wifiProc.running = true;
                     } else {
                         network.ssid = found.conn;
                         network.strength = 1;
@@ -137,12 +139,12 @@ Item {
 
     // ── wifi list (active ssid/strength + candidates) ─────────
     Process {
-        id: _wifi
+        id: wifiProc
         property string rescanMode: "no"
         command: ["nmcli", "-t", "--escape", "yes", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "device", "wifi", "list", "--rescan", rescanMode]
         stdout: StdioCollector {
             onStreamFinished: {
-                _wifi.rescanMode = "no";
+                wifiProc.rescanMode = "no";
                 const seen = {};
                 const list = [];
                 for (const line of text.split("\n")) {
@@ -164,9 +166,19 @@ Item {
                     const prev = seen[name];
                     if (prev === undefined) {
                         seen[name] = list.length;
-                        list.push({ ssid: name, strength: sig, secured, active });
+                        list.push({
+                            ssid: name,
+                            strength: sig,
+                            secured,
+                            active
+                        });
                     } else if (sig > list[prev].strength || active) {
-                        list[prev] = { ssid: name, strength: Math.max(sig, list[prev].strength), secured, active: active || list[prev].active };
+                        list[prev] = {
+                            ssid: name,
+                            strength: Math.max(sig, list[prev].strength),
+                            secured,
+                            active: active || list[prev].active
+                        };
                     }
                 }
                 list.sort((a, b) => (b.active - a.active) || (b.strength - a.strength));
@@ -177,22 +189,21 @@ Item {
 
     // ── connect/disconnect runner ─────────────────────────────
     Process {
-        id: _action
+        id: actionProc
         stderr: StdioCollector {
-            id: _actionErr
+            id: actionErr
         }
         onExited: (code, status) => {
             network.busy = false;
             if (code !== 0) {
-                const raw = _actionErr.text.trim();
+                const raw = actionErr.text.trim();
                 if (/[Ss]ecrets were required/.test(raw)) {
                     // Semantic state, not prose: UI offers a password prompt.
                     network.passwordNeededFor = network._pendingSsid;
                 } else {
                     // One line, not the nmcli essay.
                     const errLine = raw.split("\n").find(l => l.startsWith("Error:"));
-                    network.error = (errLine ?? raw.split("\n")[0] ?? "").replace(/^Error:\s*/, "")
-                        || ("nmcli failed (exit " + code + ")");
+                    network.error = (errLine ?? raw.split("\n")[0] ?? "").replace(/^Error:\s*/, "") || ("nmcli failed (exit " + code + ")");
                 }
             }
             network._refresh();
@@ -201,11 +212,11 @@ Item {
 
     // ── event stream: refresh on NetworkManager activity ──────
     Process {
-        id: _monitor
+        id: monitorProc
         command: ["nmcli", "monitor"]
         running: network.available
         stdout: SplitParser {
-            onRead: _debounce.restart()
+            onRead: debounceTimer.restart()
         }
         onExited: (code, status) => {
             // NM went away (or nmcli missing); state reflects it.
@@ -216,7 +227,7 @@ Item {
     // Debounce: coalesces monitor line bursts into one refresh.
     // Not a poll — it only fires after an actual NM event.
     Timer {
-        id: _debounce
+        id: debounceTimer
         interval: 400
         onTriggered: network._refresh()
     }

@@ -31,12 +31,12 @@ Item {
 
     function _run(cmd) {
         error = "";
-        _proc.command = cmd;
-        _proc.running = true;
+        proc.command = cmd;
+        proc.running = true;
     }
 
     Process {
-        id: _proc
+        id: proc
         onExited: (code, status) => {
             if (code !== 0)
                 session.error = "command failed (exit " + code + ")";

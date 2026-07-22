@@ -25,12 +25,12 @@ Item {
             return;
         busy = true;
         error = "";
-        _proc.command = ["rice-switch", name];
-        _proc.running = true;
+        proc.command = ["rice-switch", name];
+        proc.running = true;
     }
 
     Process {
-        id: _proc
+        id: proc
         onExited: (code, status) => {
             rice.busy = false;
             if (code !== 0)

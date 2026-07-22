@@ -102,7 +102,7 @@ _: {
         # read-only here), else its first wallpaper from the index. A
         # remembered path gone stale (rebuilt store hash) is re-matched
         # by basename before falling back. Themes without wallpapers
-        # keep the current one. Same awww flow and persist file as
+        # keep the current one. Same wallpaper-apply flow and persist file as
         # WallpaperState / wallpaper-restore.
         prefs="$state_dir/prefs.json"
         wp=""
@@ -116,10 +116,8 @@ _: {
         if [ -z "$wp" ] || [ ! -r "$wp" ]; then
           wp="$("$jq" -r --arg n "$theme" '.themes[$n].wallpapers[0] // empty' "$index")"
         fi
-        if [ -n "$wp" ] && [ -r "$wp" ] && command -v awww >/dev/null; then
-          awww img "$wp" --transition-type fade --transition-duration 1.0 --transition-fps 60 &&
-            mkdir -p "$HOME/.config/wallpaper" &&
-            printf %s "$wp" > "$HOME/.config/wallpaper/current" || true
+        if [ -n "$wp" ] && [ -r "$wp" ] && command -v wallpaper-apply >/dev/null; then
+          wallpaper-apply "$wp" fade 1.0 || true
         fi
 
         # Nudge a running shell in case the pointer file was just created

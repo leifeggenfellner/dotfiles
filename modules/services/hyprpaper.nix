@@ -5,6 +5,44 @@ _: {
       inherit (osConfig.environment.desktop.theme) wallpaper;
       awww = "${pkgs.awww}/bin/awww";
 
+      wallpaper-apply = pkgs.writeShellScriptBin "wallpaper-apply" ''
+        set -euo pipefail
+
+        WP="''${1:-}"
+        TRANSITION="''${2:-fade}"
+        DURATION="''${3:-1.0}"
+        PERSIST_FILE="$HOME/.config/wallpaper/current"
+
+        if [ -z "$WP" ] || [ ! -f "$WP" ]; then
+          echo "wallpaper-apply: missing readable wallpaper: $WP" >&2
+          exit 64
+        fi
+
+        ${awww}-daemon 2>/dev/null &
+        disown || true
+        for _ in $(seq 1 50); do
+          ${awww} query >/dev/null 2>&1 && break
+          sleep 0.1
+        done
+
+        outputs=$(${awww} query 2>/dev/null | ${pkgs.gnused}/bin/sed -n 's/^: \([^:]*\):.*/\1/p' | ${pkgs.coreutils}/bin/paste -sd, -)
+        if [ -n "$outputs" ]; then
+          ${awww} img "$WP" \
+            --outputs "$outputs" \
+            --transition-type "$TRANSITION" \
+            --transition-duration "$DURATION" \
+            --transition-fps 60 2>/dev/null || true
+        else
+          ${awww} img "$WP" \
+            --transition-type "$TRANSITION" \
+            --transition-duration "$DURATION" \
+            --transition-fps 60 2>/dev/null || true
+        fi
+
+        mkdir -p "$(dirname "$PERSIST_FILE")"
+        printf '%s\n' "$WP" > "$PERSIST_FILE"
+      '';
+
       # Boot-time wallpaper restore: persisted path, with rice-aware
       # recovery when it went stale (store paths in the persist file
       # die on rebuild+GC — the assets hash changes whenever any theme
@@ -65,20 +103,14 @@ _: {
           WP="$DEFAULT"
         fi
 
-        # Re-seed the persist file with the resolved (live) path
-        mkdir -p "$(dirname "$PERSIST_FILE")"
-        echo "$WP" > "$PERSIST_FILE"
-
-        ${awww} img "$WP" \
-          --transition-type fade \
-          --transition-duration 1.0 \
-          --transition-fps 60 2>/dev/null || true
+        ${wallpaper-apply}/bin/wallpaper-apply "$WP" fade 1.0
       '';
     in
     {
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
         home.packages = [
           pkgs.awww
+          wallpaper-apply
           wallpaper-restore
         ];
       };
