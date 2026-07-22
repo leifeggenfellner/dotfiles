@@ -642,7 +642,7 @@
 
               # Disable auto-updates (settings.json is read-only on NixOS)
               "extensions.autoCheckUpdates" = false;
-              "extensions.autoUpdate" = false;
+              "extensions.autoUpdate" = "off";
               "extensions.ignoreRecommendations" = true;
               "extensions.showRecommendationsOnlyOnDemand" = true;
               "update.mode" = "none";
