@@ -1,4 +1,4 @@
-{ ... }: {
+_: {
   flake.homeModules.programs-lotm-lockscreen =
     { lib, config, osConfig, ... }:
     let
