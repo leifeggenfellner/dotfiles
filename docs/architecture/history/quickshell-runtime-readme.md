@@ -11,3 +11,4 @@ Planned responsibilities:
 Checkpoint specs:
 
 - checkpoint-01-lotm-ritual-bar.md
+- checkpoint-runtime-neutral-lock-entrypoints.md
