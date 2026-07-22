@@ -1,6 +1,4 @@
-// modules/rice/runtime/quickshell/modules/lockscreen/variants/Lotm.qml
-//
-// LOTM lockscreen wrapper. Embeds the theme UI as an Item under rice's
+// Theme lockscreen wrapper. Embeds the selected theme UI as an Item under rice's
 // ShellRoot and supplies the SDDM-shaped authentication surface it expects.
 // The Loader instantiates the theme's Main.qml verbatim; ancestor-scope
 // resolution supplies sddm/userModel/sessionModel/keyboard to it.
@@ -12,8 +10,8 @@ import Quickshell.Wayland
 Item {
     id: root
 
-    // Absolute path to the LOTM lockscreen asset dir. Injected by rice-lock-screen.
-    property string themePath: Quickshell.env("RICE_LOCK_LOTM_THEME_PATH")
+    // Absolute path to the selected lockscreen asset dir. Injected by rice-lock-screen.
+    property string themePath: Quickshell.env("RICE_LOCK_THEME_PATH")
 
     readonly property var sddm: shim.sddm
     readonly property var userModel: shim.userModel
@@ -32,7 +30,7 @@ Item {
     property bool themeReady: false
 
     function failOpen(reason) {
-        console.error("LOTM lockscreen: failing open:", reason);
+        console.error("Theme lockscreen: failing open:", reason);
         Quickshell.execDetached(["quickshell", "-c", "rice", "ipc", "call", "ambient", "setIdleHint", "off"]);
         Quickshell.execDetached(["loginctl", "unlock-session"]);
         root.sessionLocked = false;
@@ -61,10 +59,10 @@ Item {
             }
             Quickshell.execDetached(["loginctl", "unlock-session"]);
 
-            // Optional unlock chime. Off unless RICE_LOTM_LOCK_CHIME
+            // Optional unlock chime. Off unless RICE_LOCK_CHIME
             // opts in and rice-lock-screen has exported an audio path.
-            const chime = Quickshell.env("RICE_LOTM_LOCK_CHIME") || "";
-            const sound = Quickshell.env("RICE_LOTM_LOCK_UNLOCK_SOUND") || "";
+            const chime = Quickshell.env("RICE_LOCK_CHIME") || "";
+            const sound = Quickshell.env("RICE_LOCK_UNLOCK_SOUND") || "";
             const on = ["on", "1", "true", "yes"].indexOf(chime.toLowerCase()) >= 0;
             if (on && sound.length > 0) {
                 Quickshell.execDetached(["rice-sound-play", sound]);
@@ -102,7 +100,7 @@ Item {
             }
             onStatusChanged: {
                 if (status === Loader.Error) {
-                    console.error("LOTM lockscreen: failed to load", source);
+                    console.error("Theme lockscreen: failed to load", source);
                     root.failOpen("theme loader error");
                 }
             }

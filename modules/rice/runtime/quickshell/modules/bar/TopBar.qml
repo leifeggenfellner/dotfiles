@@ -8,6 +8,7 @@ import "../../services/network"
 import "../../services/audio"
 import "../../services/bluetooth"
 import "../../services/power"
+import "../../services/session"
 import "../../services/wallpaper"
 import "../../services/notifications"
 import "../../services/tray"
@@ -54,6 +55,7 @@ PanelWindow {
             audio: AudioState,
             bluetooth: BluetoothState,
             power: PowerState,
+            session: SessionState,
             wallpaper: WallpaperState,
             notifications: NotificationState,
             tray: TrayState,

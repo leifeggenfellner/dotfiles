@@ -230,11 +230,13 @@ _: {
             lock_file="lock.qml" ;;
           lotm)
             if [ "$preview" = "1" ]; then
-              lock_file="preview-lotm.qml"
+              lock_file="preview-theme.qml"
             else
-              lock_file="lock-lotm.qml"
+              lock_file="lock-theme.qml"
             fi
             export RICE_LOCK_LOTM_THEME_PATH="${lotm-lockscreen-theme}"
+            export RICE_LOCK_THEME_PATH="$RICE_LOCK_LOTM_THEME_PATH"
+            [ -z "''${RICE_LOCK_CHIME:-}" ] && [ -n "''${RICE_LOTM_LOCK_CHIME:-}" ] && export RICE_LOCK_CHIME="$RICE_LOTM_LOCK_CHIME"
             # Export theme-driven colours for the LOTM lockscreen. Main.qml
             # falls back to its native LOTM literals when
             # these are unset, so unmanifested themes still look right.
@@ -251,6 +253,7 @@ _: {
               if [ -z "''${RICE_LOTM_LOCK_UNLOCK_SOUND:-}" ] && [ -n "$lotm_lock_unlock_sound" ] && [ -f "$lotm_lock_unlock_sound" ]; then
                 export RICE_LOTM_LOCK_UNLOCK_SOUND="$lotm_lock_unlock_sound"
               fi
+              [ -z "''${RICE_LOCK_UNLOCK_SOUND:-}" ] && [ -n "''${RICE_LOTM_LOCK_UNLOCK_SOUND:-}" ] && export RICE_LOCK_UNLOCK_SOUND="$RICE_LOTM_LOCK_UNLOCK_SOUND"
             fi
             ;;
           *) echo "rice-lock-screen: unknown variant: $variant" >&2; exit 64 ;;
@@ -262,6 +265,8 @@ _: {
           # Dev mode: point at in-tree assets so hot edits work.
           if [ "$variant" = "lotm" ]; then
             export RICE_LOCK_LOTM_THEME_PATH="$repo_root/modules/rice/themes/lotm/lockscreen/lotm"
+            export RICE_LOCK_THEME_PATH="$RICE_LOCK_LOTM_THEME_PATH"
+            [ -z "''${RICE_LOCK_CHIME:-}" ] && [ -n "''${RICE_LOTM_LOCK_CHIME:-}" ] && export RICE_LOCK_CHIME="$RICE_LOTM_LOCK_CHIME"
           fi
         else
           lock_root="$HOME/.config/quickshell/rice/$lock_file"

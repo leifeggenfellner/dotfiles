@@ -2,5 +2,5 @@ import Quickshell
 import "./modules/lockscreen/variants"
 
 ShellRoot {
-    LotmPreview {}
+    ThemeLock {}
 }

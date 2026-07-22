@@ -1,4 +1,4 @@
 module lockscreen.variants
-Lotm 1.0 Lotm.qml
-LotmPreview 1.0 LotmPreview.qml
+ThemeLock 1.0 ThemeLock.qml
+ThemeLockPreview 1.0 ThemeLockPreview.qml
 SddmShim 1.0 SddmShim.qml

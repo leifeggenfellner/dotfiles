@@ -1,7 +1,6 @@
 import QtQuick
 import "../../core"
 import "../../components"
-import "../../services/session"
 
 // ── SessionLockTile ──────────────────────────────────────────
 // Dashboard-region tile that engages the canonical lock path.
@@ -18,7 +17,7 @@ Item {
     property var services: ({})
     property var settings: ({})
 
-    readonly property var session: services.session ?? SessionState
+    readonly property var session: services.session ?? null
     readonly property string label: settings.label ?? "Lock"
     readonly property string hint: settings.hint ?? "Engage the lockscreen"
     readonly property string iconName: settings.icon ?? "lock"

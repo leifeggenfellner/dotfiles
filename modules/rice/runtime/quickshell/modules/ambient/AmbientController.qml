@@ -125,7 +125,7 @@ Item {
             const on = governor.parseToggle(v);
             governor.idleHint = on;
             // Off implies lock is done or was aborted — clear inflight
-            // regardless of who set it (LOTM unlock, hypridle resume,
+            // regardless of who set it (unlock, hypridle resume,
             // manual reset). Watchdog is reset to avoid a stale fire.
             if (!on) {
                 governor.lockInFlight = false;

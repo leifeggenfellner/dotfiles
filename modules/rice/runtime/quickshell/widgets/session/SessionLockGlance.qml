@@ -1,11 +1,10 @@
 import QtQuick
 import "../../core"
 import "../../components"
-import "../../services/session"
 
 // ── SessionLockGlance ────────────────────────────────────────
 // Bar-region lock affordance. No popout — one-click lock via the
-// canonical SessionState.lock() path (which routes through
+// injected session lock path (which routes through
 // `lock-screen` → ambient.lockWithVeil → rice-lock-screen).
 //
 // Descriptor: `region: "right"`, `services: ["session"]`, no popout.
@@ -18,7 +17,7 @@ Item {
     property var services: ({})
     property var settings: ({})
 
-    readonly property var session: services.session ?? SessionState
+    readonly property var session: services.session ?? null
     readonly property string iconName: settings.icon ?? "lock"
     readonly property string tooltip: settings.tooltip ?? "Lock"
 

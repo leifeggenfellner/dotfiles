@@ -5,7 +5,7 @@ import Quickshell
 Item {
     id: root
 
-    property string themePath: Quickshell.env("RICE_LOCK_LOTM_THEME_PATH")
+    property string themePath: Quickshell.env("RICE_LOCK_THEME_PATH")
 
     readonly property var sddm: fakeSddm
     readonly property var userModel: fakeUserModel
@@ -23,16 +23,16 @@ Item {
         property string hostName: "preview"
 
         function login(user, password, sessionIndex) {
-            console.warn("LotmPreview: login suppressed for", user, "session", sessionIndex);
+            console.warn("Lock preview: login suppressed for", user, "session", sessionIndex);
             loginFailed();
         }
 
         function reboot() {
-            console.warn("LotmPreview: reboot suppressed");
+            console.warn("Lock preview: reboot suppressed");
         }
 
         function powerOff() {
-            console.warn("LotmPreview: powerOff suppressed");
+            console.warn("Lock preview: powerOff suppressed");
         }
     }
 
@@ -69,7 +69,7 @@ Item {
         height: 720
         visible: true
         color: "black"
-        title: "LOTM lockscreen preview (no session lock)"
+        title: "Theme lockscreen preview (no session lock)"
 
         Loader {
             anchors.fill: parent
@@ -77,7 +77,7 @@ Item {
             onLoaded: item.forceActiveFocus()
             onStatusChanged: {
                 if (status === Loader.Error)
-                    console.error("LotmPreview: failed to load", source);
+                    console.error("Lock preview: failed to load", source);
             }
         }
     }
