@@ -183,8 +183,8 @@ _: {
         fi
 
         if [ -n "$MANIFEST" ]; then
-          lock_image=$($JQ -r '.assets.lockscreen[0] // empty' "$MANIFEST")
-          lock_video=$($JQ -r '.assets.lockscreenVideos[0] // empty' "$MANIFEST")
+          lock_image=$($JQ -r '((.assets.wallpapers // []) | map(select(endswith("/klein_airships.png") or endswith("/klein_airships.jpg") or endswith("/klein_airships.jpeg") or endswith("/klein_airships.webp"))) | .[0]) // (.assets.lockscreen[0] // empty)' "$MANIFEST")
+          lock_video=$($JQ -r '((.assets.lockscreenVideos // []) | map(select(endswith("/klein_loen.mp4"))) | .[0]) // empty' "$MANIFEST")
           accent=$($JQ -r '.tokens.colors.accent.primary // empty' "$MANIFEST")
           font=$($JQ -r '.tokens.typography.families.display // empty' "$MANIFEST")
 

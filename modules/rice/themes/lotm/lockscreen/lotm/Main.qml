@@ -112,13 +112,30 @@ Rectangle {
     }
 
     // Prefer the active theme's lockscreen video (rice manifest
-    // -> RICE_LOCK_VIDEO), then a LOTM-specific override, then the
-    // bundled bg.mp4. MediaPlayer accepts file:// or bare paths.
+    // -> RICE_LOCK_VIDEO), then a LOTM-specific override. If no video
+    // is available, rice-lock-screen exports RICE_LOCK_IMAGE.
     readonly property string _bgSource: {
         const v = _env("RICE_LOCK_VIDEO", _env("RICE_LOTM_LOCK_BG", ""));
         if (v.length === 0)
-            return "bg.mp4";
+            return "";
         return v.startsWith("file://") || v.indexOf("://") > 0 ? v : "file://" + v;
+    }
+    readonly property string _fallbackImageSource: {
+        const v = _env("RICE_LOCK_IMAGE", "");
+        if (v.length === 0)
+            return "";
+        return v.startsWith("file://") || v.indexOf("://") > 0 ? v : "file://" + v;
+    }
+
+    Image {
+        anchors.fill: parent
+        source: root._fallbackImageSource
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        smooth: true
+        mipmap: true
+        visible: root._fallbackImageSource.length > 0
+        z: -600
     }
 
     MediaPlayer {
@@ -126,13 +143,15 @@ Rectangle {
         source: root._bgSource
         videoOutput: bgVideo
         loops: MediaPlayer.Infinite
-        Component.onCompleted: player.play()
+        Component.onCompleted: if (root._bgSource.length > 0)
+            player.play()
     }
 
     VideoOutput {
         id: bgVideo
         anchors.fill: parent
         fillMode: VideoOutput.PreserveAspectCrop
+        visible: root._bgSource.length > 0
         z: -500
     }
 
