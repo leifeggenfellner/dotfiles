@@ -16,6 +16,8 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   LAPTOP="eDP-1"
 
   MONITORS_JSON=$(hyprctl monitors -j)
+  ORIGINAL_MONITOR=$(echo "$MONITORS_JSON" | $JQ -r '[.[] | select(.focused) | .name][0] // ""')
+  ORIGINAL_WORKSPACE=$(echo "$MONITORS_JSON" | $JQ -r '[.[] | select(.focused) | .activeWorkspace.id][0] // ""')
 
   refresh_monitors() {
     MONITORS_JSON=$(hyprctl monitors -j)
@@ -38,22 +40,18 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     fi
   }
 
-  # Ensure a workspace exists on the target monitor — create it if missing
-  ensure_ws() {
+  restore_focus() {
     local ws="$1" mon="$2"
-    if ! hyprctl workspaces -j | $JQ -e --argjson id "$ws" '.[] | select(.id == $id)' >/dev/null 2>&1; then
-      # Focus the target monitor first, then create workspace there
+    local monitors_json
+
+    monitors_json=$(hyprctl monitors -j)
+    if [ -n "$mon" ] && echo "$monitors_json" | $JQ -e --arg m "$mon" '.[] | select(.name == $m)' >/dev/null 2>&1; then
       hyprctl dispatch focusmonitor "$mon" >/dev/null 2>&1 || true
+    fi
+
+    if [ -n "$ws" ] && hyprctl workspaces -j | $JQ -e --argjson id "$ws" '.[] | select(.id == $id)' >/dev/null 2>&1; then
       hyprctl dispatch workspace "$ws" >/dev/null 2>&1 || true
     fi
-  }
-
-  # Clean up auto-created empty workspaces (11, 12, etc.) on newly added monitors
-  cleanup_empty() {
-    hyprctl workspaces -j | $JQ -r '.[] | select(.id >= 10 and .windows == 0) | .id' 2>/dev/null | while read -r ws; do
-      # Switch away from it, then it'll be cleaned up if empty
-      hyprctl dispatch workspace 1 >/dev/null 2>&1 || true
-    done
   }
 
   set_mon() {
@@ -97,20 +95,11 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     set_ws "5,monitor:$LAPTOP"
     set_ws "6,monitor:$LAPTOP"
 
-    # Ensure target workspaces exist, then move them
-    ensure_ws 1 "$HOME_MON"
-    ensure_ws 2 "$HOME_MON"
-    for i in {3..6}; do
-      ensure_ws "$i" "$LAPTOP"
-    done
-
     move_ws 1 "$HOME_MON"
     move_ws 2 "$HOME_MON"
     for i in {3..6}; do
       move_ws "$i" "$LAPTOP"
     done
-
-    cleanup_empty
 
   elif [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] && has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
     echo "Work setup detected"
@@ -132,15 +121,6 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     set_ws "4,monitor:$LAPTOP"
     set_ws "5,monitor:$LAPTOP"
 
-    # Ensure target workspaces exist, then move them
-    ensure_ws 1 "$CENTER_MON"
-    ensure_ws 6 "$CENTER_MON"
-    ensure_ws 3 "$RIGHT_MON"
-    ensure_ws 7 "$RIGHT_MON"
-    ensure_ws 2 "$LAPTOP"
-    ensure_ws 4 "$LAPTOP"
-    ensure_ws 5 "$LAPTOP"
-
     move_ws 1 "$CENTER_MON"
     move_ws 6 "$CENTER_MON"
     move_ws 3 "$RIGHT_MON"
@@ -148,8 +128,6 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     move_ws 2 "$LAPTOP"
     move_ws 4 "$LAPTOP"
     move_ws 5 "$LAPTOP"
-
-    cleanup_empty
 
   elif [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] && { has_desc "$MONITOR_WORK_CENTER_DESC" || has_desc "$MONITOR_WORK_RIGHT_DESC"; }; then
     echo "Partial work setup detected"
@@ -170,12 +148,6 @@ pkgs.writeShellScriptBin "setup-monitors" ''
       set_ws "5,monitor:$LAPTOP"
       set_ws "7,monitor:$LAPTOP"
 
-      ensure_ws 1 "$CENTER_MON"
-      ensure_ws 6 "$CENTER_MON"
-      for i in 2 3 4 5 7; do
-        ensure_ws "$i" "$LAPTOP"
-      done
-
       move_ws 1 "$CENTER_MON"
       move_ws 6 "$CENTER_MON"
       for i in 2 3 4 5 7; do
@@ -195,20 +167,12 @@ pkgs.writeShellScriptBin "setup-monitors" ''
       set_ws "5,monitor:$LAPTOP"
       set_ws "6,monitor:$LAPTOP"
 
-      ensure_ws 3 "$RIGHT_MON"
-      ensure_ws 7 "$RIGHT_MON"
-      for i in 1 2 4 5 6; do
-        ensure_ws "$i" "$LAPTOP"
-      done
-
       move_ws 3 "$RIGHT_MON"
       move_ws 7 "$RIGHT_MON"
       for i in 1 2 4 5 6; do
         move_ws "$i" "$LAPTOP"
       done
     fi
-
-    cleanup_empty
 
   else
     echo "Laptop-only setup"
@@ -222,6 +186,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
   # Wake any DPMS-sleeping monitors
   hyprctl dispatch dpms on 2>/dev/null || true
+  restore_focus "$ORIGINAL_WORKSPACE" "$ORIGINAL_MONITOR"
 
   echo "Monitor setup complete"
 ''
