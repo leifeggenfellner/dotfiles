@@ -17,6 +17,7 @@ Item {
     readonly property var userModel: shim.userModel
     readonly property var sessionModel: shim.sessionModel
     readonly property var config: shim.config
+    readonly property var lockState: sharedLockState
 
     // SDDM provides `keyboard`; Quickshell does not. This stub keeps the
     // lockscreen UI quiet without adding an SDDM runtime dependency.
@@ -28,6 +29,13 @@ Item {
     property bool authenticated: false
     property bool sessionLocked: true
     property bool themeReady: false
+
+    QtObject {
+        id: sharedLockState
+
+        property string password: ""
+        property bool authPending: false
+    }
 
     function failOpen(reason) {
         console.error("Theme lockscreen: failing open:", reason);

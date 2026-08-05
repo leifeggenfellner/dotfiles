@@ -12,10 +12,11 @@ Item {
     property bool messageIsError: false
     property bool alignRight: false
     property real failAmount: 0
-    property alias text: input.text
+    property string text: ""
     readonly property bool inputActiveFocus: input.activeFocus
     readonly property color markColor: root.messageIsError ? Theme.colors.state.danger : Theme.colors.accent.primary
 
+    signal textChangeRequested(string value)
     signal submit(string value)
     signal keyPulse(real x, real y)
 
@@ -24,30 +25,31 @@ Item {
     y: shown ? 0 : 18
     scale: shown ? 1 : 0.985
 
-    readonly property bool shown: revealed || input.text.length > 0 || input.activeFocus
+    readonly property bool shown: revealed || root.text.length > 0 || input.activeFocus
 
     function forceInputFocus() {
         input.forceActiveFocus();
     }
 
     function appendText(value) {
-        input.text += value;
-        input.cursorPosition = input.text.length;
+        const nextText = root.text + value;
+        root.textChangeRequested(nextText);
+        input.cursorPosition = nextText.length;
         keyPulse(input.width * 0.5, input.height * 0.5);
     }
 
     function backspace() {
-        if (input.text.length > 0)
-            input.text = input.text.slice(0, input.text.length - 1);
+        if (root.text.length > 0)
+            root.textChangeRequested(root.text.slice(0, root.text.length - 1));
     }
 
     function clear() {
-        input.text = "";
+        root.textChangeRequested("");
     }
 
     function submitNow() {
-        if (input.text.length > 0 && !authenticating)
-            submit(input.text);
+        if (root.text.length > 0 && !authenticating)
+            submit(root.text);
     }
 
     Behavior on opacity {
@@ -70,7 +72,6 @@ Item {
     }
 
     onFailureNonceChanged: {
-        clear();
         failPulse.restart();
     }
 
@@ -110,6 +111,7 @@ Item {
         anchors.rightMargin: 34
         anchors.verticalCenter: field.verticalCenter
         height: 28
+        text: root.text
         color: Theme.colors.fg.primary
         selectionColor: Config.accentColor
         selectedTextColor: Theme.colors.bg.sunken
@@ -122,7 +124,10 @@ Item {
         verticalAlignment: TextInput.AlignVCenter
         clip: true
         enabled: root.enabled && !root.authenticating && !root.success
-        onTextEdited: root.keyPulse(x + width * 0.5 + (cursorPosition - text.length / 2) * 8, y + height * 0.5)
+        onTextEdited: {
+            root.textChangeRequested(text);
+            root.keyPulse(x + width * 0.5 + (cursorPosition - text.length / 2) * 8, y + height * 0.5);
+        }
         Keys.onReturnPressed: root.submitNow()
         Keys.onEnterPressed: root.submitNow()
     }
@@ -135,7 +140,7 @@ Item {
         anchors.verticalCenter: field.verticalCenter
         height: 24
         text: "PASSWORD"
-        visible: input.text.length === 0
+        visible: root.text.length === 0
         color: Theme.colors.fg.muted
         opacity: input.activeFocus ? 0.46 : 0.32
         font.family: Config.font
@@ -151,7 +156,7 @@ Item {
         anchors.verticalCenter: field.verticalCenter
         width: 15
         height: 15
-        opacity: input.text.length > 0 || input.activeFocus ? 0.78 : 0.48
+        opacity: root.text.length > 0 || input.activeFocus ? 0.78 : 0.48
 
         Behavior on opacity {
             NumberAnimation {

@@ -52,17 +52,34 @@ Rectangle {
 
     // Quickshell
     property bool isQuickshell: typeof sddm === "undefined" || sddm.hostName === undefined
+    readonly property bool _hasSharedLockState: typeof lockState !== "undefined" && lockState !== null
+    readonly property string passwordText: root._hasSharedLockState ? lockState.password : passInput.text
 
     // State
     property int userIndex: (typeof userModel !== "undefined" && userModel.lastIndex >= 0) ? userModel.lastIndex : 0
     property int sessionIndex: (typeof sessionModel !== "undefined" && sessionModel.lastIndex >= 0) ? sessionModel.lastIndex : 0
     property bool sessionMenuOpen: false
     property bool userMenuOpen: false
-    property bool authPending: false
+    property bool localAuthPending: false
+    property bool authPending: root._hasSharedLockState ? lockState.authPending : root.localAuthPending
+
+    function setPasswordText(value) {
+        if (root._hasSharedLockState)
+            lockState.password = value;
+        else
+            passInput.text = value;
+    }
+
+    function setAuthPending(value) {
+        if (root._hasSharedLockState)
+            lockState.authPending = value;
+        else
+            root.localAuthPending = value;
+    }
 
     function refocusPasswordInput() {
         passInput.forceActiveFocus();
-        passInput.cursorPosition = passInput.text.length;
+        passInput.cursorPosition = root.passwordText.length;
     }
 
     FolderListModel {
@@ -557,15 +574,23 @@ Rectangle {
                 readOnly: root.authPending
                 property bool wasClicked: false
                 cursorVisible: false
+                Binding {
+                    target: passInput
+                    property: "text"
+                    value: root.passwordText
+                    when: root._hasSharedLockState
+                }
                 cursorDelegate: Item {
                     width: 0
                     height: 0
                 }
                 selectionColor: root.gold
-                rightPadding: passInput.text.length > 0 ? 50 * s : 0
+                rightPadding: root.passwordText.length > 0 ? 50 * s : 0
                 onTextEdited: {
-                    if (!root.authPending)
+                    if (!root.authPending) {
                         errText.text = "";
+                        root.setPasswordText(passInput.text);
+                    }
                 }
                 Behavior on rightPadding {
                     NumberAnimation {
@@ -585,7 +610,7 @@ Rectangle {
                     font.pixelSize: 12 * s
                     font.letterSpacing: 3 * s
                     color: root.gold
-                    opacity: passInput.text.length === 0 ? (root.authPending ? 0.72 : 0.4) : 0
+                    opacity: root.passwordText.length === 0 ? (root.authPending ? 0.72 : 0.4) : 0
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 400
@@ -641,8 +666,8 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 32 * s
                 height: 32 * s
-                opacity: (passInput.text.length > 0 || root.authPending) ? 0.8 : 0
-                scale: (passInput.text.length > 0 || root.authPending) ? 1.0 : 0.8
+                opacity: (root.passwordText.length > 0 || root.authPending) ? 0.8 : 0
+                scale: (root.passwordText.length > 0 || root.authPending) ? 1.0 : 0.8
                 Behavior on opacity {
                     NumberAnimation {
                         duration: 350
@@ -897,7 +922,7 @@ Rectangle {
             refocusPasswordInput();
             return;
         }
-        if (passInput.text.length === 0) {
+        if (root.passwordText.length === 0) {
             passInput.wasClicked = true;
             refocusPasswordInput();
             return;
@@ -909,10 +934,10 @@ Rectangle {
             n = userModel.lastUser;
         }
         if (typeof sddm !== "undefined") {
-            var password = passInput.text;
-            root.authPending = true;
+            var password = root.passwordText;
+            root.setAuthPending(true);
             errText.text = "";
-            passInput.text = "";
+            root.setPasswordText("");
             passInput.wasClicked = true;
             refocusPasswordInput();
             sddm.login(n, password, root.sessionIndex);
@@ -922,12 +947,12 @@ Rectangle {
     Connections {
         target: typeof sddm !== "undefined" ? sddm : null
         function onLoginSucceeded() {
-            root.authPending = false;
+            root.setAuthPending(false);
         }
         function onLoginFailed() {
-            root.authPending = false;
+            root.setAuthPending(false);
             errText.text = "ACCESS DENIED";
-            passInput.text = "";
+            root.setPasswordText("");
             passInput.wasClicked = true;
             refocusPasswordInput();
             focusRepairTimer.kick();

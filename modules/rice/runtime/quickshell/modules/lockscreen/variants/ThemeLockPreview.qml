@@ -11,9 +11,17 @@ Item {
     readonly property var userModel: fakeUserModel
     readonly property var sessionModel: fakeSessionModel
     readonly property var config: ({})
+    readonly property var lockState: sharedLockState
     readonly property QtObject keyboard: QtObject {
         property bool numLock: false
         property bool capsLock: false
+    }
+
+    QtObject {
+        id: sharedLockState
+
+        property string password: ""
+        property bool authPending: false
     }
 
     QtObject {

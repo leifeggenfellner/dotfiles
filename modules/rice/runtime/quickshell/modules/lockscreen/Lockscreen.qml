@@ -7,6 +7,7 @@ Item {
     id: root
 
     property string pendingResponse: ""
+    property string password: ""
     property bool success: false
     property bool releasing: false
     property int failureNonce: 0
@@ -29,6 +30,11 @@ Item {
         root.answerIfReady();
     }
 
+    function setPassword(value) {
+        if (!root.authenticating && !root.success && !root.releasing)
+            root.password = value;
+    }
+
     function answerIfReady() {
         if (root.pendingResponse.length > 0 && pam.responseRequired) {
             pam.respond(root.pendingResponse);
@@ -38,6 +44,7 @@ Item {
 
     function fail() {
         root.pendingResponse = "";
+        root.password = "";
         root.failureNonce += 1;
     }
 
@@ -64,9 +71,11 @@ Item {
                     authenticating: root.authenticating
                     success: root.success || root.releasing
                     failureNonce: root.failureNonce
+                    passwordText: root.password
                     authMessage: root.authMessage
                     authMessageIsError: root.authMessageIsError
                     secure: sessionLock.secure
+                    onPasswordTextChangeRequested: value => root.setPassword(value)
                     onSubmitPassword: password => root.submit(password)
                 }
             }

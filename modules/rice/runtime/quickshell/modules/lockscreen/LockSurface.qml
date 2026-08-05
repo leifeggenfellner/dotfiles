@@ -7,6 +7,7 @@ FocusScope {
     property bool authenticating: false
     property bool success: false
     property int failureNonce: 0
+    property string passwordText: ""
     property string authMessage: ""
     property bool authMessageIsError: false
     property bool secure: false
@@ -18,6 +19,7 @@ FocusScope {
     property real failureGlow: 0
 
     signal submitPassword(string password)
+    signal passwordTextChangeRequested(string value)
 
     focus: true
 
@@ -70,7 +72,7 @@ FocusScope {
         interval: 6500
         repeat: false
         onTriggered: {
-            if (password.text.length === 0 && !root.authenticating)
+            if (root.passwordText.length === 0 && !root.authenticating)
                 root.userAwake = false;
         }
     }
@@ -176,7 +178,7 @@ FocusScope {
             width: parent.width - 34
             x: root.compactLayout ? (parent.width - width) / 2 : 0
             alignRight: !root.compactLayout
-            reveal: root.userAwake || password.text.length > 0
+            reveal: root.userAwake || root.passwordText.length > 0
             time: root.time
         }
     }
@@ -211,7 +213,8 @@ FocusScope {
             id: password
 
             width: parent.width
-            revealed: root.userAwake || text.length > 0 || root.authenticating
+            text: root.passwordText
+            revealed: root.userAwake || root.passwordText.length > 0 || root.authenticating
             authenticating: root.authenticating
             success: root.success
             failureNonce: root.failureNonce
@@ -219,6 +222,7 @@ FocusScope {
             messageIsError: root.authMessageIsError
             enabled: root.secure && !root.success
             alignRight: false
+            onTextChangeRequested: value => root.passwordTextChangeRequested(value)
             onSubmit: value => root.submitPassword(value)
             onKeyPulse: (x, y) => sparks.emitAt(x + loginForm.x + password.x, y + loginForm.y + password.y)
         }
