@@ -53,21 +53,30 @@ Rectangle {
     // Quickshell
     property bool isQuickshell: typeof sddm === "undefined" || sddm.hostName === undefined
     readonly property bool _hasSharedLockState: typeof lockState !== "undefined" && lockState !== null
-    readonly property string passwordText: root._hasSharedLockState ? lockState.password : passInput.text
+    readonly property string passwordText: root._hasSharedLockState ? lockState.password : root.localPasswordText
 
     // State
     property int userIndex: (typeof userModel !== "undefined" && userModel.lastIndex >= 0) ? userModel.lastIndex : 0
     property int sessionIndex: (typeof sessionModel !== "undefined" && sessionModel.lastIndex >= 0) ? sessionModel.lastIndex : 0
     property bool sessionMenuOpen: false
     property bool userMenuOpen: false
+    property string localPasswordText: ""
     property bool localAuthPending: false
     property bool authPending: root._hasSharedLockState ? lockState.authPending : root.localAuthPending
+    property bool localAuthFailed: false
+    property string localErrorMessage: ""
+    readonly property bool authFailed: root._hasSharedLockState ? lockState.authFailed : root.localAuthFailed
+    readonly property string errorMessage: root._hasSharedLockState ? lockState.errorMessage : root.localErrorMessage
 
     function setPasswordText(value) {
+        if (!root.authPending && root.authFailed && value.length > root.passwordText.length)
+            root.clearError();
         if (root._hasSharedLockState)
             lockState.password = value;
-        else
+        else {
+            root.localPasswordText = value;
             passInput.text = value;
+        }
     }
 
     function setAuthPending(value) {
@@ -75,6 +84,20 @@ Rectangle {
             lockState.authPending = value;
         else
             root.localAuthPending = value;
+    }
+
+    function setErrorMessage(value) {
+        if (root._hasSharedLockState) {
+            lockState.authFailed = value.length > 0;
+            lockState.errorMessage = value;
+        } else {
+            root.localAuthFailed = value.length > 0;
+            root.localErrorMessage = value;
+        }
+    }
+
+    function clearError() {
+        root.setErrorMessage("");
     }
 
     function refocusPasswordInput() {
@@ -587,10 +610,8 @@ Rectangle {
                 selectionColor: root.gold
                 rightPadding: root.passwordText.length > 0 ? 50 * s : 0
                 onTextEdited: {
-                    if (!root.authPending) {
-                        errText.text = "";
+                    if (!root.authPending)
                         root.setPasswordText(passInput.text);
-                    }
                 }
                 Behavior on rightPadding {
                     NumberAnimation {
@@ -713,11 +734,12 @@ Rectangle {
             horizontalAlignment: Text.AlignRight
             height: 15 * s
             verticalAlignment: Text.AlignTop
-            text: ""
             color: root.authPending ? root.gold : "#ff4444"
             font.family: root._fontFamily
             font.pixelSize: 12 * s
             font.letterSpacing: 2 * s
+            text: root.errorMessage
+            opacity: root.errorMessage.length > 0 ? 1 : 0
         }
     }
 
@@ -936,7 +958,6 @@ Rectangle {
         if (typeof sddm !== "undefined") {
             var password = root.passwordText;
             root.setAuthPending(true);
-            errText.text = "";
             root.setPasswordText("");
             passInput.wasClicked = true;
             refocusPasswordInput();
@@ -948,10 +969,11 @@ Rectangle {
         target: typeof sddm !== "undefined" ? sddm : null
         function onLoginSucceeded() {
             root.setAuthPending(false);
+            root.clearError();
         }
         function onLoginFailed() {
             root.setAuthPending(false);
-            errText.text = "ACCESS DENIED";
+            root.setErrorMessage("ACCESS DENIED");
             root.setPasswordText("");
             passInput.wasClicked = true;
             refocusPasswordInput();

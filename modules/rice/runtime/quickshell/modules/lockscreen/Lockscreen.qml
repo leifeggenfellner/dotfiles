@@ -11,9 +11,11 @@ Item {
     property bool success: false
     property bool releasing: false
     property int failureNonce: 0
+    property bool authFailed: false
+    property string errorMessage: ""
     readonly property bool authenticating: pam.active
-    readonly property string authMessage: pam.message
-    readonly property bool authMessageIsError: pam.messageIsError
+    readonly property string authMessage: root.errorMessage.length > 0 ? root.errorMessage : pam.message
+    readonly property bool authMessageIsError: root.authFailed || pam.messageIsError
 
     function submit(password) {
         if (password.length === 0 || root.success || root.releasing || !sessionLock.secure)
@@ -31,8 +33,16 @@ Item {
     }
 
     function setPassword(value) {
-        if (!root.authenticating && !root.success && !root.releasing)
+        if (!root.authenticating && !root.success && !root.releasing) {
+            if (root.authFailed && value.length > root.password.length)
+                root.clearError();
             root.password = value;
+        }
+    }
+
+    function clearError() {
+        root.authFailed = false;
+        root.errorMessage = "";
     }
 
     function answerIfReady() {
@@ -45,6 +55,8 @@ Item {
     function fail() {
         root.pendingResponse = "";
         root.password = "";
+        root.authFailed = true;
+        root.errorMessage = "ACCESS DENIED";
         root.failureNonce += 1;
     }
 
@@ -90,6 +102,7 @@ Item {
         onResponseRequiredChanged: root.answerIfReady()
         onCompleted: result => {
             if (result === PamResult.Success) {
+                root.clearError();
                 root.success = true;
                 finishTimer.restart();
             } else {

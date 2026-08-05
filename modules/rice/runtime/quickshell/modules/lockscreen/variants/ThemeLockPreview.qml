@@ -22,6 +22,8 @@ Item {
 
         property string password: ""
         property bool authPending: false
+        property bool authFailed: false
+        property string errorMessage: ""
     }
 
     QtObject {
