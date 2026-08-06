@@ -13,6 +13,368 @@
       accent1 = c.${s.accentPrimary};
       accent2 = c.${s.accentSecondary};
       accent3 = c.${s.accentTertiary};
+
+      q = builtins.toJSON;
+      lines = lib.concatStringsSep "\n";
+      mods = lib.concatStringsSep " + ";
+      key = modifiers: keyName: if modifiers == "" then keyName else "${modifiers} + ${keyName}";
+      luaBool = value: if value then "true" else "false";
+      luaValue = value:
+        if builtins.isBool value then luaBool value
+        else if builtins.isInt value || builtins.isFloat value then toString value
+        else if builtins.isString value then q value
+        else throw "Unsupported Lua value in Hyprland config";
+      luaAttrs = attrs:
+        "{ ${lib.concatStringsSep ", " (lib.mapAttrsToList (name: value: "${name} = ${luaValue value}") attrs)} }";
+      flagsArg = flags: if flags == { } then "" else ", ${luaAttrs flags}";
+      bind = keys: dispatcher: ''hl.bind(${q keys}, ${dispatcher})'';
+      bindWith = keys: dispatcher: flags: ''hl.bind(${q keys}, ${dispatcher}${flagsArg flags})'';
+      bindExec = keys: command: bind keys ''hl.dsp.exec_cmd(${q command})'';
+      bezierCurve = name: value:
+        let
+          points = lib.splitString "," value;
+        in
+        ''hl.curve(${q name}, { type = "bezier", points = { {${lib.elemAt points 0}, ${lib.elemAt points 1}}, {${lib.elemAt points 2}, ${lib.elemAt points 3}} } })'';
+      animation = { leaf, speed, bezier, style ? null }:
+        ''hl.animation({ leaf = ${q leaf}, enabled = true, speed = ${toString speed}, bezier = ${q bezier}${lib.optionalString (style != null) ", style = ${q style}"} })'';
+
+      mainMod = "SUPER";
+      SECONDARY = "SHIFT";
+      TERTIARY = "CTRL";
+      mainShift = mods [ mainMod SECONDARY ];
+      mainCtrl = mods [ mainMod TERTIARY ];
+      mainAlt = mods [ mainMod "ALT" ];
+      mainShiftCtrl = mods [ mainMod SECONDARY TERTIARY ];
+
+      toggle =
+        program:
+        let
+          prog = builtins.substring 0 14 program;
+        in
+        "pkill ${prog} || uwsm app -- ${program}";
+
+      runOnce = program: "pgrep ${program} || uwsm app -- ${program}";
+      launch = program: "uwsm app -- ${program}";
+      riceOsd = action: fallback: "sh -c '${pkgs.quickshell}/bin/quickshell -c rice ipc call osd ${action} >/dev/null 2>&1 || ${fallback}'";
+
+      env = [
+        [ "GRIMBLAST_NO_CURSOR" "0" ]
+        [ "HYPRCURSOR_THEME" "${pkgs.capitaine-cursors}" ]
+        [ "HYPRCURSOR_SIZE" (toString s.cursorSize) ]
+        [ "QT_WAYLAND_DISABLE_WINDOWDECORATION" "1" ]
+      ];
+
+      execOnce = [
+        "wallpaper-restore"
+        "hyprctl setcursor ${s.cursorName} ${toString s.cursorSize}"
+        "wl-clip-persist --clipboard both"
+        "wl-paste --watch cliphist store"
+        "uwsm finalize"
+        "thunderbolt-wait && setup-monitors"
+        "handle-monitor"
+      ] ++ lib.optionals config.rice.enable [
+        "uwsm app -- rice-shell"
+      ];
+
+      workspaceBinds = lib.flatten (builtins.genList
+        (i:
+          let
+            ws = i + 1;
+          in
+          [
+            (bind (key mainMod (toString ws)) ''hl.dsp.focus({ workspace = ${toString ws} })'')
+            (bind (key mainShift (toString ws)) ''hl.dsp.window.move({ workspace = ${toString ws} })'')
+          ]) 9);
+
+      commonBinds = [
+        (bindExec (key mainMod "Return") (launch "foot"))
+        (bindExec (key mainMod "B") (toggle "foot -T btop -e btop"))
+        (bindExec (key mainMod "R") (toggle "foot -T yazi -e yazi"))
+        (bindExec (key mainMod "S") (launch "spotify"))
+        (bindExec (key mainShift "D") (runOnce "pcmanfm"))
+        (bindExec (key mainShift "W") (launch "foot -T theme-switcher -e theme-switcher"))
+        (bindExec (key mainShift "L") "lock-screen")
+        (bindExec (key mainShift "P") (runOnce "grimblast --notify copy area"))
+        (bind (key mainShift "T") ''hl.dsp.window.move({ workspace = "special" })'')
+        (bind (key mainMod "t") ''hl.dsp.workspace.toggle_special("")'')
+        (bindExec (key mainShiftCtrl "Q") "uwsm stop")
+        (bind (key mainMod "Q") ''hl.dsp.window.close()'')
+        (bind (key mainMod "F") ''hl.dsp.window.float({ action = "toggle" })'')
+        (bind (key mainMod "G") ''hl.dsp.window.fullscreen({ action = "toggle" })'')
+        (bind (key mainMod "P") ''hl.dsp.layout("togglesplit")'')
+        (bind (key mainMod "k") ''hl.dsp.focus({ direction = "u" })'')
+        (bind (key mainMod "j") ''hl.dsp.focus({ direction = "d" })'')
+        (bind (key mainMod "l") ''hl.dsp.focus({ direction = "r" })'')
+        (bind (key mainMod "h") ''hl.dsp.focus({ direction = "l" })'')
+        (bind (key mainMod "left") ''hl.dsp.focus({ workspace = "e-1" })'')
+        (bind (key mainMod "right") ''hl.dsp.focus({ workspace = "e+1" })'')
+        (bind (key mainShift "right") ''hl.dsp.window.move({ workspace = "e+1" })'')
+        (bind (key mainShift "left") ''hl.dsp.window.move({ workspace = "e-1" })'')
+        (bindExec "XF86AudioPlay" "playerctl play-pause")
+        (bindExec "XF86AudioNext" "playerctl next")
+        (bindExec "XF86AudioPrev" "playerctl previous")
+      ] ++ workspaceBinds;
+
+      riceBinds = [
+        (bindExec "XF86AudioRaiseVolume" (riceOsd "volumeUp" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"))
+        (bindExec "XF86AudioLowerVolume" (riceOsd "volumeDown" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"))
+        (bindExec "XF86AudioMute" (riceOsd "toggleMute" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+        (bindExec "XF86MonBrightnessUp" (riceOsd "brightnessUp" "brightnessctl set +10%"))
+        (bindExec "XF86MonBrightnessDown" (riceOsd "brightnessDown" "brightnessctl set 10%-"))
+        (bindExec (key mainMod "Space") "quickshell -c rice ipc call shell toggleLauncher")
+        (bindExec (key mainMod "D") "quickshell -c rice ipc call shell toggleDashboard")
+        (bindExec (key mainAlt "T") "quickshell -c rice ipc call shell toggleSwitcher")
+        (bindExec (key mainMod "W") "quickshell -c rice ipc call shell toggleWallpapers")
+        (bindExec (key mainAlt "W") "quickshell -c rice ipc call wallpapers next")
+        (bindExec (key mainMod "V") "quickshell -c rice ipc call shell toggleSatchel")
+        (bindExec (key mainMod "N") "quickshell -c rice ipc call notifications toggleCenter")
+        (bindExec (key mainShiftCtrl "N") "quickshell -c rice ipc call notifications clearAll")
+      ];
+
+      fallbackBinds = [
+        (bindExec "XF86AudioRaiseVolume" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+")
+        (bindExec "XF86AudioLowerVolume" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-")
+        (bindExec "XF86AudioMute" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")
+        (bindExec "XF86MonBrightnessUp" "brightnessctl set +10%")
+        (bindExec "XF86MonBrightnessDown" "brightnessctl set 10%-")
+        (bindExec (key mainMod "W") (launch "foot -T wallpaper-picker -e wallpaper-picker"))
+        (bindExec (key mainMod "N") "swaync-client -t -sw")
+        (bindExec (key mainShift "N") "swaync-client -d -sw")
+        (bindExec (key mainShiftCtrl "N") "swaync-client -C -sw")
+      ];
+
+      repeatingBinds = [
+        (bindWith (key mainCtrl "k") ''hl.dsp.window.resize({ x = 0, y = -20, relative = true })'' { repeating = true; })
+        (bindWith (key mainCtrl "j") ''hl.dsp.window.resize({ x = 0, y = 20, relative = true })'' { repeating = true; })
+        (bindWith (key mainCtrl "l") ''hl.dsp.window.resize({ x = 20, y = 0, relative = true })'' { repeating = true; })
+        (bindWith (key mainCtrl "h") ''hl.dsp.window.resize({ x = -20, y = 0, relative = true })'' { repeating = true; })
+        (bindWith (key mainAlt "k") ''hl.dsp.window.swap({ direction = "u" })'' { repeating = true; })
+        (bindWith (key mainAlt "j") ''hl.dsp.window.swap({ direction = "d" })'' { repeating = true; })
+        (bindWith (key mainAlt "l") ''hl.dsp.window.swap({ direction = "r" })'' { repeating = true; })
+        (bindWith (key mainAlt "h") ''hl.dsp.window.swap({ direction = "l" })'' { repeating = true; })
+      ];
+
+      mouseBinds = [
+        (bindWith (key mainMod "mouse:272") ''hl.dsp.window.drag()'' { mouse = true; })
+        (bindWith (key mainMod "mouse:273") ''hl.dsp.window.resize()'' { mouse = true; })
+      ];
+
+      floatingClassRules = [
+        "^(Rofi)$"
+        "^(eww)$"
+        "^(Gimp-2.10)$"
+        "^(org.gnome.Calculator)$"
+        "^(org.gnome.Calendar)$"
+        "^(gnome-system-monitor)$"
+        "^(pavucontrol)$"
+        "^(nm-connection-editor)$"
+        "^(Color Picker)$"
+        "^(Network)$"
+        "^(pcmanfm)$"
+        "^(com.github.flxzt.rnote)$"
+        "^(xdg-desktop-portal)$"
+        "^(xdg-desktop-portal-gnome)$"
+        "^(transmission-gtk)$"
+        "^(org.kde.kdeconnect-settings)$"
+        "^(org.pulseaudio.pavucontrol)$"
+      ];
+
+      floatingTitleRules = [
+        "^(Spotify Premium)$"
+        "^(Spotify)$"
+        "^(spotify_player)$"
+        "^(yazi)$"
+        "^(btop)$"
+      ];
+
+      workspaceRules = [
+        [ "class" "^(code|Code)$" "1" ]
+        [ "class" "^(Alacritty|alacritty|foot)$" "2" ]
+        [ "class" "^(zen|ZenBrowser)$" "3" ]
+        [ "class" "^(Slack)$" "4" ]
+        [ "class" "^(discord)$" "4" ]
+        [ "class" "^(spotify)$" "5" ]
+        [ "class" "^(btop|htop|nvtop|MissionCenter)$" "6" ]
+      ];
+
+      luaConfig = ''
+        hl.config({
+            general = {
+                gaps_in = ${toString s.gapsInner},
+                gaps_out = ${toString s.gapsOuter},
+                border_size = ${toString s.borderWidth},
+                allow_tearing = true,
+                resize_on_border = true,
+                col = {
+                    active_border = ${q "${fmt.rgb accent1} ${fmt.rgb accent2} ${fmt.rgb accent3} 45deg"},
+                    inactive_border = ${q (fmt.rgb c.surface0)},
+                },
+                hover_icon_on_border = true,
+                extend_border_grab_area = 15,
+            },
+
+            cursor = {
+                inactive_timeout = 3,
+                no_hardware_cursors = 0,
+                enable_hyprcursor = true,
+            },
+
+            decoration = {
+                rounding = ${toString s.rounding},
+                blur = {
+                    enabled = true,
+                    size = ${toString s.blurSize},
+                    passes = ${toString s.blurPasses},
+                    new_optimizations = true,
+                    ignore_opacity = true,
+                    xray = false,
+                    contrast = ${toString s.blurContrast},
+                    brightness = ${toString s.blurBrightness},
+                    noise = ${toString s.blurNoise},
+                },
+                active_opacity = ${toString s.opacityActive},
+                inactive_opacity = ${toString s.opacityInactive},
+                fullscreen_opacity = 1.0,
+            },
+
+            animations = {
+                enabled = true,
+            },
+
+            input = {
+                kb_layout = "no",
+                follow_mouse = 1,
+                mouse_refocus = true,
+                sensitivity = 0.0,
+                accel_profile = "adaptive",
+                touchpad = {
+                    natural_scroll = true,
+                    disable_while_typing = true,
+                    tap_to_click = true,
+                    middle_button_emulation = true,
+                },
+            },
+
+            group = {
+                groupbar = {
+                    font_size = ${toString s.fontSizeSmall},
+                    gradients = true,
+                    render_titles = true,
+                    scrolling = true,
+                },
+                col = {
+                    border_active = ${q (fmt.rgb accent1)},
+                    border_inactive = ${q (fmt.rgb c.surface0)},
+                },
+            },
+
+            dwindle = {
+                preserve_split = true,
+                force_split = 1,
+                default_split_ratio = 1.2,
+                smart_split = false,
+                smart_resizing = false,
+                use_active_for_splits = true,
+            },
+
+            misc = {
+                disable_autoreload = true,
+                force_default_wallpaper = 0,
+                animate_mouse_windowdragging = true,
+                animate_manual_resizes = true,
+                vrr = 1,
+                focus_on_activate = true,
+                mouse_move_focuses_monitor = true,
+                enable_swallow = true,
+                swallow_regex = "^(foot|alacritty|kitty)$",
+            },
+
+            xwayland = {
+                force_zero_scaling = true,
+            },
+
+            debug = {
+                disable_logs = false,
+            },
+        })
+
+        ${lines (map (entry: ''hl.env(${q (lib.elemAt entry 0)}, ${q (lib.elemAt entry 1)})'') env)}
+
+        hl.on("hyprland.start", function()
+        ${lines (map (command: ''    hl.exec_cmd(${q command})'') execOnce)}
+        end)
+
+        ${bezierCurve "wind" s.bezierWind}
+        ${bezierCurve "winIn" s.bezierWinIn}
+        ${bezierCurve "winOut" s.bezierWinOut}
+        ${bezierCurve "liner" s.bezierLiner}
+        ${bezierCurve "overshot" s.bezierOvershot}
+
+        ${animation { leaf = "windows"; speed = s.speedWindowOpen; bezier = "wind"; style = "slide"; }}
+        ${animation { leaf = "windowsIn"; speed = s.speedWindowOpen; bezier = "winIn"; style = "slide"; }}
+        ${animation { leaf = "windowsOut"; speed = s.speedWindowClose; bezier = "winOut"; style = "slide"; }}
+        ${animation { leaf = "windowsMove"; speed = s.speedWindowMove; bezier = "wind"; style = "slide"; }}
+        ${animation { leaf = "border"; speed = s.speedBorder; bezier = "liner"; }}
+        ${animation { leaf = "borderangle"; speed = s.speedBorderAngle; bezier = "liner"; style = "loop"; }}
+        ${animation { leaf = "fade"; speed = s.speedFade; bezier = "default"; }}
+        ${animation { leaf = "layers"; speed = s.speedLayer; bezier = "wind"; style = "slide"; }}
+        ${animation { leaf = "layersIn"; speed = s.speedLayerIn; bezier = "winIn"; style = "slide"; }}
+        ${animation { leaf = "layersOut"; speed = s.speedLayerOut; bezier = "winOut"; style = "fade"; }}
+        ${animation { leaf = "workspaces"; speed = s.speedWorkspace; bezier = "overshot"; style = "slidevert"; }}
+        ${animation { leaf = "specialWorkspace"; speed = s.speedSpecialWorkspace; bezier = "default"; style = "slidevert"; }}
+
+        hl.workspace_rule({ workspace = "special:magic", gaps_in = 20, gaps_out = 40 })
+
+        local function blurred_layer(namespace)
+            hl.layer_rule({
+                match = { namespace = namespace },
+                blur = true,
+                ignore_alpha = 0,
+            })
+        end
+
+        blurred_layer("^(wofi)$")
+        blurred_layer("^(waybar)$")
+        blurred_layer("^(swaync-notification-window)$")
+        blurred_layer("^(swaync-control-center)$")
+
+        ${lines commonBinds}
+        ${lines (if config.rice.enable then riceBinds else fallbackBinds)}
+        ${lines repeatingBinds}
+        ${lines mouseBinds}
+
+        local function floating_class(pattern, width, height)
+            hl.window_rule({
+                match = { class = pattern },
+                float = true,
+                size = { width, height },
+                center = true,
+            })
+        end
+
+        local function floating_title(pattern, width, height)
+            hl.window_rule({
+                match = { title = pattern },
+                float = true,
+                size = { width, height },
+                center = true,
+            })
+        end
+
+        ${lines (map (pattern: ''floating_class(${q pattern}, "monitor_w*0.5", "monitor_h*0.7")'') floatingClassRules)}
+        ${lines (map (pattern: ''floating_title(${q pattern}, "monitor_w*0.5", "monitor_h*0.7")'') floatingTitleRules)}
+        floating_title("^(theme-switcher)$", "monitor_w*0.4", "monitor_h*0.7")
+        floating_title("^(wallpaper-picker)$", "monitor_w*0.6", "monitor_h*0.8")
+
+        ${lines (map (rule:
+          let
+            matchKind = lib.elemAt rule 0;
+            pattern = lib.elemAt rule 1;
+            workspace = lib.elemAt rule 2;
+          in
+          ''hl.window_rule({ match = { ${matchKind} = ${q pattern} }, workspace = ${q workspace} })'') workspaceRules)}
+        hl.window_rule({ match = { class = "^(zen|ZenBrowser)$" }, opacity = "1.0 override 1.0 override" })
+      '';
     in
     {
       imports = [
@@ -21,11 +383,15 @@
 
       config = lib.mkIf (config.environment.desktop.windowManager == "hyprland") {
         environment = {
+          etc."xdg/hypr/hyprland.lua".text = luaConfig;
           systemPackages = [
             inputs.hyprland-contrib.packages.${pkgs.stdenv.hostPlatform.system}.grimblast
           ];
           pathsToLink = [ "/share/icons" ];
-          variables.NIXOS_OZONE_WL = "1";
+          variables = {
+            HYPRLAND_CONFIG = "/etc/xdg/hypr/hyprland.lua";
+            NIXOS_OZONE_WL = "1";
+          };
         };
 
         programs = {
@@ -35,318 +401,11 @@
             package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
             portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
             plugins = [ ];
-
-            settings =
-              let
-                mainMod = "SUPER";
-                SECONDARY = "SHIFT";
-                TERTIARY = "CTRL";
-
-                toggle =
-                  program:
-                  let
-                    prog = builtins.substring 0 14 program;
-                  in
-                  "pkill ${prog} || uwsm app -- ${program}";
-
-                runOnce = program: "pgrep ${program} || uwsm app -- ${program}";
-                launch = program: "uwsm app -- ${program}";
-                riceOsd = action: fallback: "sh -c '${pkgs.quickshell}/bin/quickshell -c rice ipc call osd ${action} >/dev/null 2>&1 || ${fallback}'";
-              in
-              {
-                # === Settings ===
-                env = [
-                  "GRIMBLAST_NO_CURSOR,0"
-                  "HYPRCURSOR_THEME,${pkgs.capitaine-cursors}"
-                  "HYPRCURSOR_SIZE,${toString s.cursorSize}"
-                  "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
-                ];
-                exec-once = [
-                  "wallpaper-restore"
-                  "hyprctl setcursor ${s.cursorName} ${toString s.cursorSize}"
-                  "wl-clip-persist --clipboard both &"
-                  "wl-paste --watch cliphist store &"
-                  "uwsm finalize"
-                  "thunderbolt-wait && setup-monitors"
-                  "handle-monitor &"
-                ] ++ lib.optionals config.rice.enable [
-                  "uwsm app -- rice-shell"
-                ];
-
-                general = {
-                  gaps_in = s.gapsInner;
-                  gaps_out = s.gapsOuter;
-                  border_size = s.borderWidth;
-                  allow_tearing = true;
-                  resize_on_border = true;
-                  "col.active_border" = "${fmt.rgb accent1} ${fmt.rgb accent2} ${fmt.rgb accent3} 45deg";
-                  "col.inactive_border" = fmt.rgb c.surface0;
-                  hover_icon_on_border = true;
-                  extend_border_grab_area = 15;
-                };
-
-                cursor = {
-                  inactive_timeout = 3;
-                  no_hardware_cursors = false;
-                  enable_hyprcursor = true;
-                };
-
-                decoration = {
-                  inherit (s) rounding;
-
-                  blur = {
-                    enabled = true;
-                    size = s.blurSize;
-                    passes = s.blurPasses;
-                    new_optimizations = true;
-                    ignore_opacity = true;
-                    xray = false;
-                    contrast = s.blurContrast;
-                    brightness = s.blurBrightness;
-                    noise = s.blurNoise;
-                  };
-
-                  active_opacity = s.opacityActive;
-                  inactive_opacity = s.opacityInactive;
-                  fullscreen_opacity = 1.0;
-                };
-
-                layerrule = [
-                  "blur on, match:namespace ^(wofi)$"
-                  "ignore_alpha 0, match:namespace ^(wofi)$"
-                  "blur on, match:namespace ^(waybar)$"
-                  "ignore_alpha 0, match:namespace ^(waybar)$"
-                  "blur on, match:namespace ^(swaync-notification-window)$"
-                  "ignore_alpha 0, match:namespace ^(swaync-notification-window)$"
-                  "blur on, match:namespace ^(swaync-control-center)$"
-                  "ignore_alpha 0, match:namespace ^(swaync-control-center)$"
-                ];
-
-                animations.enabled = true;
-
-                bezier = [
-                  "wind, ${s.bezierWind}"
-                  "winIn, ${s.bezierWinIn}"
-                  "winOut, ${s.bezierWinOut}"
-                  "liner, ${s.bezierLiner}"
-                  "overshot, ${s.bezierOvershot}"
-                ];
-
-                animation = [
-                  "windows, 1, ${toString s.speedWindowOpen}, wind, slide"
-                  "windowsIn, 1, ${toString s.speedWindowOpen}, winIn, slide"
-                  "windowsOut, 1, ${toString s.speedWindowClose}, winOut, slide"
-                  "windowsMove, 1, ${toString s.speedWindowMove}, wind, slide"
-                  "border, 1, ${toString s.speedBorder}, liner"
-                  "borderangle, 1, ${toString s.speedBorderAngle}, liner, loop"
-                  "fade, 1, ${toString s.speedFade}, default"
-                  "layers, 1, ${toString s.speedLayer}, wind, slide"
-                  "layersIn, 1, ${toString s.speedLayerIn}, winIn, slide"
-                  "layersOut, 1, ${toString s.speedLayerOut}, winOut, fade"
-                  "workspaces, 1, ${toString s.speedWorkspace}, overshot, slidevert"
-                  "specialWorkspace, 1, ${toString s.speedSpecialWorkspace}, default, slidevert"
-                ];
-
-                input = {
-                  kb_layout = "no";
-                  follow_mouse = 1;
-                  mouse_refocus = true;
-                  sensitivity = 0.0;
-                  accel_profile = "adaptive";
-
-                  touchpad = {
-                    natural_scroll = true;
-                    disable_while_typing = true;
-                    tap-to-click = true;
-                    middle_button_emulation = true;
-                  };
-                };
-
-                group = {
-                  groupbar = {
-                    font_size = s.fontSizeSmall;
-                    gradients = true;
-                    render_titles = true;
-                    scrolling = true;
-                  };
-                  "col.border_active" = fmt.rgb accent1;
-                  "col.border_inactive" = fmt.rgb c.surface0;
-                };
-
-                dwindle = {
-                  # pseudotile option removed in Hyprland 0.55; the `pseudo`
-                  # dispatcher is now always available.
-                  preserve_split = true;
-                  force_split = 1;
-                  default_split_ratio = 1.2;
-                  smart_split = false;
-                  smart_resizing = false;
-                  use_active_for_splits = true;
-                };
-
-                misc = {
-                  disable_autoreload = true;
-                  force_default_wallpaper = 0;
-                  animate_mouse_windowdragging = true;
-                  animate_manual_resizes = true;
-                  vrr = 1;
-                  focus_on_activate = true;
-                  mouse_move_focuses_monitor = true;
-                  enable_swallow = true;
-                  swallow_regex = "^(foot|alacritty|kitty)$";
-                };
-
-                workspace = [
-                  "special:magic, gapsin:20, gapsout:40"
-                ];
-
-                xwayland.force_zero_scaling = true;
-                debug.disable_logs = false;
-
-                # === Binds ===
-                bind = [
-                  "${mainMod}, Return, exec, ${launch "foot"}"
-                  "${mainMod}, B, exec, ${toggle "foot -T btop -e btop"}"
-                  "${mainMod}, R, exec, ${toggle "foot -T yazi -e yazi"}"
-                  "${mainMod}, S, exec, ${launch "spotify"}"
-                  "${mainMod} ${SECONDARY}, D, exec, ${runOnce "pcmanfm"}"
-                  "${mainMod} ${SECONDARY}, W, exec, ${launch "foot -T theme-switcher -e theme-switcher"}"
-
-                  "${mainMod} ${SECONDARY}, L, exec, lock-screen"
-
-
-                  "${mainMod} ${SECONDARY}, P, exec, ${runOnce "grimblast --notify copy area"}"
-
-                  "${mainMod} ${SECONDARY}, T, movetoworkspace, special"
-                  "${mainMod}, t, togglespecialworkspace"
-
-                  "${mainMod} ${SECONDARY} ${TERTIARY}, Q, exit"
-                  "${mainMod}, Q, killactive"
-                  "${mainMod}, F, togglefloating"
-                  "${mainMod}, G, fullscreen"
-                  "${mainMod}, P, layoutmsg, togglesplit"
-
-                  "${mainMod}, k, movefocus, u"
-                  "${mainMod}, j, movefocus, d"
-                  "${mainMod}, l, movefocus, r"
-                  "${mainMod}, h, movefocus, l"
-
-                  "${mainMod}, left,  exec, hyprctl dispatch workspace e-1"
-                  "${mainMod}, right, exec, hyprctl dispatch workspace e+1"
-                  "${mainMod}, 1, exec, hyprctl dispatch workspace 1"
-                  "${mainMod}, 2, exec, hyprctl dispatch workspace 2"
-                  "${mainMod}, 3, exec, hyprctl dispatch workspace 3"
-                  "${mainMod}, 4, exec, hyprctl dispatch workspace 4"
-                  "${mainMod}, 5, exec, hyprctl dispatch workspace 5"
-                  "${mainMod}, 6, exec, hyprctl dispatch workspace 6"
-                  "${mainMod}, 7, exec, hyprctl dispatch workspace 7"
-                  "${mainMod}, 8, exec, hyprctl dispatch workspace 8"
-                  "${mainMod}, 9, exec, hyprctl dispatch workspace 9"
-
-                  "${mainMod} ${SECONDARY}, right, exec, hyprctl dispatch movetoworkspace e+1"
-                  "${mainMod} ${SECONDARY}, left, exec, hyprctl dispatch movetoworkspace e-1"
-                  "${mainMod} ${SECONDARY}, 1, exec, hyprctl dispatch movetoworkspace 1"
-                  "${mainMod} ${SECONDARY}, 2, exec, hyprctl dispatch movetoworkspace 2"
-                  "${mainMod} ${SECONDARY}, 3, exec, hyprctl dispatch movetoworkspace 3"
-                  "${mainMod} ${SECONDARY}, 4, exec, hyprctl dispatch movetoworkspace 4"
-                  "${mainMod} ${SECONDARY}, 5, exec, hyprctl dispatch movetoworkspace 5"
-                  "${mainMod} ${SECONDARY}, 6, exec, hyprctl dispatch movetoworkspace 6"
-                  "${mainMod} ${SECONDARY}, 7, exec, hyprctl dispatch movetoworkspace 7"
-                  "${mainMod} ${SECONDARY}, 8, exec, hyprctl dispatch movetoworkspace 8"
-                  "${mainMod} ${SECONDARY}, 9, exec, hyprctl dispatch movetoworkspace 9"
-
-                  ", XF86AudioPlay, exec, playerctl play-pause"
-                  ", XF86AudioNext, exec, playerctl next"
-                  ", XF86AudioPrev, exec, playerctl previous"
-                ] ++ (if config.rice.enable then [
-                  ", XF86AudioRaiseVolume, exec, ${riceOsd "volumeUp" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"}"
-                  ", XF86AudioLowerVolume, exec, ${riceOsd "volumeDown" "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"}"
-                  ", XF86AudioMute,        exec, ${riceOsd "toggleMute" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"}"
-                  ", XF86MonBrightnessUp,   exec, ${riceOsd "brightnessUp" "brightnessctl set +10%"}"
-                  ", XF86MonBrightnessDown, exec, ${riceOsd "brightnessDown" "brightnessctl set 10%-"}"
-
-                  # Rice shell surfaces (see docs/architecture/ROADMAP.md)
-                  "${mainMod}, Space, exec, quickshell -c rice ipc call shell toggleLauncher"
-                  "${mainMod}, D, exec, quickshell -c rice ipc call shell toggleDashboard"
-                  "${mainMod} ALT, T, exec, quickshell -c rice ipc call shell toggleSwitcher"
-                  "${mainMod}, W, exec, quickshell -c rice ipc call shell toggleWallpapers"
-                  "${mainMod} ALT, W, exec, quickshell -c rice ipc call wallpapers next"
-                  "${mainMod}, V, exec, quickshell -c rice ipc call shell toggleSatchel"
-                  "${mainMod}, N, exec, quickshell -c rice ipc call notifications toggleCenter"
-                  "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, quickshell -c rice ipc call notifications clearAll"
-                ] else [
-                  ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-                  ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-                  ", XF86AudioMute,        exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-                  ", XF86MonBrightnessUp,   exec, brightnessctl set +10%"
-                  ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
-
-                  # Non-rice hosts keep the fzf wallpaper picker on Super+W.
-                  "${mainMod}, W, exec, ${launch "foot -T wallpaper-picker -e wallpaper-picker"}"
-                  "${mainMod}, N, exec, swaync-client -t -sw"
-                  "${mainMod} ${SECONDARY}, N, exec, swaync-client -d -sw"
-                  "${mainMod} ${SECONDARY} ${TERTIARY}, N, exec, swaync-client -C -sw"
-                ]);
-
-                binde = [
-                  "${mainMod} ${TERTIARY}, k, resizeactive, 0 -20"
-                  "${mainMod} ${TERTIARY}, j, resizeactive, 0 20"
-                  "${mainMod} ${TERTIARY}, l, resizeactive, 20 0"
-                  "${mainMod} ${TERTIARY}, h, resizeactive, -20 0"
-                  "${mainMod} ALT,  k, swapwindow, u"
-                  "${mainMod} ALT,  j, swapwindow, d"
-                  "${mainMod} ALT,  l, swapwindow, r"
-                  "${mainMod} ALT,  h, swapwindow, l"
-                ];
-
-                bindm = [
-                  "${mainMod}, mouse:272, movewindow"
-                  "${mainMod}, mouse:273, resizewindow"
-                ];
-
-                # === Rules ===
-                windowrule = [
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(Rofi)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(eww)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(Gimp-2.10)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.gnome.Calculator)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.gnome.Calendar)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(gnome-system-monitor)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(pavucontrol)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(nm-connection-editor)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(Color Picker)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(Network)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(pcmanfm)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(com.github.flxzt.rnote)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(xdg-desktop-portal)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(xdg-desktop-portal-gnome)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(transmission-gtk)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.kde.kdeconnect-settings)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:class ^(org.pulseaudio.pavucontrol)$"
-
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(Spotify Premium)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(Spotify)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(spotify_player)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(yazi)$"
-                  "float on, size (monitor_w*0.5) (monitor_h*0.7), center on, match:title ^(btop)$"
-                  "float on, size (monitor_w*0.4) (monitor_h*0.7), center on, match:title ^(theme-switcher)$"
-                  "float on, size (monitor_w*0.6) (monitor_h*0.8), center on, match:title ^(wallpaper-picker)$"
-
-                  "workspace 1, match:class ^(code|Code)$"
-                  "workspace 2, match:class ^(Alacritty|alacritty|foot)$"
-                  "workspace 3, match:class ^(zen|ZenBrowser)$"
-                  "workspace 4, match:class ^(Slack)$"
-                  "workspace 4, match:class ^(discord)$"
-                  "workspace 5, match:class ^(spotify)$"
-                  "workspace 6, match:class ^(btop|htop|nvtop|MissionCenter)$"
-                  "opacity 1.0 override 1.0 override, match:class ^(zen|ZenBrowser)$"
-                ];
-              };
           };
 
           fish.loginShellInit = ''
             if test (tty) = "/dev/tty1"
-              exec Hyprland &> /dev/null
+              exec Hyprland --config /etc/xdg/hypr/hyprland.lua &> /dev/null
             end
           '';
         };
