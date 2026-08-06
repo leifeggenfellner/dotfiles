@@ -11,8 +11,6 @@
       fmt = import ../themes/_fmt.nix lib;
       s = config.environment.desktop.theme.style;
       accent1 = c.${s.accentPrimary};
-      accent2 = c.${s.accentSecondary};
-      accent3 = c.${s.accentTertiary};
 
       q = builtins.toJSON;
       lines = lib.concatStringsSep "\n";
@@ -206,7 +204,7 @@
                 allow_tearing = true,
                 resize_on_border = true,
                 col = {
-                    active_border = ${q "${fmt.rgb accent1} ${fmt.rgb accent2} ${fmt.rgb accent3} 45deg"},
+                  active_border = ${q (fmt.rgb accent1)},
                     inactive_border = ${q (fmt.rgb c.surface0)},
                 },
                 hover_icon_on_border = true,
@@ -315,7 +313,6 @@
         ${animation { leaf = "windowsOut"; speed = s.speedWindowClose; bezier = "winOut"; style = "slide"; }}
         ${animation { leaf = "windowsMove"; speed = s.speedWindowMove; bezier = "wind"; style = "slide"; }}
         ${animation { leaf = "border"; speed = s.speedBorder; bezier = "liner"; }}
-        ${animation { leaf = "borderangle"; speed = s.speedBorderAngle; bezier = "liner"; style = "loop"; }}
         ${animation { leaf = "fade"; speed = s.speedFade; bezier = "default"; }}
         ${animation { leaf = "layers"; speed = s.speedLayer; bezier = "wind"; style = "slide"; }}
         ${animation { leaf = "layersIn"; speed = s.speedLayerIn; bezier = "winIn"; style = "slide"; }}

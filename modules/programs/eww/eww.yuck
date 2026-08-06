@@ -25,7 +25,7 @@
        :space-evenly false :spacing 4
     (for ws in workspaces
       (button :class "${ws.active ? 'ws-active' : 'ws-inactive'}"
-              :onclick "hyprctl dispatch workspace ${ws.id}"
+              :onclick "hyprctl dispatch 'hl.dsp.focus({ workspace = ${ws.id} })'"
         "${ws.id == 1 ? '󰨞' : ws.id == 2 ? '' : ws.id == 3 ? '󰈹' : ws.id == 4 ? '󰒱' : ws.id == 5 ? '󰓇' : ws.id == 6 ? '󰕮' : ws.id}"))))
 
 ;; Battery
@@ -105,7 +105,7 @@
           (button :class "btn-lock" :tooltip "Lock"
                   :onclick "lock-screen" "󰌾")
           (button :class "btn-logout" :tooltip "Logout"
-                  :onclick "hyprctl dispatch exit" "󰍃")))
+              :onclick "uwsm stop" "󰍃")))
       (button :class "btn-shutdown" :tooltip "Shutdown"
               :onclick "systemctl poweroff" "󰐥"))))
 

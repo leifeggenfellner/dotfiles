@@ -73,16 +73,6 @@
     lockMonitorPriority = [ "work" "home" "laptop" ];
   };
 
-  programs.hyprland = {
-    enable = true;
-    settings = {
-      monitor = [
-        "eDP-1,preferred,auto,1"
-        ",preferred,auto,1"
-      ];
-    };
-  };
-
   rice = {
     enable = true;
     theme = "lotm";

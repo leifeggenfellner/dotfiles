@@ -99,7 +99,7 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
     if [ "$monitor_count" -gt 1 ] || [ "$external_count" -gt 0 ]; then
       echo "Detected external monitor(s) — dock displays are online"
       # Wake monitors that may have gone to DPMS sleep during boot
-      hyprctl dispatch dpms on 2>/dev/null || true
+      hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "on" }))' >/dev/null 2>&1 || true
       exit 0
     fi
     sleep "$POLL_INTERVAL"
@@ -110,13 +110,13 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
     authorize_devices
 
     # Poke DPMS periodically to wake any sleeping monitors
-    hyprctl dispatch dpms on 2>/dev/null || true
+    hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "on" }))' >/dev/null 2>&1 || true
 
     # Trigger monitor rescan in Hyprland in case DP links appeared after auth.
-    hyprctl keyword monitor ",preferred,auto,1" >/dev/null 2>&1 || true
+    hyprctl eval 'hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })' >/dev/null 2>&1 || true
   done
 
   # Final DPMS wake even on timeout — monitors may have appeared but gone to sleep
-  hyprctl dispatch dpms on 2>/dev/null || true
+  hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "on" }))' >/dev/null 2>&1 || true
   echo "Timeout after ''${MAX_WAIT}s — only laptop display found, proceeding anyway"
 ''

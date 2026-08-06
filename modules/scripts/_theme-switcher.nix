@@ -67,7 +67,7 @@ let
   borderCaseBranches = builtins.concatStringsSep "\n    " (
     lib.mapAttrsToList
       (name: palette:
-        "${name}) echo \"${palette.mauve} ${palette.blue} ${palette.sapphire} ${palette.surface0}\" ;;"
+        "${name}) echo \"${palette.yellow} ${palette.surface0}\" ;;"
       )
       palettes
   );
@@ -179,13 +179,10 @@ let
       esac
     }
 
-    IFS=' ' read -r accent1 accent2 accent3 inactive <<< "$(get_borders "$scheme")"
-    [ -z "$accent1" ] && exit 0
+    IFS=' ' read -r accent inactive <<< "$(get_borders "$scheme")"
+    [ -z "$accent" ] && exit 0
 
-    hyprctl keyword general:col.active_border "rgb($accent1) rgb($accent2) rgb($accent3) 45deg" >/dev/null 2>&1 || true
-    hyprctl keyword general:col.inactive_border "rgb($inactive)" >/dev/null 2>&1 || true
-    hyprctl keyword group:col.border_active "rgb($accent1)" >/dev/null 2>&1 || true
-    hyprctl keyword group:col.border_inactive "rgb($inactive)" >/dev/null 2>&1 || true
+    hyprctl eval "hl.config({ general = { col = { active_border = \"rgb($accent)\", inactive_border = \"rgb($inactive)\" } }, group = { col = { border_active = \"rgb($accent)\", border_inactive = \"rgb($inactive)\" } } })" >/dev/null 2>&1 || true
   '';
 
   # ── Terminal color apply script (called on final apply only) ──────

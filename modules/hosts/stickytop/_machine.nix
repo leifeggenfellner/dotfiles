@@ -33,19 +33,6 @@
     lockMonitorPriority = [ "laptop" ];
   };
 
-  programs.hyprland = {
-    enable = true;
-    settings = {
-      monitor = [
-        # Built-in 14" 1920x1200 panel
-        "eDP-1,preferred,auto,1"
-
-        # External monitors — auto-detect
-        ",preferred,auto,1"
-      ];
-    };
-  };
-
   rice = {
     enable = false;
     theme = "lotm";

@@ -14,7 +14,7 @@ pkgs.writeShellScriptBin "handle-monitor" ''
 
   reconcile_displays() {
     echo "Reconciling display topology..."
-    hyprctl dispatch dpms on 2>/dev/null || true
+    hyprctl eval 'hl.dispatch(hl.dsp.dpms({ action = "on" }))' >/dev/null 2>&1 || true
     thunderbolt-wait || true
     setup-monitors || true
     wallpaper-restore || true

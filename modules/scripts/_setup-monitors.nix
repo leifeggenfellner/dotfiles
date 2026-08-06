@@ -33,10 +33,24 @@ pkgs.writeShellScriptBin "setup-monitors" ''
       '.[] | select(.description | contains($d)) | .name'
   }
 
+  lua_quote() {
+    printf '%s' "$1" | $JQ -Rsa .
+  }
+
+  hypr_eval() {
+    hyprctl eval "$1" >/dev/null 2>&1
+  }
+
+  hypr_dispatch() {
+    hypr_eval "hl.dispatch($1)"
+  }
+
   move_ws() {
+    local workspace="$1" monitor="$2"
+
     # Only move workspaces that actually exist
-    if hyprctl workspaces -j | $JQ -e --argjson id "$1" '.[] | select(.id == $id)' >/dev/null 2>&1; then
-      hyprctl dispatch moveworkspacetomonitor "$1" "$2" >/dev/null 2>&1 || true
+    if hyprctl workspaces -j | $JQ -e --argjson id "$workspace" '.[] | select(.id == $id)' >/dev/null 2>&1; then
+      hypr_dispatch "hl.dsp.workspace.move({ workspace = $(lua_quote "$workspace"), monitor = $(lua_quote "$monitor") })" || true
     fi
   }
 
@@ -46,20 +60,57 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
     monitors_json=$(hyprctl monitors -j)
     if [ -n "$mon" ] && echo "$monitors_json" | $JQ -e --arg m "$mon" '.[] | select(.name == $m)' >/dev/null 2>&1; then
-      hyprctl dispatch focusmonitor "$mon" >/dev/null 2>&1 || true
+      hypr_dispatch "hl.dsp.focus({ monitor = $(lua_quote "$mon") })" || true
     fi
 
     if [ -n "$ws" ] && hyprctl workspaces -j | $JQ -e --argjson id "$ws" '.[] | select(.id == $id)' >/dev/null 2>&1; then
-      hyprctl dispatch workspace "$ws" >/dev/null 2>&1 || true
+      hypr_dispatch "hl.dsp.focus({ workspace = $(lua_quote "$ws") })" || true
     fi
   }
 
   set_mon() {
-    hyprctl keyword monitor "$1" >/dev/null 2>&1
+    local output mode position scale lua_scale
+
+    IFS=',' read -r output mode position scale <<< "$1"
+    if [ "$mode" = "disable" ]; then
+      hypr_eval "hl.monitor({ output = $(lua_quote "$output"), disabled = true })"
+      return
+    fi
+
+    if [ -z "$scale" ] || printf '%s\n' "$scale" | grep -q '[^0-9.]'; then
+      lua_scale="\"$scale\""
+    else
+      lua_scale="$scale"
+    fi
+
+    hypr_eval "hl.monitor({ output = $(lua_quote "$output"), mode = $(lua_quote "$mode"), position = $(lua_quote "$position"), scale = $lua_scale })"
   }
 
   set_ws() {
-    hyprctl keyword workspace "$1" >/dev/null 2>&1
+    local spec="$1" workspace rest part monitor is_default lua
+
+    IFS=',' read -r workspace rest <<< "$spec"
+    monitor=""
+    is_default="false"
+
+    IFS=',' read -ra parts <<< "$rest"
+    for part in "''${parts[@]}"; do
+      case "$part" in
+        monitor:*) monitor="''${part#monitor:}" ;;
+        default:true) is_default="true" ;;
+      esac
+    done
+
+    lua="{ workspace = $(lua_quote "$workspace")"
+    if [ -n "$monitor" ]; then
+      lua="$lua, monitor = $(lua_quote "$monitor")"
+    fi
+    if [ "$is_default" = "true" ]; then
+      lua="$lua, default = true"
+    fi
+    lua="$lua }"
+
+    hypr_eval "hl.workspace_rule($lua)"
   }
 
   echo "Detected monitors:"
@@ -185,8 +236,9 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   fi
 
   # Wake any DPMS-sleeping monitors
-  hyprctl dispatch dpms on 2>/dev/null || true
+  hypr_dispatch 'hl.dsp.dpms({ action = "on" })' || true
   restore_focus "$ORIGINAL_WORKSPACE" "$ORIGINAL_MONITOR"
 
   echo "Monitor setup complete"
 ''
+
