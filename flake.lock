@@ -229,24 +229,6 @@
         "type": "github"
       }
     },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems_3"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "hardware": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -907,11 +889,11 @@
         "pre-commit-hooks-nix": "pre-commit-hooks-nix"
       },
       "locked": {
-        "lastModified": 1786120706,
-        "narHash": "sha256-KQGgJb6YphLl0xKKvVQuffMQnT3cMjnJQqXYSqKh3uU=",
+        "lastModified": 1786125434,
+        "narHash": "sha256-Vdrz7gcAZwvVvf67gZXuRxaAVMx0zIQygqratC0NHPk=",
         "owner": "HNIKT-Tjenesteutvikling-Systemutvikling",
         "repo": "mugge",
-        "rev": "a08aa2202cf9ce81c9f1c75140316f52b1060e41",
+        "rev": "7477fb0c18b357740f0d3ae81c5ba3030c2a2b9f",
         "type": "github"
       },
       "original": {
@@ -1024,22 +1006,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "nixpkgs.lib",
-        "type": "github"
-      }
-    },
-    "nixpkgs_10": {
-      "locked": {
-        "lastModified": 1742578646,
-        "narHash": "sha256-GiQ40ndXRnmmbDZvuv762vS+gew1uDpFwOfgJ8tLiEs=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "94c4dbe77c0740ebba36c173672ca15a7926c993",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
         "type": "github"
       }
     },
@@ -1270,29 +1236,9 @@
         "nixpkgs": "nixpkgs_8",
         "nur": "nur",
         "pre-commit-hooks-nix": "pre-commit-hooks-nix_2",
-        "scramgit": "scramgit",
         "sops-nix": "sops-nix",
         "vsmugge": "vsmugge",
         "zen-browser": "zen-browser"
-      }
-    },
-    "scramgit": {
-      "inputs": {
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": "nixpkgs_10"
-      },
-      "locked": {
-        "lastModified": 1784140187,
-        "narHash": "sha256-8iMnAfollgQp4p7thbMKjz4KE7V0SJkPliqxQxeJtCw=",
-        "owner": "gako358",
-        "repo": "scram",
-        "rev": "133f9daca96d9961f60bfe86ee8da66ce076fb0a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "gako358",
-        "repo": "scram",
-        "type": "github"
       }
     },
     "sops-nix": {
@@ -1331,21 +1277,6 @@
       }
     },
     "systems_2": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_3": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
