@@ -129,7 +129,8 @@ Item {
             services: ["systemStats"]
             layout: ({
                     colSpan: 6,
-                    minHeight: 340
+                    column: "main",
+                    minHeight: 304
                 })
             glance: metersDashboard
         },
@@ -140,7 +141,8 @@ Item {
             services: ["weather"]
             layout: ({
                     colSpan: 6,
-                    minHeight: 196
+                    column: "sidebar",
+                    minHeight: 148
                 })
             glance: weatherDashboard
         },
@@ -151,7 +153,8 @@ Item {
             services: ["weather"]
             layout: ({
                     colSpan: 6,
-                    minHeight: 220
+                    column: "sidebar",
+                    minHeight: 176
                 })
             glance: calendarDashboard
         },
@@ -162,6 +165,7 @@ Item {
             services: ["session"]
             layout: ({
                     colSpan: 3,
+                    column: "sidebar",
                     minHeight: 168
                 })
             glance: sessionLockTile
@@ -212,8 +216,6 @@ Item {
             console.warn("Registry: plugin", plugin.id, "failed to load:", component.errorString());
             return null;
         }
-        if (component.status !== Component.Ready)
-            return null;
         return component;
     }
 

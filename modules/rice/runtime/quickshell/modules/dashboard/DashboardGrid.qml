@@ -12,12 +12,13 @@ Item {
     property bool surfaceMapped: false
     property bool reducedMotion: false
     property int gap: Theme.metrics.space.md
-    property int minColumns: 6
-    property int maxColumns: 12
-    property real compactBreakpoint: 900
+    property real compactBreakpoint: 1120
+    property real sidebarRatio: 0.46
+    property int sidebarMinWidth: 360
+    property int sidebarMaxWidth: 560
+    property int mainMinWidth: 440
 
-    readonly property int columns: width < compactBreakpoint ? minColumns : maxColumns
-    readonly property real columnWidth: columns > 0 ? Math.max(1, (width - gap * (columns - 1)) / columns) : 1
+    readonly property bool compact: width < compactBreakpoint
     readonly property real contentHeight: _contentHeight
     readonly property var placements: _placements
     property int focusIndex: placements.length > 0 ? Math.max(0, Math.min(_focusIndex, placements.length - 1)) : -1
@@ -31,7 +32,6 @@ Item {
     signal requestVisible(real y, real h)
 
     onWidthChanged: schedulePack()
-    onColumnsChanged: schedulePack()
     onDescriptorsChanged: {
         _focusIndex = descriptors.length > 0 ? 0 : -1;
         schedulePack();
@@ -53,16 +53,11 @@ Item {
         const epigraphLike = widget.widgetId === "epigraph";
         return {
             colSpan: hint.colSpan ?? (epigraphLike ? 12 : 6),
+            column: hint.column ?? null,
+            fullWidth: hint.fullWidth ?? epigraphLike,
             minHeight: hint.minHeight ?? (epigraphLike ? 112 : 180),
             priority: hint.priority ?? widget.priority ?? 0
         };
-    }
-
-    function effectiveSpan(widget) {
-        const requested = Math.max(1, Math.min(maxColumns, defaultLayout(widget).colSpan));
-        if (columns <= minColumns && requested >= 6)
-            return minColumns;
-        return Math.max(1, Math.min(columns, requested));
     }
 
     function sortedEntries() {
@@ -82,70 +77,94 @@ Item {
         return Math.max(1, measured > 0 ? measured : entry.layout.minHeight);
     }
 
-    function findBestColumn(heights, span) {
-        let bestColumn = 0;
-        let bestY = Number.POSITIVE_INFINITY;
+    function isFullWidth(entry) {
+        return entry.layout.fullWidth === true || entry.layout.colSpan >= 12;
+    }
 
-        // Skyline first-fit: for each legal span, look at the tallest occupied
-        // column under it. The topmost candidate wins, ties keep the earlier
-        // column, which gives top-left packing and fills holes from mixed cards.
-        for (let column = 0; column <= columns - span; column++) {
-            let y = 0;
-            for (let offset = 0; offset < span; offset++)
-                y = Math.max(y, heights[column + offset]);
-            if (y < bestY) {
-                bestY = y;
-                bestColumn = column;
-            }
+    function preferredColumn(entry) {
+        if (entry.layout.column === "main" || entry.layout.column === "sidebar")
+            return entry.layout.column;
+        const id = entry.widget.widgetId;
+        if (id === "weather" || id === "calendar" || id === "session-lock" || id === "ritualLedger")
+            return "sidebar";
+        return "main";
+    }
+
+    function pushPlacement(out, entry, x, y, w, h, columnName) {
+        out.push({
+            key: descriptorKey(entry),
+            widget: entry.widget,
+            sourceIndex: entry.sourceIndex,
+            placementIndex: out.length,
+            column: columnName,
+            colSpan: 1,
+            x,
+            y,
+            width: w,
+            height: h
+        });
+
+        return y + h;
+    }
+
+    function appendFlow(out, entries, x, startY, w, columnName) {
+        let y = startY;
+        for (let i = 0; i < entries.length; i++) {
+            if (i > 0)
+                y += gap;
+            const entry = entries[i];
+            y = pushPlacement(out, entry, x, y, w, measuredHeight(entry), columnName);
         }
+        return y;
+    }
 
-        return {
-            column: bestColumn,
-            y: bestY === Number.POSITIVE_INFINITY ? 0 : bestY
-        };
+    function sidebarWidthFor(totalWidth) {
+        const maxSidebar = Math.min(sidebarMaxWidth, Math.max(sidebarMinWidth, totalWidth - gap - mainMinWidth));
+        return Math.max(sidebarMinWidth, Math.min(maxSidebar, Math.round(totalWidth * sidebarRatio)));
     }
 
     function pack() {
-        if (width <= 0 || columns <= 0) {
+        if (width <= 0) {
             _placements = [];
             _contentHeight = 0;
             return;
         }
 
-        const heights = Array(columns).fill(0);
         const out = [];
         const ordered = sortedEntries();
 
-        for (let i = 0; i < ordered.length; i++) {
-            const entry = ordered[i];
-            const span = effectiveSpan(entry.widget);
-            const h = measuredHeight(entry);
-            const fit = findBestColumn(heights, span);
-            const x = fit.column * (columnWidth + gap);
-            const y = fit.y === 0 ? 0 : fit.y + gap;
-            const w = span * columnWidth + (span - 1) * gap;
-            const key = descriptorKey(entry);
-
-            out.push({
-                key,
-                widget: entry.widget,
-                sourceIndex: entry.sourceIndex,
-                placementIndex: i,
-                column: fit.column,
-                colSpan: span,
-                x,
-                y,
-                width: w,
-                height: h
-            });
-
-            const nextHeight = y + h;
-            for (let offset = 0; offset < span; offset++)
-                heights[fit.column + offset] = nextHeight;
+        if (compact) {
+            _contentHeight = appendFlow(out, ordered, 0, 0, width, "single");
+            _placements = out;
+            if (_focusIndex < 0 && out.length > 0)
+                _focusIndex = 0;
+            return;
         }
 
+        const fullWidth = ordered.filter(entry => isFullWidth(entry));
+        const remaining = ordered.filter(entry => !isFullWidth(entry));
+        const mainEntries = remaining.filter(entry => preferredColumn(entry) === "main");
+        const sidebarEntries = remaining.filter(entry => preferredColumn(entry) === "sidebar");
+
+        const headerBottom = appendFlow(out, fullWidth, 0, 0, width, "full");
+        const contentTop = headerBottom > 0 && remaining.length > 0 ? headerBottom + gap : headerBottom;
+
+        if (mainEntries.length === 0 || sidebarEntries.length === 0) {
+            _contentHeight = appendFlow(out, remaining, 0, contentTop, width, "single");
+            _placements = out;
+            if (_focusIndex < 0 && out.length > 0)
+                _focusIndex = 0;
+            return;
+        }
+
+        const sidebarWidth = sidebarWidthFor(width);
+        const mainWidth = width - gap - sidebarWidth;
+        const sidebarX = mainWidth + gap;
+        const mainBottom = appendFlow(out, mainEntries, 0, contentTop, mainWidth, "main");
+        const sidebarBottom = appendFlow(out, sidebarEntries, sidebarX, contentTop, sidebarWidth, "sidebar");
+
         _placements = out;
-        _contentHeight = Math.max(0, ...heights);
+        _contentHeight = Math.max(mainBottom, sidebarBottom);
         if (_focusIndex < 0 && out.length > 0)
             _focusIndex = 0;
     }
@@ -333,9 +352,24 @@ Item {
         property real revealProgress: 1
         property bool retryPulse: true
 
-        Behavior on x { NumberAnimation { duration: grid.reducedMotion ? 0 : Motion.stateChange.duration; easing.type: grid.reducedMotion ? Easing.Linear : Motion.stateChange.easing } }
-        Behavior on y { NumberAnimation { duration: grid.reducedMotion ? 0 : Motion.stateChange.duration; easing.type: grid.reducedMotion ? Easing.Linear : Motion.stateChange.easing } }
-        Behavior on revealProgress { NumberAnimation { duration: grid.reducedMotion ? 0 : Motion.surfaceReveal.duration; easing.type: grid.reducedMotion ? Easing.Linear : Motion.surfaceReveal.easing } }
+        Behavior on x {
+            NumberAnimation {
+                duration: grid.reducedMotion ? 0 : Motion.stateChange.duration
+                easing.type: grid.reducedMotion ? Easing.Linear : Motion.stateChange.easing
+            }
+        }
+        Behavior on y {
+            NumberAnimation {
+                duration: grid.reducedMotion ? 0 : Motion.stateChange.duration
+                easing.type: grid.reducedMotion ? Easing.Linear : Motion.stateChange.easing
+            }
+        }
+        Behavior on revealProgress {
+            NumberAnimation {
+                duration: grid.reducedMotion ? 0 : Motion.surfaceReveal.duration
+                easing.type: grid.reducedMotion ? Easing.Linear : Motion.surfaceReveal.easing
+            }
+        }
 
         onReportedHeightChanged: grid.setMeasuredHeight(placement.key, reportedHeight)
         onWidgetHeightChanged: Qt.callLater(() => grid.setMeasuredHeight(placement.key, reportedHeight))

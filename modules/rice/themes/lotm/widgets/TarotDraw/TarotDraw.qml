@@ -74,14 +74,15 @@ Rectangle {
     readonly property bool hasDaily: daily.date === today && daily.card !== undefined
     readonly property var currentCard: hasDaily ? cards[Math.max(0, Math.min(cards.length - 1, daily.card))] : null
     readonly property real cardAspect: 1000 / 1778
-    readonly property int cardHeight: 220
+    readonly property bool wide: width >= 560
+    readonly property int cardHeight: wide ? 220 : 188
     readonly property int cardWidth: Math.round(cardHeight * cardAspect)
     readonly property color cardMatte: "#d9c59b"
 
     property bool revealed: hasDaily
 
-    width: 672
-    height: 252
+    implicitHeight: (wide ? wideLayout.implicitHeight : compactLayout.implicitHeight) + theme.metrics.space.lg * 2
+    height: implicitHeight
     radius: theme.metrics.radius.medium
     color: theme.colors.bg.base
     border.width: 1
@@ -176,9 +177,12 @@ Rectangle {
     }
 
     Row {
+        id: wideLayout
+
         anchors.fill: parent
         anchors.margins: root.theme.metrics.space.lg
         spacing: root.theme.metrics.space.lg
+        visible: root.wide
 
         Rectangle {
             id: cardFrame
@@ -270,6 +274,127 @@ Rectangle {
                 width: parent.width
                 text: root.currentCard ? root.currentCard.sequence + " · " + root.currentCard.name : root.emptyLabel
                 color: root.currentCard ? root.theme.colors.accent.primary : root.theme.colors.fg.subtle
+                wrapMode: Text.WordWrap
+                font.family: root.theme.typography.families.display
+                font.pointSize: root.theme.typography.sizes.heading
+            }
+
+            Text {
+                width: parent.width
+                text: root.currentCard ? root.currentCard.phrase : "A single card may be recorded for the day."
+                color: root.theme.colors.fg.muted
+                wrapMode: Text.WordWrap
+                font.family: root.theme.typography.families.sans
+                font.pointSize: root.theme.typography.sizes.body
+            }
+
+            Text {
+                text: root.hasDaily ? "sealed for " + root.today : "waiting for a draw"
+                color: root.theme.colors.fg.subtle
+                font.family: root.theme.typography.families.mono
+                font.pointSize: root.theme.typography.sizes.small
+            }
+        }
+    }
+
+    Column {
+        id: compactLayout
+
+        anchors.fill: parent
+        anchors.margins: root.theme.metrics.space.lg
+        spacing: root.theme.metrics.space.md
+        visible: !root.wide
+
+        Rectangle {
+            width: root.cardWidth
+            height: root.cardHeight
+            anchors.horizontalCenter: parent.horizontalCenter
+            radius: 4
+            color: root.cardMatte
+            border.width: 0
+            clip: true
+            scale: compactDrawMouse.pressed ? 0.96 : 1
+            rotation: root.revealed ? 0 : 2
+
+            Image {
+                anchors.fill: parent
+                anchors.margins: 1
+                source: Qt.resolvedUrl(root.visibleCardPath())
+                fillMode: Image.PreserveAspectCrop
+                horizontalAlignment: Image.AlignHCenter
+                verticalAlignment: Image.AlignVCenter
+                smooth: true
+                mipmap: true
+            }
+
+            MouseArea {
+                id: compactDrawMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: root.draw()
+            }
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: root.motion.sealPress.duration
+                    easing.type: root.motion.sealPress.easing
+                }
+            }
+            Behavior on rotation {
+                NumberAnimation {
+                    duration: root.motion.cardFlip.duration
+                    easing.type: root.motion.cardFlip.easing
+                }
+            }
+        }
+
+        Column {
+            width: parent.width
+            spacing: root.theme.metrics.space.md
+
+            Row {
+                width: parent.width
+                spacing: root.theme.metrics.space.md
+
+                Text {
+                    text: root.title
+                    color: root.theme.colors.fg.primary
+                    font.family: root.theme.typography.families.display
+                    font.pointSize: root.theme.typography.sizes.heading
+                }
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: drawTextCompact.width + root.theme.metrics.space.md * 2
+                    height: 28
+                    radius: root.theme.metrics.radius.small
+                    color: compactActionMouse.containsMouse ? root.theme.colors.bg.elevated : root.theme.colors.bg.sunken
+                    border.width: 1
+                    border.color: compactActionMouse.containsMouse ? root.theme.colors.accent.primary : root.theme.colors.bg.surface1
+
+                    Text {
+                        id: drawTextCompact
+                        anchors.centerIn: parent
+                        text: root.hasDaily ? root.redrawLabel : root.prompt
+                        color: root.theme.colors.fg.primary
+                        font.family: root.theme.typography.families.sans
+                        font.pointSize: root.theme.typography.sizes.small
+                    }
+
+                    MouseArea {
+                        id: compactActionMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: root.draw()
+                    }
+                }
+            }
+
+            Text {
+                width: parent.width
+                text: root.currentCard ? root.currentCard.sequence + " · " + root.currentCard.name : root.emptyLabel
+                color: root.currentCard ? root.theme.colors.accent.primary : root.theme.colors.fg.subtle
+                wrapMode: Text.WordWrap
                 font.family: root.theme.typography.families.display
                 font.pointSize: root.theme.typography.sizes.heading
             }

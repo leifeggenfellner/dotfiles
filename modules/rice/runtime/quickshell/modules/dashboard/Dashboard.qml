@@ -108,14 +108,18 @@ PanelWindow {
             id: panel
 
             readonly property int outerMargin: Theme.metrics.space.lg * 2
-            readonly property real targetRatio: 1.6
+            readonly property int maxPanelWidth: 1360
+            readonly property real comfortableRatio: compactPanel ? 0.86 : 1.42
             readonly property int availableWidth: Math.max(1, parent.width - outerMargin * 2)
             readonly property int availableHeight: Math.max(1, parent.height - outerMargin * 2)
             readonly property bool compactPanel: availableWidth < 900
+            readonly property int minimumHeight: Math.min(availableHeight, compactPanel ? 560 : 680)
+            readonly property int comfortableHeight: Math.round(width / comfortableRatio)
+            readonly property int contentDrivenHeight: dashboardGrid.contentHeight > 0 ? Math.ceil(dashboardGrid.contentHeight + Theme.metrics.space.lg * 2) : 0
 
             anchors.centerIn: parent
-            width: Math.min(availableWidth, 1184, Math.floor(availableHeight * targetRatio))
-            height: compactPanel ? Math.min(availableHeight, Math.max(Math.round(width / 0.72), Math.round(width / targetRatio))) : Math.min(availableHeight, Math.round(width / targetRatio))
+            width: Math.min(availableWidth, maxPanelWidth)
+            height: Math.min(availableHeight, Math.max(minimumHeight, comfortableHeight, contentDrivenHeight))
             radius: Theme.metrics.radius.large
             color: Theme.colors.bg.mantle
             border.width: 1

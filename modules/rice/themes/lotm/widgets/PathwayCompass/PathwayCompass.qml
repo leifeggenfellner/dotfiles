@@ -82,9 +82,11 @@ Rectangle {
     ]
     readonly property int activeIndex: Math.max(0, Math.min(pathways.length - 1, settings.activeIndex ?? 0))
     readonly property var activePathway: pathways.length > 0 ? pathways[activeIndex] : ({})
+    readonly property int cardGap: theme.metrics.space.sm
+    readonly property bool stackPathways: width < 620
 
-    width: 672
-    height: 112
+    implicitHeight: content.implicitHeight + theme.metrics.space.lg * 2
+    height: implicitHeight
     radius: theme.metrics.radius.medium
     color: theme.colors.bg.base
     border.width: 1
@@ -94,14 +96,15 @@ Rectangle {
         return row && row.color ? row.color : fallback;
     }
 
-    Row {
+    Column {
+        id: content
+
         anchors.fill: parent
         anchors.margins: root.theme.metrics.space.lg
-        spacing: root.theme.metrics.space.lg
+        spacing: root.theme.metrics.space.md
 
         Column {
-            width: 180
-            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width
             spacing: root.theme.metrics.space.xs
 
             Text {
@@ -110,7 +113,7 @@ Rectangle {
                 color: root.theme.colors.fg.primary
                 font.family: root.theme.typography.families.display
                 font.pointSize: root.theme.typography.sizes.heading
-                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
             }
 
             Text {
@@ -119,14 +122,15 @@ Rectangle {
                 color: root.theme.colors.fg.subtle
                 font.family: root.theme.typography.families.mono
                 font.pointSize: root.theme.typography.sizes.small
-                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
             }
         }
 
-        Row {
-            width: parent.width - 180 - parent.spacing
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: root.theme.metrics.space.sm
+        Flow {
+            id: pathwayFlow
+
+            width: parent.width
+            spacing: root.cardGap
 
             Repeater {
                 model: root.pathways
@@ -140,14 +144,17 @@ Rectangle {
                     readonly property bool active: index === root.activeIndex
                     readonly property color accent: root.pathwayColor(modelData, root.theme.colors.accent.primary)
 
-                    width: (parent.width - root.theme.metrics.space.sm * Math.max(0, root.pathways.length - 1)) / Math.max(1, root.pathways.length)
-                    height: 68
+                    width: root.stackPathways ? pathwayFlow.width : (pathwayFlow.width - root.cardGap * Math.max(0, root.pathways.length - 1)) / Math.max(1, root.pathways.length)
+                    implicitHeight: cardContent.implicitHeight + root.theme.metrics.space.sm * 2
+                    height: Math.max(68, implicitHeight)
                     radius: root.theme.metrics.radius.small
                     color: active ? root.theme.colors.bg.elevated : root.theme.colors.bg.sunken
                     border.width: active ? 2 : 1
                     border.color: active ? accent : root.theme.colors.bg.surface1
 
                     Row {
+                        id: cardContent
+
                         anchors.fill: parent
                         anchors.margins: root.theme.metrics.space.sm
                         spacing: root.theme.metrics.space.sm
@@ -171,7 +178,7 @@ Rectangle {
                                 color: root.theme.colors.fg.primary
                                 font.family: root.theme.typography.families.sans
                                 font.pointSize: root.theme.typography.sizes.body
-                                elide: Text.ElideRight
+                                wrapMode: Text.WordWrap
                             }
 
                             Text {
@@ -180,7 +187,7 @@ Rectangle {
                                 color: card.active ? card.accent : root.theme.colors.fg.subtle
                                 font.family: root.theme.typography.families.mono
                                 font.pointSize: root.theme.typography.sizes.small
-                                elide: Text.ElideRight
+                                wrapMode: Text.WordWrap
                             }
                         }
                     }

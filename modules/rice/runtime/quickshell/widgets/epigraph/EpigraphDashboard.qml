@@ -15,7 +15,6 @@ Column {
     readonly property var lines: settings.lines ?? ["A quiet overview of the machine."]
     readonly property int lineIndex: lines.length > 0 ? Math.abs(clock.date.getDate() - 1) % lines.length : 0
 
-    width: 672
     spacing: Theme.metrics.space.sm
 
     SystemClock {

@@ -338,6 +338,7 @@ in
       region = "dashboard";
       priority = 40;
       services = [ "prefs" ];
+      layout = { column = "main"; minHeight = 320; };
     }
     {
       id = "ritualLedger";
@@ -346,6 +347,7 @@ in
       region = "dashboard";
       priority = 50;
       services = [ "prefs" ];
+      layout = { column = "sidebar"; minHeight = 148; };
     }
     {
       id = "pathwayCompass";
@@ -354,6 +356,7 @@ in
       region = "dashboard";
       priority = 60;
       services = [ ];
+      layout = { column = "main"; minHeight = 180; };
     }
   ];
 

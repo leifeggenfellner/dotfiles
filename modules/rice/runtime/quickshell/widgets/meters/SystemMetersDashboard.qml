@@ -18,8 +18,8 @@ Column {
     readonly property var colors: settings.colors ?? ({})
     readonly property var danger: settings.danger ?? ({})
     readonly property color dangerColor: settings.corruptionColor ?? Theme.colors.state.danger
+    readonly property bool compact: width < 560
 
-    width: 672
     spacing: Theme.metrics.space.md
 
     component MeterCard: Rectangle {
@@ -30,8 +30,9 @@ Column {
         required property color fillColor
         property bool danger: false
 
-        width: (root.width - Theme.metrics.space.md) / 2
-        height: 112
+        width: root.compact ? root.width : (root.width - Theme.metrics.space.md) / 2
+        implicitHeight: meterContent.implicitHeight + Theme.metrics.space.md * 2
+        height: implicitHeight
         radius: Theme.metrics.radius.medium
         color: Theme.colors.bg.elevated
         border.width: danger ? 2 : 1
@@ -45,6 +46,8 @@ Column {
         }
 
         Column {
+            id: meterContent
+
             anchors.fill: parent
             anchors.margins: Theme.metrics.space.md
             spacing: Theme.metrics.space.sm
@@ -59,7 +62,8 @@ Column {
                     color: Theme.colors.fg.primary
                     font.family: Theme.typography.families.sans
                     font.pointSize: Theme.typography.sizes.body
-                    elide: Text.ElideRight
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
                 }
 
                 Text {
@@ -102,15 +106,18 @@ Column {
                 color: danger ? root.dangerColor : Theme.colors.fg.subtle
                 font.family: Theme.typography.families.sans
                 font.pointSize: Theme.typography.sizes.small
-                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
                 width: parent.width
             }
         }
     }
 
     Grid {
-        columns: 2
+        id: meterGrid
+
+        columns: root.compact ? 1 : 2
         spacing: Theme.metrics.space.md
+        width: root.width
 
         MeterCard {
             title: root.labels.cpu?.title ?? "CPU"

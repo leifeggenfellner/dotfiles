@@ -123,7 +123,6 @@ Item {
             text: root.hint
             horizontalAlignment: Text.AlignHCenter
             color: Theme.colors.fg.subtle
-            elide: Text.ElideRight
             wrapMode: Text.WordWrap
             font.family: Theme.typography.families.sans
             font.pointSize: Theme.typography.sizes.small
