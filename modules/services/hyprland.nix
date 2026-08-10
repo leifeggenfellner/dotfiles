@@ -53,6 +53,8 @@
 
       runOnce = program: "pgrep ${program} || uwsm app -- ${program}";
       launch = program: "uwsm app -- ${program}";
+      quickshell = "${pkgs.quickshell}/bin/quickshell";
+      riceIpc = target: action: "${quickshell} -c rice ipc call ${target} ${action}";
       riceOsd = action: fallback: "sh -c '${pkgs.quickshell}/bin/quickshell -c rice ipc call osd ${action} >/dev/null 2>&1 || ${fallback}'";
 
       env = [
@@ -71,7 +73,7 @@
         "thunderbolt-wait && setup-monitors"
         "handle-monitor"
       ] ++ lib.optionals config.rice.enable [
-        "uwsm app -- rice-shell"
+        "uwsm app -- ${quickshell} -c rice"
       ];
 
       workspaceBinds = lib.flatten (builtins.genList
@@ -119,14 +121,14 @@
         (bindExec "XF86AudioMute" (riceOsd "toggleMute" "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
         (bindExec "XF86MonBrightnessUp" (riceOsd "brightnessUp" "brightnessctl set +10%"))
         (bindExec "XF86MonBrightnessDown" (riceOsd "brightnessDown" "brightnessctl set 10%-"))
-        (bindExec (key mainMod "Space") "quickshell -c rice ipc call shell toggleLauncher")
-        (bindExec (key mainMod "D") "quickshell -c rice ipc call shell toggleDashboard")
-        (bindExec (key mainAlt "T") "quickshell -c rice ipc call shell toggleSwitcher")
-        (bindExec (key mainMod "W") "quickshell -c rice ipc call shell toggleWallpapers")
-        (bindExec (key mainAlt "W") "quickshell -c rice ipc call wallpapers next")
-        (bindExec (key mainMod "V") "quickshell -c rice ipc call shell toggleSatchel")
-        (bindExec (key mainMod "N") "quickshell -c rice ipc call notifications toggleCenter")
-        (bindExec (key mainShiftCtrl "N") "quickshell -c rice ipc call notifications clearAll")
+        (bindExec (key mainMod "Space") (riceIpc "shell" "toggleLauncher"))
+        (bindExec (key mainMod "D") (riceIpc "shell" "toggleDashboard"))
+        (bindExec (key mainAlt "T") (riceIpc "shell" "toggleSwitcher"))
+        (bindExec (key mainMod "W") (riceIpc "shell" "toggleWallpapers"))
+        (bindExec (key mainAlt "W") (riceIpc "wallpapers" "next"))
+        (bindExec (key mainMod "V") (riceIpc "shell" "toggleSatchel"))
+        (bindExec (key mainMod "N") (riceIpc "notifications" "toggleCenter"))
+        (bindExec (key mainShiftCtrl "N") (riceIpc "notifications" "clearAll"))
       ];
 
       fallbackBinds = [
