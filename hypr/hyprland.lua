@@ -267,7 +267,7 @@ hl.config({
         animate_mouse_windowdragging = true,
         animate_manual_resizes = true,
         vrr = 1,
-        focus_on_activate = false,
+        focus_on_activate = true,
         mouse_move_focuses_monitor = true,
         enable_swallow = true,
         swallow_regex = "^(foot|alacritty|kitty)$",
@@ -294,20 +294,22 @@ for _, entry in ipairs(env) do
 end
 
 local setup_displays = "setup-monitors"
+local restore_wallpaper = "wallpaper-restore"
 local monitor_handler = "pgrep -f '[h]andle-monitor' || uwsm app -- handle-monitor"
 local quickshell_rice = "pgrep -f '[q]uickshell.*rice' || uwsm app -- rice-shell --prod"
 
 local exec_once = {
-    "wallpaper-restore",
+    restore_wallpaper,
     "hyprctl setcursor " .. style.cursor_name .. " " .. tostring(style.cursor_size),
     "wl-clip-persist --clipboard both",
     "wl-paste --watch cliphist store",
     "uwsm finalize",
-    "thunderbolt-wait && " .. setup_displays,
+    "thunderbolt-wait && " .. setup_displays .. " && " .. restore_wallpaper,
     monitor_handler,
 }
 
 hl.exec_cmd(setup_displays)
+hl.exec_cmd(restore_wallpaper)
 hl.exec_cmd(monitor_handler)
 
 if rice_enabled then
@@ -355,15 +357,10 @@ blurred_layer("^(swaync-notification-window)$")
 blurred_layer("^(swaync-control-center)$")
 
 hl.window_rule({
-    name = "block-activation-focus-steal",
-    match = { class = ".*" },
-    suppress_event = "activate activatefocus",
-    focus_on_activate = false,
-})
-
-hl.window_rule({
     name = "alert-dialogs-no-initial-focus",
     match = { title = ".*([Aa]lert|[Dd]ialog|[Nn]otification|[Pp]opup).*" },
+    suppress_event = "activate activatefocus",
+    focus_on_activate = false,
     no_initial_focus = true,
 })
 
@@ -495,13 +492,13 @@ floating_title("^(theme-switcher)$", "monitor_w*0.4", "monitor_h*0.7")
 floating_title("^(wallpaper-picker)$", "monitor_w*0.6", "monitor_h*0.8")
 
 local workspace_rules = {
-    { match = "class", pattern = "^(code|Code)$", workspace = "1 silent" },
-    { match = "class", pattern = "^(Alacritty|alacritty|foot)$", workspace = "2 silent" },
-    { match = "class", pattern = "^(zen|ZenBrowser)$", workspace = "3 silent" },
-    { match = "class", pattern = "^(Slack)$", workspace = "4 silent" },
-    { match = "class", pattern = "^(discord)$", workspace = "4 silent" },
-    { match = "class", pattern = "^(spotify)$", workspace = "5 silent" },
-    { match = "class", pattern = "^(btop|htop|nvtop|MissionCenter)$", workspace = "6 silent" },
+    { match = "class", pattern = "^(code|Code)$", workspace = "1" },
+    { match = "class", pattern = "^(Alacritty|alacritty|foot)$", workspace = "2" },
+    { match = "class", pattern = "^(zen|ZenBrowser)$", workspace = "3" },
+    { match = "class", pattern = "^(Slack)$", workspace = "4" },
+    { match = "class", pattern = "^(discord)$", workspace = "4" },
+    { match = "class", pattern = "^(spotify)$", workspace = "5" },
+    { match = "class", pattern = "^(btop|htop|nvtop|MissionCenter)$", workspace = "6" },
 }
 
 for _, rule in ipairs(workspace_rules) do
