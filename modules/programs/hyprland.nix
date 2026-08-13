@@ -2,6 +2,7 @@ _: {
   flake.homeModules.programs-hyprland =
     { lib
     , pkgs
+    , config
     , osConfig
     , ...
     }:
@@ -43,8 +44,13 @@ _: {
             QT_QPA_PLATFORM = "wayland;xcb";
             QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
             QT_QPA_PLATFORMTHEME = "qt5ct";
+            HYPRLAND_CONFIG = "${config.xdg.configHome}/hypr/hyprland.lua";
+            DOTFILES_RICE_ENABLE = if osConfig.rice.enable or false then "1" else "0";
           };
         };
+
+        xdg.configFile."hypr/hyprland.lua".source =
+          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Sources/dotfiles/hypr/hyprland.lua";
       };
     };
 }
