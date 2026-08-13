@@ -22,8 +22,80 @@ local main_ctrl = mods({ main_mod, tertiary })
 local main_alt = mods({ main_mod, "ALT" })
 local main_shift_ctrl = mods({ main_mod, secondary, tertiary })
 
-local rice_enabled = os.getenv("DOTFILES_RICE_ENABLE") == "1"
-local quickshell = "quickshell"
+local function merge(defaults, overrides)
+    local result = {}
+
+    for key_name, value in pairs(defaults) do
+        result[key_name] = value
+    end
+
+    if type(overrides) == "table" then
+        for key_name, value in pairs(overrides) do
+            result[key_name] = value
+        end
+    end
+
+    return result
+end
+
+local function read_file(path)
+    local file = io.open(path, "r")
+    if file == nil then
+        return nil
+    end
+
+    local content = file:read("*a")
+    file:close()
+    return content
+end
+
+local function load_manifest_theme(home)
+    local manifest = read_file(home .. "/.config/rice/manifest.json")
+    if manifest == nil then
+        return {}
+    end
+
+    local legacy = manifest:match('"legacy":%{(.-)%}') or ""
+    local active_border = legacy:match('"mauve":"([0-9a-fA-F]+)"')
+    local inactive_border = legacy:match('"surface0":"([0-9a-fA-F]+)"')
+    local colors = {}
+
+    if active_border ~= nil then
+        colors.active_border = "rgb(" .. active_border .. ")"
+    end
+
+    if inactive_border ~= nil then
+        colors.inactive_border = "rgb(" .. inactive_border .. ")"
+    end
+
+    return {
+        rice_enabled = true,
+        colors = colors,
+    }
+end
+
+local function load_theme()
+    local home = os.getenv("HOME")
+    if home == nil then
+        return {}
+    end
+
+    local theme_chunk = loadfile(home .. "/.config/hypr/theme.lua")
+    if theme_chunk == nil then
+        return load_manifest_theme(home)
+    end
+
+    local ok, theme = pcall(theme_chunk)
+    if ok and type(theme) == "table" then
+        return theme
+    end
+
+    return load_manifest_theme(home)
+end
+
+local theme = load_theme()
+local rice_enabled = theme.rice_enabled == true
+local quickshell = theme.quickshell or "quickshell"
 
 local function toggle(program)
     local prog = string.sub(program, 1, 14)
@@ -88,7 +160,7 @@ local function animation(leaf, speed, bezier, style)
     hl.animation(config)
 end
 
-local style = {
+local style = merge({
     rounding = 16,
     gaps_inner = 7,
     gaps_outer = 7,
@@ -103,12 +175,12 @@ local style = {
     font_size_small = 10,
     cursor_name = "capitaine-cursors-white",
     cursor_size = 16,
-}
+}, theme.style)
 
-local colors = {
+local colors = merge({
     active_border = "rgb(cba6f7)",
     inactive_border = "rgb(313244)",
-}
+}, theme.colors)
 
 hl.config({
     general = {
@@ -221,18 +293,26 @@ for _, entry in ipairs(env) do
     hl.env(entry[1], entry[2])
 end
 
+local setup_displays = "setup-monitors"
+local monitor_handler = "pgrep -f '[h]andle-monitor' || uwsm app -- handle-monitor"
+local quickshell_rice = "pgrep -f '[q]uickshell.*rice' || uwsm app -- rice-shell --prod"
+
 local exec_once = {
     "wallpaper-restore",
     "hyprctl setcursor " .. style.cursor_name .. " " .. tostring(style.cursor_size),
     "wl-clip-persist --clipboard both",
     "wl-paste --watch cliphist store",
     "uwsm finalize",
-    "thunderbolt-wait && setup-monitors",
-    "handle-monitor",
+    "thunderbolt-wait && " .. setup_displays,
+    monitor_handler,
 }
 
+hl.exec_cmd(setup_displays)
+hl.exec_cmd(monitor_handler)
+
 if rice_enabled then
-    table.insert(exec_once, "uwsm app -- " .. quickshell .. " -c rice")
+    table.insert(exec_once, quickshell_rice)
+    hl.exec_cmd(quickshell_rice)
 end
 
 hl.on("hyprland.start", function()

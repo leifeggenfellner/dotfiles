@@ -6,6 +6,44 @@ _: {
     , osConfig
     , ...
     }:
+    let
+      themeLib = import ../rice/nix/_themes-lib.nix { inherit lib; };
+      palette = import ../themes/_palette.nix {
+        scheme = osConfig.environment.desktop.theme.scheme;
+        themePackages = if (osConfig.rice.enable or false) then themeLib.themePackages osConfig.rice else { };
+      };
+      fmt = import ../themes/_fmt.nix lib;
+      style = osConfig.environment.desktop.theme.style;
+      activeBorder = palette.${style.accentPrimary};
+      q = builtins.toJSON;
+      luaBool = value: if value then "true" else "false";
+      hyprTheme = ''
+        return {
+            rice_enabled = ${luaBool (osConfig.rice.enable or false)},
+            quickshell = ${q "${pkgs.quickshell}/bin/quickshell"},
+            style = {
+                rounding = ${toString style.rounding},
+                gaps_inner = ${toString style.gapsInner},
+                gaps_outer = ${toString style.gapsOuter},
+                border_width = ${toString style.borderWidth},
+                opacity_active = ${toString style.opacityActive},
+                opacity_inactive = ${toString style.opacityInactive},
+                blur_size = ${toString style.blurSize},
+                blur_passes = ${toString style.blurPasses},
+                blur_contrast = ${toString style.blurContrast},
+                blur_brightness = ${toString style.blurBrightness},
+                blur_noise = ${toString style.blurNoise},
+                font_size_small = ${toString style.fontSizeSmall},
+                cursor_name = ${q style.cursorName},
+                cursor_size = ${toString style.cursorSize},
+            },
+            colors = {
+                active_border = ${q (fmt.rgb activeBorder)},
+                inactive_border = ${q (fmt.rgb palette.surface0)},
+            },
+        }
+      '';
+    in
     {
 
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
@@ -51,6 +89,7 @@ _: {
 
         xdg.configFile."hypr/hyprland.lua".source =
           config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Sources/dotfiles/hypr/hyprland.lua";
+        xdg.configFile."hypr/theme.lua".text = hyprTheme;
       };
     };
 }
