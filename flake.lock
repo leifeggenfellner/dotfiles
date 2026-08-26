@@ -1299,11 +1299,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787044965,
-        "narHash": "sha256-pQI7/oke36vx/8Do7FTX0wfkHTQg0fAJzErXk8Zwla0=",
+        "lastModified": 1787222503,
+        "narHash": "sha256-gARDGu7UEnuJi00Xyd05d7PQvHHm08T0V3ELyx1FfeU=",
         "owner": "gako358",
         "repo": "vsmugge",
-        "rev": "afb8a4dccf23ccb67096cccc990001d0d2f239c6",
+        "rev": "ce33a99444c655b1b3f765dcfe8141f98846d84a",
         "type": "github"
       },
       "original": {

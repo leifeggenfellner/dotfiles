@@ -326,6 +326,9 @@
               # Sidebar placement
               "workbench.sideBar.location" = "right";
 
+              # Copilot agent behavior
+              "chat.subagents.allowInvocationsFromSubagents" = true;
+
               # Performance improvements for Scala/Metals
               "files.watcherExclude" = {
                 "**/.bloop" = true;
