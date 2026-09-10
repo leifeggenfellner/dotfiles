@@ -855,6 +855,12 @@
           };
         };
 
+        xdg.configFile = {
+          "Code/User/prompts/context-scout.agent.md".source = ./vscode/prompts/context-scout.agent.md;
+          "Code/User/prompts/validation-runner.agent.md".source = ./vscode/prompts/validation-runner.agent.md;
+          "Code/User/prompts/evaluator.agent.md".source = ./vscode/prompts/evaluator.agent.md;
+        };
+
         home = {
           packages = [
             (pkgs.writeShellScriptBin "code-wrapped" ''

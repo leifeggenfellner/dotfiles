@@ -1,3 +1,8 @@
+---
+name: 'change-validation'
+description: 'Use when: selecting and reporting incremental validation for Nix, Home Manager, runtime UI, themes, or persisted state changes in this dotfiles repository.'
+---
+
 ## Objective
 
 Require lightweight but explicit validation for every incremental change.

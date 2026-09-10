@@ -1,3 +1,8 @@
+---
+name: 'theme-authoring'
+description: 'Use when: creating or changing a rice theme package, tokens, assets, widget settings, manifest data, previews, or theme plugin packaging.'
+---
+
 # Skill: Theme Authoring
 
 ## Scope
@@ -17,7 +22,7 @@ manifest (`theme.nix`), tokens, assets, widget configuration, plugin packaging.
 ## Rules
 
 - The manifest is the theme's ONLY interface to the runtime. Follow
-  [contracts/theme-manifest.md](../../docs/architecture/contracts/theme-manifest.md)
+  [contracts/theme-manifest.md](../../../docs/architecture/contracts/theme-manifest.md)
   exactly; the schema is closed-core / open-edges (D-005):
   fill every `tokens.*` key; put theme-specific extras under `palette.*`,
   `assets.art.*`, and `widgets.<id>.settings`.
@@ -31,7 +36,7 @@ manifest (`theme.nix`), tokens, assets, widget configuration, plugin packaging.
   identities, not the whole catalog); keep icon usage semantic, prefer
   low-opacity watermarks over high-contrast overlays.
 - Customization escalates through the tiers of the
-  [widget contract](../../docs/architecture/contracts/widget-contract.md):
+  [widget contract](../../../docs/architecture/contracts/widget-contract.md):
   tokens → settings → delegate slots → plugin widgets. Plugins are for
   genuinely new widgets only.
 - Plugins live in `themes/<name>/widgets/`, are declared in the manifest
@@ -58,6 +63,6 @@ manifest (`theme.nix`), tokens, assets, widget configuration, plugin packaging.
 
 ## Pointers
 
-[theme-manifest](../../docs/architecture/contracts/theme-manifest.md) ·
-[widget-contract](../../docs/architecture/contracts/widget-contract.md) ·
-[DECISIONS.md](../../docs/architecture/DECISIONS.md) (D-004, D-005, D-006, D-011)
+[theme-manifest](../../../docs/architecture/contracts/theme-manifest.md) ·
+[widget-contract](../../../docs/architecture/contracts/widget-contract.md) ·
+[DECISIONS.md](../../../docs/architecture/DECISIONS.md) (D-004, D-005, D-006, D-011)

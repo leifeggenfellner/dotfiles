@@ -1,3 +1,8 @@
+---
+name: 'quickshell-runtime'
+description: 'Use when: changing Quickshell runtime file placement, import direction, state ownership, lazy surfaces, or theme-neutral runtime structure.'
+---
+
 # Skill: Quickshell Runtime
 
 ## Scope
@@ -21,7 +26,7 @@ ownership. (During migration, the legacy location is
   presentation · `widgets/` descriptor-driven widgets · `modules/` surfaces
   (bar, launcher, osd, …) · `services/` state singletons.
 - Import direction is a strict DAG — full table in
-  [ARCHITECTURE.md](../../docs/architecture/ARCHITECTURE.md). The three most
+  [ARCHITECTURE.md](../../../docs/architecture/ARCHITECTURE.md). The three most
   violated rules:
   1. `components/` never import services.
   2. `services/` import only `utils/` — no UI, no `Theme`.
@@ -55,6 +60,6 @@ ownership. (During migration, the legacy location is
 
 ## Pointers
 
-[ARCHITECTURE.md](../../docs/architecture/ARCHITECTURE.md) ·
-[service-contract](../../docs/architecture/contracts/service-contract.md) ·
-[widget-contract](../../docs/architecture/contracts/widget-contract.md)
+[ARCHITECTURE.md](../../../docs/architecture/ARCHITECTURE.md) ·
+[service-contract](../../../docs/architecture/contracts/service-contract.md) ·
+[widget-contract](../../../docs/architecture/contracts/widget-contract.md)

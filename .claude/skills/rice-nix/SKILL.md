@@ -1,3 +1,8 @@
+---
+name: 'rice-nix'
+description: 'Use when: changing rice Nix options, theme manifest generation, live switching machinery, derived assets, or propagation to desktop applications.'
+---
+
 # Skill: Rice Nix
 
 ## Scope
@@ -29,7 +34,7 @@ hyprlock/wallpaper. Companion to the general `nix-module-quality` skill.
   `rice-switch` only validates + writes the pointer + sets wallpaper. Nix never
   writes to `$XDG_STATE_HOME`; users never edit store paths.
 - `mkThemeManifest` validates the schema at build time
-  ([theme-manifest](../../docs/architecture/contracts/theme-manifest.md)) —
+  ([theme-manifest](../../../docs/architecture/contracts/theme-manifest.md)) —
   a broken theme must fail `nix flake check`, not the running shell.
 - Propagation goes THROUGH the existing HM bridge (D-012): the active manifest
   feeds `theme.colors` / `theme.style`; waybar/hyprlock/qt/GTK modules keep
@@ -59,7 +64,7 @@ hyprlock/wallpaper. Companion to the general `nix-module-quality` skill.
 
 ## Pointers
 
-[theme-manifest](../../docs/architecture/contracts/theme-manifest.md) ·
-[ARCHITECTURE.md](../../docs/architecture/ARCHITECTURE.md) ·
-[DECISIONS.md](../../docs/architecture/DECISIONS.md) (D-003, D-011, D-012) ·
-`nix-module-quality.md`
+[theme-manifest](../../../docs/architecture/contracts/theme-manifest.md) ·
+[ARCHITECTURE.md](../../../docs/architecture/ARCHITECTURE.md) ·
+[DECISIONS.md](../../../docs/architecture/DECISIONS.md) (D-003, D-011, D-012) ·
+[nix-module-quality](../nix-module-quality/SKILL.md)

@@ -1,3 +1,8 @@
+---
+name: 'dotfiles-workflow'
+description: 'Use when: starting or coordinating repository-specific dotfiles work that needs scope, ownership, architecture, validation, and rollout guardrails.'
+---
+
 # Dotfiles Workflow
 
 ## Mission
@@ -84,9 +89,9 @@ Ship incremental, reversible improvements to this Nix + rice setup with clear st
 
 Use these together for stricter execution:
 
-- [.claude/skills/nix-module-quality.md](.claude/skills/nix-module-quality.md)
-- [.claude/skills/change-validation.md](.claude/skills/change-validation.md)
+- [nix-module-quality](../nix-module-quality/SKILL.md)
+- [change-validation](../change-validation/SKILL.md)
 - For rice framework work, start from
-  [.claude/skills/rice-architecture.md](.claude/skills/rice-architecture.md),
-  which routes to the specialized rice skills and the canonical docs in
-  [docs/architecture/](docs/architecture/).
+  [rice-architecture](../rice-architecture/SKILL.md), which routes to the
+  specialized rice skills and the canonical docs in
+  [docs/architecture/](../../../docs/architecture/).

@@ -1,3 +1,8 @@
+---
+name: 'service-authoring'
+description: 'Use when: adding or changing a Quickshell state singleton, backend integration, service state shape, command methods, availability, or cleanup behavior.'
+---
+
 # Skill: Service Authoring
 
 ## Scope
@@ -15,7 +20,7 @@ Adding or changing a state singleton under `runtime/quickshell/services/<domain>
 ## Rules
 
 - One singleton per domain, named `<Domain>State`, implementing
-  [contracts/service-contract.md](../../docs/architecture/contracts/service-contract.md)
+  [contracts/service-contract.md](../../../docs/architecture/contracts/service-contract.md)
   in full. The three most violated rules:
   1. Backend preference order (D-008): Quickshell native service → DBus →
      event-triggered `Process` → timer-polled `Process` (last resort; the
@@ -51,6 +56,6 @@ Adding or changing a state singleton under `runtime/quickshell/services/<domain>
 
 ## Pointers
 
-[service-contract](../../docs/architecture/contracts/service-contract.md) ·
-[ROADMAP.md](../../docs/architecture/ROADMAP.md) ·
-[DECISIONS.md](../../docs/architecture/DECISIONS.md) (D-008, D-009)
+[service-contract](../../../docs/architecture/contracts/service-contract.md) ·
+[ROADMAP.md](../../../docs/architecture/ROADMAP.md) ·
+[DECISIONS.md](../../../docs/architecture/DECISIONS.md) (D-008, D-009)

@@ -1,3 +1,8 @@
+---
+name: 'rice-architecture'
+description: 'Use when: routing any rice framework work to its owning Quickshell runtime, theme, widget, service, motion, or Nix layer and checking architecture decisions.'
+---
+
 # Skill: Rice Architecture (router)
 
 ## Scope
@@ -15,7 +20,7 @@ and which specialized skill to apply next.
 
 ## Rules
 
-- Read [docs/architecture/DECISIONS.md](../../docs/architecture/DECISIONS.md)
+- Read [docs/architecture/DECISIONS.md](../../../docs/architecture/DECISIONS.md)
   before proposing direction; conflicting ideas must cite and supersede an entry,
   never silently redirect.
 - Classify the change first, then delegate:
@@ -26,12 +31,12 @@ and which specialized skill to apply next.
   - Animation, effects, sound → `motion-and-effects`
   - Nix options, manifest builder, switching, propagation → `rice-nix`
 - Layer ownership (map in
-  [ARCHITECTURE.md](../../docs/architecture/ARCHITECTURE.md)):
+  [ARCHITECTURE.md](../../../docs/architecture/ARCHITECTURE.md)):
   Nix builds and composes · themes provide data + optional plugins · runtime
   renders · services own system state.
 - Runtime↔theme coupling is legal only through the
-  [theme manifest](../../docs/architecture/contracts/theme-manifest.md) and the
-  [widget contract](../../docs/architecture/contracts/widget-contract.md).
+  [theme manifest](../../../docs/architecture/contracts/theme-manifest.md) and the
+  [widget contract](../../../docs/architecture/contracts/widget-contract.md).
 - Any agreed decision from a session lands as a new `D-NNN` entry in DECISIONS.md
   in the same change.
 

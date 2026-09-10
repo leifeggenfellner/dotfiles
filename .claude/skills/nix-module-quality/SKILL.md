@@ -1,3 +1,8 @@
+---
+name: 'nix-module-quality'
+description: 'Use when: creating, changing, or reviewing NixOS and Home Manager modules, options, composition, defaults, or host-specific configuration in this dotfiles repository.'
+---
+
 ## Objective
 
 Keep NixOS and Home Manager modules modular, declarative, and easy to evolve.

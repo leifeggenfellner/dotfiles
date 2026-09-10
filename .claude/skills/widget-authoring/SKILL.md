@@ -1,3 +1,8 @@
+---
+name: 'widget-authoring'
+description: 'Use when: adding or changing a built-in Quickshell widget or theme plugin widget, descriptor, settings schema, glance item, or popout content.'
+---
+
 # Skill: Widget Authoring
 
 ## Scope
@@ -18,7 +23,7 @@ theme plugin (`themes/<name>/widgets/<Dir>/`).
 ## Rules
 
 - Implement the descriptor exactly as specified in
-  [contracts/widget-contract.md](../../docs/architecture/contracts/widget-contract.md):
+  [contracts/widget-contract.md](../../../docs/architecture/contracts/widget-contract.md):
   `id`, `contractVersion`, `enabled`, `region`, `priority`, `monitorPolicy`,
   `services`, `settings`, `glanceItem`, optional `popoutContent`.
 - Services arrive by injection from the declared `services` list (D-009) —
@@ -50,6 +55,6 @@ theme plugin (`themes/<name>/widgets/<Dir>/`).
 
 ## Pointers
 
-[widget-contract](../../docs/architecture/contracts/widget-contract.md) ·
-[motion-contract](../../docs/architecture/contracts/motion-contract.md) ·
-[service-contract](../../docs/architecture/contracts/service-contract.md)
+[widget-contract](../../../docs/architecture/contracts/widget-contract.md) ·
+[motion-contract](../../../docs/architecture/contracts/motion-contract.md) ·
+[service-contract](../../../docs/architecture/contracts/service-contract.md)

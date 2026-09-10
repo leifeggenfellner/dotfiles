@@ -1,3 +1,8 @@
+---
+name: 'motion-and-effects'
+description: 'Use when: adding or changing Quickshell animation, transitions, visual effects, particles, shaders, glow, sound, or reduce-motion behavior.'
+---
+
 # Skill: Motion and Effects
 
 ## Scope
@@ -17,7 +22,7 @@ the runtime or a theme plugin.
 
 - Everything flows through the central facades: `Motion` for animation, `Sound`
   for audio, `Effects` for tiered visual effects. Full rules in
-  [contracts/motion-contract.md](../../docs/architecture/contracts/motion-contract.md).
+  [contracts/motion-contract.md](../../../docs/architecture/contracts/motion-contract.md).
   The rules most violated in practice:
   1. No inline durations, easing curves, or animation Timers in UI code —
      reference semantic animations (`Motion.panelOpen`, `Motion.stateChange`, …).
@@ -56,5 +61,5 @@ the runtime or a theme plugin.
 
 ## Pointers
 
-[motion-contract](../../docs/architecture/contracts/motion-contract.md) ·
-[DECISIONS.md](../../docs/architecture/DECISIONS.md) (D-010, L-005..L-007)
+[motion-contract](../../../docs/architecture/contracts/motion-contract.md) ·
+[DECISIONS.md](../../../docs/architecture/DECISIONS.md) (D-010, L-005..L-007)
