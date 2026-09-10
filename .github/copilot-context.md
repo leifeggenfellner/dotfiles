@@ -62,11 +62,20 @@ numbering in `ROADMAP.md` remains authoritative and is unrelated.
 
 ## Handoff
 
-- Next DX refactor increment 8: rollout and runtime verification. No activation or
-  desktop/runtime verification is claimed for DX refactor increments 1-7; visually
-  and behaviorally verify after an explicitly approved rebuild/activation,
-  including multi-monitor/lazy-surface, service/hardware, theme-switch,
-  bindings/rules, and startup behavior.
+- DX refactor increment 8 rollout status (2026-09-10, `shitbox`): preflight and
+  `nh os build` completed successfully from clean commit `830be800`; 73
+  derivations built and the expected Nix-owned Hyprland config path evaluated.
+  The active system remained generation 546. `sudo -n true` reported that a
+  password is required, so `nh os switch` was not started and no post-activation
+  runtime verification is claimed. No cleaning, reboot, logout, lock, remote
+  deployment, source mutation, theme switch, or other live-state mutation ran.
+- Next DX refactor increment 8 step: run the approved local `nh os switch` from
+  an authenticated terminal, retaining generation 546 as the rollback source,
+  then complete startup, lazy-surface, theme transaction, Hyprland mapping,
+  wallpaper, multi-monitor, service/hardware, bindings/rules, process, and log
+  verification. The pre-activation baseline was unchanged: LOTM resolved via the
+  default with no mutable active pointer, persisted/applied wallpaper agreed,
+  one rice Quickshell process exposed IPC, and one monitor was present.
 - Baseline freshly verified through repaired DX refactor increment 7 on 2026-09-10:
   focused manifest and executable transactional switch checks, explicit
   generated-script ShellCheck, scoped `nixpkgs-fmt --check`, rice lint, no-build
