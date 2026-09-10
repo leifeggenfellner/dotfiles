@@ -23,6 +23,23 @@ shell.qml`; services depend on utils separately and are injected into
 - Never activate Home Manager, deploy, publish, stage, or commit without explicit
   approval. Validation must not load/execute generated Hyprland Lua (D-038).
 
+## Copilot Orchestration Handoff
+
+- Completed 2026-09-10: workspace agents now use one bounded Git-provenance
+  preflight when needed, one bounded scout path, at most one implementation worker
+  per ownership area, worker-owned immediate checks, orchestrator-owned final
+  validation/evaluation, provenance-aware evidence reuse, bounded repair loops,
+  and explicit approval/context-protection guidance.
+- `checks.copilot-agent-contract` validates the six authoritative agent sources,
+  exact role tool/delegation contracts, resolvable references, required frontmatter,
+  and Nix source installation of shared agents. Installed `Code/User` copies remain
+  generated and were not read or edited.
+- Focused check `nix build path:.#checks.x86_64-linux.copilot-agent-contract
+--no-link` and `nixpkgs-fmt --check modules/perSystem/checks.nix` pass.
+- Budgets and output limits are prompt policy only; VS Code does not mechanically
+  guarantee exact token/cost limits, compaction integrity, approvals, recursion
+  depth, or parallel scheduling.
+
 ## Completed DX Refactor Increments
 
 These increments belong only to the DX refactor initiative. Canonical phase

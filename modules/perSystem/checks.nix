@@ -15,5 +15,16 @@ _: {
 
     checks.rice-theme-switch =
       import ../rice/nix/_theme-switch-check.nix { inherit pkgs; };
+
+    checks.copilot-agent-contract = pkgs.runCommand "copilot-agent-contract"
+      {
+        nativeBuildInputs = [ pkgs.python3Packages.pyyaml ];
+      } ''
+      python ${../../scripts/copilot-agent-lint.py} \
+        --workspace-dir ${../../.github/agents} \
+        --shared-dir ${../programs/vscode/prompts} \
+        --install-file ${../programs/vscode.nix}
+      touch $out
+    '';
   };
 }
