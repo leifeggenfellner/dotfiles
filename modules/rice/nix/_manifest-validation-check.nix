@@ -28,6 +28,32 @@ let
         }).validated
         true)).success;
 
+  oldSchemaV2 = removeAtPath [ "tokens" "metrics" "dashboard" ]
+    (removeAtPath [ "tokens" "metrics" "workspaces" ] cyberpunk);
+  oldSchemaV2Manifest = (mkThemeManifest {
+    themeName = "cyberpunk";
+    themeDir = themeDirs.cyberpunk;
+    theme = oldSchemaV2;
+  }).manifest;
+  expectedMetricDefaults = {
+    workspaces = {
+      slotSize = 30;
+      ringExpansion = 4;
+      iconSize = 24;
+      iconSourceSize = 48;
+    };
+    dashboard = {
+      columnCount = 12;
+      compactBreakpoint = 1120;
+      sidebarRatio = 0.46;
+      sidebarMinWidth = 360;
+      sidebarMaxWidth = 560;
+      mainMinWidth = 440;
+      epigraphMinHeight = 112;
+      defaultMinHeight = 180;
+    };
+  };
+
   validThemes =
     lib.mapAttrsToList evaluates { inherit cyberpunk lotm; }
     ++ [
@@ -39,6 +65,7 @@ let
         (setAtPath [ "assets" "icons" "custom-action" ] "X" cyberpunk))
       (evaluates "cyberpunk"
         (setAtPath [ "widgets" "workspaces" "settings" "customOption" ] true cyberpunk))
+      (evaluates "cyberpunk" oldSchemaV2)
       (evaluates "cyberpunk"
         (setAtPath [ "integration" ]
           {
@@ -67,6 +94,17 @@ let
     (setAtPath [ "tokens" "colors" "accent" "glow" ] "#123456" cyberpunk)
     (setAtPath [ "tokens" "typography" "families" "ui" ] "Sans" cyberpunk)
     (setAtPath [ "tokens" "metrics" "bar" "blur" ] 8 cyberpunk)
+    (removeAtPath [ "tokens" "metrics" "workspaces" "slotSize" ] cyberpunk)
+    (setAtPath [ "tokens" "metrics" "workspaces" "custom" ] 8 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "workspaces" "slotSize" ] 0 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "workspaces" "iconSize" ] 31 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "workspaces" "iconSourceSize" ] 23 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "dashboard" "sidebarRatio" ] "0.46" cyberpunk)
+    (setAtPath [ "tokens" "metrics" "dashboard" "columnCount" ] 0 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "dashboard" "sidebarRatio" ] 0 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "dashboard" "sidebarRatio" ] 1 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "dashboard" "sidebarMinWidth" ] 561 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "dashboard" "compactBreakpoint" ] 811 cyberpunk)
     (setAtPath [ "tokens" "motion" "durations" "instant" ] 0 cyberpunk)
     (setAtPath [ "tokens" "motion" "easings" "spring" ] "OutBack" cyberpunk)
     (setAtPath [ "tokens" "effects" "custom" ] true cyberpunk)
@@ -106,6 +144,8 @@ let
   ];
 in
 assert lib.all (result: result) validThemes;
+assert oldSchemaV2Manifest.tokens.metrics.workspaces == expectedMetricDefaults.workspaces;
+assert oldSchemaV2Manifest.tokens.metrics.dashboard == expectedMetricDefaults.dashboard;
 assert lib.all (result: !result) invalidResults;
 pkgs.runCommand "rice-manifest-validation" { } ''
   touch $out

@@ -91,6 +91,24 @@ Item {
                         margin: 8,
                         spacing: 12,
                         opacity: 0.85
+                    },
+                    // Compatibility defaults keep no-manifest dev runs and
+                    // previously built schema-v2 manifests renderable.
+                    workspaces: {
+                        slotSize: 30,
+                        ringExpansion: 4,
+                        iconSize: 24,
+                        iconSourceSize: 48
+                    },
+                    dashboard: {
+                        columnCount: 12,
+                        compactBreakpoint: 1120,
+                        sidebarRatio: 0.46,
+                        sidebarMinWidth: 360,
+                        sidebarMaxWidth: 560,
+                        mainMinWidth: 440,
+                        epigraphMinHeight: 112,
+                        defaultMinHeight: 180
                     }
                 },
                 motion: {

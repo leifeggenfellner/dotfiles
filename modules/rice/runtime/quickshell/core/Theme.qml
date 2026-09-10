@@ -77,6 +77,22 @@ QtObject {
             readonly property int spacing: theme._t.metrics.bar.spacing
             readonly property real opacity: theme._t.metrics.bar.opacity
         }
+        readonly property QtObject workspaces: QtObject {
+            readonly property int slotSize: theme._t.metrics.workspaces.slotSize
+            readonly property int ringExpansion: theme._t.metrics.workspaces.ringExpansion
+            readonly property int iconSize: theme._t.metrics.workspaces.iconSize
+            readonly property int iconSourceSize: theme._t.metrics.workspaces.iconSourceSize
+        }
+        readonly property QtObject dashboard: QtObject {
+            readonly property int columnCount: theme._t.metrics.dashboard.columnCount
+            readonly property int compactBreakpoint: theme._t.metrics.dashboard.compactBreakpoint
+            readonly property real sidebarRatio: theme._t.metrics.dashboard.sidebarRatio
+            readonly property int sidebarMinWidth: theme._t.metrics.dashboard.sidebarMinWidth
+            readonly property int sidebarMaxWidth: theme._t.metrics.dashboard.sidebarMaxWidth
+            readonly property int mainMinWidth: theme._t.metrics.dashboard.mainMinWidth
+            readonly property int epigraphMinHeight: theme._t.metrics.dashboard.epigraphMinHeight
+            readonly property int defaultMinHeight: theme._t.metrics.dashboard.defaultMinHeight
+        }
     }
 
     readonly property QtObject motion: QtObject {

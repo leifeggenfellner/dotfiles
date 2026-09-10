@@ -42,6 +42,14 @@ and exposes it exclusively through the `Theme` facade.
       radius = { small; medium; large; };
       space  = { xs; sm; md; lg; };
       bar    = { height; margin; spacing; opacity; };
+      # OPTIONAL as whole groups in schema-v2 source input for compatibility;
+      # normalized manifest JSON always contains every field shown here.
+      workspaces = { slotSize; ringExpansion; iconSize; iconSourceSize; };
+      dashboard = {
+        columnCount; compactBreakpoint; sidebarRatio;
+        sidebarMinWidth; sidebarMaxWidth; mainMinWidth;
+        epigraphMinHeight; defaultMinHeight;
+      };
     };
     motion = {                    # see contracts/motion-contract.md
       durations = { fast; base; slow; overlay; };
@@ -124,7 +132,11 @@ and exposes it exclusively through the `Theme` facade.
 ## Rules
 
 1. **Closed core, open edges (D-005).** Every `tokens.*` key above is guaranteed to
-   exist after validation; the runtime may bind to it unconditionally. `palette`,
+   exist in normalized manifest JSON; the runtime may bind to it unconditionally.
+   Schema-v2 source input must provide the full Phase 1 core. The later-added
+   `tokens.metrics.workspaces` and `tokens.metrics.dashboard` groups may each be
+   omitted as a whole for D-013 compatibility and are filled with the defaults
+   below. If either group is present, all of its fields are required. `palette`,
    `assets.art`, `assets.icons`, and `widgets.<id>.settings` are open-ended and may
    only be read by the widget/plugin they belong to — never by runtime core.
    D-023 clarifies that long-lived built-in surfaces with widget-like settings
@@ -133,8 +145,17 @@ and exposes it exclusively through the `Theme` facade.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.
-3. **Fallbacks.** Optional keys default from `shared/` or runtime defaults so a
-   minimal theme is ~30 lines: `meta` + `tokens.colors` + one wallpaper.
+3. **Fallbacks and source compatibility.** A minimal schema-v2 source still contains
+   `meta` and the full required Phase 1 token schema (`colors`, `typography`,
+   `metrics.radius`, `metrics.space`, `metrics.bar`, and `motion`). It may omit the
+   two later metric groups above. `mkThemeManifest` normalizes omissions to the
+   previous runtime literals: `workspaces = { slotSize = 30; ringExpansion = 4;
+iconSize = 24; iconSourceSize = 48; }` and `dashboard = { columnCount = 12;
+compactBreakpoint = 1120; sidebarRatio = 0.46; sidebarMinWidth = 360;
+sidebarMaxWidth = 560; mainMinWidth = 440; epigraphMinHeight = 112;
+defaultMinHeight = 180; }`. Optional assets and open-edge data continue to
+   default from `shared/` or runtime defaults. Runtime defaults preserve
+   no-manifest development and compatibility with previously built schema-v2 JSON.
 4. **Validation is a build failure, not a runtime failure.** `mkThemeManifest`
    asserts required keys, color formats, and file existence at eval/build time.
 5. **No behavior in the manifest.** The manifest is data. Anything executable

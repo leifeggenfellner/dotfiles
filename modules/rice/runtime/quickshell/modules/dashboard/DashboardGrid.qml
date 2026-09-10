@@ -12,11 +12,14 @@ Item {
     property bool surfaceMapped: false
     property bool reducedMotion: false
     property int gap: Theme.metrics.space.md
-    property real compactBreakpoint: 1120
-    property real sidebarRatio: 0.46
-    property int sidebarMinWidth: 360
-    property int sidebarMaxWidth: 560
-    property int mainMinWidth: 440
+    property int columnCount: Theme.metrics.dashboard.columnCount
+    property real compactBreakpoint: Theme.metrics.dashboard.compactBreakpoint
+    property real sidebarRatio: Theme.metrics.dashboard.sidebarRatio
+    property int sidebarMinWidth: Theme.metrics.dashboard.sidebarMinWidth
+    property int sidebarMaxWidth: Theme.metrics.dashboard.sidebarMaxWidth
+    property int mainMinWidth: Theme.metrics.dashboard.mainMinWidth
+    property int epigraphMinHeight: Theme.metrics.dashboard.epigraphMinHeight
+    property int defaultMinHeight: Theme.metrics.dashboard.defaultMinHeight
 
     readonly property bool compact: width < compactBreakpoint
     readonly property real contentHeight: _contentHeight
@@ -32,6 +35,15 @@ Item {
     signal requestVisible(real y, real h)
 
     onWidthChanged: schedulePack()
+    onGapChanged: schedulePack()
+    onColumnCountChanged: schedulePack()
+    onCompactBreakpointChanged: schedulePack()
+    onSidebarRatioChanged: schedulePack()
+    onSidebarMinWidthChanged: schedulePack()
+    onSidebarMaxWidthChanged: schedulePack()
+    onMainMinWidthChanged: schedulePack()
+    onEpigraphMinHeightChanged: schedulePack()
+    onDefaultMinHeightChanged: schedulePack()
     onDescriptorsChanged: {
         _focusIndex = descriptors.length > 0 ? 0 : -1;
         schedulePack();
@@ -52,10 +64,10 @@ Item {
         const hint = widget.layout ?? {};
         const epigraphLike = widget.widgetId === "epigraph";
         return {
-            colSpan: hint.colSpan ?? (epigraphLike ? 12 : 6),
+            colSpan: hint.colSpan ?? (epigraphLike ? columnCount : Math.ceil(columnCount / 2)),
             column: hint.column ?? null,
             fullWidth: hint.fullWidth ?? epigraphLike,
-            minHeight: hint.minHeight ?? (epigraphLike ? 112 : 180),
+            minHeight: hint.minHeight ?? (epigraphLike ? epigraphMinHeight : defaultMinHeight),
             priority: hint.priority ?? widget.priority ?? 0
         };
     }
@@ -78,7 +90,7 @@ Item {
     }
 
     function isFullWidth(entry) {
-        return entry.layout.fullWidth === true || entry.layout.colSpan >= 12;
+        return entry.layout.fullWidth === true || entry.layout.colSpan >= columnCount;
     }
 
     function preferredColumn(entry) {

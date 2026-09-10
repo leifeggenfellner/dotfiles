@@ -72,7 +72,7 @@ let
         [ "regular" "medium" "bold" ]
         (get [ "typography" "weights" ] tokens))
       (checkClosed "tokens.metrics"
-        [ "radius" "space" "bar" ]
+        [ "radius" "space" "bar" "workspaces" "dashboard" ]
         (get [ "metrics" ] tokens))
       (checkClosed "tokens.metrics.radius"
         [ "small" "medium" "large" ]
@@ -83,6 +83,12 @@ let
       (checkClosed "tokens.metrics.bar"
         [ "height" "margin" "spacing" "opacity" ]
         (get [ "metrics" "bar" ] tokens))
+      (checkClosed "tokens.metrics.workspaces"
+        [ "slotSize" "ringExpansion" "iconSize" "iconSourceSize" ]
+        (get [ "metrics" "workspaces" ] tokens))
+      (checkClosed "tokens.metrics.dashboard"
+        [ "columnCount" "compactBreakpoint" "sidebarRatio" "sidebarMinWidth" "sidebarMaxWidth" "mainMinWidth" "epigraphMinHeight" "defaultMinHeight" ]
+        (get [ "metrics" "dashboard" ] tokens))
       (checkClosed "tokens.motion"
         [ "durations" "easings" "intensity" "ambient" "enabled" ]
         (get [ "motion" ] tokens))
@@ -132,7 +138,33 @@ let
   get = path: attrs:
     lib.attrByPath path (fail "missing tokens.${lib.concatStringsSep "." path}") attrs;
 
-  tokens = theme.tokens;
+  metricDefaults = {
+    workspaces = {
+      slotSize = 30;
+      ringExpansion = 4;
+      iconSize = 24;
+      iconSourceSize = 48;
+    };
+    dashboard = {
+      columnCount = 12;
+      compactBreakpoint = 1120;
+      sidebarRatio = 0.46;
+      sidebarMinWidth = 360;
+      sidebarMaxWidth = 560;
+      mainMinWidth = 440;
+      epigraphMinHeight = 112;
+      defaultMinHeight = 180;
+    };
+  };
+
+  sourceTokens = theme.tokens;
+  sourceMetrics = sourceTokens.metrics;
+  tokens = sourceTokens // {
+    metrics = sourceMetrics // {
+      workspaces = sourceMetrics.workspaces or metricDefaults.workspaces;
+      dashboard = sourceMetrics.dashboard or metricDefaults.dashboard;
+    };
+  };
 
   requireString = path:
     let value = get path tokens; in
@@ -161,8 +193,34 @@ let
     ++ map (s: requireInt [ "metrics" "space" s ]) [ "xs" "sm" "md" "lg" ]
     ++ map (b: requireInt [ "metrics" "bar" b ]) [ "height" "margin" "spacing" ]
     ++ [ (requireNumber [ "metrics" "bar" "opacity" ]) ]
+    ++ map (w: requireInt [ "metrics" "workspaces" w ]) [ "slotSize" "ringExpansion" "iconSize" "iconSourceSize" ]
+    ++ map (d: requireInt [ "metrics" "dashboard" d ]) [ "columnCount" "compactBreakpoint" "sidebarMinWidth" "sidebarMaxWidth" "mainMinWidth" "epigraphMinHeight" "defaultMinHeight" ]
+    ++ [ (requireNumber [ "metrics" "dashboard" "sidebarRatio" ]) ]
     ++ map (d: requireInt [ "motion" "durations" d ]) [ "fast" "base" "slow" "overlay" ]
     ++ map (e: requireString [ "motion" "easings" e ]) [ "standard" "enter" "exit" "emphasis" ];
+
+  requirePositive = path:
+    let value = get path tokens; in
+    if value > 0 then true
+    else fail "tokens.${lib.concatStringsSep "." path} must be positive";
+
+  metricRangeChecks =
+    map (name: requirePositive [ "metrics" "workspaces" name ])
+      [ "slotSize" "ringExpansion" "iconSize" "iconSourceSize" ]
+    ++ map (name: requirePositive [ "metrics" "dashboard" name ])
+      [ "columnCount" "compactBreakpoint" "sidebarMinWidth" "sidebarMaxWidth" "mainMinWidth" "epigraphMinHeight" "defaultMinHeight" ]
+    ++ [
+      (if tokens.metrics.workspaces.iconSize <= tokens.metrics.workspaces.slotSize then true
+      else fail "tokens.metrics.workspaces.iconSize must not exceed slotSize")
+      (if tokens.metrics.workspaces.iconSourceSize >= tokens.metrics.workspaces.iconSize then true
+      else fail "tokens.metrics.workspaces.iconSourceSize must be at least iconSize")
+      (if tokens.metrics.dashboard.sidebarRatio > 0 && tokens.metrics.dashboard.sidebarRatio < 1 then true
+      else fail "tokens.metrics.dashboard.sidebarRatio must be greater than 0 and less than 1")
+      (if tokens.metrics.dashboard.sidebarMinWidth <= tokens.metrics.dashboard.sidebarMaxWidth then true
+      else fail "tokens.metrics.dashboard.sidebarMinWidth must not exceed sidebarMaxWidth")
+      (if tokens.metrics.dashboard.compactBreakpoint >= tokens.metrics.dashboard.sidebarMinWidth + tokens.metrics.space.md + tokens.metrics.dashboard.mainMinWidth then true
+      else fail "tokens.metrics.dashboard.compactBreakpoint must fit sidebarMinWidth, mainMinWidth, and the dashboard gap")
+    ];
 
   metaChecks = [
     (if (theme.meta.name or null) == themeName then true
@@ -349,7 +407,7 @@ let
     });
   };
 
-  checks = schemaChecks ++ tokenChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
+  checks = schemaChecks ++ tokenChecks ++ metricRangeChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
     ++ motionExtraChecks ++ effectChecks ++ pluginChecks;
 in
 {

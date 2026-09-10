@@ -39,13 +39,13 @@ Item {
                 readonly property string iconSpec: modelData.icon ?? ""
                 readonly property bool iconIsImage: Theme.iconIsFile(iconSpec)
 
-                width: 30
-                height: 30
+                width: Theme.metrics.workspaces.slotSize
+                height: Theme.metrics.workspaces.slotSize
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: parent.width + 4
-                    height: parent.height + 4
+                    width: parent.width + Theme.metrics.workspaces.ringExpansion
+                    height: parent.height + Theme.metrics.workspaces.ringExpansion
                     radius: width / 2
                     color: "transparent"
                     border.width: 1
@@ -62,11 +62,11 @@ Item {
                 Image {
                     visible: slot.iconIsImage
                     anchors.centerIn: parent
-                    width: 24
-                    height: 24
+                    width: Theme.metrics.workspaces.iconSize
+                    height: Theme.metrics.workspaces.iconSize
                     source: slot.iconIsImage ? Theme.assetUrl(slot.iconSpec) : ""
-                    sourceSize.width: 48
-                    sourceSize.height: 48
+                    sourceSize.width: Theme.metrics.workspaces.iconSourceSize
+                    sourceSize.height: Theme.metrics.workspaces.iconSourceSize
                     fillMode: Image.PreserveAspectFit
                     smooth: true
                     opacity: slot.isActive ? 1 : 0.45

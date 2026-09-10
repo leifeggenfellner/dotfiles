@@ -85,6 +85,22 @@ in
         spacing = 10;
         opacity = 0.92;
       };
+      workspaces = {
+        slotSize = 30;
+        ringExpansion = 4;
+        iconSize = 24;
+        iconSourceSize = 48;
+      };
+      dashboard = {
+        columnCount = 12;
+        compactBreakpoint = 1120;
+        sidebarRatio = 0.46;
+        sidebarMinWidth = 360;
+        sidebarMaxWidth = 560;
+        mainMinWidth = 440;
+        epigraphMinHeight = 112;
+        defaultMinHeight = 180;
+      };
     };
 
     motion = {
