@@ -55,6 +55,11 @@ in
         heading = 18;
         icon = 18;
       };
+      weights = {
+        regular = 400;
+        medium = 500;
+        bold = 700;
+      };
     };
 
     metrics = {
@@ -94,6 +99,7 @@ in
         exit = "InCubic";
         emphasis = "InOutBack";
       };
+      intensity = "calm";
       # Opt into the ambient atmosphere tier (D-021); the runtime
       # governor still pauses it on battery/fullscreen/reduce-motion.
       ambient = true;

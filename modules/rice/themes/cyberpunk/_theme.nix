@@ -59,6 +59,11 @@ in
         heading = 18;
         icon = 18;
       };
+      weights = {
+        regular = 400;
+        medium = 500;
+        bold = 700;
+      };
     };
 
     metrics = {
@@ -90,6 +95,14 @@ in
         slow = 300;
         overlay = 80;
       };
+      easings = {
+        standard = "OutCubic";
+        enter = "OutQuint";
+        exit = "InCubic";
+        emphasis = "OutBack";
+      };
+      intensity = "calm";
+      ambient = false;
       enabled = true;
     };
   };
