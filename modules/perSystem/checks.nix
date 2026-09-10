@@ -9,5 +9,8 @@ _: {
       bash ${../../scripts/rice-lint.sh} "$runtime"
       touch $out
     '';
+
+    checks.rice-manifest-validation =
+      import ../rice/nix/_manifest-validation-check.nix { inherit pkgs; };
   };
 }

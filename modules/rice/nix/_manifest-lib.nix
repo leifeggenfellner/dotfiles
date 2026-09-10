@@ -14,11 +14,17 @@
 # wallpaper, and Quickshell may use `assets.lockscreenVideos[0]` as an
 # animated background when present.
 { pkgs, lib }:
-{ themeName, themeDir }:
+{ themeName, themeDir, theme ? import (themeDir + "/_theme.nix") }:
 let
-  theme = import (themeDir + "/_theme.nix");
-
   fail = msg: throw "rice theme '${themeName}': ${msg}";
+
+  checkClosed = path: allowed: value:
+    if !builtins.isAttrs value
+    then fail "${path} must be an attrset"
+    else
+      let unknown = lib.subtractLists allowed (lib.attrNames value); in
+      if unknown == [ ] then true
+      else fail "${path} contains unknown keys: ${lib.concatStringsSep ", " unknown}";
 
   hex = v:
     if builtins.isString v && builtins.match "#[0-9a-fA-F]{6}" v != null
@@ -33,58 +39,192 @@ let
     state = [ "ok" "warn" "danger" "info" ];
   };
 
+  schemaChecks =
+    [
+      (checkClosed "manifest"
+        [ "meta" "tokens" "palette" "assets" "widgets" "plugins" "integration" ]
+        theme)
+      (checkClosed "meta"
+        [ "name" "displayName" "version" "schemaVersion" ]
+        (theme.meta or { }))
+      (checkClosed "tokens"
+        [ "colors" "typography" "metrics" "motion" "effects" ]
+        (theme.tokens or { }))
+      (checkClosed "tokens.colors"
+        (lib.attrNames colorSchema)
+        (get [ "colors" ] tokens))
+    ]
+    ++ lib.mapAttrsToList
+      (group: keys: checkClosed "tokens.colors.${group}" keys
+        (get [ "colors" group ] tokens))
+      colorSchema
+    ++ [
+      (checkClosed "tokens.typography"
+        [ "families" "sizes" "weights" ]
+        (get [ "typography" ] tokens))
+      (checkClosed "tokens.typography.families"
+        [ "display" "sans" "mono" ]
+        (get [ "typography" "families" ] tokens))
+      (checkClosed "tokens.typography.sizes"
+        [ "small" "body" "bar" "heading" "icon" ]
+        (get [ "typography" "sizes" ] tokens))
+      (checkClosed "tokens.typography.weights"
+        [ "regular" "medium" "bold" ]
+        (get [ "typography" "weights" ] tokens))
+      (checkClosed "tokens.metrics"
+        [ "radius" "space" "bar" ]
+        (get [ "metrics" ] tokens))
+      (checkClosed "tokens.metrics.radius"
+        [ "small" "medium" "large" ]
+        (get [ "metrics" "radius" ] tokens))
+      (checkClosed "tokens.metrics.space"
+        [ "xs" "sm" "md" "lg" ]
+        (get [ "metrics" "space" ] tokens))
+      (checkClosed "tokens.metrics.bar"
+        [ "height" "margin" "spacing" "opacity" ]
+        (get [ "metrics" "bar" ] tokens))
+      (checkClosed "tokens.motion"
+        [ "durations" "easings" "intensity" "ambient" "enabled" ]
+        (get [ "motion" ] tokens))
+      (checkClosed "tokens.motion.durations"
+        [ "fast" "base" "slow" "overlay" "ceremonial" ]
+        (get [ "motion" "durations" ] tokens))
+      (checkClosed "tokens.motion.easings"
+        [ "standard" "enter" "exit" "emphasis" ]
+        (get [ "motion" "easings" ] tokens))
+      (checkClosed "assets"
+        [ "lockscreenVariant" "logo" "launcherIcon" "icons" "sounds" "art" "rasterize" ]
+        (theme.assets or { }))
+    ]
+    ++ lib.optionals (tokens ? effects) [
+      (checkClosed "tokens.effects" [ "layers" ] tokens.effects)
+    ]
+    ++ lib.mapAttrsToList
+      (id: descriptor: checkClosed "widgets.${id}"
+        [ "enabled" "region" "priority" "monitorPolicy" "settings" ]
+        descriptor)
+      (theme.widgets or { })
+    ++ map
+      (plugin: checkClosed "plugins entry"
+        [ "id" "source" "entry" "region" "priority" "services" "layout" ]
+        plugin)
+      (theme.plugins or [ ])
+    ++ lib.optionals (theme ? integration) (
+      [
+        (checkClosed "integration"
+          [ "gtk" "qt" "cursor" "fonts" ]
+          theme.integration)
+      ]
+      ++ lib.optionals (theme.integration ? gtk) [
+        (checkClosed "integration.gtk" [ "theme" "iconTheme" ] theme.integration.gtk)
+      ]
+      ++ lib.optionals (theme.integration ? qt) [
+        (checkClosed "integration.qt" [ "style" ] theme.integration.qt)
+      ]
+      ++ lib.optionals (theme.integration ? cursor) [
+        (checkClosed "integration.cursor" [ "name" "size" ] theme.integration.cursor)
+      ]
+      ++ lib.optionals (theme.integration ? fonts) [
+        (checkClosed "integration.fonts" [ "packages" ] theme.integration.fonts)
+      ]
+    );
+
   get = path: attrs:
     lib.attrByPath path (fail "missing tokens.${lib.concatStringsSep "." path}") attrs;
+
+  tokens = theme.tokens;
+
+  requireString = path:
+    let value = get path tokens; in
+    if builtins.isString value then value
+    else fail "tokens.${lib.concatStringsSep "." path} must be a string";
+
+  requireInt = path:
+    let value = get path tokens; in
+    if builtins.isInt value then value
+    else fail "tokens.${lib.concatStringsSep "." path} must be an int";
+
+  requireNumber = path:
+    let value = get path tokens; in
+    if builtins.isInt value || builtins.isFloat value then value
+    else fail "tokens.${lib.concatStringsSep "." path} must be a number";
 
   tokenChecks =
     lib.flatten
       (lib.mapAttrsToList
-        (group: keys: map (k: hex (get [ "colors" group k ] theme.tokens)) keys)
+        (group: keys: map (k: hex (get [ "colors" group k ] tokens)) keys)
         colorSchema)
-    ++ map (f: get [ "typography" "families" f ] theme.tokens) [ "display" "sans" "mono" ]
-    ++ map (d: get [ "motion" "durations" d ] theme.tokens) [ "fast" "base" "slow" "overlay" ];
+    ++ map (f: requireString [ "typography" "families" f ]) [ "display" "sans" "mono" ]
+    ++ map (s: requireInt [ "typography" "sizes" s ]) [ "small" "body" "bar" "heading" "icon" ]
+    ++ map (w: requireInt [ "typography" "weights" w ]) [ "regular" "medium" "bold" ]
+    ++ map (r: requireInt [ "metrics" "radius" r ]) [ "small" "medium" "large" ]
+    ++ map (s: requireInt [ "metrics" "space" s ]) [ "xs" "sm" "md" "lg" ]
+    ++ map (b: requireInt [ "metrics" "bar" b ]) [ "height" "margin" "spacing" ]
+    ++ [ (requireNumber [ "metrics" "bar" "opacity" ]) ]
+    ++ map (d: requireInt [ "motion" "durations" d ]) [ "fast" "base" "slow" "overlay" ]
+    ++ map (e: requireString [ "motion" "easings" e ]) [ "standard" "enter" "exit" "emphasis" ];
 
   metaChecks = [
     (if (theme.meta.name or null) == themeName then true
     else fail "meta.name must equal '${themeName}'")
-    (theme.meta.schemaVersion or (fail "missing meta.schemaVersion"))
+    (if builtins.isString (theme.meta.displayName or null) then true
+    else fail "meta.displayName must be a string")
+    (if builtins.isString (theme.meta.version or null) then true
+    else fail "meta.version must be a string")
+    (if builtins.isInt (theme.meta.schemaVersion or null)
+      && theme.meta.schemaVersion == 2
+    then true
+    else fail "meta.schemaVersion must be the integer 2")
   ];
 
-  # Motion v2 (D-022) + ambient effects (D-021): optional keys,
-  # typechecked when present so a theme typo fails the build, never
-  # the running shell. Easing names resolve (warn-and-default) in
-  # the runtime; only the shape is enforced here.
+  # Motion v2 (D-022) + ambient effects (D-021): ceremonial is optional;
+  # the global controls below are required and typechecked. Easing names
+  # resolve (warn-and-default) in the runtime; only their shape is enforced.
   motionExtraChecks =
-    lib.mapAttrsToList
-      (k: v:
-        if builtins.isString v then true
-        else fail "tokens.motion.easings.${k} must be a curve-name string")
-      (theme.tokens.motion.easings or { })
-    ++ [
+    [
       (
-        let c = theme.tokens.motion.durations.ceremonial or null; in
+        let c = tokens.motion.durations.ceremonial or null; in
         if c == null || builtins.isInt c then true
         else fail "tokens.motion.durations.ceremonial must be an int (ms)"
       )
+      (if lib.elem (get [ "motion" "intensity" ] tokens) [ "calm" "lively" ] then true
+      else fail "tokens.motion.intensity must be one of [calm lively]")
+      (if builtins.isBool (get [ "motion" "ambient" ] tokens) then true
+      else fail "tokens.motion.ambient must be a bool")
+      (if builtins.isBool (get [ "motion" "enabled" ] tokens) then true
+      else fail "tokens.motion.enabled must be a bool")
     ];
 
   effectTypes = [ "fog" "particles" "vignette" ];
   # Tints are color TOKEN REFS (L-005: effects derive from tokens,
-  # never literal colors): "<bg|fg|accent|state>.<key>".
+  # never literal colors): "<bg|fg|accent|state>.<key>". The reference
+  # path is relative to tokens.colors and must resolve there.
   isTokenRef = v:
     builtins.isString v
-    && builtins.match "(bg|fg|accent|state)\\.[a-zA-Z0-9]+" v != null;
+    && builtins.match "(bg|fg|accent|state)\\.[a-zA-Z0-9]+" v != null
+    && lib.hasAttrByPath (lib.splitString "." v) tokens.colors;
   effectChecks =
-    let layers = (theme.tokens.effects or { }).layers or [ ]; in
+    let
+      layers =
+        if tokens ? effects
+        then tokens.effects.layers or (fail "missing tokens.effects.layers")
+        else [ ];
+    in
     if !builtins.isList layers
     then fail "tokens.effects.layers must be a list"
     else
       map
         (l:
-          if !(lib.elem (l.type or null) effectTypes)
+          if !builtins.isAttrs l
+          then fail "tokens.effects layers must be attrsets"
+          else if !(checkClosed "tokens.effects layer"
+            [ "type" "tint" "opacity" "speed" "count" "band" ]
+            l)
+          then false
+          else if !(lib.elem (l.type or null) effectTypes)
           then fail "tokens.effects layer type must be one of [${lib.concatStringsSep " " effectTypes}], got ${builtins.toJSON (l.type or null)}"
-          else if l ? tint && !isTokenRef l.tint
-          then fail "tokens.effects tint must be a color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON l.tint}"
+          else if !(l ? tint) || !isTokenRef l.tint
+          then fail "tokens.effects tint is required and must resolve to an existing color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON (l.tint or null)}"
           else true)
         layers;
 
@@ -196,6 +336,7 @@ let
     rasterize);
 
   manifest = theme // {
+    inherit tokens;
     inherit plugins;
     assets = (removeAttrs (theme.assets or { }) [ "rasterize" "lockscreenVariant" ]) // {
       inherit raster wallpapers lockscreen lockscreenVideos;
@@ -208,11 +349,12 @@ let
     });
   };
 
-  checks = tokenChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
+  checks = schemaChecks ++ tokenChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
     ++ motionExtraChecks ++ effectChecks ++ pluginChecks;
 in
 {
   inherit manifest;
+  validated = builtins.deepSeq checks true;
   json = builtins.deepSeq checks
     (pkgs.writeText "rice-manifest-${themeName}.json" (builtins.toJSON manifest));
 }
