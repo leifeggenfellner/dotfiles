@@ -116,6 +116,7 @@ Item {
             widgetId: "epigraph"
             region: "dashboard"
             priority: 0
+            unloadWhenClosed: true
             layout: ({
                     colSpan: 12,
                     minHeight: 128
@@ -127,6 +128,7 @@ Item {
             region: "dashboard"
             priority: 10
             services: ["systemStats"]
+            unloadWhenClosed: true
             layout: ({
                     colSpan: 6,
                     column: "main",
@@ -139,6 +141,7 @@ Item {
             region: "dashboard"
             priority: 20
             services: ["weather"]
+            unloadWhenClosed: true
             layout: ({
                     colSpan: 6,
                     column: "sidebar",
@@ -151,6 +154,7 @@ Item {
             region: "dashboard"
             priority: 30
             services: ["weather"]
+            unloadWhenClosed: true
             layout: ({
                     colSpan: 6,
                     column: "sidebar",
@@ -163,6 +167,7 @@ Item {
             region: "dashboard"
             priority: 40
             services: ["session"]
+            unloadWhenClosed: true
             layout: ({
                     colSpan: 3,
                     column: "sidebar",

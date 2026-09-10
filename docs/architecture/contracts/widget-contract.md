@@ -11,18 +11,19 @@ the **only** interface plugin widgets may rely on (D-004).
 
 Every widget exports a descriptor with:
 
-| Field             | Type               | Meaning                                                                               |
-| ----------------- | ------------------ | ------------------------------------------------------------------------------------- |
-| `id`              | string             | unique, stable; the key used in manifest `widgets.<id>`                               |
-| `contractVersion` | int                | version of this contract the widget targets (D-013)                                   |
-| `enabled`         | bool               | resolved from manifest config; default true                                           |
-| `region`          | string             | surface-defined set: bar uses `left` / `center` / `right`; dashboard uses `dashboard` |
-| `priority`        | int                | ordering within a region                                                              |
-| `monitorPolicy`   | string             | `all` / `primary` / surface-defined                                                   |
-| `services`        | list&lt;string&gt; | service ids this widget needs, e.g. `["audio"]` (D-009)                               |
-| `settings`        | object             | widget-defined schema, filled from manifest `widgets.<id>.settings`                   |
-| `glanceItem`      | Component          | the always-visible representation                                                     |
-| `popoutContent`   | Component?         | optional; rendered inside the shared popout shell                                     |
+| Field              | Type               | Meaning                                                                               |
+| ------------------ | ------------------ | ------------------------------------------------------------------------------------- |
+| `id`               | string             | unique, stable; the key used in manifest `widgets.<id>`                               |
+| `contractVersion`  | int                | version of this contract the widget targets (D-013)                                   |
+| `enabled`          | bool               | resolved from manifest config; default true                                           |
+| `region`           | string             | surface-defined set: bar uses `left` / `center` / `right`; dashboard uses `dashboard` |
+| `priority`         | int                | ordering within a region                                                              |
+| `monitorPolicy`    | string             | `all` / `primary` / surface-defined                                                   |
+| `services`         | list&lt;string&gt; | service ids this widget needs, e.g. `["audio"]` (D-009)                               |
+| `settings`         | object             | widget-defined schema, filled from manifest `widgets.<id>.settings`                   |
+| `unloadWhenClosed` | bool               | permits a closed surface to destroy this widget; default false                        |
+| `glanceItem`       | Component          | the always-visible representation                                                     |
+| `popoutContent`    | Component?         | optional; rendered inside the shared popout shell                                     |
 
 ## Lifecycle & rendering rules
 
@@ -39,6 +40,10 @@ Every widget exports a descriptor with:
    and `Motion` facades (L-004, D-010). No manifest access outside `Theme`.
 6. Glance items must render acceptably with empty/default settings — a theme that
    configures nothing gets a sane widget.
+7. **Unloading:** surfaces may unload only after their conceal transition and only
+   when every mounted descriptor permits it. Descriptors default to retention;
+   set `unloadWhenClosed` only when durable state lives in services or prefs and
+   recreating the widget cannot lose meaningful user state.
 
 ## Theme customization tiers (in order of preference)
 

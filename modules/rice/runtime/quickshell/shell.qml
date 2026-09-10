@@ -1,4 +1,6 @@
 import Quickshell
+import QtQuick
+import "./core"
 import "./modules/ambient"
 import "./modules/bar"
 import "./modules/launcher"
@@ -19,6 +21,13 @@ import "./modules/lore"
 ShellRoot {
     id: root
 
+    component SurfaceLoader: Loader {
+        required property var modelData
+        required property bool requested
+
+        active: requested || (item !== null && item.visible)
+    }
+
     NotificationIpc {}
 
     WallpaperIpc {}
@@ -33,12 +42,24 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
-        AmbientLayer {}
+        SurfaceLoader {
+            id: ambientLoader
+            requested: ShellState.ambientActive
+            sourceComponent: AmbientLayer {
+                modelData: ambientLoader.modelData
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        IdleOverlay {}
+        SurfaceLoader {
+            id: idleLoader
+            requested: ShellState.idleApproaching
+            sourceComponent: IdleOverlay {
+                modelData: idleLoader.modelData
+            }
+        }
     }
 
     Variants {
@@ -53,17 +74,29 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
-        BarPopout {}
+        SurfaceLoader {
+            id: popoutLoader
+            requested: ShellState.activePopout.length > 0
+            sourceComponent: BarPopout {
+                modelData: popoutLoader.modelData
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        Launcher {}
+        SurfaceLoader {
+            id: launcherLoader
+            requested: ShellState.launcherOpen
+            sourceComponent: Launcher {
+                modelData: launcherLoader.modelData
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        Dashboard {}
+        DashboardLoader {}
     }
 
     Variants {
@@ -73,12 +106,24 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
-        NotificationCenter {}
+        SurfaceLoader {
+            id: notificationCenterLoader
+            requested: ShellState.notificationsOpen
+            sourceComponent: NotificationCenter {
+                modelData: notificationCenterLoader.modelData
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        Satchel {}
+        SurfaceLoader {
+            id: satchelLoader
+            requested: ShellState.satchelOpen
+            sourceComponent: Satchel {
+                modelData: satchelLoader.modelData
+            }
+        }
     }
 
     Variants {
@@ -88,16 +133,34 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
-        ThemeSwitcher {}
+        SurfaceLoader {
+            id: switcherLoader
+            requested: ShellState.switcherOpen
+            sourceComponent: ThemeSwitcher {
+                modelData: switcherLoader.modelData
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        WallpaperPicker {}
+        SurfaceLoader {
+            id: wallpaperLoader
+            requested: ShellState.wallpapersOpen
+            sourceComponent: WallpaperPicker {
+                modelData: wallpaperLoader.modelData
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        DebugOverlay {}
+        SurfaceLoader {
+            id: debugLoader
+            requested: ShellState.debugVisible
+            sourceComponent: DebugOverlay {
+                modelData: debugLoader.modelData
+            }
+        }
     }
 }

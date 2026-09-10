@@ -65,6 +65,16 @@ let
         (setAtPath [ "assets" "icons" "custom-action" ] "X" cyberpunk))
       (evaluates "cyberpunk"
         (setAtPath [ "widgets" "workspaces" "settings" "customOption" ] true cyberpunk))
+      (evaluates "cyberpunk"
+        (setAtPath [ "widgets" "workspaces" "unloadWhenClosed" ] false cyberpunk))
+      (evaluates "lotm"
+        (setAtPath [ "plugins" ]
+          [ ((builtins.head lotm.plugins) // { unloadWhenClosed = true; }) ]
+          lotm))
+      (evaluates "lotm"
+        (setAtPath [ "plugins" ]
+          [ (removeAttrs (builtins.head lotm.plugins) [ "unloadWhenClosed" ]) ]
+          lotm))
       (evaluates "cyberpunk" oldSchemaV2)
       (evaluates "cyberpunk"
         (setAtPath [ "integration" ]
@@ -131,6 +141,7 @@ let
       cyberpunk)
     (setAtPath [ "assets" "custom" ] true cyberpunk)
     (setAtPath [ "widgets" "workspaces" "custom" ] true cyberpunk)
+    (setAtPath [ "widgets" "workspaces" "unloadWhenClosed" ] "false" cyberpunk)
     (setAtPath [ "integration" "custom" ] true cyberpunk)
     (setAtPath [ "integration" "gtk" "custom" ] true cyberpunk)
   ];
@@ -140,6 +151,10 @@ let
     (evaluates "lotm"
       (setAtPath [ "plugins" ]
         [ ((builtins.head lotm.plugins) // { custom = true; }) ]
+        lotm))
+    (evaluates "lotm"
+      (setAtPath [ "plugins" ]
+        [ ((builtins.head lotm.plugins) // { unloadWhenClosed = "false"; }) ]
         lotm))
   ];
 in

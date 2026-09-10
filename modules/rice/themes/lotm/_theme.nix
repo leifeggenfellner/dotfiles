@@ -360,6 +360,7 @@ in
       region = "dashboard";
       priority = 40;
       services = [ "prefs" ];
+      unloadWhenClosed = true;
       layout = { column = "main"; minHeight = 320; };
     }
     {
@@ -369,6 +370,7 @@ in
       region = "dashboard";
       priority = 50;
       services = [ "prefs" ];
+      unloadWhenClosed = true;
       layout = { column = "sidebar"; minHeight = 148; };
     }
     {
@@ -378,6 +380,7 @@ in
       region = "dashboard";
       priority = 60;
       services = [ ];
+      unloadWhenClosed = true;
       layout = { column = "main"; minHeight = 180; };
     }
   ];

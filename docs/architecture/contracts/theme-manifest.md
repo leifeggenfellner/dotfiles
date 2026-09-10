@@ -105,6 +105,7 @@ and exposes it exclusively through the `Theme` facade.
       region = "left" | "center" | "right";
       priority = 0;
       monitorPolicy = "all" | "primary" | "…";
+      unloadWhenClosed = false;    # optional; see widget lifecycle contract
       settings = { };             # OPEN: widget-defined settings schema
     };
   };
@@ -117,6 +118,7 @@ and exposes it exclusively through the `Theme` facade.
       region = "dashboard";
       priority = 50;
       services = [ ];
+      unloadWhenClosed = false;   # optional; see widget lifecycle contract
     }
   ];
 

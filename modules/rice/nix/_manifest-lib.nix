@@ -26,6 +26,11 @@ let
       if unknown == [ ] then true
       else fail "${path} contains unknown keys: ${lib.concatStringsSep ", " unknown}";
 
+  checkUnloadWhenClosed = path: descriptor:
+    if !(descriptor ? unloadWhenClosed) || builtins.isBool descriptor.unloadWhenClosed
+    then true
+    else fail "${path}.unloadWhenClosed must be a bool";
+
   hex = v:
     if builtins.isString v && builtins.match "#[0-9a-fA-F]{6}" v != null
     then v
@@ -107,12 +112,12 @@ let
     ]
     ++ lib.mapAttrsToList
       (id: descriptor: checkClosed "widgets.${id}"
-        [ "enabled" "region" "priority" "monitorPolicy" "settings" ]
+        [ "enabled" "region" "priority" "monitorPolicy" "settings" "unloadWhenClosed" ]
         descriptor)
       (theme.widgets or { })
     ++ map
       (plugin: checkClosed "plugins entry"
-        [ "id" "source" "entry" "region" "priority" "services" "layout" ]
+        [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]
         plugin)
       (theme.plugins or [ ])
     ++ lib.optionals (theme ? integration) (
@@ -134,6 +139,14 @@ let
         (checkClosed "integration.fonts" [ "packages" ] theme.integration.fonts)
       ]
     );
+
+  descriptorChecks =
+    lib.mapAttrsToList
+      (id: descriptor: checkUnloadWhenClosed "widgets.${id}" descriptor)
+      (theme.widgets or { })
+    ++ map
+      (plugin: checkUnloadWhenClosed "plugins entry" plugin)
+      (theme.plugins or [ ]);
 
   get = path: attrs:
     lib.attrByPath path (fail "missing tokens.${lib.concatStringsSep "." path}") attrs;
@@ -407,7 +420,7 @@ let
     });
   };
 
-  checks = schemaChecks ++ tokenChecks ++ metricRangeChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
+  checks = schemaChecks ++ descriptorChecks ++ tokenChecks ++ metricRangeChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
     ++ motionExtraChecks ++ effectChecks ++ pluginChecks;
 in
 {
