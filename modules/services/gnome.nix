@@ -3,6 +3,13 @@ _: {
     { config, pkgs, lib, ... }:
     {
       config = lib.mkMerge [
+        {
+          nixpkgs.overlays = [
+            (_final: prev: {
+              gcr = prev.gcr_3;
+            })
+          ];
+        }
         (lib.mkIf config.environment.desktop.enable {
           services = {
             dbus = {
