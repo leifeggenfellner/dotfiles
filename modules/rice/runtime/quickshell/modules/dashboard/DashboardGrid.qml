@@ -363,6 +363,7 @@ Item {
 
         property real revealProgress: 1
         property bool retryPulse: true
+        property var acquiredUpdateServices: []
 
         Behavior on x {
             NumberAnimation {
@@ -387,15 +388,20 @@ Item {
         onWidgetHeightChanged: Qt.callLater(() => grid.setMeasuredHeight(placement.key, reportedHeight))
         Component.onCompleted: {
             grid.setMeasuredHeight(placement.key, reportedHeight);
+            syncServiceUpdates();
             if (grid.surfaceActive)
                 startEntrance();
         }
+        Component.onDestruction: releaseServiceUpdates()
         onPlacementChanged: grid.setMeasuredHeight(placement.key, reportedHeight)
         onLoadAllowedChanged: Qt.callLater(() => grid.setMeasuredHeight(placement.key, reportedHeight))
+        onRequestedServicesChanged: syncServiceUpdates()
+        onResolvedServicesChanged: syncServiceUpdates()
 
         Connections {
             target: grid
             function onSurfaceActiveChanged() {
+                mount.syncServiceUpdates();
                 mount.injectContent(content.item);
                 if (grid.surfaceActive)
                     mount.startEntrance();
@@ -404,6 +410,40 @@ Item {
                     mount.revealProgress = 1;
                 }
             }
+        }
+
+        function desiredUpdateServices() {
+            if (!grid.surfaceActive)
+                return [];
+            const desired = [];
+            for (const name of requestedServices) {
+                const service = resolvedServices[name];
+                if (!service || typeof service.acquireUpdates !== "function" || typeof service.releaseUpdates !== "function" || desired.indexOf(service) >= 0)
+                    continue;
+                desired.push(service);
+            }
+            return desired;
+        }
+
+        function syncServiceUpdates() {
+            const desired = desiredUpdateServices();
+            const acquired = acquiredUpdateServices;
+            for (const service of acquired) {
+                if (desired.indexOf(service) < 0)
+                    service.releaseUpdates();
+            }
+            for (const service of desired) {
+                if (acquired.indexOf(service) < 0)
+                    service.acquireUpdates();
+            }
+            acquiredUpdateServices = desired;
+        }
+
+        function releaseServiceUpdates() {
+            const acquired = acquiredUpdateServices;
+            acquiredUpdateServices = [];
+            for (const service of acquired)
+                service.releaseUpdates();
         }
 
         function assignIfPossible(item, propertyName, value) {

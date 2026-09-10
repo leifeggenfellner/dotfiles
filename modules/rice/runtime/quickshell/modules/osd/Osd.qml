@@ -18,7 +18,7 @@ PanelWindow {
     readonly property bool open: ShellState.osdVisible
     readonly property bool brightness: ShellState.osdKind === "brightness"
     readonly property bool available: brightness ? BrightnessState.available : AudioState.available
-    readonly property real value: brightness ? BrightnessState.value : AudioState.volume
+    readonly property real value: brightness ? (BrightnessState.pending && BrightnessState.requestedValueKnown ? BrightnessState.requestedValue : BrightnessState.value) : AudioState.volume
     readonly property string iconName: brightness ? "brightness" : (AudioState.muted ? "volume-muted" : "volume")
     readonly property string label: available ? Math.round(value * 100) + "%" : "n/a"
 

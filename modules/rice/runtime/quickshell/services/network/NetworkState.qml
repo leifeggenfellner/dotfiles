@@ -31,6 +31,9 @@ Item {
     property var networks: []
     property string passwordNeededFor: ""
     property string _pendingSsid: ""
+    property bool _monitorDesired: true
+    property bool _shuttingDown: false
+    property int _monitorRetryAttempt: 0
 
     // ── commands ──────────────────────────────────────────────
     function connect(target, password) {
@@ -85,7 +88,22 @@ Item {
     }
 
     function _refresh() {
-        statusProc.running = true;
+        if (!statusProc.running)
+            statusProc.running = true;
+    }
+
+    function _startMonitor() {
+        if (_shuttingDown || !_monitorDesired || monitorProc.running)
+            return;
+        monitorProc.running = true;
+    }
+
+    function _scheduleMonitorRetry() {
+        if (_shuttingDown || !_monitorDesired || monitorRetry.running)
+            return;
+        monitorRetry.interval = Math.min(15000, 1000 * Math.pow(2, _monitorRetryAttempt));
+        _monitorRetryAttempt = Math.min(_monitorRetryAttempt + 1, 4);
+        monitorRetry.restart();
     }
 
     // ── device status (which connection is active) ────────────
@@ -214,13 +232,28 @@ Item {
     Process {
         id: monitorProc
         command: ["nmcli", "monitor"]
-        running: network.available
         stdout: SplitParser {
-            onRead: debounceTimer.restart()
+            onRead: {
+                network.available = true;
+                network._monitorRetryAttempt = 0;
+                debounceTimer.restart();
+            }
         }
         onExited: (code, status) => {
             // NM went away (or nmcli missing); state reflects it.
             network.available = false;
+            network._scheduleMonitorRetry();
+        }
+    }
+
+    // One monitor process at a time. Repeated failures back off from 1s
+    // to 15s; a real monitor event resets the failure history.
+    Timer {
+        id: monitorRetry
+        repeat: false
+        onTriggered: {
+            network._refresh();
+            network._startMonitor();
         }
     }
 
@@ -232,5 +265,15 @@ Item {
         onTriggered: network._refresh()
     }
 
-    Component.onCompleted: _refresh()
+    Component.onCompleted: {
+        _refresh();
+        _startMonitor();
+    }
+    Component.onDestruction: {
+        _shuttingDown = true;
+        _monitorDesired = false;
+        monitorRetry.stop();
+        debounceTimer.stop();
+        monitorProc.running = false;
+    }
 }

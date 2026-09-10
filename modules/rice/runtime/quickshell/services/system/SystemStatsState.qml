@@ -9,8 +9,10 @@ import Quickshell.Io
 // justified D-008 tier 4 poll: one short process every 3s, only
 // reading kernel counters, no long-lived polling loop per metric.
 //
-//   state: available, busy, error, cpuLoad [0..1], memoryPercent,
-//          temperatureC (-1 when absent), diskPercent, byte totals
+//   state: available, busy, error, updatesActive, cpuLoad [0..1],
+//          memoryPercent, temperatureC (-1 when absent), diskPercent,
+//          byte totals
+//   commands: acquireUpdates(), releaseUpdates(), refresh()
 
 Item {
     id: stats
@@ -29,8 +31,20 @@ Item {
     property real diskTotal: 0
     readonly property real diskPercent: diskTotal > 0 ? diskUsed / diskTotal : 0
 
+    readonly property bool updatesActive: _updateConsumers > 0
+    property int _updateConsumers: 0
     property real _lastCpuTotal: 0
     property real _lastCpuIdle: 0
+
+    function acquireUpdates() {
+        _updateConsumers++;
+        if (_updateConsumers === 1)
+            refresh();
+    }
+
+    function releaseUpdates() {
+        _updateConsumers = Math.max(0, _updateConsumers - 1);
+    }
 
     function refresh() {
         if (probe.running)
@@ -70,23 +84,27 @@ Item {
         available = memoryTotal > 0 || diskTotal > 0 || total > 0;
     }
 
-    Component.onCompleted: refresh()
-
     // No event source exists for aggregate CPU load, memory pressure,
     // hwmon temperature, or root filesystem usage. Keep the timer
-    // coarse: dashboard vitals are glance data, not a profiler.
+    // coarse and active only while a consumer requests glance data.
     Timer {
         interval: 3000
         repeat: true
-        running: true
+        running: stats.updatesActive
         onTriggered: stats.refresh()
     }
 
     Process {
         id: probe
         command: ["sh", "-c", "LC_ALL=C; awk '/^cpu / { total=0; for (i=2; i<=NF; i++) total += $i; printf \"cpuTotal=%s\\n\", total; printf \"cpuIdle=%s\\n\", $5 + $6 }' /proc/stat; awk '/^MemTotal:/ { total=$2 } /^MemAvailable:/ { avail=$2 } END { if (total > 0) { printf \"memTotal=%s\\n\", total * 1024; printf \"memUsed=%s\\n\", (total - avail) * 1024 } }' /proc/meminfo; df -Pk / | awk 'NR == 2 { printf \"diskTotal=%s\\n\", $2 * 1024; printf \"diskUsed=%s\\n\", $3 * 1024 }'; temp=; for f in /sys/class/hwmon/hwmon*/temp*_input; do [ -r \"$f\" ] || continue; v=$(cat \"$f\" 2>/dev/null) || continue; case \"$v\" in ''|*[!0-9-]*) continue ;; esac; if [ \"$v\" -gt 0 ] && [ \"$v\" -lt 120000 ]; then temp=$v; break; fi; done; [ -n \"$temp\" ] && awk -v t=\"$temp\" 'BEGIN { printf \"tempC=%.1f\\n\", t / 1000 }'"]
-        stdout: StdioCollector { id: stdout; waitForEnd: true }
-        stderr: StdioCollector { id: stderr; waitForEnd: true }
+        stdout: StdioCollector {
+            id: stdout
+            waitForEnd: true
+        }
+        stderr: StdioCollector {
+            id: stderr
+            waitForEnd: true
+        }
         onExited: (code, status) => {
             stats.busy = false;
             if (code !== 0) {
