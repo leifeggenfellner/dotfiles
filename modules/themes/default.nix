@@ -45,10 +45,6 @@ in
             package = pkgs.google-fonts.override { fonts = [ "Inter" ]; };
             size = 9;
           };
-          theme = {
-            name = "Flat-Remix-GTK-White-Dark";
-            package = pkgs.flat-remix-gtk;
-          };
           iconTheme = {
             name = "Papirus-Dark";
             package = pkgs.papirus-icon-theme;
