@@ -15,11 +15,17 @@ _: {
       fmt = import ../themes/_fmt.nix lib;
       style = osConfig.environment.desktop.theme.style;
       activeBorder = palette.${style.accentPrimary};
+      colors = {
+        activeBorder = fmt.rgb activeBorder;
+        inactiveBorder = fmt.rgb palette.surface0;
+      };
+      riceEnabled = osConfig.rice.enable or false;
+      hyprlandConfig = osConfig.environment.desktop.hyprland.configPath;
       q = builtins.toJSON;
       luaBool = value: if value then "true" else "false";
       hyprTheme = ''
         return {
-            rice_enabled = ${luaBool (osConfig.rice.enable or false)},
+            rice_enabled = ${luaBool riceEnabled},
             quickshell = ${q "${pkgs.quickshell}/bin/quickshell"},
             style = {
                 rounding = ${toString style.rounding},
@@ -38,8 +44,8 @@ _: {
                 cursor_size = ${toString style.cursorSize},
             },
             colors = {
-                active_border = ${q (fmt.rgb activeBorder)},
-                inactive_border = ${q (fmt.rgb palette.surface0)},
+                active_border = ${q colors.activeBorder},
+                inactive_border = ${q colors.inactiveBorder},
             },
         }
       '';
@@ -47,6 +53,13 @@ _: {
     {
 
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
+        assertions = [
+          {
+            assertion = hyprlandConfig == "${config.xdg.configHome}/hypr/hyprland.lua";
+            message = "The system Hyprland config path must match Home Manager's generated config path.";
+          }
+        ];
+
         home = {
           packages = [
             pkgs.arandr # screen layout manager
@@ -82,13 +95,28 @@ _: {
             QT_QPA_PLATFORM = "wayland;xcb";
             QT_WAYLAND_DISABLE_WINDOWDECORATION = 1;
             QT_QPA_PLATFORMTHEME = "qt5ct";
-            HYPRLAND_CONFIG = "${config.xdg.configHome}/hypr/hyprland.lua";
-            DOTFILES_RICE_ENABLE = if osConfig.rice.enable or false then "1" else "0";
+            HYPRLAND_CONFIG = hyprlandConfig;
+            DOTFILES_RICE_ENABLE = if riceEnabled then "1" else "0";
           };
         };
 
-        xdg.configFile."hypr/hyprland.lua".source =
-          config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Sources/dotfiles/hypr/hyprland.lua";
+        wayland.windowManager.hyprland = {
+          enable = true;
+          configType = "lua";
+          package = null;
+          portalPackage = null;
+          systemd.enable = false;
+          settings = lib.mkMerge [
+            (import ./hyprland/_settings.nix { inherit style colors; })
+            (import ./hyprland/_startup.nix { inherit lib riceEnabled style; })
+            (import ./hyprland/_bindings.nix {
+              inherit lib riceEnabled;
+              quickshell = "${pkgs.quickshell}/bin/quickshell";
+            })
+            (import ./hyprland/_rules.nix { inherit lib; })
+          ];
+        };
+
         xdg.configFile."hypr/theme.lua".text = hyprTheme;
       };
     };

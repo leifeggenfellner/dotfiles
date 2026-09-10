@@ -217,8 +217,17 @@ let
     if value > 0 then true
     else fail "tokens.${lib.concatStringsSep "." path} must be positive";
 
+  requireBoundedMetric = path:
+    let value = get path tokens; in
+    if value >= 0 && value <= 512 then true
+    else fail "tokens.${lib.concatStringsSep "." path} must be between 0 and 512";
+
   metricRangeChecks =
-    map (name: requirePositive [ "metrics" "workspaces" name ])
+    map (name: requireBoundedMetric [ "metrics" "radius" name ])
+      [ "small" "medium" "large" ]
+    ++ map (name: requireBoundedMetric [ "metrics" "space" name ])
+      [ "xs" "sm" "md" "lg" ]
+    ++ map (name: requirePositive [ "metrics" "workspaces" name ])
       [ "slotSize" "ringExpansion" "iconSize" "iconSourceSize" ]
     ++ map (name: requirePositive [ "metrics" "dashboard" name ])
       [ "columnCount" "compactBreakpoint" "sidebarMinWidth" "sidebarMaxWidth" "mainMinWidth" "epigraphMinHeight" "defaultMinHeight" ]

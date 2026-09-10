@@ -5,8 +5,7 @@ _: {
       c = config.theme.colors;
       s = config.theme.style;
       fmt = import ../themes/_fmt.nix lib;
-      # Map semantic color names → ANSI SGR codes (matching foot/termKeys palette)
-      # Using palette indices means OSC 4 overrides from theme-switcher take effect
+      # Map semantic color names to ANSI SGR codes from the terminal palette.
       nameToSgr = {
         base = 30;
         red = 31;
@@ -31,7 +30,7 @@ _: {
       accent1 = paletteFishAnsi s.accentPrimary;
       reset = "\\x1b[0m";
       artFile = ./fastfetch/oshuwan.txt;
-      # Fastfetch color constants — palette-indexed for live theme switching
+      # Fastfetch color constants from the declarative terminal palette.
       c1 = paletteAnsi s.accentPrimary; # accent
       c2 = paletteAnsi s.accentSecondary; # accent2
       c3 = paletteAnsi "surface1"; # dim
@@ -41,10 +40,6 @@ _: {
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
         home.packages = [ pkgs.fastfetch ];
         programs.fish.functions.fish_greeting = ''
-          # Apply cached theme colors for new terminals opened after a theme switch
-          if test -f ~/.cache/theme-term-colors
-            command cat ~/.cache/theme-term-colors
-          end
           echo -ne '${accent1}'
           command cat ${artFile}
           echo -ne '${reset}'

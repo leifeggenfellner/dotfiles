@@ -170,6 +170,19 @@ defaultMinHeight = 180; }`. Optional assets and open-edge data continue to
    theme-root-relative entry path. Keep plugin-local assets under the plugin
    directory and resolve them from QML with relative URLs.
 
+## Hyprland visual mapping (D-039)
+
+The live Hyprland adapter consumes normalized closed-core tokens directly; this
+does not add a manifest field or change schema compatibility. The complete mapping
+is `tokens.colors.accent.primary` to active general/group borders,
+`tokens.colors.bg.surface1` to inactive general/group borders,
+`tokens.metrics.radius.medium` to rounding, `tokens.metrics.space.sm` to inner
+gaps, and `tokens.metrics.space.md` to outer gaps. Adding another live Hyprland
+keyword requires extending this explicit contract and its adapter tests. Behavioral
+settings, binds, rules, input, and animations are never manifest-controlled.
+Mapped radius/spacing values are integers in the inclusive range 0–512; manifest
+generation and the runtime adapter enforce the same bound before Hyprland IPC.
+
 ## Versioning (D-013)
 
 - `schemaVersion` bumps only on breaking changes, each requiring a DECISIONS.md

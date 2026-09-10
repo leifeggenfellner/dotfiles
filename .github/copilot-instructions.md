@@ -10,6 +10,11 @@ This repository is a NixOS and Home Manager configuration with a contract-driven
 
 ## Change Rules
 
+- For non-trivial tasks, orchestrators and workers must read
+  `.github/copilot-context.md` early, then verify relevant claims against current
+  Git status and the nearest code/contract/decision authority. Stale context never
+  overrides code, contracts, decisions, or current user changes. Update the context
+  after each completed substantive phase.
 - Start from the nearest controlling module, runtime layer, contract, failing command, or test. Make focused, reversible edits and preserve existing host behavior unless change is explicit.
 - Never edit generated manifests, derived assets, build output, caches, `result` links, lock state, or mutable runtime data. Change the source of truth and use the established generator or build.
 - Respect dirty worktrees and unrelated user changes. Do not activate Home Manager, deploy, publish, alter remote services, or perform destructive operations without explicit approval.

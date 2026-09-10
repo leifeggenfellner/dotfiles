@@ -2,6 +2,9 @@
 {
   flake.nixosModules.services-hyprland =
     { lib, pkgs, config, ... }:
+    let
+      hyprlandConfig = config.environment.desktop.hyprland.configPath;
+    in
     {
       imports = [
         inputs.hyprland.nixosModules.default
@@ -14,7 +17,7 @@
           ];
           pathsToLink = [ "/share/icons" ];
           variables = {
-            HYPRLAND_CONFIG = "/home/leif/.config/hypr/hyprland.lua";
+            HYPRLAND_CONFIG = hyprlandConfig;
             NIXOS_OZONE_WL = "1";
           };
         };
@@ -30,7 +33,7 @@
 
           fish.loginShellInit = ''
             if test (tty) = "/dev/tty1"
-              exec Hyprland --config "$HOME/.config/hypr/hyprland.lua" &> /dev/null
+              exec Hyprland --config "${hyprlandConfig}" &> /dev/null
             end
           '';
         };

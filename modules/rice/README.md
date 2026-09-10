@@ -33,5 +33,9 @@ Task-level rules for agents live in `.claude/skills/` (start with
 
 - `rice.enable = true;` and `rice.theme = "<name>";` in host config set the
   Nix-default theme.
-- At runtime, `rice-switch <name>` (once implemented) flips the active theme
-  live via `$XDG_STATE_HOME/rice/active`.
+- At runtime, `rice-switch <name>` flips the active theme
+  live via `$XDG_STATE_HOME/rice/active`. It is a per-user transaction covering
+  Hyprland visual tokens, the pointer, Quickshell reload, and wallpaper; it never
+  activates a system specialisation.
+- Full rebuild-time chrome remains an explicit administrator workflow through
+  `/run/current-system/specialisation/rice-<name>/bin/switch-to-configuration switch`.

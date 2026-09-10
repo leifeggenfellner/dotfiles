@@ -671,15 +671,16 @@ explicit full-chrome theme switch path while preserving fast pointer switching.
   NixOS specialisations. Each generated config forces `rice.theme` and
   `environment.desktop.theme.scheme` to the target theme and disables recursive
   specialisation generation.
-- ✅ `rice-switch --specialise <theme>` activates the matching generated system
-  specialisation, then performs the existing active-pointer, wallpaper, and shell
-  reload flow.
+- ✅ Generated system specialisations remain available through their explicit
+  `/run/current-system/specialisation/rice-<theme>/bin/switch-to-configuration`
+  workflow. D-040 removes specialisation activation from the per-user
+  `rice-switch` transaction.
 - Verified: editor diagnostics clean for changed Nix/docs; `nixpkgs-fmt` clean;
   `nix eval` shows `rice-cyberpunk`, `rice-lotm`, and the existing
   `with-nvidia`; generated cyberpunk config forces both rice and desktop schemes;
-  Home Manager activation package builds and `rice-switch --help` exposes
-  `--specialise`; shitbox toplevel builds and contains switchers for both rice
-  theme specialisations.
+  Home Manager activation package and shitbox toplevel builds contain switchers
+  for both rice theme specialisations. D-040 later isolates those system
+  switchers from `rice-switch`.
 
 ## Phase 27 — External theme packages ✅
 

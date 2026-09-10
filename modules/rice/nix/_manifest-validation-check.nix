@@ -54,6 +54,25 @@ let
     };
   };
 
+  hyprlandVisual = manifest: {
+    activeBorder = manifest.tokens.colors.accent.primary;
+    inactiveBorder = manifest.tokens.colors.bg.surface1;
+    rounding = manifest.tokens.metrics.radius.medium;
+  };
+
+  expectedHyprlandVisuals = {
+    cyberpunk = {
+      activeBorder = "#00e5ff";
+      inactiveBorder = "#1e2940";
+      rounding = 4;
+    };
+    lotm = {
+      activeBorder = "#c79a3a";
+      inactiveBorder = "#3e3121";
+      rounding = 10;
+    };
+  };
+
   validThemes =
     lib.mapAttrsToList evaluates { inherit cyberpunk lotm; }
     ++ [
@@ -88,6 +107,7 @@ let
     ];
 
   invalidThemes = [
+    (setAtPath [ "tokens" "colors" "accent" "primary" ] "not-a-color" cyberpunk)
     (removeAtPath [ "tokens" "typography" "weights" "regular" ] cyberpunk)
     (removeAtPath [ "tokens" "motion" "easings" "standard" ] cyberpunk)
     (removeAtPath [ "tokens" "motion" "intensity" ] cyberpunk)
@@ -104,6 +124,10 @@ let
     (setAtPath [ "tokens" "colors" "accent" "glow" ] "#123456" cyberpunk)
     (setAtPath [ "tokens" "typography" "families" "ui" ] "Sans" cyberpunk)
     (setAtPath [ "tokens" "metrics" "bar" "blur" ] 8 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "radius" "medium" ] (-1) cyberpunk)
+    (setAtPath [ "tokens" "metrics" "radius" "medium" ] 513 cyberpunk)
+    (setAtPath [ "tokens" "metrics" "space" "sm" ] (-1) cyberpunk)
+    (setAtPath [ "tokens" "metrics" "space" "md" ] 513 cyberpunk)
     (removeAtPath [ "tokens" "metrics" "workspaces" "slotSize" ] cyberpunk)
     (setAtPath [ "tokens" "metrics" "workspaces" "custom" ] 8 cyberpunk)
     (setAtPath [ "tokens" "metrics" "workspaces" "slotSize" ] 0 cyberpunk)
@@ -161,6 +185,14 @@ in
 assert lib.all (result: result) validThemes;
 assert oldSchemaV2Manifest.tokens.metrics.workspaces == expectedMetricDefaults.workspaces;
 assert oldSchemaV2Manifest.tokens.metrics.dashboard == expectedMetricDefaults.dashboard;
+assert hyprlandVisual (mkThemeManifest {
+  themeName = "cyberpunk";
+  themeDir = themeDirs.cyberpunk;
+}).manifest == expectedHyprlandVisuals.cyberpunk;
+assert hyprlandVisual (mkThemeManifest {
+  themeName = "lotm";
+  themeDir = themeDirs.lotm;
+}).manifest == expectedHyprlandVisuals.lotm;
 assert lib.all (result: !result) invalidResults;
 pkgs.runCommand "rice-manifest-validation" { } ''
   touch $out

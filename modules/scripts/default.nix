@@ -31,12 +31,6 @@ _: {
         inherit pkgs;
         inherit (config) colorScheme;
       };
-      theme-switcher = pkgs.callPackage ./_theme-switcher.nix {
-        inherit pkgs lib;
-        themes = builtins.attrNames (import ../themes/_palettes.nix);
-        palettes = import ../themes/_palettes.nix;
-        currentScheme = osConfig.environment.desktop.theme.scheme;
-      };
       wallpaper-picker = pkgs.callPackage ./_wallpaper-picker.nix {
         inherit pkgs;
         wallpaperDir = "$HOME/Pictures/wallpapers";
@@ -52,7 +46,6 @@ _: {
           handle-monitor
           thunderbolt-wait
           lock-screen
-          theme-switcher
           wallpaper-picker
 
           gum-scripts.system-cleanup

@@ -110,9 +110,19 @@ theme plugins → injected services + mount-provided theme/motion facades
 
 1. Nix builds every enabled theme's manifest into the store + a `themes.json` index.
 2. Runtime reads `$XDG_STATE_HOME/rice/active` (fallback: Nix default) and watches it.
-3. `rice-switch <theme>` validates against the index, writes the pointer, sets the
-   wallpaper; the shell re-binds live.
+3. `rice-switch <theme>` holds a per-user transaction lock, pins the immutable
+   store index and manifests, captures the prior pointer, validates the target,
+   applies its fixed safe Hyprland visual-token mapping, atomically writes the
+   pointer, reloads the shell, and applies the wallpaper. Any failure or handled
+   interruption after effects begin best-effort restores prior Hyprland visuals,
+   exact pointer state, Quickshell resolution, and the exact previously persisted
+   wallpaper even when it is outside the prior manifest. If no wallpaper was
+   previously persisted, rollback restores that absence and reports partial
+   rollback when a possibly changed visual wallpaper cannot be restored;
+   incomplete compensation is always reported as a partial rollback.
 4. GTK/Qt/cursor/icons/fonts follow at rebuild via the legacy theme bridge (D-012).
+   Generated system specialisations remain a separate explicit rebuild-time
+   workflow and are never entered by `rice-switch` (D-040).
 
 ## Skill authority matrix (D-015)
 

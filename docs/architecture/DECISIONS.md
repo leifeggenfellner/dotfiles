@@ -584,6 +584,73 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   locking would remain hyprlock-only. Hypridle still owns idle timing; the lock
   command owns the selected lock implementation.
 
+### D-038 — Hyprland Lua remains Nix-generated
+
+- Date: 2026-09-10 · Status: active
+- Phase 6 makes Home Manager's `wayland.windowManager.hyprland.settings` the
+  authority for the generated Lua at
+  `environment.desktop.hyprland.configPath`. NixOS launch policy and Home
+  Manager session state consume that same read-only path. The handwritten
+  `hypr/hyprland.lua` remains an uninstalled legacy reference, not a runtime
+  authority or fallback.
+- Rollback is declarative: revert the Phase 6 Git changes and rebuild, or select
+  a retained older Nix generation. Do not restore authority by linking or
+  copying the handwritten legacy file into the active config path.
+- Startup parity is behavioral, not a command-count copy of the legacy file:
+  register each one-shot action under `hyprland.start`, remove parse-time and
+  duplicate execution, and retain the delayed dock setup and wallpaper retry.
+- Validation must be side-effect-free: render and inspect the generated source,
+  make static assertions over its text, and use `luac -p` for syntax only. Do
+  not execute the generated Lua or invoke a Hyprland verifier or config loader;
+  loading the config may run top-level process behavior.
+- Why: one Nix-owned source keeps launchers, session variables, generated
+  configuration, and rollback aligned while preserving a reviewable migration
+  reference. This extends L-008 without rewriting the imported decision.
+
+### D-039 — Rice switch owns live Hyprland visual tokens
+
+- Date: 2026-09-10 · Status: active
+- `rice-switch` is the only installed theme-switch workflow. It validates the
+  target's immutable normalized manifest, applies the mapped Hyprland visual
+  keywords, atomically commits `$XDG_STATE_HOME/rice/active`, and reloads a
+  running Quickshell in that order. Hyprland apply failure leaves the pointer
+  unchanged; pointer or Quickshell reload failure restores the previous pointer
+  and reapplies its visual tokens. A failed visual rollback reports the explicit
+  recovery command `rice-hyprland-theme --active`.
+- The generated `rice-hyprland-theme` adapter consumes the same normalized
+  manifest as Quickshell. Its closed mapping is `accent.primary` to active
+  general/group borders, `bg.surface1` to inactive general/group borders,
+  `metrics.radius.medium` to rounding, and `metrics.space.{sm,md}` to inner and
+  outer gaps. It rejects malformed manifests before IPC and applies no binds,
+  rules, input, animation, or other behavioral configuration.
+- Generated Hyprland Lua invokes `rice-hyprland-theme --active` from the
+  `hyprland.start` event, after IPC is available. Lua and QML do not duplicate
+  the adapter's parser: QML keeps its D-018 `ManifestLoader`, while the shell
+  adapter is an invocation-time consumer like the D-020 lock command.
+- The rebuild-based `theme-switcher` package and binding are retired. Its source
+  remains as an uninstalled legacy reference until separate cleanup; no active
+  theme path mutates Nix source or invokes `nixos-rebuild`.
+- Why: Quickshell and Hyprland should present one active rice immediately without
+  making mutable state a Nix source or moving behavioral Hyprland authority out
+  of D-038's generated configuration.
+
+### D-040 — Live theme switching is a user transaction
+
+- Date: 2026-09-10 · Status: active
+- `rice-switch` is exclusively a serialized per-user transaction over live
+  Hyprland visual tokens, the active pointer, Quickshell reload, and wallpaper.
+  It resolves its index and manifests to immutable regular Nix store files before
+  effects, captures prior state, and compensates all attempted effects on failure
+  or handled interruption. It reports partial rollback whenever any required
+  compensation fails.
+- Generated NixOS/Home Manager theme specialisations from D-034 remain available
+  only through their explicit system `switch-to-configuration` paths. The
+  `rice-switch --specialise` clause of D-034 is superseded; live switching never
+  invokes system specialisation, rebuild, activation, or source mutation.
+- Why: system activation cannot participate safely in the user-owned live-theme
+  rollback boundary. Keeping it explicit avoids an irreversible side effect
+  inside a transaction whose other state can be compensated immediately.
+
 ---
 
 ## Legacy imports

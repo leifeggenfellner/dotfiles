@@ -12,5 +12,8 @@ _: {
 
     checks.rice-manifest-validation =
       import ../rice/nix/_manifest-validation-check.nix { inherit pkgs; };
+
+    checks.rice-theme-switch =
+      import ../rice/nix/_theme-switch-check.nix { inherit pkgs; };
   };
 }
