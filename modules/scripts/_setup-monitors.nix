@@ -1,5 +1,5 @@
 { pkgs
-, monitorHome ? ""
+, monitorFamilyHome ? ""
 , monitorWorkCenter ? ""
 , monitorWorkRight ? ""
 , ...
@@ -10,10 +10,19 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
   JQ=${pkgs.jq}/bin/jq
 
-  MONITOR_HOME_DESC="${monitorHome}"
+  MONITOR_FAMILY_HOME_DESC="${monitorFamilyHome}"
   MONITOR_WORK_CENTER_DESC="${monitorWorkCenter}"
   MONITOR_WORK_RIGHT_DESC="${monitorWorkRight}"
   LAPTOP="eDP-1"
+  PROFILE="''${1:-auto}"
+
+  case "$PROFILE" in
+    auto|family_home|home_office|work) ;;
+    *)
+      echo "Usage: setup-monitors [auto|family_home|home_office|work]" >&2
+      exit 2
+      ;;
+  esac
 
   MONITORS_JSON=$(hyprctl monitors -j)
   ORIGINAL_MONITOR=$(echo "$MONITORS_JSON" | $JQ -r '[.[] | select(.focused) | .name][0] // ""')
@@ -69,9 +78,9 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   }
 
   set_mon() {
-    local output mode position scale lua_scale
+    local output mode position scale transform lua_scale lua_transform
 
-    IFS=',' read -r output mode position scale <<< "$1"
+    IFS=',' read -r output mode position scale transform <<< "$1"
     if [ "$mode" = "disable" ]; then
       hypr_eval "hl.monitor({ output = $(lua_quote "$output"), disabled = true })"
       return
@@ -83,7 +92,21 @@ pkgs.writeShellScriptBin "setup-monitors" ''
       lua_scale="$scale"
     fi
 
-    hypr_eval "hl.monitor({ output = $(lua_quote "$output"), mode = $(lua_quote "$mode"), position = $(lua_quote "$position"), scale = $lua_scale })"
+    lua_transform=""
+    if [ -n "$transform" ]; then
+      lua_transform=", transform = $transform"
+    fi
+
+    hypr_eval "hl.monitor({ output = $(lua_quote "$output"), mode = $(lua_quote "$mode"), position = $(lua_quote "$position"), scale = $lua_scale$lua_transform })"
+  }
+
+  disable_desc() {
+    local description="$1" output
+
+    if [ -n "$description" ] && has_desc "$description"; then
+      output=$(name_of "$description")
+      set_mon "$output,disable,,"
+    fi
   }
 
   set_ws() {
@@ -129,31 +152,63 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     fi
   fi
 
-  if [ -n "$MONITOR_HOME_DESC" ] && has_desc "$MONITOR_HOME_DESC"; then
-    echo "Home setup detected"
+  if { [ "$PROFILE" = "auto" ] || [ "$PROFILE" = "family_home" ]; } \
+    && [ -n "$MONITOR_FAMILY_HOME_DESC" ] && has_desc "$MONITOR_FAMILY_HOME_DESC"; then
+    echo "family_home profile detected"
 
-    HOME_MON=$(name_of "$MONITOR_HOME_DESC")
-    echo "Samsung output name: $HOME_MON"
+    FAMILY_HOME_MON=$(name_of "$MONITOR_FAMILY_HOME_DESC")
+    echo "Samsung output name: $FAMILY_HOME_MON"
 
     set_mon "$LAPTOP,1920x1200@60,0x0,1"
-    set_mon "$HOME_MON,3440x1440@60,1920x0,1"
+    set_mon "$FAMILY_HOME_MON,3440x1440@60,1920x0,1"
 
     # Bind workspaces to monitors first — affects both existing and new workspaces
-    set_ws "1,monitor:$HOME_MON,default:true"
-    set_ws "2,monitor:$HOME_MON"
+    set_ws "1,monitor:$FAMILY_HOME_MON,default:true"
+    set_ws "2,monitor:$FAMILY_HOME_MON"
     set_ws "3,monitor:$LAPTOP,default:true"
     set_ws "4,monitor:$LAPTOP"
     set_ws "5,monitor:$LAPTOP"
     set_ws "6,monitor:$LAPTOP"
 
-    move_ws 1 "$HOME_MON"
-    move_ws 2 "$HOME_MON"
+    move_ws 1 "$FAMILY_HOME_MON"
+    move_ws 2 "$FAMILY_HOME_MON"
     for i in {3..6}; do
       move_ws "$i" "$LAPTOP"
     done
 
-  elif [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] && has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
-    echo "Work setup detected"
+  elif [ "$PROFILE" = "home_office" ] \
+    && [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] \
+    && has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
+    echo "home_office profile selected"
+
+    LEFT_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")
+    MIDDLE_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
+    echo "Left portrait monitor: $LEFT_MON, Middle landscape monitor: $MIDDLE_MON"
+
+    set_mon "$LEFT_MON,2560x1440@60,0x0,1,1"
+    set_mon "$MIDDLE_MON,2560x1440@60,1440x0,1"
+    set_mon "$LAPTOP,1920x1200@60,4000x0,1"
+
+    set_ws "1,monitor:$LEFT_MON,default:true"
+    set_ws "6,monitor:$LEFT_MON"
+    set_ws "3,monitor:$MIDDLE_MON,default:true"
+    set_ws "7,monitor:$MIDDLE_MON"
+    set_ws "2,monitor:$LAPTOP,default:true"
+    set_ws "4,monitor:$LAPTOP"
+    set_ws "5,monitor:$LAPTOP"
+
+    move_ws 1 "$LEFT_MON"
+    move_ws 6 "$LEFT_MON"
+    move_ws 3 "$MIDDLE_MON"
+    move_ws 7 "$MIDDLE_MON"
+    move_ws 2 "$LAPTOP"
+    move_ws 4 "$LAPTOP"
+    move_ws 5 "$LAPTOP"
+
+  elif { [ "$PROFILE" = "auto" ] || [ "$PROFILE" = "work" ]; } \
+    && [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] \
+    && has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
+    echo "work profile detected"
 
     CENTER_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")
     RIGHT_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
@@ -180,7 +235,9 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     move_ws 4 "$LAPTOP"
     move_ws 5 "$LAPTOP"
 
-  elif [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] && { has_desc "$MONITOR_WORK_CENTER_DESC" || has_desc "$MONITOR_WORK_RIGHT_DESC"; }; then
+  elif { [ "$PROFILE" = "auto" ] || [ "$PROFILE" = "work" ] || [ "$PROFILE" = "home_office" ]; } \
+    && [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] \
+    && { has_desc "$MONITOR_WORK_CENTER_DESC" || has_desc "$MONITOR_WORK_RIGHT_DESC"; }; then
     echo "Partial work setup detected"
 
     set_mon "$LAPTOP,1920x1200@60,0x0,1"
@@ -229,6 +286,10 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     echo "Laptop-only setup"
 
     set_mon "$LAPTOP,preferred,0x0,1"
+
+    disable_desc "$MONITOR_FAMILY_HOME_DESC"
+    disable_desc "$MONITOR_WORK_CENTER_DESC"
+    disable_desc "$MONITOR_WORK_RIGHT_DESC"
 
     for i in {1..10}; do
       set_ws "$i,monitor:$LAPTOP"

@@ -16,7 +16,7 @@ _: {
       set-monitor = pkgs.callPackage ./_set-monitor.nix { inherit pkgs; };
       setup-monitors = pkgs.callPackage ./_setup-monitors.nix {
         inherit pkgs;
-        monitorHome = monitorDesc "home";
+        monitorFamilyHome = monitorDesc "familyHome";
         monitorWorkCenter = monitorDesc "work";
         monitorWorkRight = monitorDesc "workRight";
       };

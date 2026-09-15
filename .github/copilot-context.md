@@ -79,6 +79,17 @@ numbering in `ROADMAP.md` remains authoritative and is unrelated.
 
 ## Handoff
 
+- Display layout update (2026-09-16, `shitbox`): `work`/`workRight` own HP serials
+  `1H361409R2`/`1H361409TR` at both work and home office. Automatic detection
+  keeps the work layout; `setup-monitors home_office` explicitly selects the
+  home-office layout because identical monitor sets cannot identify location.
+  That layout places the left display portrait at 0x0, the right display at
+  1440x0, and the laptop at 4000x0, all top-aligned at scale 1. Current home-dock
+  connectors are DP-6/DP-9, but no cross-boot or work-site evidence establishes
+  connector stability. Mocked generated-script behavior, generated Bash syntax,
+  monitor-registry and `shitbox` evaluation, scoped formatting, no-build flake
+  checks, and diff hygiene pass. No activation or live display mutation ran;
+  clockwise rotation and visual alignment remain to verify.
 - DX refactor increment 8 rollout status (2026-09-10, `shitbox`): preflight and
   `nh os build` completed successfully from clean commit `830be800`; 73
   derivations built and the expected Nix-owned Hyprland config path evaluated.

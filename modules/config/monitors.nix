@@ -35,14 +35,14 @@ _: {
       options.environment.desktop.monitors = lib.mkOption {
         type = lib.types.attrsOf monitorSubmodule;
         default = { };
-        description = "Named monitor registry. Keys are logical names (e.g. 'laptop', 'work', 'home').";
+        description = "Named monitor registry. Keys are logical names (e.g. 'laptop', 'work', 'familyHome').";
       };
 
       options.environment.desktop.lockMonitorPriority = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
         description = "Ordered list of monitor keys (from environment.desktop.monitors) to prefer for the lock screen. First connected one wins.";
-        example = [ "work" "home" "laptop" ];
+        example = [ "work" "familyHome" "laptop" ];
       };
     };
 }
