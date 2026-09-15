@@ -51,10 +51,7 @@ _: {
 
         };
 
-        systemd.services.greetd = {
-          after = [ "home-manager-leif.service" ];
-          requires = [ "home-manager-leif.service" ];
-        };
+        systemd.services.greetd.after = [ "home-manager-leif.service" ];
       };
     };
 }
