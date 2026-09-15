@@ -48,6 +48,12 @@ _: {
                 default_session = session;
               };
             };
+
+        };
+
+        systemd.services.greetd = {
+          after = [ "home-manager-leif.service" ];
+          requires = [ "home-manager-leif.service" ];
         };
       };
     };

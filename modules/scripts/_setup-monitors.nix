@@ -181,29 +181,29 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     && has_desc "$MONITOR_WORK_CENTER_DESC" && has_desc "$MONITOR_WORK_RIGHT_DESC"; then
     echo "home_office profile selected"
 
-    LEFT_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")
-    MIDDLE_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
+    LEFT_MON=$(name_of "$MONITOR_WORK_RIGHT_DESC")
+    MIDDLE_MON=$(name_of "$MONITOR_WORK_CENTER_DESC")
     echo "Left portrait monitor: $LEFT_MON, Middle landscape monitor: $MIDDLE_MON"
 
     set_mon "$LEFT_MON,2560x1440@60,0x0,1,1"
     set_mon "$MIDDLE_MON,2560x1440@60,1440x0,1"
     set_mon "$LAPTOP,1920x1200@60,4000x0,1"
 
-    set_ws "1,monitor:$LEFT_MON,default:true"
-    set_ws "6,monitor:$LEFT_MON"
-    set_ws "3,monitor:$MIDDLE_MON,default:true"
-    set_ws "7,monitor:$MIDDLE_MON"
-    set_ws "2,monitor:$LAPTOP,default:true"
-    set_ws "4,monitor:$LAPTOP"
-    set_ws "5,monitor:$LAPTOP"
+    set_ws "2,monitor:$LEFT_MON,default:true"
+    set_ws "4,monitor:$LEFT_MON"
+    set_ws "5,monitor:$LEFT_MON"
+    set_ws "1,monitor:$MIDDLE_MON,default:true"
+    set_ws "3,monitor:$MIDDLE_MON"
+    set_ws "6,monitor:$LAPTOP,default:true"
+    set_ws "7,monitor:$LAPTOP"
 
-    move_ws 1 "$LEFT_MON"
-    move_ws 6 "$LEFT_MON"
+    move_ws 2 "$LEFT_MON"
+    move_ws 4 "$LEFT_MON"
+    move_ws 5 "$LEFT_MON"
+    move_ws 1 "$MIDDLE_MON"
     move_ws 3 "$MIDDLE_MON"
-    move_ws 7 "$MIDDLE_MON"
-    move_ws 2 "$LAPTOP"
-    move_ws 4 "$LAPTOP"
-    move_ws 5 "$LAPTOP"
+    move_ws 6 "$LAPTOP"
+    move_ws 7 "$LAPTOP"
 
   elif { [ "$PROFILE" = "auto" ] || [ "$PROFILE" = "work" ]; } \
     && [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] \
