@@ -26,7 +26,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
   MONITORS_JSON=$(hyprctl monitors -j)
   ORIGINAL_MONITOR=$(echo "$MONITORS_JSON" | $JQ -r '[.[] | select(.focused) | .name][0] // ""')
-  ORIGINAL_WORKSPACE=$(echo "$MONITORS_JSON" | $JQ -r '[.[] | select(.focused) | .activeWorkspace.id][0] // ""')
+  ORIGINAL_WORKSPACE=$(echo "$MONITORS_JSON" | $JQ -r '[.[] | select(.focused) | (.activeWorkspace.id? // .activeWorkspace.name?)][0] // ""')
 
   refresh_monitors() {
     MONITORS_JSON=$(hyprctl monitors -j)
@@ -58,7 +58,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
     local workspace="$1" monitor="$2"
 
     # Only move workspaces that actually exist
-    if hyprctl workspaces -j | $JQ -e --argjson id "$workspace" '.[] | select(.id == $id)' >/dev/null 2>&1; then
+    if hyprctl workspaces -j | $JQ -e --arg workspace "$workspace" '.[] | select(((.id? // .name? // empty) | tostring) == $workspace)' >/dev/null 2>&1; then
       hypr_dispatch "hl.dsp.workspace.move({ workspace = $(lua_quote "$workspace"), monitor = $(lua_quote "$monitor") })" || true
     fi
   }
@@ -72,7 +72,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
       hypr_dispatch "hl.dsp.focus({ monitor = $(lua_quote "$mon") })" || true
     fi
 
-    if [ -n "$ws" ] && hyprctl workspaces -j | $JQ -e --argjson id "$ws" '.[] | select(.id == $id)' >/dev/null 2>&1; then
+    if [ -n "$ws" ] && hyprctl workspaces -j | $JQ -e --arg workspace "$ws" '.[] | select(((.id? // .name? // empty) | tostring) == $workspace)' >/dev/null 2>&1; then
       hypr_dispatch "hl.dsp.focus({ workspace = $(lua_quote "$ws") })" || true
     fi
   }
