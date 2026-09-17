@@ -220,20 +220,20 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
     # Bind workspaces to monitors first
     set_ws "1,monitor:$CENTER_MON,default:true"
-    set_ws "6,monitor:$CENTER_MON"
+    set_ws "5,monitor:$CENTER_MON"
     set_ws "3,monitor:$RIGHT_MON,default:true"
     set_ws "7,monitor:$RIGHT_MON"
     set_ws "2,monitor:$LAPTOP,default:true"
     set_ws "4,monitor:$LAPTOP"
-    set_ws "5,monitor:$LAPTOP"
+    set_ws "6,monitor:$LAPTOP"
 
     move_ws 1 "$CENTER_MON"
-    move_ws 6 "$CENTER_MON"
+    move_ws 5 "$CENTER_MON"
     move_ws 3 "$RIGHT_MON"
     move_ws 7 "$RIGHT_MON"
     move_ws 2 "$LAPTOP"
     move_ws 4 "$LAPTOP"
-    move_ws 5 "$LAPTOP"
+    move_ws 6 "$LAPTOP"
 
   elif { [ "$PROFILE" = "auto" ] || [ "$PROFILE" = "work" ] || [ "$PROFILE" = "home_office" ]; } \
     && [ -n "$MONITOR_WORK_CENTER_DESC" ] && [ -n "$MONITOR_WORK_RIGHT_DESC" ] \
