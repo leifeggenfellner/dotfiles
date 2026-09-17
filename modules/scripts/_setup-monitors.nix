@@ -59,7 +59,7 @@ pkgs.writeShellScriptBin "setup-monitors" ''
 
     # Only move workspaces that actually exist
     if hyprctl workspaces -j | $JQ -e --arg workspace "$workspace" '.[] | select(((.id? // .name? // empty) | tostring) == $workspace)' >/dev/null 2>&1; then
-      hypr_dispatch "hl.dsp.workspace.move({ workspace = $(lua_quote "$workspace"), monitor = $(lua_quote "$monitor") })" || true
+      hypr_dispatch "hl.dsp.workspace.move_to_monitor({ workspace = $(lua_quote "$workspace"), monitor = $(lua_quote "$monitor") })" || true
     fi
   }
 
