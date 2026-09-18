@@ -67,7 +67,6 @@ pkgs.writeShellScriptBin "handle-monitor" ''
     }
 
     echo "Monitoring for display changes on $SOCKET..."
-    schedule_reconcile 1
 
     while read -r line; do
       case "$line" in

@@ -14,7 +14,35 @@ pkgs.writeShellScriptBin "setup-monitors" ''
   MONITOR_WORK_CENTER_DESC="${monitorWorkCenter}"
   MONITOR_WORK_RIGHT_DESC="${monitorWorkRight}"
   LAPTOP="eDP-1"
-  PROFILE="''${1:-auto}"
+  PROFILE_ARG="''${1:-}"
+  PROFILE_STATE_DIR="''${XDG_STATE_HOME:-$HOME/.local/state}/hypr"
+  PROFILE_STATE_FILE="$PROFILE_STATE_DIR/setup-monitors-profile"
+
+  persist_profile() {
+    local profile="$1" state_file
+
+    umask 077
+    mkdir -p "$PROFILE_STATE_DIR"
+    state_file=$(mktemp "$PROFILE_STATE_DIR/setup-monitors-profile.XXXXXX")
+    printf '%s\n' "$profile" > "$state_file"
+    mv -f "$state_file" "$PROFILE_STATE_FILE"
+  }
+
+  if [ -z "$PROFILE_ARG" ] && [ -r "$PROFILE_STATE_FILE" ]; then
+    IFS= read -r PROFILE < "$PROFILE_STATE_FILE" || true
+    case "$PROFILE" in
+      home_office|work)
+        echo "Reusing saved $PROFILE monitor profile"
+        ;;
+      *) PROFILE="auto" ;;
+    esac
+  else
+    PROFILE="$PROFILE_ARG"
+  fi
+
+  if [ -z "$PROFILE" ]; then
+    PROFILE="auto"
+  fi
 
   case "$PROFILE" in
     auto|family_home|home_office|work) ;;
@@ -22,6 +50,10 @@ pkgs.writeShellScriptBin "setup-monitors" ''
       echo "Usage: setup-monitors [auto|family_home|home_office|work]" >&2
       exit 2
       ;;
+  esac
+
+  case "$PROFILE_ARG" in
+    home_office|work) persist_profile "$PROFILE_ARG" ;;
   esac
 
   MONITORS_JSON=$(hyprctl monitors -j)
