@@ -6,6 +6,7 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
   BOLTCTL=${pkgs.bolt}/bin/boltctl
   JQ=${pkgs.jq}/bin/jq
   MAX_WAIT=30
+  # A one-second cadence catches late dock/DRM enumeration without excessive rescans.
   POLL_INTERVAL=1
 
   echo "=== Thunderbolt/USB4 dock scan ==="
@@ -80,10 +81,10 @@ pkgs.writeShellScriptBin "thunderbolt-wait" ''
     return 1
   }
 
-  # If neither bolt nor DRM sees an external endpoint, skip quickly.
+  # A dock may enumerate after the graphical session starts. Keep the bounded
+  # wait active so late devices receive authorization and Hyprland rescans.
   if ! dock_present && ! drm_external_connected; then
-    echo "No dock/external connectors detected — skipping"
-    exit 0
+    echo "No dock/external connectors detected yet — waiting for late enumeration"
   fi
 
   authorize_sysfs

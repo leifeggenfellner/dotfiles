@@ -13,13 +13,37 @@ _: {
 
       systemd.services.thunderbolt-rescan = {
         description = "Authorize Thunderbolt devices and rescan display connectors";
-        after = [ "bolt.service" "graphical.target" ];
+        after = [ "bolt.service" "graphical.target" "systemd-modules-load.service" ];
         wantedBy = [ "graphical.target" ];
         path = [ pkgs.coreutils pkgs.bolt pkgs.gawk pkgs.systemd ];
         serviceConfig = {
           Type = "oneshot";
           ExecStart = pkgs.writeShellScript "thunderbolt-rescan" ''
-            sleep 3
+            intel_drm_ready() {
+              [ -d /sys/module/i915 ] || return 1
+
+              for status in /sys/class/drm/card*-*/status; do
+                [ -e "$status" ] || continue
+                driver="$${status%/status}/device/driver"
+                [ -e "$driver" ] || continue
+                [ "$(basename "$(readlink -f "$driver")")" = "i915" ] && return 0
+              done
+
+              return 1
+            }
+
+            waited=0
+            while ! intel_drm_ready && [ "$waited" -lt 20 ]; do
+              echo "Waiting for Intel DRM connector readiness..."
+              sleep 1
+              waited=$((waited + 1))
+            done
+
+            if intel_drm_ready; then
+              echo "Intel DRM connector ready after $waited second(s)"
+            else
+              echo "Intel DRM connector not ready after $waited second(s); reprobeing anyway"
+            fi
 
             # Authorize any pending peripheral via boltctl. Skip host domains.
             boltctl list -a 2>/dev/null | awk '
