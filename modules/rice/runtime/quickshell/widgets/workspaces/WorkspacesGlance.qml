@@ -15,9 +15,10 @@ Item {
 
     property var services: ({})
     property var settings: ({})
+    property string screenName: ""
 
     readonly property var items: settings.items ?? []
-    readonly property int active: services.hypr ? services.hypr.activeWorkspace : 1
+    readonly property int active: services.hypr ? services.hypr.activeWorkspaceForScreen(screenName) : 1
 
     implicitWidth: items.length > 0 ? strip.width : fallback.width
     implicitHeight: Theme.metrics.bar.height

@@ -92,6 +92,8 @@ PanelWindow {
                 onLoaded: {
                     item.services = bar.resolveServices(mount.modelData.services);
                     item.settings = mount.modelData.settings;
+                    if ("screenName" in item)
+                        item.screenName = bar.screen.name;
                 }
             }
         }

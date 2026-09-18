@@ -10,7 +10,7 @@ import Quickshell.Wayland
 // window title) by porting from the legacy tree.
 //
 //   state:    available, focusedScreenName ("" when unknown),
-//             activeWorkspace (id), anyFullscreen
+//             activeWorkspace (id), activeWorkspaceForScreen(name), anyFullscreen
 //   commands: switchWorkspace(id)
 //
 // Focused output is exposed by NAME (matches ShellScreen.name);
@@ -33,6 +33,11 @@ Item {
 
     property int _fullscreenCount: 0
     readonly property bool anyFullscreen: _fullscreenCount > 0
+
+    function activeWorkspaceForScreen(screenName) {
+        const monitor = Hyprland.monitors.values.find(candidate => candidate.name === screenName);
+        return monitor?.activeWorkspace?.id ?? hypr.activeWorkspace;
+    }
 
     function switchWorkspace(id) {
         Hyprland.dispatch("workspace " + id);
