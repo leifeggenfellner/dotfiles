@@ -1,16 +1,15 @@
-{ lib, riceEnabled, style }:
+{ lib, monitorControlEnabled, riceEnabled, style }:
 let
-  setupDisplays = "setup-monitors";
   restoreWallpaper = "wallpaper-restore";
   applyRiceTheme = "rice-hyprland-theme --active";
-  monitorHandler = "pgrep -f '[h]andle-monitor' || uwsm app -- handle-monitor";
+  finalizeSession = "uwsm finalize" + lib.optionalString monitorControlEnabled " && systemctl --user start --no-block monitor-control.service";
   quickshellRice = "pgrep -f '[q]uickshell.*rice' || uwsm app -- rice-shell --prod";
   execOnce = (if riceEnabled then [ applyRiceTheme ] else [ ]) ++ [
     "hyprctl setcursor ${style.cursorName} ${toString style.cursorSize}"
     "wl-clip-persist --clipboard both"
     "wl-paste --watch cliphist store"
-    "uwsm finalize"
-    "thunderbolt-wait && ${setupDisplays} && ${restoreWallpaper} && ( ${monitorHandler} )"
+    finalizeSession
+    restoreWallpaper
   ] ++ (if riceEnabled then [ quickshellRice ] else [ ]);
   startFunction = ''
     function()

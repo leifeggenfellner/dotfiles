@@ -20,6 +20,7 @@ _: {
         inactiveBorder = fmt.rgb palette.surface0;
       };
       riceEnabled = osConfig.rice.enable or false;
+      monitorControlEnabled = osConfig.environment.desktop.monitorControl.enable;
       hyprlandConfig = osConfig.environment.desktop.hyprland.configPath;
       q = builtins.toJSON;
       luaBool = value: if value then "true" else "false";
@@ -108,7 +109,7 @@ _: {
           systemd.enable = false;
           settings = lib.mkMerge [
             (import ./hyprland/_settings.nix { inherit style colors; })
-            (import ./hyprland/_startup.nix { inherit lib riceEnabled style; })
+            (import ./hyprland/_startup.nix { inherit lib monitorControlEnabled riceEnabled style; })
             (import ./hyprland/_bindings.nix {
               inherit lib riceEnabled;
               quickshell = "${pkgs.quickshell}/bin/quickshell";

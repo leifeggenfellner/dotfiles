@@ -1,4 +1,4 @@
-{ lib }:
+_:
 let
   floatingClasses = [
     "^(Rofi)$"
@@ -48,11 +48,7 @@ in
   ++ [
     (floatRule "title" "^(wallpaper-picker)$" "monitor_w*0.6" "monitor_h*0.8")
     { match.class = "^(code|Code)$"; workspace = "1"; }
-    { match.class = "^(Alacritty|alacritty|foot)$"; workspace = "2"; }
     { match.class = "^(zen|ZenBrowser)$"; workspace = "3"; }
-    { match.class = "^(Slack)$"; workspace = "4"; }
-    { match.class = "^(discord)$"; workspace = "4"; }
-    { match.class = "^(spotify)$"; workspace = "5"; }
     { match.class = "^(btop|htop|nvtop|MissionCenter)$"; workspace = "6"; }
     { match.class = "^(zen|ZenBrowser)$"; opacity = "1.0 override 1.0 override"; }
   ];
