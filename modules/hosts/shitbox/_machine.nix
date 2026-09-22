@@ -65,8 +65,16 @@
 
     monitors = {
       laptop = { desc = "LG Display 0x0791"; name = "eDP-1"; resolution = "1920x1200@60"; };
-      work = { desc = "HP Inc. HP 527pu"; serial = "1H361409R2"; resolution = "2560x1440@60"; };
-      workRight = { desc = "HP Inc. HP 527pu"; serial = "1H361409TR"; resolution = "2560x1440@60"; };
+      work = {
+        desc = "HP Inc. HP 527pu";
+        serial = "1H35421YT0";
+        resolution = "2560x1440@60";
+      };
+      workRight = {
+        desc = "HP Inc. HP 527pu";
+        serial = "1H35421YRD";
+        resolution = "2560x1440@60";
+      };
       familyHome = { desc = "Samsung Electric Company C34J79x"; serial = "HTRM900265"; resolution = "3440x1440@60"; };
     };
 
@@ -80,8 +88,8 @@
           { monitor = "laptop"; position = "4000x0"; workspaces = [ 6 7 ]; }
         ];
         work.outputs = [
-          { monitor = "laptop"; position = "0x0"; workspaces = [ 2 4 6 ]; }
-          { monitor = "work"; position = "1920x0"; primary = true; workspaces = [ 1 5 ]; }
+          { monitor = "laptop"; position = "0x0"; workspaces = [ 2 4 5 ]; }
+          { monitor = "work"; position = "1920x0"; primary = true; workspaces = [ 1 6 ]; }
           { monitor = "workRight"; position = "4480x0"; workspaces = [ 3 7 ]; }
         ];
         family_home = {
@@ -99,7 +107,9 @@
         };
       };
       appRoutes = {
+        vscode = { class = "^(code|Code)$"; workspace = 1; };
         terminal = { class = "^(Alacritty|alacritty|foot)$"; workspace = 2; };
+        zen = { class = "^(zen|ZenBrowser)$"; workspace = 3; };
         slack = { class = "^(Slack)$"; workspace = 4; };
         discord = { class = "^(discord)$"; workspace = 4; };
         spotify = { class = "^(spotify)$"; workspace = 5; };
