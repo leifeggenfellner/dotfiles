@@ -68,39 +68,77 @@ def focus_command(kind, value):
     return ["hyprctl", "dispatch", f'hl.dsp.focus({{{kind} = "{value}"}})']
 
 
+def lua_literal(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return repr(value)
+    if isinstance(value, str):
+        escaped = []
+        for character in value:
+            if character == "\\":
+                escaped.append("\\\\")
+            elif character == '"':
+                escaped.append('\\"')
+            elif character == "\n":
+                escaped.append("\\n")
+            elif character == "\r":
+                escaped.append("\\r")
+            elif character == "\t":
+                escaped.append("\\t")
+            elif ord(character) < 32:
+                escaped.append(f"\\{ord(character):03d}")
+            else:
+                escaped.append(character)
+        return f'"{"".join(escaped)}"'
+    raise RuntimeError(f"unsupported Lua literal: {value!r}")
+
+
+def lua_table(fields):
+    return (
+        "{ "
+        + ", ".join(f"{key} = {lua_literal(value)}" for key, value in fields.items())
+        + " }"
+    )
+
+
+def eval_command(expression):
+    # This compositor's dynamic configuration API is exposed through hl.* Lua.
+    return ["hyprctl", "eval", expression]
+
+
 def monitor_command(name, mode, position, scale=1.0, transform=0):
     name = validate_output_name(name)
-    return [
-        "hyprctl",
-        "keyword",
-        "monitor",
-        f"{name},{mode},{position},{scale},transform,{transform}",
-    ]
+    fields = {
+        "output": name,
+        "mode": mode,
+        "position": position,
+        "scale": float(scale),
+        "transform": int(transform),
+    }
+    return "monitor", eval_command(f"hl.monitor({lua_table(fields)})")
 
 
 def disabled_monitor_command(name):
-    return ["hyprctl", "keyword", "monitor", f"{validate_output_name(name)},disable"]
+    name = validate_output_name(name)
+    return "monitor", eval_command(
+        f"hl.monitor({lua_table({'output': name, 'disabled': True})})"
+    )
 
 
 def workspace_rule_command(workspace, output, default):
     workspace = workspace_selector(workspace)
     output = validate_output_name(output)
-    return [
-        "hyprctl",
-        "keyword",
-        "workspace",
-        f"{workspace},monitor:{output},default:{str(default).lower()}",
-    ]
+    fields = {"workspace": workspace, "monitor": output, "default": bool(default)}
+    return "workspace_rule", eval_command(f"hl.workspace_rule({lua_table(fields)})")
 
 
 def window_rule_command(window_class, workspace):
     workspace = workspace_selector(workspace)
-    return [
-        "hyprctl",
-        "keyword",
-        "windowrule",
-        f"workspace {workspace} silent,match:class {window_class}",
-    ]
+    match = lua_table({"class": window_class})
+    return "window_rule", eval_command(
+        f'hl.window_rule({{ match = {match}, workspace = {lua_literal(f"{workspace} silent")} }})'
+    )
 
 
 def state_root():
@@ -293,8 +331,8 @@ def desired_output(config, output, found):
     }
 
 
-def output_matches(current, desired):
-    if current.get("disabled", False):
+def output_matches(current, desired, active_names):
+    if current.get("name") not in active_names:
         return False
     mode_parts = desired["mode"].split("@", 1)
     mode = mode_parts[0]
@@ -315,10 +353,10 @@ def output_matches(current, desired):
     )
 
 
-def output_state(current):
+def output_state(current, active_names):
     if current is None:
         return "missing"
-    if current.get("disabled", False):
+    if current.get("name") not in active_names:
         return "disabled"
     return (
         f"enabled at {current.get('width')}x{current.get('height')}"
@@ -327,7 +365,7 @@ def output_state(current):
     )
 
 
-def verify_plan_converged(config, plan, monitors):
+def verify_plan_converged(config, plan, monitors, active_names):
     found, _ = inventory(config, monitors)
     desired_names = {output["name"] for output in plan["outputs"]}
     for desired in plan["outputs"]:
@@ -339,26 +377,26 @@ def verify_plan_converged(config, plan, monitors):
             ),
             None,
         )
-        if not output_matches(current or {}, desired):
+        if not output_matches(current or {}, desired, active_names):
             raise RuntimeError(
                 f"monitor reconciliation did not converge for {desired['name']}: "
                 f"expected enabled {desired['mode']} at {desired['position']} "
                 f"scale {desired['scale']} transform {desired['transform']}; "
-                f"observed {output_state(current)}"
+                f"observed {output_state(current, active_names)}"
             )
     for key, current in found.items():
         if (
             config["monitors"][key].get("serial")
             and current["name"] not in desired_names
-            and not current.get("disabled", False)
+            and current["name"] in active_names
         ):
             raise RuntimeError(
                 f"monitor reconciliation did not converge for {current['name']}: "
-                f"expected disabled; observed {output_state(current)}"
+                f"expected disabled; observed {output_state(current, active_names)}"
             )
 
 
-def build_plan(config, monitors, selection, include_routes=False):
+def build_plan(config, monitors, active_names, selection, include_routes=False):
     selected, active, outputs, found, unknown = resolve_layout(
         config, monitors, selection
     )
@@ -377,6 +415,7 @@ def build_plan(config, monitors, selection, include_routes=False):
                     )
                 ],
                 output,
+                active_names,
             ):
                 commands.append(
                     monitor_command(
@@ -529,11 +568,19 @@ class MonitorDaemon:
                 focused = next(
                     (monitor for monitor in monitors if monitor.get("focused")), None
                 )
+                # The active-only query is authoritative for enabled state.
+                active_names = {
+                    monitor["name"] for monitor in await hypr_json("monitors")
+                }
                 plan = build_plan(
-                    self.config, monitors, self.selection, not self.routes_applied
+                    self.config,
+                    monitors,
+                    active_names,
+                    self.selection,
+                    not self.routes_applied,
                 )
-                for command in plan["commands"]:
-                    if command[1:3] == ["keyword", "windowrule"]:
+                for kind, command in plan["commands"]:
+                    if kind == "window_rule":
                         await run_best_effort(
                             warnings, "dynamic app route unavailable", command
                         )
@@ -544,6 +591,7 @@ class MonitorDaemon:
                         self.config,
                         plan,
                         await hypr_json("monitors", "all"),
+                        {monitor["name"] for monitor in await hypr_json("monitors")},
                     )
                 self.routes_applied = True
                 if plan["activeProfile"] != "ambiguous":
@@ -600,10 +648,7 @@ class MonitorDaemon:
                         f"focus restoration to workspace {focus_workspace} failed",
                         focus_command("workspace", focus_workspace),
                     )
-                if any(
-                    command[1:3] == ["keyword", "monitor"]
-                    for command in plan["commands"]
-                ):
+                if any(kind == "monitor" for kind, _ in plan["commands"]):
                     await run_command(["wallpaper-restore"], check=False)
                 self.write_status(
                     activeProfile=plan["activeProfile"],

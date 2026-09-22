@@ -26,13 +26,14 @@ def output(monitor, position, workspaces, transform=0, primary=False):
     }
 
 
-def monitor_command(name, mode, position, scale=1.0, transform=0):
-    return [
-        "hyprctl",
-        "keyword",
-        "monitor",
-        f"{name},{mode},{position},{scale},transform,{transform}",
-    ]
+def active_names_of(monitors):
+    return {entry["name"] for entry in monitors if not entry.get("disabled", False)}
+
+
+monitor_command = monitor_control.monitor_command
+disabled_monitor_command = monitor_control.disabled_monitor_command
+workspace_rule_command = monitor_control.workspace_rule_command
+window_rule_command = monitor_control.window_rule_command
 
 
 CONFIG = {
@@ -154,21 +155,25 @@ class MonitorControlTests(unittest.TestCase):
             monitor_control.inventory(CONFIG, [LAPTOP, HP_CENTER, duplicate])
 
     def test_hp_topology_is_ambiguous_without_explicit_selection(self):
+        monitors = [LAPTOP, HP_LEFT, HP_CENTER]
         plan = monitor_control.build_plan(
-            CONFIG, [LAPTOP, HP_LEFT, HP_CENTER], {"mode": "auto"}
+            CONFIG, monitors, active_names_of(monitors), {"mode": "auto"}
         )
         self.assertEqual(plan["activeProfile"], "ambiguous")
         self.assertEqual(plan["commands"], [])
 
     def test_explicit_profiles_generate_distinct_geometry(self):
+        monitors = [LAPTOP, HP_LEFT, HP_CENTER]
         home = monitor_control.build_plan(
             CONFIG,
-            [LAPTOP, HP_LEFT, HP_CENTER],
+            monitors,
+            active_names_of(monitors),
             {"mode": "explicit", "profile": "home_office"},
         )
         work = monitor_control.build_plan(
             CONFIG,
-            [LAPTOP, HP_LEFT, HP_CENTER],
+            monitors,
+            active_names_of(monitors),
             {"mode": "explicit", "profile": "work"},
         )
         self.assertIn(
@@ -200,6 +205,7 @@ class MonitorControlTests(unittest.TestCase):
                 plan = monitor_control.build_plan(
                     CONFIG,
                     monitors,
+                    active_names_of(monitors),
                     {"mode": "explicit", "profile": profile},
                 )
                 laptop = next(
@@ -214,21 +220,20 @@ class MonitorControlTests(unittest.TestCase):
                 )
 
     def test_laptop_fallback_assigns_all_workspaces(self):
-        plan = monitor_control.build_plan(CONFIG, [LAPTOP], {"mode": "auto"})
+        monitors = [LAPTOP]
+        plan = monitor_control.build_plan(
+            CONFIG, monitors, active_names_of(monitors), {"mode": "auto"}
+        )
         self.assertEqual(plan["activeProfile"], "laptop_only")
         self.assertIn(
             monitor_command("eDP-1", "1920x1200@60", "0x0"),
             plan["commands"],
         )
-        rules = [
-            command
-            for command in plan["commands"]
-            if command[1:3] == ["keyword", "workspace"]
-        ]
+        rules = [argv for kind, argv in plan["commands"] if kind == "workspace_rule"]
         self.assertEqual(len(rules), 10)
         self.assertEqual(
             rules[0],
-            ["hyprctl", "keyword", "workspace", "1,monitor:eDP-1,default:true"],
+            workspace_rule_command("1", "eDP-1", True)[1],
         )
 
     def test_wrong_refresh_rate_requires_monitor_update(self):
@@ -241,24 +246,36 @@ class MonitorControlTests(unittest.TestCase):
             description="LG Display",
             refresh_rate=120.0,
         )
-        plan = monitor_control.build_plan(CONFIG, [laptop], {"mode": "auto"})
+        plan = monitor_control.build_plan(
+            CONFIG, [laptop], active_names_of([laptop]), {"mode": "auto"}
+        )
         self.assertIn(
             monitor_command("eDP-1", "1920x1200@60", "0x0"),
             plan["commands"],
         )
 
     def test_auto_profile_requires_all_declared_outputs(self):
-        plan = monitor_control.build_plan(CONFIG, [SAMSUNG], {"mode": "auto"})
+        monitors = [SAMSUNG]
+        plan = monitor_control.build_plan(
+            CONFIG, monitors, active_names_of(monitors), {"mode": "auto"}
+        )
         self.assertEqual(plan["activeProfile"], "ambiguous")
         self.assertEqual(plan["commands"], [])
 
     def test_family_profile_is_uniquely_auto_detected(self):
-        plan = monitor_control.build_plan(CONFIG, [LAPTOP, SAMSUNG], {"mode": "auto"})
+        monitors = [LAPTOP, SAMSUNG]
+        plan = monitor_control.build_plan(
+            CONFIG, monitors, active_names_of(monitors), {"mode": "auto"}
+        )
         self.assertEqual(plan["activeProfile"], "family_home")
 
     def test_partial_explicit_profile_keeps_selection_and_covers_workspaces(self):
+        monitors = [LAPTOP, HP_CENTER]
         plan = monitor_control.build_plan(
-            CONFIG, [LAPTOP, HP_CENTER], {"mode": "explicit", "profile": "work"}
+            CONFIG,
+            monitors,
+            active_names_of(monitors),
+            {"mode": "explicit", "profile": "work"},
         )
         self.assertEqual(plan["selectedProfile"], "work")
         self.assertEqual(plan["activeProfile"], "work:partial")
@@ -274,48 +291,52 @@ class MonitorControlTests(unittest.TestCase):
         self.assertEqual(assigned, set(range(1, 11)))
 
     def test_workspace_and_app_route_commands_are_native_argv(self):
+        monitors = [LAPTOP]
         plan = monitor_control.build_plan(
-            CONFIG, [LAPTOP], {"mode": "auto"}, include_routes=True
+            CONFIG,
+            monitors,
+            active_names_of(monitors),
+            {"mode": "auto"},
+            include_routes=True,
         )
         self.assertIn(
-            ["hyprctl", "keyword", "workspace", "5,monitor:eDP-1,default:false"],
+            workspace_rule_command("5", "eDP-1", False),
             plan["commands"],
         )
         self.assertIn(
-            [
-                "hyprctl",
-                "keyword",
-                "windowrule",
-                "workspace 4 silent,match:class ^(Slack)$",
-            ],
+            window_rule_command("^(Slack)$", 4),
             plan["commands"],
         )
         self.assertIn(
             monitor_command("eDP-1", "1920x1200@60", "0x0"),
             plan["commands"],
         )
-        self.assertTrue(all(command[1] == "keyword" for command in plan["commands"]))
+        self.assertTrue(all(argv[1] == "eval" for kind, argv in plan["commands"]))
 
     def test_native_plan_disables_unselected_monitor(self):
+        monitors = [LAPTOP, HP_LEFT, HP_CENTER, SAMSUNG]
         plan = monitor_control.build_plan(
             CONFIG,
-            [LAPTOP, HP_LEFT, HP_CENTER, SAMSUNG],
+            monitors,
+            active_names_of(monitors),
             {"mode": "explicit", "profile": "work"},
             include_routes=True,
         )
         self.assertIn(
-            ["hyprctl", "keyword", "monitor", "DP-3,disable"],
+            disabled_monitor_command("DP-3"),
             plan["commands"],
         )
 
     def test_disabled_connected_monitor_can_be_enabled_by_next_profile(self):
+        monitors = [LAPTOP, HP_LEFT, HP_CENTER]
         laptop_plan = monitor_control.build_plan(
             CONFIG,
-            [LAPTOP, HP_LEFT, HP_CENTER],
+            monitors,
+            active_names_of(monitors),
             {"mode": "explicit", "profile": "laptop_only"},
         )
         self.assertIn(
-            ["hyprctl", "keyword", "monitor", "DP-6,disable"],
+            disabled_monitor_command("DP-6"),
             laptop_plan["commands"],
         )
 
@@ -332,9 +353,11 @@ class MonitorControlTests(unittest.TestCase):
             "scale": None,
             "transform": None,
         }
+        work_monitors = [LAPTOP, HP_LEFT, disabled_center]
         work_plan = monitor_control.build_plan(
             CONFIG,
-            [LAPTOP, HP_LEFT, disabled_center],
+            work_monitors,
+            active_names_of(work_monitors),
             {"mode": "explicit", "profile": "work"},
         )
         self.assertEqual(work_plan["activeProfile"], "work")
@@ -345,24 +368,34 @@ class MonitorControlTests(unittest.TestCase):
 
     def test_converged_plan_accepts_intentionally_disabled_external_output(self):
         disabled_center = {**HP_CENTER, "disabled": True}
+        monitors = [LAPTOP_AT_ORIGIN, disabled_center]
         plan = monitor_control.build_plan(
             CONFIG,
-            [LAPTOP_AT_ORIGIN, disabled_center],
+            monitors,
+            active_names_of(monitors),
             {"mode": "explicit", "profile": "laptop_only"},
         )
         monitor_control.verify_plan_converged(
-            CONFIG, plan, [LAPTOP_AT_ORIGIN, disabled_center]
+            CONFIG, plan, monitors, active_names_of(monitors)
         )
 
     def test_native_plan_rejects_untrusted_output_names(self):
         unsafe = copy.deepcopy(HP_CENTER)
         unsafe["name"] = "DP-6,$(touch /tmp/monitor-control-injection)"
+        monitors = [LAPTOP, HP_LEFT, unsafe]
         with self.assertRaisesRegex(RuntimeError, "invalid Hyprland output name"):
             monitor_control.build_plan(
                 CONFIG,
-                [LAPTOP, HP_LEFT, unsafe],
+                monitors,
+                active_names_of(monitors),
                 {"mode": "explicit", "profile": "work"},
             )
+
+    def test_lua_literals_escape_string_syntax(self):
+        self.assertEqual(
+            monitor_control.lua_literal('a"\\\n\x01'),
+            '"a\\"\\\\\\n\\001"',
+        )
 
     def test_event_parser_is_exact(self):
         self.assertTrue(monitor_control.is_monitor_event("monitoradded>>DP-4"))
@@ -384,14 +417,16 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
             scheduled.append((delay, callback))
             return Timer()
 
-        daemon = monitor_control.MonitorDaemon(CONFIG, schedule_later=schedule_later)
         stale_laptop = copy.deepcopy(LAPTOP)
-        stale_laptop["disabled"] = True
         hypr_json = mock.AsyncMock(
             side_effect=[
                 [stale_laptop],
+                [],
                 [stale_laptop],
-                [stale_laptop],
+                [],
+                [LAPTOP_AT_ORIGIN],
+                [LAPTOP_AT_ORIGIN],
+                [LAPTOP_AT_ORIGIN],
                 [LAPTOP_AT_ORIGIN],
                 [{"id": 1}],
                 [],
@@ -406,6 +441,9 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         ), mock.patch.object(
             monitor_control, "run_command", new=mock.AsyncMock(return_value="")
         ):
+            daemon = monitor_control.MonitorDaemon(
+                CONFIG, schedule_later=schedule_later
+            )
             daemon.schedule_reconcile(0)
             _, start_initial = scheduled.pop(0)
             start_initial()
@@ -426,7 +464,7 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         process = mock.Mock(returncode=0)
         process.communicate = mock.AsyncMock(return_value=(b"", b""))
         dangerous = "match:class $(touch /tmp/bad); echo bad, workspace 2 silent"
-        argv = monitor_control.window_rule_command(dangerous, "2")
+        kind, argv = monitor_control.window_rule_command(dangerous, "2")
         with mock.patch(
             "asyncio.create_subprocess_exec",
             new=mock.AsyncMock(return_value=process),
@@ -439,17 +477,27 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_route_install_failure_does_not_abort_reconcile(self):
-        daemon = monitor_control.MonitorDaemon(CONFIG)
         commands = []
 
         async def run_command(argv, check=True):
             commands.append(argv)
-            if len(argv) > 2 and argv[1:3] == ["keyword", "windowrule"]:
+            if (
+                len(argv) > 2
+                and argv[1] == "eval"
+                and argv[2].startswith("hl.window_rule(")
+            ):
                 raise RuntimeError("unsupported rule grammar")
             return ""
 
         hypr_json = mock.AsyncMock(
-            side_effect=[[LAPTOP], [LAPTOP_AT_ORIGIN], [{"id": 1}], []]
+            side_effect=[
+                [LAPTOP],
+                [LAPTOP],
+                [LAPTOP_AT_ORIGIN],
+                [LAPTOP_AT_ORIGIN],
+                [{"id": 1}],
+                [],
+            ]
         )
         with tempfile.TemporaryDirectory() as directory, mock.patch.dict(
             os.environ,
@@ -461,6 +509,7 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         ), mock.patch.object(
             monitor_control, "run_command", side_effect=run_command
         ):
+            daemon = monitor_control.MonitorDaemon(CONFIG)
             self.assertTrue(await daemon.reconcile())
 
         self.assertEqual(hypr_json.await_args_list[0], mock.call("monitors", "all"))
@@ -478,9 +527,7 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(daemon.status["warnings"])
 
     async def test_stale_post_apply_snapshot_fails_reconciliation(self):
-        daemon = monitor_control.MonitorDaemon(CONFIG)
         stale_laptop = copy.deepcopy(LAPTOP)
-        stale_laptop["disabled"] = True
         stale_laptop["scale"] = 1.5
         commands = []
 
@@ -488,7 +535,7 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
             commands.append(argv)
             return ""
 
-        hypr_json = mock.AsyncMock(side_effect=[[stale_laptop], [stale_laptop]])
+        hypr_json = mock.AsyncMock(side_effect=[[stale_laptop], [], [stale_laptop], []])
         with tempfile.TemporaryDirectory() as directory, mock.patch.dict(
             os.environ,
             {"XDG_RUNTIME_DIR": directory, "XDG_STATE_HOME": directory},
@@ -497,12 +544,18 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         ), mock.patch.object(
             monitor_control, "run_command", side_effect=run_command
         ):
+            daemon = monitor_control.MonitorDaemon(CONFIG)
             self.assertFalse(await daemon.reconcile())
 
-        self.assertIn(monitor_command("eDP-1", "1920x1200@60", "0x0"), commands)
+        self.assertIn(monitor_command("eDP-1", "1920x1200@60", "0x0")[1], commands)
         self.assertEqual(
             hypr_json.await_args_list,
-            [mock.call("monitors", "all"), mock.call("monitors", "all")],
+            [
+                mock.call("monitors", "all"),
+                mock.call("monitors"),
+                mock.call("monitors", "all"),
+                mock.call("monitors"),
+            ],
         )
         self.assertIsNone(daemon.status["activeProfile"])
         self.assertIn("did not converge for eDP-1", daemon.status["lastError"])
@@ -510,7 +563,6 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(daemon.routes_applied)
 
     async def test_failed_dispatchers_do_not_block_keyword_geometry_or_status(self):
-        daemon = monitor_control.MonitorDaemon(CONFIG)
         laptop = copy.deepcopy(LAPTOP)
         laptop["scale"] = 1.5
         commands = []
@@ -524,6 +576,8 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         hypr_json = mock.AsyncMock(
             side_effect=[
                 [laptop],
+                [laptop],
+                [LAPTOP_AT_ORIGIN],
                 [LAPTOP_AT_ORIGIN],
                 [{"id": 1}],
                 [
@@ -543,9 +597,10 @@ class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):
         ), mock.patch.object(
             monitor_control, "run_command", side_effect=run_command
         ):
+            daemon = monitor_control.MonitorDaemon(CONFIG)
             self.assertTrue(await daemon.reconcile())
 
-        keyword_geometry = monitor_command("eDP-1", "1920x1200@60", "0x0")
+        keyword_geometry = monitor_command("eDP-1", "1920x1200@60", "0x0")[1]
         self.assertIn(keyword_geometry, commands)
         self.assertLess(
             commands.index(keyword_geometry),

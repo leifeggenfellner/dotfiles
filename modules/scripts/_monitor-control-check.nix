@@ -6,7 +6,8 @@ pkgs.runCommand "monitor-control-check"
 }
   ''
     python3 ${./_monitor-control_test.py}
-    ! grep -F '"eval"' ${./_monitor-control.py}
+    ! grep -F '"keyword"' ${./_monitor-control.py}
+    grep -F 'hl.monitor(' ${./_monitor-control.py}
     grep -F 'def workspace_rule_command(' ${./_monitor-control.py}
     grep -F 'def window_rule_command(' ${./_monitor-control.py}
     ! grep -F 'set-monitor' ${./default.nix}

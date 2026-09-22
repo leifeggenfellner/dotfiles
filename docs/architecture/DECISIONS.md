@@ -660,15 +660,18 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - The Home Manager `monitor-control` user service is the only runtime owner. It
   listens to Hyprland's instance event socket, coalesces monitor events with an
   event-loop timer, reconnects after socket churn, and applies output, workspace,
-  and application policy through fixed-argument `hyprctl keyword` calls. Runtime
-  reconciliation uses only native keyword and dispatch IPC; it never generates
-  Lua or invokes `hyprctl eval`. Output identifiers are validated before use.
-  Reconciliation queries all outputs so a connected output disabled by one
-  profile remains discoverable and can be enabled by the next. The service
-  publishes atomic machine-readable status. Generated Hyprland Lua no longer
-  launches or deduplicates monitor processes, superseding D-038's delayed-dock
-  setup clause while retaining its Nix-generated startup authority. Legacy
-  topology commands are not installed.
+  and application policy through fixed-argument `hyprctl eval` calls to the
+  native `hl.monitor`, `hl.workspace_rule`, and `hl.window_rule` APIs. The
+  configured compositor's `keyword` request is nonfunctional, so eval
+  expressions are assembled only from typed Lua literals; no runtime input is
+  accepted as code. Output identifiers are validated before use. Reconciliation
+  queries all outputs so a connected output disabled by one profile remains
+  discoverable and can be enabled by the next, while its active-only monitor
+  query determines actual enabled state. The service publishes atomic
+  machine-readable status. Generated Hyprland Lua no longer launches or
+  deduplicates monitor processes, superseding D-038's delayed-dock setup clause
+  while retaining its Nix-generated startup authority. Legacy topology commands
+  are not installed.
 - `work` and `home_office` share the same two HP serials and are therefore never
   auto-distinguished. `monitor-control select <profile>` persists an explicit
   selection; `monitor-control auto` clears it. The unique family topology and

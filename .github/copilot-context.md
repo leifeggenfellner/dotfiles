@@ -96,23 +96,19 @@ numbering in `ROADMAP.md` remains authoritative and is unrelated.
   routes, and explicit auto-detection policy. The Home Manager service owns
   private atomic selection/status/control, serialized reconcile, socket2
   debounce/reconnect, focus restoration, and existing-window movement. Runtime
-  topology uses fixed-argv native `hyprctl keyword monitor`, `workspace`, and
-  best-effort `windowrule` calls plus `hyprctl dispatch`; it does not generate Lua
-  or invoke `hyprctl eval`. Reconciliation uses `hyprctl monitors all -j`, so
-  connected outputs disabled by one profile remain available to a later profile;
-  sparse disabled geometry is handled safely. The unreferenced legacy
-  `set-monitor` eval implementation is removed from source and installation.
-  Direct Python tests, the packaged monitor check, generated-config check, Home
-  Manager activation-package build, Nix formatting, diff hygiene, and no-build
-  flake evaluation pass. Generated Lua starts the service non-blockingly after
-  `uwsm finalize`. The reported
-  fallback warning was backend bookkeeping, not parser rejection; the active
-  config is an older generation and the service is absent until activation.
-  Focused daemon and generated-Lua checks cover argv safety, nonfatal route
-  failure, startup isolation, and syntax. No activation, reload, live mutation,
-  generated-file edit, deployment, staging, or commit ran. Activation-time
-  service startup, exact Hyprland 0.56 dynamic-rule acceptance, physical dock
-  permutations, focus, routing, wallpaper restoration, and persisted-selection
+  topology uses fixed-argv `hyprctl eval` calls to `hl.monitor`,
+  `hl.workspace_rule`, and `hl.window_rule`, plus typed `hyprctl dispatch` for
+  workspace/window movement and focus. The compositor's advertised `keyword`
+  request returns `unknown request` with exit status zero, so it silently left
+  the laptop at Hyprland's automatic scale and made reconciliation fail.
+  `monitors all` also reports `disabled: true` for active outputs; enabled state
+  must instead come from the active-only monitor query. Eval expressions are
+  constructed solely from typed Lua literals, with no runtime input accepted as
+  code. Direct Python tests (24), the packaged monitor check, and the no-link
+  shitbox Home Manager activation-package build pass. No activation, reload,
+  profile selection, live mutation, generated-file edit, deployment, staging,
+  or commit ran. Activation-time selection of `work`, monitor geometry, app
+  routing, focus restoration, wallpaper restoration, and persisted-selection
   behavior remain to verify.
 - Quickshell monitor-profile integration completed 2026-09-18 under the
   monitor-control contract and runtime DAG: the theme-neutral

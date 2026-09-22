@@ -49,23 +49,25 @@ CLI/status but must not write either file or own monitor state.
   there are no hardware polling or shell sleep loops.
 - Reconciliation queries `hyprctl monitors all -j`; disabled but connected outputs
   remain in inventory and sparse disabled geometry is always treated as needing
-  reconfiguration when a later profile enables the output.
-- Layout uses `hyprctl keyword monitor`; workspace policy uses `hyprctl keyword
-workspace`. These critical phases run in that order and must succeed before a
-  profile is reported active. Application policy uses the configured compositor
-  package's native `hyprctl keyword windowrule` grammar with a silent workspace
-  effect.
+  reconfiguration when a later profile enables the output. The active-only
+  `hyprctl monitors -j` result is authoritative for enabled state because this
+  compositor build reports `disabled: true` for active outputs in the all-output
+  result.
+- This compositor build exposes no functional `hyprctl keyword` IPC request.
+  Layout, workspace policy, and application routing use `hyprctl eval` with the
+  native `hl.monitor`, `hl.workspace_rule`, and `hl.window_rule` APIs. Critical
+  geometry and workspace calls run in that order and must succeed before a
+  profile is reported active; dynamic app-rule failures remain nonfatal.
 - Workspace migration, existing-window routing, and focus restoration use the
   configured compositor package's typed Lua-config dispatcher payloads through
   `hyprctl dispatch`, including `hl.dsp.workspace.move`, `hl.dsp.window.move`,
   and `hl.dsp.focus`. They run only after geometry and workspace policy. These
-  dispatches and dynamic rule installation are best-effort: rejection is recorded
-  in `warnings` but does not prevent the geometry profile from becoming active.
-  No `hyprctl eval`, shell interpolation, or generated Lua file is involved.
+  dispatches are best-effort: rejection is recorded in `warnings` but does not
+  prevent the geometry profile from becoming active.
 - Monitor geometry is compared before mutation to avoid unnecessary mode changes
-  and flicker. All process calls use fixed argument vectors with no shell;
-  runtime output names are allowlisted. Runtime reconciliation never generates
-  Lua, invokes `hyprctl eval`, or accepts code snippets from runtime input. No
+  and flicker. All process calls use fixed argument vectors with no shell.
+  Runtime output names are allowlisted, and all values interpolated into `eval`
+  expressions use typed Lua literals; no runtime input is accepted as code. No
   legacy topology command is installed alongside `monitor-control`.
 - After critical monitor and workspace commands, reconciliation re-queries
   `hyprctl monitors all -j` before reporting a profile active. Every planned
