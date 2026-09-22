@@ -11,6 +11,7 @@ import "../../services/power"
 import "../../services/session"
 import "../../services/tray"
 import "../../services/mpris"
+import "../../services/monitor"
 
 // ── BarPopout ─────────────────────────────────────────────────
 // The single anchored popout host (L-002): renders the active
@@ -24,9 +25,7 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    readonly property var active: ShellState.activePopout.length > 0
-        ? Registry.effectiveById(ShellState.activePopout)
-        : null
+    readonly property var active: ShellState.activePopout.length > 0 ? Registry.effectiveById(ShellState.activePopout) : null
     readonly property bool onFocusedScreen: !HyprState.available || HyprState.focusedScreenName === host.screen.name
     readonly property bool open: active !== null && active.popout !== null && onFocusedScreen
 
@@ -53,7 +52,8 @@ PanelWindow {
             power: PowerState,
             session: SessionState,
             tray: TrayState,
-            mpris: MprisState
+            mpris: MprisState,
+            monitorControl: MonitorControlState
         };
         const out = {};
         for (const n of names)

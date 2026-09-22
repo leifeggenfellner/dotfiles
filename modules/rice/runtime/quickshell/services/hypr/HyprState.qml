@@ -10,7 +10,8 @@ import Quickshell.Wayland
 // window title) by porting from the legacy tree.
 //
 //   state:    available, focusedScreenName ("" when unknown),
-//             activeWorkspace (id), activeWorkspaceForScreen(name), anyFullscreen
+//             activeWorkspace (id), activeWorkspaceForScreen(name),
+//             anyFullscreen, monitorsRevision
 //   commands: switchWorkspace(id)
 //
 // Focused output is exposed by NAME (matches ShellScreen.name);
@@ -29,14 +30,23 @@ Item {
     readonly property bool mock: false
     readonly property bool available: Hyprland.focusedMonitor !== null
     readonly property string focusedScreenName: Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""
-    readonly property int activeWorkspace: Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1
+    readonly property int activeWorkspace: activeWorkspaceForScreen(focusedScreenName)
 
     property int _fullscreenCount: 0
     readonly property bool anyFullscreen: _fullscreenCount > 0
+    property int monitorsRevision: 0
+    property var _activeWorkspaces: ({})
 
     function activeWorkspaceForScreen(screenName) {
-        const monitor = Hyprland.monitors.values.find(candidate => candidate.name === screenName);
-        return monitor?.activeWorkspace?.id ?? hypr.activeWorkspace;
+        return hypr._activeWorkspaces[screenName] ?? Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1;
+    }
+
+    function _setActiveWorkspace(screenName, workspaceId) {
+        if (!screenName || hypr._activeWorkspaces[screenName] === workspaceId)
+            return;
+        hypr._activeWorkspaces = Object.assign({}, hypr._activeWorkspaces, {
+            [screenName]: workspaceId
+        });
     }
 
     function switchWorkspace(id) {
@@ -65,6 +75,23 @@ Item {
             // Deferred: at destruction time the model still lists
             // the departing toplevel.
             Component.onDestruction: Qt.callLater(hypr._recountFullscreen)
+        }
+    }
+
+    Instantiator {
+        model: Hyprland.monitors
+
+        delegate: QtObject {
+            required property var modelData
+            readonly property string screenName: modelData.name ?? ""
+            readonly property int activeWorkspaceId: modelData.activeWorkspace?.id ?? 1
+
+            onActiveWorkspaceIdChanged: hypr._setActiveWorkspace(screenName, activeWorkspaceId)
+            Component.onCompleted: {
+                hypr._setActiveWorkspace(screenName, activeWorkspaceId);
+                hypr.monitorsRevision++;
+            }
+            Component.onDestruction: Qt.callLater(() => hypr.monitorsRevision++)
         }
     }
 }

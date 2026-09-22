@@ -10,6 +10,7 @@ import "./meters" as Meters
 import "./epigraph" as Epigraph
 import "./divination" as Divination
 import "./session" as Session
+import "./monitor" as Monitor
 
 // ── Registry ──────────────────────────────────────────────────
 // The widget registry: built-in descriptors ∪ theme plugins.
@@ -73,6 +74,14 @@ Item {
         id: sessionLockTile
         Session.SessionLockTile {}
     }
+    Component {
+        id: monitorGlance
+        Monitor.MonitorProfileGlance {}
+    }
+    Component {
+        id: monitorPopout
+        Monitor.MonitorProfilePopout {}
+    }
 
     readonly property list<QtObject> builtins: [
         WidgetDescriptor {
@@ -103,6 +112,14 @@ Item {
             services: ["mpris"]
             glance: mediaGlance
             popout: mediaPopout
+        },
+        WidgetDescriptor {
+            widgetId: "monitor-profile"
+            region: "right"
+            priority: 7
+            services: ["monitorControl", "hypr"]
+            glance: monitorGlance
+            popout: monitorPopout
         },
         WidgetDescriptor {
             widgetId: "power"
