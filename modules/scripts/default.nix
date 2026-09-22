@@ -9,19 +9,8 @@ _: {
         in
         map (key: monitors.${key}.desc) (builtins.filter (k: monitors ? ${k}) prio);
 
-      monitorDesc = key: if monitors ? ${key} then monitors.${key}.desc else "";
-
       countdown-timer = pkgs.callPackage ./_countdown-timer.nix { inherit pkgs; };
       gen-ssh-key = pkgs.callPackage ./_gen-ssh-key.nix { inherit pkgs; };
-      set-monitor = pkgs.callPackage ./_set-monitor.nix { inherit pkgs; };
-      setup-monitors = pkgs.callPackage ./_setup-monitors.nix {
-        inherit pkgs;
-        monitorFamilyHome = monitorDesc "familyHome";
-        monitorWorkCenter = monitorDesc "work";
-        monitorWorkRight = monitorDesc "workRight";
-      };
-      handle-monitor = pkgs.callPackage ./_handle-monitor.nix { inherit pkgs; };
-      thunderbolt-wait = pkgs.callPackage ./_thunderbolt-wait.nix { inherit pkgs; };
       lock-screen = pkgs.callPackage ./_lock-screen.nix {
         inherit pkgs lib;
         monitorPriority = lockPriority;
@@ -41,10 +30,6 @@ _: {
         [
           countdown-timer
           gen-ssh-key
-          set-monitor
-          setup-monitors
-          handle-monitor
-          thunderbolt-wait
           lock-screen
           wallpaper-picker
 
