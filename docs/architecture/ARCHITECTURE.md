@@ -30,6 +30,12 @@ The _why_ lives in [DECISIONS.md](DECISIONS.md). Exact interfaces live in
 └───────────────────────────────────────────────────────────┘
 ```
 
+Hyprland monitor topology is an external control plane rather than Quickshell
+state. Nix defines physical identities, profiles, and app routes; the
+`monitor-control` user service owns selection, reconciliation, and status through
+the [monitor-control contract](contracts/monitor-control.md). Quickshell may read
+that status or invoke the CLI, but never owns or rewrites it.
+
 The runtime is a product; themes are content packages (D-004, D-006). Coupling
 between them is legal only through the
 [theme manifest](contracts/theme-manifest.md) and the

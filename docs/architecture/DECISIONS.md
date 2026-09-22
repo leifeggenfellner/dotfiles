@@ -651,6 +651,42 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   rollback boundary. Keeping it explicit avoids an irreversible side effect
   inside a transaction whose other state can be compensated immediately.
 
+### D-041 — Monitor topology has one event-driven control plane
+
+- Date: 2026-09-18 · Status: active
+- Nix owns exact monitor identities, profile layouts, workspace assignments, and
+  application routes. External displays match the exact `serial` field from
+  `hyprctl monitors all -j`; descriptions are display text and never identity.
+- The Home Manager `monitor-control` user service is the only runtime owner. It
+  listens to Hyprland's instance event socket, coalesces monitor events with an
+  event-loop timer, reconnects after socket churn, and applies output, workspace,
+  and application policy through fixed-argument `hyprctl keyword` calls. Runtime
+  reconciliation uses only native keyword and dispatch IPC; it never generates
+  Lua or invokes `hyprctl eval`. Output identifiers are validated before use.
+  Reconciliation queries all outputs so a connected output disabled by one
+  profile remains discoverable and can be enabled by the next. The service
+  publishes atomic machine-readable status. Generated Hyprland Lua no longer
+  launches or deduplicates monitor processes, superseding D-038's delayed-dock
+  setup clause while retaining its Nix-generated startup authority. Legacy
+  topology commands are not installed.
+- `work` and `home_office` share the same two HP serials and are therefore never
+  auto-distinguished. `monitor-control select <profile>` persists an explicit
+  selection; `monitor-control auto` clears it. The unique family topology and
+  laptop-only topology may auto-select. An ambiguous complete topology is left
+  unchanged until explicit selection; an incomplete explicit topology applies
+  its available outputs and assigns otherwise uncovered workspaces to the
+  laptop. Unknown external outputs are left unchanged.
+- Reconciliation diffs monitor geometry before applying it, binds workspaces,
+  moves existing workspaces and configured application windows, then restores
+  the previously focused monitor/workspace where possible. New matching windows
+  follow daemon-owned dynamic rules when the pinned compositor accepts the native
+  rule grammar; rule installation failure is nonfatal. State and control sockets
+  are private, writes are atomic, profile names are schema-validated, and
+  subprocesses always use argument vectors without a shell.
+- Why: topology events and explicit user intent need one durable owner. Serial
+  identity avoids duplicate-description ambiguity, while the explicit selection
+  rule avoids encoding a false distinction between physically identical docks.
+
 ---
 
 ## Legacy imports

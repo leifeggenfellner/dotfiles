@@ -79,17 +79,53 @@ numbering in `ROADMAP.md` remains authoritative and is unrelated.
 
 ## Handoff
 
-- Display layout update (2026-09-16, `shitbox`): `work`/`workRight` own HP serials
-  `1H361409R2`/`1H361409TR` at both work and home office. Automatic detection
-  keeps the work layout; `setup-monitors home_office` explicitly selects the
-  home-office layout because identical monitor sets cannot identify location.
-  That layout places the left display portrait at 0x0, the right display at
-  1440x0, and the laptop at 4000x0, all top-aligned at scale 1. Current home-dock
-  connectors are DP-6/DP-9, but no cross-boot or work-site evidence establishes
-  connector stability. Mocked generated-script behavior, generated Bash syntax,
-  monitor-registry and `shitbox` evaluation, scoped formatting, no-build flake
-  checks, and diff hygiene pass. No activation or live display mutation ran;
-  clockwise rotation and visual alignment remain to verify.
+- Laptop scaling repair completed 2026-09-18: eDP-1 remains at its only native
+  physical mode, `1920x1200@60`, with scale `1`. Hyprland's Lua config manager
+  requires typed `hl.dsp` payloads for `hyprctl dispatch`; legacy dispatcher text
+  was wrapped as invalid Lua. Monitor-control now uses typed workspace/window/focus
+  dispatch payloads and the exact configured compositor package. Geometry and
+  workspace rules remain critical and ordered first; later migration, routing,
+  dynamic-rule, and focus failures are status warnings and cannot block a profile
+  from becoming active. Direct Python tests (20 tests), the packaged monitor-control
+  check, scoped Nix formatting, and the no-link shitbox Home Manager activation
+  build pass. Post-activation read-only status and monitor geometry verification
+  remain. No activation, reload, profile selection, live Hyprland mutation,
+  generated-file edit, staging, or unstaging ran.
+- Monitor control redesign and Hyprland 0.56 compatibility completed 2026-09-18:
+  Nix declares exact serial identities, four typed layouts/workspace maps, app
+  routes, and explicit auto-detection policy. The Home Manager service owns
+  private atomic selection/status/control, serialized reconcile, socket2
+  debounce/reconnect, focus restoration, and existing-window movement. Runtime
+  topology uses fixed-argv native `hyprctl keyword monitor`, `workspace`, and
+  best-effort `windowrule` calls plus `hyprctl dispatch`; it does not generate Lua
+  or invoke `hyprctl eval`. Reconciliation uses `hyprctl monitors all -j`, so
+  connected outputs disabled by one profile remain available to a later profile;
+  sparse disabled geometry is handled safely. The unreferenced legacy
+  `set-monitor` eval implementation is removed from source and installation.
+  Direct Python tests, the packaged monitor check, generated-config check, Home
+  Manager activation-package build, Nix formatting, diff hygiene, and no-build
+  flake evaluation pass. Generated Lua starts the service non-blockingly after
+  `uwsm finalize`. The reported
+  fallback warning was backend bookkeeping, not parser rejection; the active
+  config is an older generation and the service is absent until activation.
+  Focused daemon and generated-Lua checks cover argv safety, nonfatal route
+  failure, startup isolation, and syntax. No activation, reload, live mutation,
+  generated-file edit, deployment, staging, or commit ran. Activation-time
+  service startup, exact Hyprland 0.56 dynamic-rule acceptance, physical dock
+  permutations, focus, routing, wallpaper restoration, and persisted-selection
+  behavior remain to verify.
+- Quickshell monitor-profile integration completed 2026-09-18 under the
+  monitor-control contract and runtime DAG: the theme-neutral
+  `services/monitor/MonitorControlState.qml` client reads daemon status and owns
+  select/auto/reconcile commands; `widgets/monitor/` supplies the registered bar
+  glance and popout controls; `widgets/Registry.qml`, `modules/bar/TopBar.qml`,
+  and `modules/bar/BarPopout.qml` inject them; and
+  `services/hypr/HyprState.qml` exposes monitor-topology revisions for refresh.
+  Prior validation passed `scripts/rice-lint.sh`, and editor diagnostics reported
+  no errors in the touched QML. No generated files or mutable state were edited.
+  Activation, daemon/CLI availability from the live shell, bar rendering,
+  profile actions, hotplug refresh, and physical multi-monitor behavior remain
+  to verify visually and at runtime.
 - DX refactor increment 8 rollout status (2026-09-10, `shitbox`): preflight and
   `nh os build` completed successfully from clean commit `830be800`; 73
   derivations built and the expected Nix-owned Hyprland config path evaluated.
