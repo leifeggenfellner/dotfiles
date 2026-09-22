@@ -65,9 +65,45 @@
 
     monitors = {
       laptop = { desc = "LG Display 0x0791"; name = "eDP-1"; resolution = "1920x1200@60"; };
-      work = { desc = "HP Inc. HP 527pu 1H35421YT0"; resolution = "2560x1440@60"; };
-      workRight = { desc = "HP Inc. HP 527pu 1H35421YRD"; resolution = "2560x1440@60"; };
-      familyHome = { desc = "Samsung Electric Company C34J79x HTRM900265"; resolution = "3440x1440@60"; };
+      work = { desc = "HP Inc. HP 527pu"; serial = "1H361409R2"; resolution = "2560x1440@60"; };
+      workRight = { desc = "HP Inc. HP 527pu"; serial = "1H361409TR"; resolution = "2560x1440@60"; };
+      familyHome = { desc = "Samsung Electric Company C34J79x"; serial = "HTRM900265"; resolution = "3440x1440@60"; };
+    };
+
+    monitorControl = {
+      enable = true;
+      fallbackProfile = "laptop_only";
+      profiles = {
+        home_office.outputs = [
+          { monitor = "workRight"; position = "0x0"; transform = 1; workspaces = [ 2 4 5 ]; }
+          { monitor = "work"; position = "1440x0"; primary = true; workspaces = [ 1 3 ]; }
+          { monitor = "laptop"; position = "4000x0"; workspaces = [ 6 7 ]; }
+        ];
+        work.outputs = [
+          { monitor = "laptop"; position = "0x0"; workspaces = [ 2 4 6 ]; }
+          { monitor = "work"; position = "1920x0"; primary = true; workspaces = [ 1 5 ]; }
+          { monitor = "workRight"; position = "4480x0"; workspaces = [ 3 7 ]; }
+        ];
+        family_home = {
+          autoDetect = true;
+          outputs = [
+            { monitor = "laptop"; position = "0x0"; workspaces = [ 3 4 5 6 ]; }
+            { monitor = "familyHome"; position = "1920x0"; primary = true; workspaces = [ 1 2 ]; }
+          ];
+        };
+        laptop_only = {
+          autoDetect = true;
+          outputs = [
+            { monitor = "laptop"; position = "0x0"; primary = true; workspaces = [ 1 2 3 4 5 6 7 8 9 10 ]; }
+          ];
+        };
+      };
+      appRoutes = {
+        terminal = { class = "^(Alacritty|alacritty|foot)$"; workspace = 2; };
+        slack = { class = "^(Slack)$"; workspace = 4; };
+        discord = { class = "^(discord)$"; workspace = 4; };
+        spotify = { class = "^(spotify)$"; workspace = 5; };
+      };
     };
 
     lockMonitorPriority = [ "work" "familyHome" "laptop" ];
