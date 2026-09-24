@@ -941,7 +941,6 @@
               ".config/Code"
               ".config/copilot-chat"
               ".config/github-copilot"
-              ".claude"
             ];
           };
         };
