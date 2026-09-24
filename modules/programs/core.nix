@@ -7,6 +7,7 @@ _: {
         asciiquarium-transparent # asciiquarium
         brightnessctl # control screen brightness
         cacert # ca certificates
+        claude-code # Claude Code CLI
         dconf2nix # dconf (gnome) files to nix converter
         ffmpegthumbnailer # thumbnailer for video files
         gum # glamorous shell scripts

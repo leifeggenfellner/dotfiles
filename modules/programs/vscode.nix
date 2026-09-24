@@ -50,7 +50,6 @@
 
         # Utilities
         jq
-        claude-code
 
         # Tools needed for aliases
         bat
