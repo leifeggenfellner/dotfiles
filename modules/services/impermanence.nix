@@ -44,6 +44,10 @@ _: {
               mode = "0700";
             }
             {
+              directory = ".claude";
+              mode = "0700";
+            }
+            {
               directory = ".local/share/direnv";
               mode = "0700";
             }
