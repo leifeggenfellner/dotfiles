@@ -1,0 +1,21 @@
+# Recipients for sops-encrypted files under sops/.
+#
+# - `leif` is the personal GPG key: the master key. `sops sops/<file>.yaml`
+#   edits with it (unlocked through gpg-agent/pinentry), and it is what lets a
+#   new machine be enrolled. Keep an offline backup of it.
+# - Every other key is a host's age key, derived from its persisted SSH host
+#   key. sops-nix uses it to decrypt secrets into /run/secrets at activation,
+#   without user interaction. Host keys never leave their machine.
+#
+# Enroll a new host from this repo's dev shell with `sops-enroll-host`, which
+# adds the host's key below and re-encrypts every file under sops/.
+keys:
+  - &leif 09758A4FEB8D70C8C23A983778A194310ECDA9B4
+  - &shitbox age1ye6uhtc3dr3gnmexwcke9nplmjp56eaqzckt60rl4j9tmzlg6vxq070ywz
+creation_rules:
+  - path_regex: ^sops/[^/]+\.yaml$
+    key_groups:
+      - pgp:
+          - *leif
+        age:
+          - *shitbox
