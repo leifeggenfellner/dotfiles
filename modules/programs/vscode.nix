@@ -9,6 +9,7 @@
     let
       inherit (osConfig.environment) desktop;
       cfg = config.program.vscode;
+      ecaCfg = config.program.eca;
 
       # Map palette scheme names to VS Code theme names
       vscodeThemeMap = {
@@ -128,6 +129,14 @@
                 # Copilot
                 github.copilot-chat
                 anthropic.claude-code
+
+                # ECA (Editor Code Assistant)
+                (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+                  name = "eca";
+                  publisher = "editor-code-assistant";
+                  version = "0.54.4";
+                  sha256 = "sha256-8PBP7tpZHlJrDR1Uv3Rxr9yHlhCPgAaFB8YUxEtGQ7s=";
+                })
 
                 # Editor
                 editorconfig.editorconfig
@@ -327,6 +336,10 @@
 
               # Copilot agent behavior
               "chat.subagents.allowInvocationsFromSubagents" = true;
+
+              # Back VS Code's own secret storage (Copilot/Claude auth tokens,
+              # etc.) with gnome-keyring instead of an unencrypted local file.
+              "password-store" = "gnome-libsecret";
 
               # Performance improvements for Scala/Metals
               "files.watcherExclude" = {
@@ -850,14 +863,12 @@
               };
 
               "rust-analyzer.rustfmt.extraArgs" = [ "+nightly" ];
+            } // lib.optionalAttrs ecaCfg.enable {
+              # Pin the VS Code ECA extension to the reproducible Nix-built
+              # server instead of letting it manage its own download.
+              "eca.serverPath" = "${ecaCfg.server}/bin/eca";
             };
           };
-        };
-
-        xdg.configFile = {
-          "Code/User/prompts/context-scout.agent.md".source = ./vscode/prompts/context-scout.agent.md;
-          "Code/User/prompts/validation-runner.agent.md".source = ./vscode/prompts/validation-runner.agent.md;
-          "Code/User/prompts/evaluator.agent.md".source = ./vscode/prompts/evaluator.agent.md;
         };
 
         home = {
@@ -880,6 +891,17 @@
               # Clear Electron/Chrome flags that might cause warnings
               unset ELECTRON_OZONE_PLATFORM_HINT
               unset NIXOS_OZONE_WL
+
+              # Load provider API keys (e.g. for the ECA extension's server
+              # subprocess, which inherits this process's environment) the
+              # same way the former Emacs setup did before spawning eca.
+              eca_env="$HOME/Sources/agentx/azure/.env"
+              if [ -r "$eca_env" ]; then
+                set -a
+                # shellcheck disable=SC1090
+                source "$eca_env"
+                set +a
+              fi
 
               # Use regular vscode package instead of FHS version to avoid permission issues
               exec ${pkgs.vscode}/bin/code "$@"
