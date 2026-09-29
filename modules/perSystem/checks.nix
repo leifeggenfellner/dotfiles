@@ -21,16 +21,9 @@
       monitor-control =
         import ../scripts/_monitor-control-check.nix { inherit pkgs; };
 
-      copilot-agent-contract = pkgs.runCommand "copilot-agent-contract"
-        {
-          nativeBuildInputs = [ pkgs.python3Packages.pyyaml ];
-        } ''
-        python ${../../scripts/copilot-agent-lint.py} \
-          --workspace-dir ${../../.github/agents} \
-          --shared-dir ${../programs/vscode/prompts} \
-          --install-file ${../programs/vscode.nix}
-        touch $out
-      '';
+      nix-mcp = pkgs.callPackage ../programs/eca/nix-mcp/_check.nix {
+        nix-mcp = pkgs.callPackage ../programs/eca/nix-mcp/_default.nix { };
+      };
     } // lib.optionalAttrs (system == "x86_64-linux") {
       hyprland-generated-config =
         let
