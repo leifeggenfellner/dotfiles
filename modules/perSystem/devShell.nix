@@ -5,6 +5,9 @@ _: {
       inputsFrom = [ ];
       nativeBuildInputs = with pkgs; [
         nixpkgs-fmt
+        sops
+        ssh-to-age
+        (callPackage ./_sops-enroll-host.nix { })
         (python3.withPackages (pythonPackages: [
           pythonPackages.pillow
         ]))

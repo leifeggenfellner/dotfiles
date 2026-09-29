@@ -59,6 +59,9 @@
   ########################################
   # Desktop (Hyprland)
   ########################################
+  # Enrolled in .sops.yaml (sops-enroll-host).
+  secrets.enable = true;
+
   environment.desktop = {
     enable = true;
     windowManager = "hyprland";

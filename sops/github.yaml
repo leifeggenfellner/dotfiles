@@ -1,0 +1,35 @@
+token: ENC[AES256_GCM,data:qrle8EEhouansAExJiCQXXOT/DUo/cWlgz97GkJMZE5lCj2TQIyOTw==,iv:p9XT9Sn7epSs/+lMAoruK0FeRUK2pPJF4u4fcckrVkc=,tag:s7yLE/i19yGUu/z77nItSw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBmajRTMFBSM2trUG1hOVJ1
+            dE9zZUJwcjlCY0dtSTBWa2UzUnM1MWt0RDFjCkJPV2kzS1gydFdKNGZLWjlDYzV0
+            L1Z0d3U1WEZobm9QRE9OenZjME44a00KLS0tIGNSSDRXMlJLZG9HVVBiRmJFOWNi
+            MmpYcUliRXY3UllVcmVyUTdiTFpZTFkK122x1MS6jdj2LSeatRGUjS+V1K89FeQh
+            vdUpynBlHERiyrN0quEZm16wqYi18lqRcMHkUHaKtOQcGQP+F4MSYw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1ye6uhtc3dr3gnmexwcke9nplmjp56eaqzckt60rl4j9tmzlg6vxq070ywz
+    lastmodified: "2026-09-29T11:10:05Z"
+    mac: ENC[AES256_GCM,data:jmNP6H4GPW4MCFXRodCE+a/KBRIwsQu5URJjrX2sVORrFIFh63F7II4l/mFR8UsO1eIyj4fMLZ6Hg/8unTNAl7SWF9PgSAtglC4QtZ9ofUqiUZrDAby+Pn2bnV2gfFl3/f7KXBv9Rb2Br1jQPNJT1ZNtTi+zsWPtO7JhLc8O0hI=,iv:Tnm6GOyxQ3AuivTlWZfoXOZZo6qEMNFIHc3bRw3F7PU=,tag:hB1tMNrtZJ+aTOIr0doXfg==,type:str]
+    pgp:
+        - created_at: "2026-09-29T11:09:40Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hQGMAwj/YoxhkEsBAQwAtbbCzvTNblC/IQNCwTuTehkUlX7up2YSTzIVPaIQVZfd
+            FESUcKsoBsapwoZ4usTHwz8y5ExjAaMpIqYQJxhgDcFLwLw3AJWrGYVFUNuOz108
+            tSCYNEl6oyujjuhPfH2MN322yFVsVdifmqTlrViBddqxBAMeGXYmQrdaGs4oczK6
+            +qB01aitb1zjmoak/BlUP7WSi29h/PwHjmU8i7awZlq1/7BZg0rkJG6iVBjINGE3
+            czFwwv1hpwZPNOHc2/y36gNNExxcSRGxtwK3mtKAkNmHNKORvxR5XQA03qJmjGNF
+            FfYTD2/roSkF8PcbhO4mMYQtxul9Fh3KzwPH+ZBwWEOPp+JYK3yLm9ZtOHk8lFiX
+            FyeqH+IKoUqzSvC3zWIUBQb79kVT1LoKK2Fm2A6A/gpgTIq7o6umGirrtStT3wzZ
+            IbxQ+b5MMXrsm+ici0mnpI0shpyRogDuigLxcfMzN7v4qpRb8WXLLN21rCF6YO1k
+            YGcSrsC6jTG1NJwPEaJl0l4BzVqXHtXRe8miFfHA0eM39lu8kxZSXccigdZ5lJ5m
+            NK+iOyt0f7vkjoZ9bLFpjdfS3KyMMmK0gcdWPFyqLgS6gVIpq26jEgCfY6q9UZub
+            FblRpALJvarmF4aYFc0E
+            =vhWQ
+            -----END PGP MESSAGE-----
+          fp: 09758A4FEB8D70C8C23A983778A194310ECDA9B4
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3
