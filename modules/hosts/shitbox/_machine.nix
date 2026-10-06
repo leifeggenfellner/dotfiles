@@ -78,6 +78,11 @@
         serial = "1H35421YRD";
         resolution = "2560x1440@60";
       };
+      dellU2722DE = {
+        desc = "Dell Inc. DELL U2722DE";
+        serial = "8DGTT83";
+        resolution = "2560x1440@60";
+      };
       familyHome = { desc = "Samsung Electric Company C34J79x"; serial = "HTRM900265"; resolution = "3440x1440@60"; };
     };
 
@@ -106,6 +111,13 @@
           autoDetect = true;
           outputs = [
             { monitor = "laptop"; position = "0x0"; primary = true; workspaces = [ 1 2 3 4 5 6 7 8 9 10 ]; }
+          ];
+        };
+        dell_zen_temp = {
+          autoDetect = false;
+          outputs = [
+            { monitor = "laptop"; position = "0x0"; scale = "1"; primary = true; workspaces = [ 1 2 4 5 6 7 8 9 10 ]; }
+            { monitor = "dellU2722DE"; position = "1920x0"; workspaces = [ 3 ]; }
           ];
         };
       };

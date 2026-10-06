@@ -20,7 +20,7 @@
       enable_hyprcursor = true;
     };
     decoration = {
-      rounding = style.rounding;
+      inherit (style) rounding;
       blur = {
         enabled = true;
         size = style.blurSize;
