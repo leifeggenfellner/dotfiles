@@ -1,6 +1,6 @@
 { pkgs }:
 let
-  implementationAgents = "backend|frontend|scala|java|nix-home-manager|rice-quickshell|refactorer|docs|remediator";
+  implementationAgents = "backend|frontend|scala|java|nix-home-manager|rice-quickshell";
   stateSnippet = ''
     umask 077
     state_dir() {
@@ -41,23 +41,42 @@ in
     chat=$(jq -r '.chat_id // ""' <<< "$input")
     [ -n "$session" ] && [ -n "$chat" ] || exit 0
     target=$(jq -r '.tool_input.agent // ""' <<< "$input")
-    case "$target" in ${implementationAgents}|verifier|reviewer|security|summary|architect) ;; *) exit 0 ;; esac
+    case "$target" in ${implementationAgents}|verifier|reviewer|security|architect) ;; *) exit 0 ;; esac
     task=$(jq -r '.tool_input.task // ""' <<< "$input")
     dir=$(state_dir "$session" "$chat")
     mkdir -p "$dir"
     chmod 700 "''${dir%/*}" "$dir"
-    if [ "$target" = architect ] && [ -e "$dir/summary-invoked" ]; then
-      rm -f "$dir"/*-invoked "$dir"/security-required
-    fi
     : > "$dir/$target-invoked"
+    case "$target" in
+      architect|${implementationAgents})
+        tier_lines=$(printf '%s\n' "$task" | grep -Ec '^[[:space:]]*Workflow tier:' || true)
+        if [ "$target" != architect ] && [ -e "$dir/tier-full" ]; then
+          : > "$dir/tier-full"
+          rm -f "$dir/tier-fast"
+        elif [ "$tier_lines" -eq 1 ] && printf '%s\n' "$task" | grep -Eq '^[[:space:]]*Workflow tier:[[:space:]]*full[[:space:]]*$'; then
+          : > "$dir/tier-full"
+          rm -f "$dir/tier-fast"
+        elif [ "$tier_lines" -eq 1 ] && printf '%s\n' "$task" | grep -Eq '^[[:space:]]*Workflow tier:[[:space:]]*fast[[:space:]]*$' && [ ! -e "$dir/tier-full" ]; then
+          : > "$dir/tier-fast"
+        else
+          : > "$dir/tier-full"
+          rm -f "$dir/tier-fast"
+        fi
+        ;;
+    esac
     case "$target" in
       architect) : > "$dir/architect-invoked" ;;
       ${implementationAgents})
         : > "$dir/implementation-invoked"
-        rm -f "$dir/verifier-invoked" "$dir/reviewer-invoked" "$dir/security-invoked" "$dir/summary-invoked"
+        rm -f "$dir/verifier-invoked" "$dir/reviewer-invoked" "$dir/security-invoked"
         ;;
       verifier)
+        security_lines=$(printf '%s\n' "$task" | grep -Ec '^[[:space:]]*Security review:' || true)
         if printf '%s\n' "$task" | grep -Eq '^[[:space:]]*Security review:[[:space:]]*required[[:space:]]*$'; then
+          : > "$dir/security-required"
+        elif [ "$security_lines" -eq 1 ] && printf '%s\n' "$task" | grep -Eq '^[[:space:]]*Security review:[[:space:]]*not-required[[:space:]]*$'; then
+          rm -f "$dir/security-required"
+        else
           : > "$dir/security-required"
         fi
         ;;
@@ -75,12 +94,10 @@ in
     dir=$(state_dir "$session" "$chat")
     if [ -e "$dir/implementation-invoked" ] && [ ! -e "$dir/verifier-invoked" ]; then
       jq -n '{followUp:"Implementation/integration was invoked but verifier evidence is missing. Spawn verifier with per-AC/task PASSED, FAILED, or UNVERIFIED evidence and literal commands.",systemMessage:"Workflow: continue with verification."}'
-    elif [ -e "$dir/verifier-invoked" ] && [ ! -e "$dir/reviewer-invoked" ]; then
+    elif [ -e "$dir/verifier-invoked" ] && [ ! -e "$dir/reviewer-invoked" ] && { [ ! -e "$dir/tier-fast" ] || [ -e "$dir/security-required" ]; }; then
       jq -n '{followUp:"Verifier was invoked but reviewer is missing. Spawn reviewer; invoke required security review too. Inspect actual PASSED/CLEAR/FINDINGS reports.",systemMessage:"Workflow: continue with review."}'
     elif [ -e "$dir/reviewer-invoked" ] && [ -e "$dir/security-required" ] && [ ! -e "$dir/security-invoked" ]; then
-      jq -n '{followUp:"Reviewer was invoked and security review is required. Spawn security and inspect its actual CLEAR/FINDINGS report.",systemMessage:"Workflow: continue with security review."}'
-    elif [ -e "$dir/verifier-invoked" ] && [ -e "$dir/reviewer-invoked" ] && [ ! -e "$dir/summary-invoked" ] && { [ ! -e "$dir/security-required" ] || [ -e "$dir/security-invoked" ]; }; then
-      jq -n '{followUp:"All required gate invocations are present. Inspect the latest reports, continue with a consolidated remediation batch while findings remain, or spawn summary after PASSED and CLEAR outcomes.",systemMessage:"Workflow: continue until the plan is complete."}'
+      jq -n '{followUp:"Security review is required. Spawn security and inspect its actual CLEAR/FINDINGS report.",systemMessage:"Workflow: continue with security review."}'
     fi
   '';
 }

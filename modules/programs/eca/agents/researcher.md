@@ -3,6 +3,7 @@ mode: subagent
 description: Read-only research agent for locating code, understanding architecture, and summarizing implementation constraints
 spawnableBy:
   - lead
+  - architect
   - debug
   - designer
   - version

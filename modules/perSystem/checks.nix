@@ -24,6 +24,8 @@
       nix-mcp = pkgs.callPackage ../programs/eca/nix-mcp/_check.nix {
         nix-mcp = pkgs.callPackage ../programs/eca/nix-mcp/_default.nix { };
       };
+
+      eca-workflow-hooks = import ../programs/eca/_workflow-check.nix { inherit pkgs; };
     } // lib.optionalAttrs (system == "x86_64-linux") {
       hyprland-generated-config =
         let

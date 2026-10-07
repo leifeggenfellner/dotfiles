@@ -1,0 +1,719 @@
+#+TITLE: ECA agent bundle efficiency plan
+#+AUTHOR: designer
+#+STARTUP: overview
+#+FILETAGS: :eca:agents:performance:
+
+* Goal, scope, acceptance
+
+** Goal
+Reduce wall-clock time and token spend of a typical =lead= run in the ECA agent
+bundle shipped by this dotfiles repo (=modules/programs/eca/=), without losing
+the guarantees the user actually relies on: evidence-based verdicts, one writable
+owner per path, and no "done" claim without observed proof.
+
+The dominant cost is *not* model choice. It is the unconditional pipeline
+(researcher -> architect -> specialist -> verifier -> reviewer -> security ->
+remediator -> re-verify -> summary), the hook that forces extra =lead= turns, and
+the ~1715-word =lead.md= plus ~995-word =AGENTS.md= replayed on every turn and
+every spawn.
+
+** In scope
+- =modules/programs/eca/agents/*.md= (roster, frontmatter, prompt bodies)
+- =modules/programs/eca/AGENTS.md=
+- =modules/programs/eca/_hooks.nix=
+- =modules/programs/eca/skills/implementation-planning/SKILL.md=
+- =modules/perSystem/checks.nix= (one new check)
+- new =modules/programs/eca/_workflow-check.nix=
+
+** Non-goals
+- Do not change the pinned ECA version (=ecaVersion = "0.157.0"=) or the release hashes.
+- Do not change =flake.lock=, lockfiles, or vendored/generated files.
+- Do not change =toolCall.approval= allow/deny regexes in =modules/programs/eca.nix=.
+- Do not change =nixMcp=, =version-git-approval=, or any Git safety behaviour.
+- Do not touch =modules/rice/=, hosts, or any module outside the list above.
+- Do not activate home-manager or switch the system as part of this work.
+- Do not run Git writes. The user writes commits.
+
+** Observable acceptance criteria
+| ID    | Criterion                                                                                                                       | Proof |
+|-------+---------------------------------------------------------------------------------------------------------------------------------+-------|
+| AC-01 | Pre-flight probes record, as observed facts, whether =github-copilot/gpt-6-luna= and =github-copilot/gpt-6-sol= spawn successfully, and whether the agent name =explorer= resolves to the bundle's =explorer.md= or to an ECA built-in. | EV-01 |
+| AC-02 | Every surviving agent file's =model=/=variant= matches the table in [[*D-03 Model and variant retiering][D-03]]; =variant: high= appears only in =architect.md= and =designer.md=. | EV-02 |
+| AC-03 | =_hooks.nix= no longer emits the "All required gate invocations are present" follow-up (current branch 4). No follow-up is emitted purely because gates were invoked. | EV-02, EV-04 |
+| AC-04 | =lead.md= defines exactly two tiers with objectively checkable entry rules; the fast tier spawns no =architect=, no research agent, no =summary=, and creates no =eca__task= entries. | EV-03 |
+| AC-05 | =lead.md= body <= 800 words; =AGENTS.md= body <= 550 words; neither drops the retained-rules list in [[*D-05 Prompt compression contract][D-05]]. | EV-03 |
+| AC-06 | =_hooks.nix= recognises a standalone =Workflow tier: fast= / =Workflow tier: full= line in a spawn task, defaults to full on missing/malformed input, never downgrades full to fast, and suppresses the reviewer follow-up only for fast. | EV-04 |
+| AC-07 | =nix build .#checks.x86_64-linux.eca-workflow-hooks= exits 0 and exercises: fast/full/missing tier, implementation->verifier, =Security review: required|not-required|missing=, escalation fast->full, marker reset on a second implementation spawn, non-=lead= actor, =follow_up_active=true=. | EV-04 |
+| AC-08 | =agents/remediator.md=, =agents/summary.md=, =agents/docs.md=, =agents/refactorer.md=, =agents/explorer.md= are deleted and no file under =modules/programs/eca/= or =modules/perSystem/= references those agent names. | EV-05 |
+| AC-09 | =nix eval --raw .#nixosConfigurations.shitbox.config.home-manager.users.leif.xdg.configFile."eca/config.json".text= exits 0 and the JSON still contains all three hook entries. | EV-02, EV-05, EV-06 |
+| AC-10 | =nix flake check --keep-going= and =nix build .#nixosConfigurations.shitbox.config.system.build.toplevel= both exit 0 on the integrated change set. | EV-06 |
+| AC-11 | A before/after measurement of three comparable tasks is recorded: wall clock, spawn count, forced follow-up turns, verifier verdict, and any later correction. No increase in unverified "done" claims. | EV-06 |
+
+* Confirmed repository context
+
+All facts below were read from source during planning. Line numbers are as of
+this plan being written; re-read before editing.
+
+** Module wiring (observed)
+- =modules/programs/eca.nix:2= defines =flake.homeModules.programs-eca=.
+- It installs =eca/AGENTS.md=, =eca/config.json= (from =effectiveEcaSettings=), and recursive copies of =agents/=, =rules/=, =commands/=, =skills/= via =xdg.configFile= (=modules/programs/eca.nix:226-246=).
+- =defaultEcaSettings.defaultAgent = "lead"=.
+- Hooks are built by =modules/programs/eca/_hooks.nix= and wired as =version-git-approval= (preToolCall), =lead-workflow-record= (postToolCall on =eca__spawn_agent=), =lead-workflow-verify= (postRequest).
+- The module is consumed only through =lib.attrValues config.flake.homeModules= at =modules/hosts/shitbox/default.nix:33= and the same pattern in =modules/hosts/stickytop/default.nix=. There are no =homeConfigurations= outputs.
+- =modules/programs/eca/rules/= and =commands/= contain only =.gitkeep=.
+
+** Hook behaviour (observed, =_hooks.nix=)
+- =implementationAgents = "backend|frontend|scala|java|nix-home-manager|rice-quickshell|refactorer|docs|remediator"= (line 3).
+- =record= writes marker files under =${XDG_RUNTIME_DIR:-/tmp}/eca-lead-workflow-$UID/<session>/<chat>/=; it sets =security-required= when the verifier spawn task contains a standalone line matching =^[[:space:]]*Security review:[[:space:]]*required[[:space:]]*$=.
+- =verify= (postRequest) has four follow-up branches, in order:
+  1. implementation invoked, verifier missing -> force verification.
+  2. verifier invoked, reviewer missing -> force review.
+  3. reviewer invoked, security required, security missing -> force security.
+  4. verifier + reviewer present, summary missing -> "All required gate invocations are present... continue until the plan is complete."
+- Branch 4 costs a full extra =lead= turn (full =lead.md= + whole history) on every run, repeatedly, and exists only to chase the =summary= subagent.
+- The hook JSON contract in use is: input =.agent=, =.session_id=, =.chat_id=, =.tool_input.agent=, =.tool_input.task=, =.follow_up_active=; output ={followUp, systemMessage}= or ={approval}=. *Do not invent other fields.*
+
+** Roster and prompt sizes (observed)
+| File | mode | model | variant | body words |
+|---+---+---+---+---|
+| lead.md | primary | gpt-6-sol | high | ~1715 |
+| designer.md | primary | gpt-6-sol | high | ~600 |
+| verifier.md | subagent | gpt-6-luna | - | ~562 |
+| architect.md | subagent | gpt-6-sol | high | ~456 |
+| reviewer.md | subagent | gpt-6-luna | - | ~379 |
+| version.md | primary | gpt-6-sol | high | ~358 |
+| prreview.md | primary | gpt-6-sol | high | ~326 |
+| scala.md | subagent | gpt-5.3-codex | - | ~303 |
+| debug.md | primary | gpt-6-sol | high | ~270 |
+| rice-quickshell.md | subagent | gpt-5.3-codex | - | ~243 |
+| nix-home-manager.md | subagent | gpt-5.3-codex | - | ~212 |
+| frontend.md | subagent | gpt-5.3-codex | - | ~198 |
+| remediator.md | subagent | gpt-6-sol | high | ~190 |
+| backend.md | subagent | gpt-5.3-codex | - | ~156 |
+| docs.md | subagent | gpt-5.4-mini | - | ~156 |
+| security.md | subagent | claude-sonnet-5 | - | ~145 |
+| java.md | subagent | gpt-5.3-codex | - | ~141 |
+| refactorer.md | subagent | gpt-6-sol | - | ~126 |
+| researcher.md | subagent | gpt-6-luna | - | ~116 |
+| summary.md | subagent | gpt-5.4-mini | - | ~111 |
+| explorer.md | subagent | gpt-6-luna | - | ~93 |
+| solo.md | primary | gpt-6-sol | - | ~91 |
+| AGENTS.md | (global) | n/a | n/a | ~995 |
+
+=spawnableBy= today: architect <- lead/designer/version; explorer <- lead/architect/designer;
+researcher <- lead/debug/designer/version/prreview; reviewer <- lead/architect/prreview;
+security <- lead/prreview; verifier <- lead/debug/architect/designer/prreview;
+all implementation agents <- lead only.
+
+** Heaviest removable passages (observed)
+- =lead.md:103-114= — ~584-word remediator-eligibility paragraph. Single largest block in the bundle.
+- =lead.md:62-97= — the 9-step pipeline, ~414 words.
+- =lead.md:33-55= — designer-plan section protocol + parallel-group rules.
+- =lead.md:64-80= (step 3) — the =eca__task= persistence/readback mandate, which blocks all implementation until trackers are created and read back.
+- =AGENTS.md:74-85= — "Verifying your work" gate narrative; it duplicates =lead.md= and =verifier.md= and is paid on *every* spawn of *every* agent.
+- =AGENTS.md:29-57= and =:59-71= — tone and code-quality bullets, heavily overlapping.
+- Verbatim 5-file duplicates in =backend/frontend/java/refactorer/scala= ("Read source against the architect packet..." and "Report changed paths alongside...") are a maintenance concern only: one specialist prompt loads per spawn, so they are *not* a runtime token cost.
+
+** Validation surface (observed)
+- Formatter: =nixpkgs-fmt= (=modules/perSystem/formatter.nix:3=), so =nix fmt=.
+- Checks (=modules/perSystem/checks.nix=): =rice-lint=, =rice-manifest-validation=, =rice-theme-switch=, =monitor-control=, =nix-mcp=, and x86_64-only =hyprland-generated-config=. Plus =pre-commit-check= from =modules/perSystem/pre-commit.nix:9-18= (statix, deadnix, nil, nixpkgs-fmt, shellcheck, beautysh).
+- *No check evaluates the ECA home-manager module or lints agent frontmatter today.*
+- =nix flake check --keep-going= alone does **not** evaluate the ECA module; only a host toplevel build or an explicit =nix eval= on the home-manager attribute does.
+- =modules/programs/eca/nix-mcp/_check.nix= is the nearest neighbour pattern for the new hook check; read it before writing =_workflow-check.nix=.
+
+* Decisions, assumptions, open questions
+
+** D-01 Two tiers, decided by lead during its first inspection
+*Decision.* Replace the unconditional pipeline with two tiers. =lead= picks the tier
+during its first normal inspection of the request — not in a dedicated triage turn
+and not via a delegated triage call — and states the tier plus a one-line rationale
+inside the implementation spawn task.
+
+*Fast tier entry rule (all must hold, unknown => full):*
+1. The change is confined to at most two existing writable files in one module.
+2. Relevant paths are identifiable from the request plus at most one bounded source inspection.
+3. It adds no public/shared interface, no dependency, no generated artifact, no migration, no cross-module wiring.
+4. It does not touch security, permissions, secrets, unsafe-command policy, ECA hooks, agent permissions, concurrency, or persistent state.
+5. There is no designer-created Org plan in play.
+
+*Fast pipeline:* lead inspects named files -> one owning specialist -> =verifier=
+with the narrowest sufficient project check and per-criterion evidence -> lead reads
+the actual report and answers. No architect, no research agent, no reviewer, no
+summary, no =eca__task=.
+
+*Fast escalation:* a FAILED or UNVERIFIED verifier, a surprise path, or a newly
+discovered shared contract escalates to full before any further implementation.
+Fast must never close on an unverified change.
+
+*Full pipeline:* lead reads entry points, spawns =researcher= only for a bounded
+missing fact -> =architect= (skipped when a usable designer Org plan already supplies
+the packets) -> specialists in disjoint dependency-ordered groups -> =verifier= over
+the integrated change -> =reviewer=, with =security= in parallel when classified
+required -> lead consolidates findings and returns each one to its *original*
+specialist -> repeat affected verification/review until the latest actual reports
+are PASSED/CLEAR or a blocker is reported -> lead writes the final report itself.
+
+*Deliberately relaxed:* fast changes get no independent reviewer, no architect plan,
+no tracker persistence. *Preserved:* single writable owner, explicit
+PASSED/FAILED/UNVERIFIED evidence, project checks over inferred success, and the
+designer-plan section checkpoint contract (including its mandatory per-section
+security review).
+
+** D-02 Roster 22 -> 17
+| Agent | Disposition | Rationale / migration |
+|---+---+---|
+| lead, architect, designer, debug, version, prreview, solo | keep | Distinct entry points, permissions, or reasoning needs. |
+| backend, frontend, java, scala, nix-home-manager, rice-quickshell | keep | Exclusive writable ownership per domain. |
+| verifier, reviewer, security | keep | Distinct evidence responsibilities. |
+| researcher | keep | Becomes the single read-only research role. |
+| *explorer* | *delete* | Redundant with =researcher=. See [[*D-04 Research consolidation picks researcher, not explorer][D-04]]. Callers =lead=, =architect=, =designer= move to =researcher=. |
+| *remediator* | *delete* | Findings go back to the original specialist under the same task/workstream and owned paths. Removes the ~584-word eligibility block from =lead.md= and a whole extra high-variant spawn per cycle. |
+| *summary* | *delete* | =lead= writes the final report from the gate reports it already read. Removes one spawn per run and the reason branch 4 exists. |
+| *docs* | *delete* | Requested documentation belongs to the specialist that owns the path; in this repo that is =nix-home-manager=. The "no unsolicited docs" rule stays in =AGENTS.md=. |
+| *refactorer* | *delete* | Behaviour-preserving refactors go to the owning language/repo specialist with an explicit regression criterion. |
+
+*Deviation from the architect consultation, recorded deliberately:* the architect
+proposed deleting =solo= and =researcher= (keeping =explorer=). This plan keeps both
+=solo= and =researcher=. =solo= is the cheapest possible mode — one agent, no
+delegation — and removing a manually selectable entry point the user may rely on is
+a UX regression that works against the stated goal. See D-04 for the research pick.
+
+** D-03 Model and variant retiering
+The user's directive: =gpt-6-luna= for less complex roles; current models are fine
+for complex ones. This plan therefore changes model identity in only two places and
+otherwise *removes reasoning variants*, which is where the latency actually is.
+
+| Agent | Now | Planned | Why |
+|---+---+---+---|
+| lead | sol / high | sol / *none* | Highest turn count in the system; =high= is paid on every orchestration turn for work that is mostly routing. |
+| architect | sol / high | sol / high (unchanged) | Infrequent, consequential interface and ownership design. |
+| designer | sol / high | sol / high (unchanged) | Durable multi-section plans. |
+| debug | sol / high | *luna* / none | Bounded reproduce-hypothesise-verify loop; it delegates the hard parts. |
+| version | sol / high | sol / *none* | Keep the stronger model for Git authority; drop perpetual =high=. |
+| prreview | sol / high | sol / *none* | Reconciles a diff plus subagent reports; =high= is not load-bearing. |
+| solo | sol / none | unchanged | Does everything alone; needs the capability. |
+| backend, frontend, java, scala, nix-home-manager, rice-quickshell | 5.3-codex | unchanged | "What it's currently using" for the complex role. Changing all six at once is an unforced quality risk; revisit only after AC-11 measurement. |
+| verifier, reviewer, researcher | luna | unchanged | Already the cheap tier. |
+| security | claude-sonnet-5 | unchanged | An independent model lens is the point of this gate, and it now runs far less often. |
+| explorer, remediator, summary, docs, refactorer | - | deleted | See D-02. |
+
+Net effect: =variant: high= survives only on =architect= and =designer=.
+
+*Unverified assumption:* that =github-copilot/gpt-6-luna= and =github-copilot/gpt-6-sol=
+are currently available to this account with these exact identifiers, and that
+dropping =variant= is accepted (rather than erroring) by ECA 0.157.0. SEC-01 probes
+this before anything is edited. If a model is unavailable, *stop and report* — do not
+silently substitute.
+
+** D-04 Research consolidation picks =researcher=, not =explorer=
+*Observed anomaly.* An =eca-info= inspection of the running server lists subagents as:
+=architect — model: github-copilot/gpt-6-sol=, =researcher — model: github-copilot/gpt-6-luna=,
+=verifier — model: github-copilot/gpt-6-luna=, plus =explorer= and =general= with
+*generic built-in descriptions and no model attribution*. The description shown for
+=explorer= ("Codebase search specialist...") is *not* the description in
+=modules/programs/eca/agents/explorer.md= ("Focused read-only explorer for iterative
+architecture research").
+
+*Inference (unverified).* ECA 0.157.0 ships a built-in =explorer= subagent whose name
+collides with the bundle's =explorer.md=, and the built-in appears to win. Consolidating
+research onto =explorer= would therefore risk routing all research through a prompt and
+model this repo does not control.
+
+*Decision.* Delete =explorer.md=; make =researcher= the single read-only research role;
+add =architect= to =researcher.spawnableBy= (final list: lead, architect, debug,
+designer, version, prreview). SEC-01 confirms or refutes the collision; if it is
+refuted, the choice is cosmetic and this plan still stands.
+
+** D-05 Prompt compression contract
+| File | Now | Target | Cut / merge | Must keep |
+|---+---+---+---+---|
+| =AGENTS.md= | ~995 | <= 550 | Collapse =:29-57= tone bullets and =:59-71= code-quality bullets into one tight list; replace the =:74-85= gate narrative with one sentence ("verify with the project's own checks, report literal commands and outcomes, say UNVERIFIED when it is; tier policy lives in lead.md"); drop the =:81= =summary= sentence; shorten =:88-100= language list to one line per language. | Comment/docstring discipline (=:11-26=), single-owner rule, read-reality-before-editing, stop-on-absent-API, "unverified means unverified", Git safety (=:102-108=), and the whole "Things to avoid" list (=:110-121=). |
+| =lead.md= | ~1715 | <= 800 | Delete the remediator block (=:103-114=), the =eca__task= persistence/readback mandate (=:64-80=), the =summary= step, and routing lines for deleted agents (=:90-91=). Replace =:33-55= and =:58-114= with the tier table + one full pipeline + a short Org-plan exception. | Delegation and tool-policy constraints (=:11-32=), the no-model-override rule, ownership rules, exact terminal verdict strings, the =Security review:= classification line requirement, Org-plan section persistence and continue/stop checkpoints. |
+| =architect.md= | ~456 | <= 350 | Merge the packet/concurrency prose (=:16-48=); swap =explorer= -> =researcher=. | The nine workstream fields, concrete interface contracts, stop conditions. |
+| =designer.md= | ~600 | <= 450 | Merge repeated consultation/register instructions; swap =explorer= -> =researcher=. | Sole Org ownership, mandatory per-section gates. |
+| =verifier.md= | ~562 | <= 420 | Remove repeated initial-vs-subsequent prose. | Exact verdict strings, per-criterion evidence matrix, "no command executed => UNVERIFIED", Scala/Java/TS required checks. |
+| =reviewer.md= | ~379 | <= 300 | Trim the two-axis explanation to its two bullets. | Exact verdict strings, one-line finding format, "do not run checks". |
+| =debug.md=, =version.md=, =prreview.md= | ~270/~358/~326 | <= 230/270/270 | Condense numbered routines; swap =researcher= references to the new single role. | Reproduction discipline, Git approval/destructive safety, full-PR boundary. |
+| =security.md=, =researcher.md= | ~145/~116 | unchanged | - | - |
+| =backend/frontend/java/scala= | 141-303 | <= 180 each | Deduplicate the two shared paragraphs. Maintenance only, no runtime win. | Language-specific constraints. |
+| =nix-home-manager.md=, =rice-quickshell.md= | ~212/~243 | <= 220 each | Light trim only. | Nix activation limits and rice architecture contracts. |
+| =skills/implementation-planning/SKILL.md= | ~403 | <= 350 | Drop the delegated-=summary= wording (=:8,:14=); keep "researcher handoffs" (=:13=) as-is since =researcher= survives. | Registers, nine fields, durable-plan rules. |
+
+** D-06 Per-spawn token discipline
+Added to =lead.md= and the specialist prompts:
+- Lead packets must carry exact paths, pertinent line ranges, and the relevant snippet or symbol, plus acceptance examples, owner, cwd, and the literal intended checks.
+- A specialist inspects its target and only the necessary neighbours. If the packet is insufficient it asks or returns BLOCKED rather than exploring the repo.
+- Routine specialist / researcher reports: ~200 words plus bounded evidence entries. Reviewer findings: one line each. Lead's normal final report: ~150 words.
+- Verifier runs the *narrowest sufficient* command set for fast work; full initial verification still covers the complete integrated change; later passes cover failed and affected checks only.
+- No cap ever permits omitting a failure, a literal check result, or an UNVERIFIED criterion.
+
+** D-07 Hook retuning
+Strictly within the existing JSON contract.
+- =lead= puts a standalone line =Workflow tier: fast= or =Workflow tier: full= in every implementation and architect spawn task, matched by =record= exactly the way =Security review: required= already is.
+- =record= writes =tier-fast= or a *sticky* =tier-full= marker. Missing or malformed => full. A later full assignment upgrades fast to full; fast never downgrades full.
+- Missing or malformed security classification fails closed to =security-required=; an explicit =required= line always wins.
+- Branch 1 (implementation without verifier): *keep, both tiers.*
+- Branch 2 (verifier without reviewer): *keep, full tier only.*
+- Branch 3 (security required but not invoked): *keep, both tiers* — so a contradictory "fast + security required" assignment cannot bypass security.
+- Branch 4: *delete.* Invocation markers never justify another turn.
+- =.follow_up_active= suppression and =version-git-approval= stay untouched.
+- =implementationAgents= loses =refactorer|docs|remediator=.
+
+** Open questions (none blocking)
+- OQ-01: after AC-11 measurement, should the six implementation specialists move from =gpt-5.3-codex= to =gpt-6-luna=? Deferred on purpose; it is a quality experiment, not a correctness change.
+- OQ-02: should =security= drop to =gpt-6-luna= once it runs only on risk-classified changes? Deferred; keeping an independent vendor is the point of the gate.
+
+** Stop conditions
+Stop and report rather than guessing when: a configured model identifier is
+unavailable; ECA rejects an agent file missing =variant=; a hook JSON field used here
+does not exist in 0.157.0; =eca-workflow-hooks= cannot be expressed with the existing
+=_hooks.nix= exports; a removed agent name still has a live reference after migration;
+=nix build .#nixosConfigurations.shitbox...toplevel= fails for a reason unrelated to
+this change set; or any path would be written by two workstreams.
+
+* Registers
+
+#+begin_src json
+{
+  "requirements": [
+    {"id": "AC-01", "section": "SEC-01"},
+    {"id": "AC-02", "section": "SEC-02"},
+    {"id": "AC-03", "section": "SEC-02"},
+    {"id": "AC-04", "section": "SEC-03"},
+    {"id": "AC-05", "section": "SEC-03"},
+    {"id": "AC-06", "section": "SEC-03"},
+    {"id": "AC-07", "section": "SEC-04"},
+    {"id": "AC-08", "section": "SEC-05"},
+    {"id": "AC-09", "section": ["SEC-02", "SEC-05", "SEC-06"]},
+    {"id": "AC-10", "section": "SEC-06"},
+    {"id": "AC-11", "section": "SEC-06"}
+  ],
+  "sections": [
+    {"id": "SEC-01", "status": "PENDING", "goal": "Pre-flight probes: model availability and explorer name collision", "workstreams": ["WF-PROBE"], "tasks": ["WF-TPROBE"], "acceptance": ["AC-01"], "dependencies": [], "owned_paths": [], "gates": ["verifier"], "evidence": "EV-01", "next": "SEC-02"},
+    {"id": "SEC-02", "status": "PENDING", "goal": "Frontmatter retiering and removal of hook branch 4", "workstreams": ["WF-MODEL", "WF-HOOK4"], "tasks": ["WF-TMODEL", "WF-THOOK4"], "acceptance": ["AC-02", "AC-03", "AC-09"], "dependencies": ["SEC-01"], "owned_paths": ["modules/programs/eca/agents/*.md", "modules/programs/eca/_hooks.nix"], "gates": ["verifier", "reviewer", "security"], "evidence": "EV-02", "next": "SEC-03"},
+    {"id": "SEC-03", "status": "PENDING", "goal": "Tier triage in lead, compressed global contract, tier-aware hooks", "workstreams": ["WF-LEAD", "WF-GLOBAL", "WF-TIER"], "tasks": ["WF-TLEAD", "WF-TGLOBAL", "WF-TTIER"], "acceptance": ["AC-04", "AC-05", "AC-06"], "dependencies": ["SEC-02"], "owned_paths": ["modules/programs/eca/agents/lead.md", "modules/programs/eca/AGENTS.md", "modules/programs/eca/_hooks.nix"], "gates": ["verifier", "reviewer", "security"], "evidence": "EV-03", "next": "SEC-04"},
+    {"id": "SEC-04", "status": "PENDING", "goal": "Regression check for the hook workflow policy", "workstreams": ["WF-CHECK"], "tasks": ["WF-TCHECK"], "acceptance": ["AC-07"], "dependencies": ["SEC-03"], "owned_paths": ["modules/programs/eca/_workflow-check.nix", "modules/perSystem/checks.nix"], "gates": ["verifier", "reviewer", "security"], "evidence": "EV-04", "next": "SEC-05"},
+    {"id": "SEC-05", "status": "PENDING", "goal": "Delete five agents and migrate every reference", "workstreams": ["WF-ROSTER"], "tasks": ["WF-TROSTER"], "acceptance": ["AC-08", "AC-09"], "dependencies": ["SEC-04"], "owned_paths": ["modules/programs/eca/agents/*.md", "modules/programs/eca/_hooks.nix", "modules/programs/eca/skills/implementation-planning/SKILL.md"], "gates": ["verifier", "reviewer", "security"], "evidence": "EV-05", "next": "SEC-06"},
+    {"id": "SEC-06", "status": "PENDING", "goal": "Compress surviving prompts and validate the integrated change", "workstreams": ["WF-PROMPTS", "WF-INTEGRATE"], "tasks": ["WF-TPROMPTS", "WF-TINTEGRATE"], "acceptance": ["AC-09", "AC-10", "AC-11"], "dependencies": ["SEC-05"], "owned_paths": ["modules/programs/eca/agents/*.md (except lead.md)"], "gates": ["verifier", "reviewer", "security"], "evidence": "EV-06", "next": null}
+  ],
+  "workstreams": [
+    {"id": "WF-PROBE", "specialist": "verifier", "parallel_group": "PG-00"},
+    {"id": "WF-MODEL", "specialist": "nix-home-manager", "parallel_group": "PG-01"},
+    {"id": "WF-HOOK4", "specialist": "nix-home-manager", "parallel_group": "PG-01"},
+    {"id": "WF-LEAD", "specialist": "nix-home-manager", "parallel_group": "PG-02"},
+    {"id": "WF-GLOBAL", "specialist": "nix-home-manager", "parallel_group": "PG-02"},
+    {"id": "WF-TIER", "specialist": "nix-home-manager", "parallel_group": "PG-02"},
+    {"id": "WF-CHECK", "specialist": "nix-home-manager", "parallel_group": "PG-03"},
+    {"id": "WF-ROSTER", "specialist": "nix-home-manager", "parallel_group": "PG-04"},
+    {"id": "WF-PROMPTS", "specialist": "nix-home-manager", "parallel_group": "PG-05"},
+    {"id": "WF-INTEGRATE", "specialist": "nix-home-manager", "parallel_group": "PG-06"}
+  ],
+  "tasks": [
+    {"id": "WF-TPROBE", "workstream": "WF-PROBE", "state": "PENDING"},
+    {"id": "WF-TMODEL", "workstream": "WF-MODEL", "state": "PENDING"},
+    {"id": "WF-THOOK4", "workstream": "WF-HOOK4", "state": "PENDING"},
+    {"id": "WF-TLEAD", "workstream": "WF-LEAD", "state": "PENDING"},
+    {"id": "WF-TGLOBAL", "workstream": "WF-GLOBAL", "state": "PENDING"},
+    {"id": "WF-TTIER", "workstream": "WF-TIER", "state": "PENDING"},
+    {"id": "WF-TCHECK", "workstream": "WF-CHECK", "state": "PENDING"},
+    {"id": "WF-TROSTER", "workstream": "WF-ROSTER", "state": "PENDING"},
+    {"id": "WF-TPROMPTS", "workstream": "WF-PROMPTS", "state": "PENDING"},
+    {"id": "WF-TINTEGRATE", "workstream": "WF-INTEGRATE", "state": "PENDING"}
+  ],
+  "evidence": [
+    {"id": "EV-01", "section": "SEC-01", "expected": "Probe spawn outcomes for gpt-6-luna and gpt-6-sol; eca-info subagent listing showing whether explorer resolves to the bundle definition", "actual": null},
+    {"id": "EV-02", "section": "SEC-02", "expected": "Frontmatter grep output; eca/config.json eval exit 0; diagnostics clean", "actual": null},
+    {"id": "EV-03", "section": "SEC-03", "expected": "Word counts for lead.md and AGENTS.md; config.json eval exit 0; diagnostics clean", "actual": null},
+    {"id": "EV-04", "section": "SEC-04", "expected": "nix build .#checks.x86_64-linux.eca-workflow-hooks exit 0 with all listed cases exercised", "actual": null},
+    {"id": "EV-05", "section": "SEC-05", "expected": "grep showing zero references to the five removed agent names; hook check still exit 0", "actual": null},
+    {"id": "EV-06", "section": "SEC-06", "expected": "nix fmt diff scoped to owned paths; nix flake check --keep-going exit 0; shitbox toplevel build exit 0; before/after measurement table", "actual": null}
+  ],
+  "gates": [
+    {"id": "G-01", "section": "SEC-01", "verifier": "PENDING", "reviewer": "n/a (read-only probes)", "security": "PENDING"},
+    {"id": "G-02", "section": "SEC-02", "verifier": "PENDING", "reviewer": "PENDING", "security": "PENDING"},
+    {"id": "G-03", "section": "SEC-03", "verifier": "PENDING", "reviewer": "PENDING", "security": "PENDING"},
+    {"id": "G-04", "section": "SEC-04", "verifier": "PENDING", "reviewer": "PENDING", "security": "PENDING"},
+    {"id": "G-05", "section": "SEC-05", "verifier": "PENDING", "reviewer": "PENDING", "security": "PENDING"},
+    {"id": "G-06", "section": "SEC-06", "verifier": "PENDING", "reviewer": "PENDING", "security": "PENDING"}
+  ]
+}
+#+end_src
+
+Security review is *required at every section checkpoint* of this plan, including
+SEC-01, because the change set alters workflow enforcement, agent permissions, and a
+hook that parses untrusted task text into shell state.
+
+* Implementation sections
+
+Working directory for every command: =/home/leif/Sources/dotfiles=.
+
+** SEC-01 Pre-flight probes
+:PROPERTIES:
+:SECTION-ID: SEC-01
+:STATUS:   PENDING
+:NEXT:     SEC-02
+:END:
+
+- Acceptance: AC-01. Workstreams: WF-PROBE. Tasks: WF-TPROBE.
+- Dependencies: none.
+- Owned writable paths: *none* (read-only section).
+- Gates: verifier PASSED; security CLEAR. Reviewer not applicable (no diff).
+
+*** WF-PROBE
+| Field | Value |
+|---+---|
+| Workstream ID | WF-PROBE |
+| Specialist | verifier |
+| Goal | Establish, as observed fact, model availability and the =explorer= name resolution before any file is edited. |
+| Owned files/modules | none (read-only) |
+| Dependencies | none |
+| Shared interfaces | ECA agent frontmatter keys =model=, =variant=; the =eca-info= skill |
+| Parallel group | PG-00 |
+| Integration order | 1 |
+| Targeted validation | see below |
+
+Probes:
+1. Load the =eca-info= skill and record the subagent listing verbatim. Report whether =explorer= shows the bundle description ("Focused read-only explorer for iterative architecture research") or an ECA built-in description, and whether it carries a model attribution.
+2. Record whether =github-copilot/gpt-6-luna= and =github-copilot/gpt-6-sol= appear in the known-model list; report the count and exact identifiers.
+3. Record whether any currently installed agent file omits =variant= and still spawns (=solo.md=, =refactorer.md=, =backend.md= are existing examples) — this establishes that dropping =variant= is safe.
+
+Expected outcome: all three answered with observed output. If =gpt-6-luna= or
+=gpt-6-sol= is unavailable, mark SEC-01 =BLOCKED= and report; do not substitute a model.
+
+** SEC-02 Frontmatter retiering and hook branch 4 removal
+:PROPERTIES:
+:SECTION-ID: SEC-02
+:STATUS:   PENDING
+:NEXT:     SEC-03
+:END:
+
+Highest value-per-risk section: it lands most of the latency win with no prompt rewrites.
+
+- Acceptance: AC-02, AC-03, AC-09. Workstreams: WF-MODEL, WF-HOOK4. Tasks: WF-TMODEL, WF-THOOK4.
+- Dependencies: SEC-01 PASSED.
+- Gates: verifier PASSED; reviewer CLEAR; security CLEAR.
+
+*** WF-MODEL
+| Field | Value |
+|---+---|
+| Workstream ID | WF-MODEL |
+| Specialist | nix-home-manager |
+| Goal | Apply the D-03 model/variant table to agent frontmatter. Frontmatter only — do not touch any prompt body in this workstream. |
+| Owned files/modules | =modules/programs/eca/agents/lead.md=, =debug.md=, =version.md=, =prreview.md= (frontmatter lines only) |
+| Dependencies | SEC-01 |
+| Shared interfaces | ECA frontmatter keys =mode=, =description=, =model=, =variant=, =spawnableBy=, =disabledTools= — add no new keys |
+| Parallel group | PG-01 |
+| Integration order | 1 |
+| Targeted validation | =grep -n '^\(model\|variant\):' modules/programs/eca/agents/*.md= must show =variant: high= only in =architect.md= and =designer.md=; =debug.md= must read =model: github-copilot/gpt-6-luna= |
+
+Concrete edits: remove the =variant: high= line from =lead.md=, =version.md=,
+=prreview.md=; in =debug.md= replace =model: github-copilot/gpt-6-sol= +
+=variant: high= with =model: github-copilot/gpt-6-luna= and no variant.
+Leave =architect.md= and =designer.md= untouched.
+
+*** WF-HOOK4
+| Field | Value |
+|---+---|
+| Workstream ID | WF-HOOK4 |
+| Specialist | nix-home-manager |
+| Goal | Delete the fourth follow-up branch from =verify= in =_hooks.nix=. |
+| Owned files/modules | =modules/programs/eca/_hooks.nix= |
+| Dependencies | SEC-01 |
+| Shared interfaces | hook stdin JSON (=.agent=, =.session_id=, =.chat_id=, =.tool_input.agent=, =.tool_input.task=, =.follow_up_active=) and stdout ={followUp,systemMessage}= |
+| Parallel group | PG-01 |
+| Integration order | 2 |
+| Targeted validation | =nix eval --raw .#nixosConfigurations.shitbox.config.home-manager.users.leif.xdg.configFile."eca/config.json".text= exits 0 and the JSON still contains =version-git-approval=, =lead-workflow-record=, =lead-workflow-verify= |
+
+Concrete edit: remove the final =elif= branch (the one emitting "All required gate
+invocations are present...") and its =summary-invoked= condition. Leave the
+=summary-invoked= marker writes in =record= alone for now; SEC-05 removes them with the
+agent.
+
+*** Section validation
+#+begin_src sh
+nix eval --raw '.#nixosConfigurations.shitbox.config.home-manager.users.leif.xdg.configFile."eca/config.json".text'
+grep -n '^\(model\|variant\):' modules/programs/eca/agents/*.md
+#+end_src
+Plus =eca__editor_diagnostics= on both changed files. Expected: eval exit 0, JSON
+containing three hook entries, no diagnostics introduced.
+
+*** Completion evidence (fill in during implementation)
+- Verifier report: /pending/
+- Reviewer report: /pending/
+- Security report: /pending/
+- Commands run and exit statuses: /pending/
+
+** SEC-03 Tier triage, compressed global contract, tier-aware hooks
+:PROPERTIES:
+:SECTION-ID: SEC-03
+:STATUS:   PENDING
+:NEXT:     SEC-04
+:END:
+
+- Acceptance: AC-04, AC-05, AC-06. Workstreams: WF-LEAD, WF-GLOBAL, WF-TIER.
+- Dependencies: SEC-02 PASSED.
+- Gates: verifier PASSED; reviewer CLEAR; security CLEAR.
+
+The three workstreams are genuinely disjoint and may be dispatched in one parallel
+message, because the shared contract (the exact marker strings) is fixed here:
+
+#+begin_src text
+Workflow tier: fast
+Workflow tier: full
+Security review: required
+Security review: not-required
+#+end_src
+
+Each must appear as a standalone line with no other text, matched by the same
+=grep -Eq '^[[:space:]]*...[[:space:]]*$'= style already used for =Security review:=.
+
+*** WF-LEAD
+| Field | Value |
+|---+---|
+| Workstream ID | WF-LEAD |
+| Specialist | nix-home-manager |
+| Goal | Rewrite =lead.md= around D-01 triage and D-06 packet discipline; cut to <= 800 body words. |
+| Owned files/modules | =modules/programs/eca/agents/lead.md= |
+| Dependencies | SEC-02 |
+| Shared interfaces | the four marker strings above; verdict strings =Overall verdict: PASSED/FAILED/UNVERIFIED= and =CLEAR/FINDINGS/UNVERIFIED= |
+| Parallel group | PG-02 |
+| Integration order | 1 |
+| Targeted validation | body word count <= 800; grep confirms both tier strings and both security strings are documented as emitted by lead; grep confirms no mention of =remediator=, =summary=, =docs=, =refactorer=, =explorer= |
+
+Required content: the two-tier table, the fast escalation rule, the full pipeline,
+"findings go back to the original specialist", the Org-plan exception (sections,
+=IN_PROGRESS=/=PASSED=, mandatory per-section security, continue/stop checkpoint), the
+no-model-override rule, the no-tool-policy-bypass rule, and D-06 packet discipline.
+Removed content: the remediator block, the =eca__task= mandate, the summary step.
+
+*** WF-GLOBAL
+| Field | Value |
+|---+---|
+| Workstream ID | WF-GLOBAL |
+| Specialist | nix-home-manager |
+| Goal | Compress =AGENTS.md= to <= 550 body words per D-05 without dropping any retained rule. |
+| Owned files/modules | =modules/programs/eca/AGENTS.md= |
+| Dependencies | SEC-02 |
+| Shared interfaces | none (prose contract consumed by every agent) |
+| Parallel group | PG-02 |
+| Integration order | 2 |
+| Targeted validation | body word count <= 550; grep confirms the retained-rule keywords from D-05 are all still present; grep confirms no reference to the =summary= agent |
+
+*** WF-TIER
+| Field | Value |
+|---+---|
+| Workstream ID | WF-TIER |
+| Specialist | nix-home-manager |
+| Goal | Make =record= parse the tier marker and =verify= apply D-07 branch policy. |
+| Owned files/modules | =modules/programs/eca/_hooks.nix= |
+| Dependencies | SEC-02 (branch 4 already gone) |
+| Shared interfaces | the four marker strings; existing hook stdin/stdout JSON contract only |
+| Parallel group | PG-02 |
+| Integration order | 3 |
+| Targeted validation | =nix eval= of =eca/config.json= exits 0; manual stdin smoke test of both hook binaries under an isolated =XDG_RUNTIME_DIR= (formalised as a check in SEC-04) |
+
+Required behaviour: sticky =tier-full=; missing/malformed tier => full; missing/malformed
+security classification => =security-required=; reviewer follow-up suppressed only when
+=tier-fast= is set and =security-required= is absent. Keep =umask 077= and the existing
+=${1//[^a-zA-Z0-9_-]/_}= sanitisation of session/chat identifiers.
+
+*** Section validation
+#+begin_src sh
+nix eval --raw '.#nixosConfigurations.shitbox.config.home-manager.users.leif.xdg.configFile."eca/config.json".text'
+#+end_src
+Plus word counts for the two prompt files and =eca__editor_diagnostics= on all three
+changed files. Expected: eval exit 0, word counts within target, no new diagnostics.
+
+*** Completion evidence (fill in during implementation)
+- Verifier report: /pending/
+- Reviewer report: /pending/
+- Security report: /pending/
+- Commands run and exit statuses: /pending/
+
+** SEC-04 Hook regression check
+:PROPERTIES:
+:SECTION-ID: SEC-04
+:STATUS:   PENDING
+:NEXT:     SEC-05
+:END:
+
+- Acceptance: AC-07. Workstream: WF-CHECK. Task: WF-TCHECK.
+- Dependencies: SEC-03 PASSED (the hook contract must be final before it is pinned by a test).
+- Gates: verifier PASSED; reviewer CLEAR; security CLEAR.
+
+*** WF-CHECK
+| Field | Value |
+|---+---|
+| Workstream ID | WF-CHECK |
+| Specialist | nix-home-manager |
+| Goal | Add a flake check that drives the real hook executables with synthetic stdin and asserts the emitted JSON. |
+| Owned files/modules | new =modules/programs/eca/_workflow-check.nix=; the =eca-workflow-hooks= attribute inside =modules/perSystem/checks.nix= |
+| Dependencies | WF-TIER complete |
+| Shared interfaces | =import ./eca/_hooks.nix { inherit pkgs; }= exposing =record=, =verify=, =gitApproval=, =gate=; the stdin/stdout JSON contract. No new ECA config key. |
+| Parallel group | PG-03 |
+| Integration order | 1 |
+| Targeted validation | =nix build .#checks.x86_64-linux.eca-workflow-hooks --out-link /tmp/eca-hooks-check= exits 0 |
+
+Read =modules/programs/eca/nix-mcp/_check.nix= and the surrounding entries in
+=modules/perSystem/checks.nix:7-45= first and match that style. Required cases:
+1. fast implementation -> verifier -> *no* reviewer follow-up;
+2. full implementation -> verifier -> reviewer follow-up emitted;
+3. missing tier marker behaves as full;
+4. =Security review: required= -> security follow-up after reviewer;
+5. =Security review: not-required= -> no security follow-up;
+6. missing security classification -> fails closed to required;
+7. fast then full in one chat -> stays full;
+8. second implementation spawn resets verifier/reviewer/security markers;
+9. actor != =lead= -> no output;
+10. =follow_up_active=true= -> no output;
+11. no case emits the deleted branch-4 text.
+
+Each case runs with its own =XDG_RUNTIME_DIR= in the sandbox. The check asserts
+*follow-up policy*, never report verdicts.
+
+*** Completion evidence (fill in during implementation)
+- Verifier report: /pending/
+- Reviewer report: /pending/
+- Security report: /pending/
+- Commands run and exit statuses: /pending/
+
+** SEC-05 Roster consolidation
+:PROPERTIES:
+:SECTION-ID: SEC-05
+:STATUS:   PENDING
+:NEXT:     SEC-06
+:END:
+
+- Acceptance: AC-08, AC-09. Workstream: WF-ROSTER. Task: WF-TROSTER.
+- Dependencies: SEC-04 PASSED (the hook check must exist before =implementationAgents= changes).
+- Gates: verifier PASSED; reviewer CLEAR; security CLEAR.
+
+*** WF-ROSTER
+| Field | Value |
+|---+---|
+| Workstream ID | WF-ROSTER |
+| Specialist | nix-home-manager |
+| Goal | Delete five agent definitions and migrate every surviving reference. |
+| Owned files/modules | delete =agents/remediator.md=, =agents/summary.md=, =agents/docs.md=, =agents/refactorer.md=, =agents/explorer.md=; edit =agents/researcher.md=, =agents/architect.md=, =agents/designer.md=, =agents/debug.md=, =agents/version.md=, =agents/prreview.md=, =agents/lead.md=, =_hooks.nix=, =skills/implementation-planning/SKILL.md= |
+| Dependencies | SEC-04 |
+| Shared interfaces | =spawnableBy= frontmatter lists; =implementationAgents= regex alternation in =_hooks.nix:3= |
+| Parallel group | PG-04 |
+| Integration order | 1 |
+| Targeted validation | see below |
+
+Reference migration checklist (re-derive before editing; these are the known sites):
+- =_hooks.nix:3= =implementationAgents=: drop =refactorer=, =docs=, =remediator=.
+- =_hooks.nix= =record=: drop =summary= from the target =case= list and the =summary-invoked= reset/reset-on-architect logic.
+- =agents/researcher.md= =spawnableBy=: final list lead, architect, debug, designer, version, prreview.
+- =agents/architect.md=: replace "spawn =explorer=" with =researcher=.
+- =agents/designer.md=: replace =explorer= with =researcher= in the spawnable list and prose.
+- =agents/debug.md=, =version.md=, =prreview.md=: confirm they reference =researcher= only.
+- =agents/lead.md=: already free of removed names after SEC-03; re-confirm.
+- =skills/implementation-planning/SKILL.md:8,14=: remove the delegated-=summary= wording; keep the researcher-handoff requirement at =:13=.
+
+Do not delete any file until its reference inventory is clean.
+
+*** Section validation
+#+begin_src sh
+grep -rn 'remediator\|refactorer\|\bexplorer\b\|agents/summary\|agents/docs' modules/programs/eca modules/perSystem
+nix eval --raw '.#nixosConfigurations.shitbox.config.home-manager.users.leif.xdg.configFile."eca/config.json".text'
+nix build .#checks.x86_64-linux.eca-workflow-hooks --out-link /tmp/eca-hooks-check
+#+end_src
+Expected: the grep returns no live agent-name reference (ordinary English words such
+as "summary" or "docs" in prose are fine and must be judged, not blindly removed);
+eval exit 0; hook check exit 0.
+
+*** Completion evidence (fill in during implementation)
+- Verifier report: /pending/
+- Reviewer report: /pending/
+- Security report: /pending/
+- Commands run and exit statuses: /pending/
+
+** SEC-06 Prompt compression and integrated validation
+:PROPERTIES:
+:SECTION-ID: SEC-06
+:STATUS:   PENDING
+:NEXT:     none
+:END:
+
+- Acceptance: AC-09, AC-10, AC-11. Workstreams: WF-PROMPTS, WF-INTEGRATE.
+- Dependencies: SEC-05 PASSED.
+- Gates: verifier PASSED; reviewer CLEAR; security CLEAR.
+
+*** WF-PROMPTS
+| Field | Value |
+|---+---|
+| Workstream ID | WF-PROMPTS |
+| Specialist | nix-home-manager |
+| Goal | Apply the remaining D-05 word targets to the surviving agent prompts. |
+| Owned files/modules | =agents/architect.md=, =designer.md=, =verifier.md=, =reviewer.md=, =debug.md=, =version.md=, =prreview.md=, =backend.md=, =frontend.md=, =java.md=, =scala.md=, =nix-home-manager.md=, =rice-quickshell.md= (*not* =lead.md=, *not* =AGENTS.md*) |
+| Dependencies | SEC-05 |
+| Shared interfaces | verdict strings; the nine workstream fields; =Security review:= and =Workflow tier:= markers |
+| Parallel group | PG-05 |
+| Integration order | 1 |
+| Targeted validation | per-file body word counts against the D-05 table; grep confirms every "must keep" keyword survives |
+
+*** WF-INTEGRATE
+| Field | Value |
+|---+---|
+| Workstream ID | WF-INTEGRATE |
+| Specialist | nix-home-manager |
+| Goal | Validate the complete integrated change set and record the before/after measurement. Read-only with respect to other workstreams' files; request fixes from the owning workstream rather than editing. |
+| Owned files/modules | *none writable* |
+| Dependencies | WF-PROMPTS complete |
+| Shared interfaces | the requirement and evidence registers in this file |
+| Parallel group | PG-06 |
+| Integration order | 2 |
+| Targeted validation | the four commands below |
+
+#+begin_src sh
+nix fmt
+git diff --stat
+nix build .#checks.x86_64-linux.eca-workflow-hooks --out-link /tmp/eca-hooks-check
+nix flake check --keep-going
+nix build .#nixosConfigurations.shitbox.config.system.build.toplevel --out-link /tmp/eca-toplevel
+#+end_src
+
+Expected: =nix fmt= touches only files owned by this change set (if it reformats
+anything else, stop and report — do not commit unrelated formatting); all builds and
+checks exit 0; no activation is performed.
+
+AC-11 measurement: pick three comparable tasks (one obvious fast-tier change, one
+multi-file full-tier change, one read-only question), run them before and after, and
+record wall clock, spawn count, forced follow-up turns, verifier verdict, and any
+later correction. Do not claim a percentage improvement that was not measured.
+
+*** Completion evidence (fill in during implementation)
+- Verifier report: /pending/
+- Reviewer report: /pending/
+- Security report: /pending/
+- Commands run and exit statuses: /pending/
+- Measurement table: /pending/
+
+* Risks
+
+| Risk | Mitigation / detection |
+|---+---|
+| Fast tier misclassifies a change and skips review | Fail closed on any unknown condition; escalate on surprise paths, FAILED/UNVERIFIED verification, or a newly discovered shared contract. During rollout, spot-check fast diffs with the manually selected =prreview=. |
+| Dropping =variant: high= degrades =lead= orchestration quality | Observable through AC-11 (more remediation rounds, more reviewer findings). Revert is a one-line frontmatter restore per agent. |
+| =debug= on =gpt-6-luna= is too weak for hard defects | =debug= delegates the hard parts to =verifier=/=researcher=; revert is one line. |
+| Hook tier marker is forgeable by any spawn task text | The hook only *requests* gates; it never grants them. Full is sticky and missing/malformed input fails closed. Security review of SEC-03 and SEC-04 specifically examines this. |
+| Marker files mistaken for outcomes | Branch 4 deleted; =lead.md= keeps "invocation markers are not outcomes"; SEC-04 asserts no completion follow-up is ever emitted. |
+| =explorer= name collision assumption is wrong | SEC-01 settles it before SEC-05 deletes anything. If wrong, the =explorer.md= deletion is still correct (redundant role) and nothing else changes. |
+| Deleting =solo= / other entry points surprises the user | Not doing it. =solo= is kept deliberately (D-02). |
+| =nix fmt= reformats unrelated files | =git diff --stat= inspected in WF-INTEGRATE before anything is reported as done. |
+
+*Rollback:* every change in this plan is a source revert of files under
+=modules/programs/eca/= plus the one =checks.nix= attribute, followed by the SEC-06
+command set. No =flake.lock=, no live home-manager activation, no Git refs are touched
+by this work.
+
+* Handoff to =lead=
+
+- *Continuation point: SEC-01 (status PENDING, ready).*
+- Run exactly one section per pipeline pass. Before dispatching a section, set its =:STATUS:= to =IN_PROGRESS= in this file. After the section's latest verifier report ends =Overall verdict: PASSED= and its reviewer and security reports end =Overall verdict: CLEAR=, set =:STATUS:= to =PASSED=, fill the section's "Completion evidence" fields with the actual commands and report outcomes, update the matching =gates= and =evidence= entries in the register, and then ask the user whether to continue to the next section.
+- Security review is *required at every section checkpoint*, including the read-only SEC-01.
+- Planned expectations in this file are not evidence. Only returned verifier/reviewer/security reports establish outcomes; hook markers and task-tracker states never do.
+- SEC-01 is a hard gate: if =github-copilot/gpt-6-luna= or =github-copilot/gpt-6-sol= is unavailable, mark SEC-01 =BLOCKED=, report, and do not substitute a model.
+- SEC-02 through SEC-06 are =PENDING= and blocked on their listed dependencies. Sections SEC-02, SEC-03, and SEC-06 each contain workstreams that may be dispatched in a single parallel message; SEC-04 and SEC-05 are single-workstream.
+- Deferred decisions requiring a user answer *after* AC-11 measurement, not before: OQ-01 (implementation specialists =gpt-5.3-codex= -> =gpt-6-luna=) and OQ-02 (=security= -> =gpt-6-luna=).
