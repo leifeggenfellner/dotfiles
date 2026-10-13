@@ -27,6 +27,13 @@
 
       sharedAliases = import ./_fish-aliases.nix { inherit pkgs lib; };
 
+      # nixpkgs' pnpm-deps hash is stale (upstream FOD drift); drop once fixed upstream.
+      typescript-language-server = pkgs.typescript-language-server.overrideAttrs (oa: {
+        pnpmDeps = oa.pnpmDeps.overrideAttrs {
+          outputHash = "sha256-xR/EF60lVBsITKgH7wCM2wHM46PFQevD51KfCENSUH4=";
+        };
+      });
+
       # VS Code only tools
       vscodeOnlyTools = with pkgs; [
         # Language servers and formatters
@@ -43,7 +50,7 @@
         # JavaScript/TypeScript ecosystem
         nodejs_24
         typescript
-        typescript-language-server
+        typescript-language-server # local override above
         vue-language-server
 
         # Fonts for proper icon rendering
