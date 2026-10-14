@@ -78,9 +78,14 @@
         serial = "1H35421YRD";
         resolution = "2560x1440@60";
       };
-      dellU2722DE = {
-        desc = "Dell Inc. DELL U2722DE";
-        serial = "8DGTT83";
+      homeOffice = {
+        desc = "HP Inc. HP 527pu";
+        serial = "1H361409R2";
+        resolution = "2560x1440@60";
+      };
+      homeOfficeLeft = {
+        desc = "HP Inc. HP 527pu";
+        serial = "1H361409TR";
         resolution = "2560x1440@60";
       };
       familyHome = { desc = "Samsung Electric Company C34J79x"; serial = "HTRM900265"; resolution = "3440x1440@60"; };
@@ -90,16 +95,22 @@
       enable = true;
       fallbackProfile = "laptop_only";
       profiles = {
-        home_office.outputs = [
-          { monitor = "workRight"; position = "0x0"; transform = 1; workspaces = [ 2 4 5 ]; }
-          { monitor = "work"; position = "1440x0"; primary = true; workspaces = [ 1 3 ]; }
-          { monitor = "laptop"; position = "4000x0"; workspaces = [ 6 7 ]; }
-        ];
-        work.outputs = [
-          { monitor = "laptop"; position = "0x0"; workspaces = [ 2 4 5 ]; }
-          { monitor = "work"; position = "1920x0"; primary = true; workspaces = [ 1 6 ]; }
-          { monitor = "workRight"; position = "4480x0"; workspaces = [ 3 7 ]; }
-        ];
+        home_office = {
+          autoDetect = true;
+          outputs = [
+            { monitor = "homeOfficeLeft"; position = "0x0"; transform = 1; workspaces = [ 2 4 5 ]; }
+            { monitor = "homeOffice"; position = "1440x0"; primary = true; workspaces = [ 1 3 ]; }
+            { monitor = "laptop"; position = "4000x0"; workspaces = [ 6 7 ]; }
+          ];
+        };
+        work = {
+          autoDetect = true;
+          outputs = [
+            { monitor = "laptop"; position = "0x0"; workspaces = [ 2 4 5 ]; }
+            { monitor = "work"; position = "1920x0"; primary = true; workspaces = [ 1 6 ]; }
+            { monitor = "workRight"; position = "4480x0"; workspaces = [ 3 7 ]; }
+          ];
+        };
         family_home = {
           autoDetect = true;
           outputs = [
@@ -113,13 +124,6 @@
             { monitor = "laptop"; position = "0x0"; primary = true; workspaces = [ 1 2 3 4 5 6 7 8 9 10 ]; }
           ];
         };
-        dell_zen_temp = {
-          autoDetect = false;
-          outputs = [
-            { monitor = "laptop"; position = "0x0"; scale = "1"; primary = true; workspaces = [ 1 2 4 5 6 7 8 9 10 ]; }
-            { monitor = "dellU2722DE"; position = "1920x0"; workspaces = [ 3 ]; }
-          ];
-        };
       };
       appRoutes = {
         vscode = { class = "^(code|Code)$"; workspace = 1; };
@@ -131,7 +135,7 @@
       };
     };
 
-    lockMonitorPriority = [ "work" "familyHome" "laptop" ];
+    lockMonitorPriority = [ "work" "homeOffice" "familyHome" "laptop" ];
   };
 
   rice = {
