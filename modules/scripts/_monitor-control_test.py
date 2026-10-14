@@ -313,6 +313,10 @@ class MonitorControlTests(unittest.TestCase):
         )
         self.assertTrue(all(argv[1] == "eval" for kind, argv in plan["commands"]))
 
+    def test_monitor_command_clears_earlier_disabled_rule(self):
+        _, argv = monitor_command("DP-7", "2560x1440@60", "0x0", transform=1)
+        self.assertIn("disabled = false", argv[2])
+
     def test_native_plan_disables_unselected_monitor(self):
         monitors = [LAPTOP, HP_LEFT, HP_CENTER, SAMSUNG]
         plan = monitor_control.build_plan(

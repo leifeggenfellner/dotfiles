@@ -109,8 +109,10 @@ def eval_command(expression):
 
 def monitor_command(name, mode, position, scale=1.0, transform=0):
     name = validate_output_name(name)
+    # Rules merge per output, so an earlier disabled rule sticks unless cleared.
     fields = {
         "output": name,
+        "disabled": False,
         "mode": mode,
         "position": position,
         "scale": float(scale),
