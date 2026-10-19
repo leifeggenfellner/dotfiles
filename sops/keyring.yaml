@@ -1,0 +1,35 @@
+password: ENC[AES256_GCM,data:lvEHPIy6FlgSjzzOUDHFkQ==,iv:ckQUYTZTHyaEnvAAJEuXbJED4ayZJA93Ni8ITebq7Gc=,tag:C1BPQLpPIxbWT31x8tbcmg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBNQTdjNW5xaU1peEpTSk9V
+            OU15UUFLVTg0aUdTelpQU1JWVmRjMlNYSDFZCjU5RXY4K3RPRjdmTHhuYWswSUZI
+            b2hTRDc3ekp1bjZ0c1p5dC9vOUc3RXcKLS0tIC91eGg4VitLZVhJaENRb2s5d0dV
+            eWlESkhkQXN3SGl2U1Z3ZkNHNXZIaU0KJdgepGq4LOZ/vvv9klIDg2brYnqzwzRu
+            O0+T4ynuP1PpB8EqxLfKi4O0kd8ZandX5FtwSl7K3JrW6hTWCmvhVQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1ye6uhtc3dr3gnmexwcke9nplmjp56eaqzckt60rl4j9tmzlg6vxq070ywz
+    lastmodified: "2026-10-19T07:49:41Z"
+    mac: ENC[AES256_GCM,data:bSmK76P3ugE8zwVgLWR3qIt/wEP4YguwDhWzGhbFzzyDl7Sg9q8yUgu5nipvcN1Anl11XzpgHlo3EXureTHhrRsBPvuxfTXPiHu/qisAoCqthK6NaqYj4eQEVywGmZ68wjbL9QP/uD48S1NIAAaGIj2TZvAAfprDyDSg84hRV6s=,iv:7S6ZimXF3UM4qKKx5J3M1VmY4NqfRdujU5R8yvFPtN0=,tag:YwG11efmPEKPm7msGlrsHw==,type:str]
+    pgp:
+        - created_at: "2026-10-19T07:47:34Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hQGMAwj/YoxhkEsBAQv+NWfLraVNn+VcW/+ehY8uPRxr13UtqYj8l/+eoAul9jt2
+            5KIo4nDgFtJgd+0uhzGcdRqlHyMnXn+kNvNxU+Moi+Hgbha6GFw2HhGNVXYixjh1
+            VEmFhW09RaIa1UbHjybRuL4adXt4mGcMEMbJWVbJXjmeFyshWu9eWfA5kKG0Vv4u
+            Au7lfcYxulE0kFvplJ1klOMzVzk9/PayDZQFFU5qfRMymkpxHL7Ug5COvQYfxF9k
+            9Jr5XAB8MP5kwYCs98owlF7Fc1foQUHT/SU09YGr//WC1j/9JatzvTvgJviXhM1u
+            fAzgXWTT4i1YUAxGCgk/syItbeGYpJBXN075qeAXtjNrXOGJbJDBmbZnAeUt3HQ0
+            dDBLH0sLX351C8dYTmJAatVoDT68Q0UbImKeFQuCO/oegTzODeCTCJlYGD6GTPAr
+            rcypFw/g9/X3RJafE5C/43ylZggU26tKWBG1reGv/ioPi0ZI1h9dBhaX5jwI8BiA
+            Bm19FVusmRx9h5lcNKMJ0l4B/v6jDWq2iHkSi5VN68FoKFNGukTfYFC05i9g5RO1
+            9X4gPv0wNaWpd0RGwvAGZYPzs+pcVMyb4H23Zdi2WAmUSnxSLY+WP9xVBjqRamYE
+            oE9JrDbffJ4y5CxLogFZ
+            =Fj6m
+            -----END PGP MESSAGE-----
+          fp: 09758A4FEB8D70C8C23A983778A194310ECDA9B4
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3

@@ -28,6 +28,7 @@ _: {
           secrets = {
             "ssh/id_ed25519" = userSecret ../../sops/ssh.yaml "id_ed25519";
             "github/token" = userSecret ../../sops/github.yaml "token";
+            "keyring/password" = userSecret ../../sops/keyring.yaml "password";
           };
         };
       };
