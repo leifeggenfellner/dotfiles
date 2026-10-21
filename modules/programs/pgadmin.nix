@@ -1,10 +1,9 @@
 _: {
   flake.homeModules.programs-pgadmin =
-    {
-      osConfig,
-      pkgs,
-      lib,
-      ...
+    { osConfig
+    , pkgs
+    , lib
+    , ...
     }:
     let
       inherit (osConfig.environment) desktop;
