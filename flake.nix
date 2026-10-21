@@ -69,7 +69,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
+      # Pinned to 1.23.2b: upstream's 1.23.3b bump has a wrong tarball hash
+      # (youwen5/zen-browser-flake#22, #24). Unpin once fixed upstream.
+      url = "github:youwen5/zen-browser-flake/458cd16116c362a5e92d5db6bdc3599e4e8b1f4a";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
