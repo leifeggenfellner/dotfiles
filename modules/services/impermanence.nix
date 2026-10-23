@@ -7,6 +7,9 @@ _: {
         ".cache/bloop"
         ".cache/coursier"
         ".cargo"
+        # pipx: tool venvs and the command links pointing into them.
+        ".local/bin"
+        ".local/share/pipx"
         ".m2"
         ".npm"
         ".pulumi"

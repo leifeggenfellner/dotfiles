@@ -46,6 +46,8 @@ _: {
       home = {
         inherit username homeDirectory;
         stateVersion = "26.05";
+        # Where pipx (and pip --user) put their commands.
+        sessionPath = [ "${homeDirectory}/.local/bin" ];
       };
 
       systemd.user.startServices = "sd-switch";
