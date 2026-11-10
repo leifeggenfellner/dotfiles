@@ -30,6 +30,61 @@ Item {
     property bool sessionLocked: true
     property bool themeReady: false
 
+    // The theme (video background and all) renders on one screen only;
+    // every other output gets a plain black lock surface. RICE_LOCK_OUTPUT
+    // names it explicitly; otherwise pick the screen nearest the
+    // horizontal middle of the layout (the centre monitor when docked,
+    // the laptop panel when not).
+    readonly property string primaryScreenName: {
+        const screens = Quickshell.screens;
+        if (screens.length === 0)
+            return "";
+        const wanted = Quickshell.env("RICE_LOCK_OUTPUT") || "";
+        for (let i = 0; i < screens.length; i++) {
+            if (screens[i].name === wanted)
+                return wanted;
+        }
+        let left = Infinity;
+        let right = -Infinity;
+        for (let i = 0; i < screens.length; i++) {
+            left = Math.min(left, screens[i].x);
+            right = Math.max(right, screens[i].x + screens[i].width);
+        }
+        const mid = (left + right) / 2;
+        let best = screens[0];
+        for (let i = 1; i < screens.length; i++) {
+            const s = screens[i];
+            if (Math.abs(s.x + s.width / 2 - mid) < Math.abs(best.x + best.width / 2 - mid))
+                best = s;
+        }
+        return best.name;
+    }
+
+    // Password entry for the secondary (black) surfaces, which get
+    // keyboard focus whenever the cursor sits on their output. Mirrors
+    // the theme's doLogin through the same shared state and shim.
+    function secondaryKey(event) {
+        event.accepted = true;
+        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            if (sharedLockState.authPending || sharedLockState.password.length === 0)
+                return;
+            const password = sharedLockState.password;
+            sharedLockState.authPending = true;
+            sharedLockState.password = "";
+            shim.sddm.login(shim.userModel.lastUser, password, Math.max(0, shim.sessionModel.lastIndex));
+        } else if (event.key === Qt.Key_Escape) {
+            sharedLockState.password = "";
+        } else if (event.key === Qt.Key_Backspace) {
+            sharedLockState.password = sharedLockState.password.slice(0, -1);
+        } else if (event.text.length > 0 && event.text.charCodeAt(0) >= 0x20 && !sharedLockState.authPending) {
+            if (sharedLockState.authFailed) {
+                sharedLockState.authFailed = false;
+                sharedLockState.errorMessage = "";
+            }
+            sharedLockState.password += event.text;
+        }
+    }
+
     QtObject {
         id: sharedLockState
 
@@ -123,6 +178,10 @@ Item {
 
         surface: Component {
             WlSessionLockSurface {
+                id: lockSurface
+
+                readonly property bool primary: lockSurface.screen !== null && lockSurface.screen.name === root.primaryScreenName
+
                 color: "black"
 
                 // Absorb stray gestures.
@@ -142,7 +201,15 @@ Item {
 
                 Loader {
                     anchors.fill: parent
+                    active: lockSurface.primary
                     sourceComponent: themeComponent
+                }
+
+                Item {
+                    anchors.fill: parent
+                    visible: !lockSurface.primary
+                    focus: !lockSurface.primary
+                    Keys.onPressed: event => root.secondaryKey(event)
                 }
             }
         }
