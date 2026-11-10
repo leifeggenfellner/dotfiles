@@ -29,6 +29,10 @@ Item {
     property bool authenticated: false
     property bool sessionLocked: true
     property bool themeReady: false
+    // Set when the theme fails to reload after it has already loaded once
+    // (e.g. re-instantiated on another output after a dock unplug). From
+    // then on every output uses the black password surface instead.
+    property bool themeBroken: false
 
     // The theme (video background and all) renders on one screen only;
     // every other output gets a plain black lock surface. RICE_LOCK_OUTPUT
@@ -60,7 +64,7 @@ Item {
         return best.name;
     }
 
-    // Password entry for the secondary (black) surfaces, which get
+    // Password entry for the black fallback surfaces, which get
     // keyboard focus whenever the cursor sits on their output. Mirrors
     // the theme's doLogin through the same shared state and shim.
     function secondaryKey(event) {
@@ -166,7 +170,12 @@ Item {
             onStatusChanged: {
                 if (status === Loader.Error) {
                     console.error("Theme lockscreen: failed to load", source);
-                    root.failOpen("theme loader error");
+                    // Fail open only on the initial load; once the lock has
+                    // been up with a working theme, fail closed instead.
+                    if (root.themeReady)
+                        root.themeBroken = true;
+                    else
+                        root.failOpen("theme loader error");
                 }
             }
         }
@@ -181,6 +190,7 @@ Item {
                 id: lockSurface
 
                 readonly property bool primary: lockSurface.screen !== null && lockSurface.screen.name === root.primaryScreenName
+                readonly property bool showTheme: lockSurface.primary && !root.themeBroken
 
                 color: "black"
 
@@ -201,14 +211,14 @@ Item {
 
                 Loader {
                     anchors.fill: parent
-                    active: lockSurface.primary
+                    active: lockSurface.showTheme
                     sourceComponent: themeComponent
                 }
 
                 Item {
                     anchors.fill: parent
-                    visible: !lockSurface.primary
-                    focus: !lockSurface.primary
+                    visible: !lockSurface.showTheme
+                    focus: !lockSurface.showTheme
                     Keys.onPressed: event => root.secondaryKey(event)
                 }
             }
