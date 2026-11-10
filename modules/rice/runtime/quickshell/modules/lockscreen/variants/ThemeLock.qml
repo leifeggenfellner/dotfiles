@@ -139,6 +139,15 @@ Item {
 
             quitTimer.start();
         }
+
+        // Mirrors the theme's own handler so the fallback surfaces can
+        // retry when no theme instance is loaded; idempotent otherwise.
+        function onLoginFailed() {
+            sharedLockState.authPending = false;
+            sharedLockState.authFailed = true;
+            sharedLockState.errorMessage = "ACCESS DENIED";
+            sharedLockState.password = "";
+        }
     }
 
     Timer {
@@ -220,6 +229,32 @@ Item {
                     visible: !lockSurface.showTheme
                     focus: !lockSurface.showTheme
                     Keys.onPressed: event => root.secondaryKey(event)
+
+                    // Minimal feedback; stays fully black until there is
+                    // input or an error to show.
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 12
+                        visible: sharedLockState.password.length > 0 || sharedLockState.authPending || sharedLockState.authFailed
+
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: "\u2022".repeat(Math.min(sharedLockState.password.length, 32))
+                            color: "white"
+                            opacity: sharedLockState.authPending ? 0.4 : 0.85
+                            font.pixelSize: 28
+                            font.letterSpacing: 6
+                        }
+
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: sharedLockState.authPending ? "\u2026" : sharedLockState.errorMessage
+                            visible: text.length > 0
+                            color: sharedLockState.authPending ? "#999999" : "#e06c6c"
+                            font.pixelSize: 14
+                            font.letterSpacing: 2
+                        }
+                    }
                 }
             }
         }
