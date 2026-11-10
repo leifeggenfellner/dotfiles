@@ -24,7 +24,9 @@ _: {
 
               for status in /sys/class/drm/card*-*/status; do
                 [ -e "$status" ] || continue
-                driver="$${status%/status}/device/driver"
+                # Connectors have no driver of their own; it hangs off the
+                # parent card (card1-DP-6/.. -> card1).
+                driver="$${status%/status}/../device/driver"
                 [ -e "$driver" ] || continue
                 [ "$(basename "$(readlink -f "$driver")")" = "i915" ] && return 0
               done
