@@ -32,9 +32,14 @@ Item {
     property int lockInFlightSerial: 0
     property string _pendingLockVariant: ""
 
-    readonly property bool ambientAllowed: Theme.motion.ambient && Theme.motion.enabled && Effects.layers.length > 0 && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !PowerState.onBattery && !HyprState.anyFullscreen
+    // True while a session lock covers the desktop. Set over IPC by
+    // rice-lock-screen (which clears it when the lock process exits),
+    // so nothing behind the lock keeps rendering for hours.
+    property bool locked: false
 
-    readonly property bool idleAllowed: governor.idleHint && Theme.motion.ambient && Theme.motion.enabled && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !HyprState.anyFullscreen
+    readonly property bool ambientAllowed: Theme.motion.ambient && Theme.motion.enabled && Effects.layers.length > 0 && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !PowerState.onBattery && !HyprState.anyFullscreen && !governor.locked
+
+    readonly property bool idleAllowed: governor.idleHint && Theme.motion.ambient && Theme.motion.enabled && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !HyprState.anyFullscreen && !governor.locked
     readonly property int lockHandoffDelay: PrefsState.reduceMotion ? 0 : 90
 
     function parseToggle(value) {
@@ -82,6 +87,15 @@ Item {
         }
     }
 
+    // Pause only once the lock surface has had time to map, so the
+    // veil doesn't drop out and flash the desktop mid-handoff.
+    Timer {
+        id: lockSettleTimer
+        interval: 2000
+        repeat: false
+        onTriggered: governor.locked = true
+    }
+
     // Failsafe: if the spawned lock never actually locks (child crashed,
     // wrong PATH, etc.) the veil would otherwise linger indefinitely.
     // 8s covers even the slowest Quickshell warm-start.
@@ -112,7 +126,8 @@ Item {
                 fullscreen: HyprState.anyFullscreen,
                 idleHint: governor.idleHint,
                 idleApproaching: ShellState.idleApproaching,
-                lockInFlight: governor.lockInFlight
+                lockInFlight: governor.lockInFlight,
+                locked: governor.locked
             });
         }
         function setMode(mode: string): void {
@@ -131,6 +146,20 @@ Item {
                 governor.lockInFlight = false;
                 veilWatchdog.stop();
             }
+        }
+
+        function setLocked(v: string): void {
+            if (governor.parseToggle(v)) {
+                lockSettleTimer.restart();
+                return;
+            }
+            // Lock gone means the user is back: drop the veil state
+            // too, same as setIdleHint("off").
+            lockSettleTimer.stop();
+            governor.locked = false;
+            governor.idleHint = false;
+            governor.lockInFlight = false;
+            veilWatchdog.stop();
         }
 
         // Canonical veil-then-lock entry point. `variant` may be empty

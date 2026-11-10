@@ -282,7 +282,22 @@ _: {
           exit 0
         fi
 
-        exec ${pkgs.quickshell}/bin/quickshell --no-duplicate --path "$lock_root"
+        # A preview never takes the session lock, and a second launch exits
+        # straight away under --no-duplicate; neither should touch the
+        # shell's lock state.
+        if [ "$preview" = "1" ] || ${pkgs.procps}/bin/pgrep -f '[q]uickshell.*--path .*/lock(-theme)?[.]qml' >/dev/null 2>&1; then
+          exec ${pkgs.quickshell}/bin/quickshell --no-duplicate --path "$lock_root"
+        fi
+
+        # Tell the rice shell it sits behind a lock so ambient effects stop
+        # rendering for however long the lock is up. The EXIT trap clears it
+        # whether the lock ends by unlock, crash or signal.
+        rice_locked() {
+          ${pkgs.quickshell}/bin/quickshell -c rice ipc call ambient setLocked "$1" >/dev/null 2>&1 || true
+        }
+        trap 'rice_locked off' EXIT
+        rice_locked on
+        ${pkgs.quickshell}/bin/quickshell --no-duplicate --path "$lock_root"
       '';
     in
     {
