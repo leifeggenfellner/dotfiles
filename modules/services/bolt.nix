@@ -8,7 +8,7 @@ _: {
       # Do not toggle Thunderbolt authorization here: deauth/re-auth emits more
       # thunderbolt change events and can flap the dock before DP tunnels settle.
       services.udev.extraRules = ''
-        SUBSYSTEM=="thunderbolt", ACTION=="add", TAG+="systemd", ENV{SYSTEMD_WANTS}="thunderbolt-rescan.service"
+        SUBSYSTEM=="thunderbolt", ACTION=="add", TAG+="systemd", ENV{SYSTEMD_WANTS}+="thunderbolt-rescan.service"
       '';
 
       systemd.services.thunderbolt-rescan = {
