@@ -230,12 +230,13 @@ Item {
                     focus: !lockSurface.showTheme
                     Keys.onPressed: event => root.secondaryKey(event)
 
-                    // Minimal feedback; stays fully black until there is
-                    // input or an error to show.
+                    // Minimal feedback, only when no output shows the theme
+                    // (which already mirrors input typed here); otherwise
+                    // stays fully black.
                     Column {
                         anchors.centerIn: parent
                         spacing: 12
-                        visible: sharedLockState.password.length > 0 || sharedLockState.authPending || sharedLockState.authFailed
+                        visible: (!root.themeReady || root.themeBroken) && (sharedLockState.password.length > 0 || sharedLockState.authPending || sharedLockState.authFailed)
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
