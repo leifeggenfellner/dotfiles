@@ -18,7 +18,8 @@ import "../../services/windows"
 //   thresholds.{cpuWarn,cpuDanger}        % of one core (25 / 80)
 //   thresholds.{memoryWarnMiB,memoryDangerMiB}  (1024 / 4096)
 //   tintOpacity                           aura fill (0.08)
-// Aura colour follows load: accent.primary → state.warn → state.danger.
+// Aura colour follows the worse load: accent.primary → state.warn →
+// state.danger; each metric line is tinted by its own threshold.
 
 PanelWindow {
     id: overlay
@@ -50,13 +51,13 @@ PanelWindow {
 
     mask: Region {}
 
-    function loadLevel(w) {
+    function cpuLevel(w) {
+        return w.cpuPercent >= (thresholds.cpuDanger ?? 80) ? 2 : w.cpuPercent >= (thresholds.cpuWarn ?? 25) ? 1 : 0;
+    }
+
+    function memoryLevel(w) {
         const mib = w.memoryBytes / 1048576;
-        if (w.cpuPercent >= (thresholds.cpuDanger ?? 80) || mib >= (thresholds.memoryDangerMiB ?? 4096))
-            return 2;
-        if (w.cpuPercent >= (thresholds.cpuWarn ?? 25) || mib >= (thresholds.memoryWarnMiB ?? 1024))
-            return 1;
-        return 0;
+        return mib >= (thresholds.memoryDangerMiB ?? 4096) ? 2 : mib >= (thresholds.memoryWarnMiB ?? 1024) ? 1 : 0;
     }
 
     function levelColor(level) {
@@ -98,7 +99,9 @@ PanelWindow {
                 id: aura
 
                 required property var modelData
-                readonly property int level: overlay.loadLevel(modelData)
+                readonly property int cpuLevel: overlay.cpuLevel(modelData)
+                readonly property int memoryLevel: overlay.memoryLevel(modelData)
+                readonly property int level: Math.max(cpuLevel, memoryLevel)
                 readonly property color tone: overlay.levelColor(level)
                 readonly property bool compact: width < 260 || height < 150
 
@@ -161,14 +164,14 @@ PanelWindow {
 
                         Text {
                             text: overlay.metric("cpu", "CPU", overlay.formatCpu(aura.modelData.cpuPercent))
-                            color: aura.level > 0 ? aura.tone : Theme.colors.fg.primary
+                            color: aura.cpuLevel > 0 ? overlay.levelColor(aura.cpuLevel) : Theme.colors.fg.primary
                             font.family: Theme.typography.families.mono
                             font.pointSize: Theme.typography.sizes.small
                         }
 
                         Text {
                             text: overlay.metric("memory", "RSS", overlay.formatBytes(aura.modelData.memoryBytes))
-                            color: aura.level > 0 ? aura.tone : Theme.colors.fg.primary
+                            color: aura.memoryLevel > 0 ? overlay.levelColor(aura.memoryLevel) : Theme.colors.fg.primary
                             font.family: Theme.typography.families.mono
                             font.pointSize: Theme.typography.sizes.small
                         }
