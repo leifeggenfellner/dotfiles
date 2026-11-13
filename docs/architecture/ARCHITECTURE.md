@@ -99,7 +99,8 @@ theme plugins → injected services + mount-provided theme/motion facades
    only by `rice-switch` and read/watched by `core/ManifestLoader` as manifest-
    resolution input (D-018); `prefs.json` is written only by the `PrefsState`
    service and read by `rice-switch` at switch time (D-019) and read-only by
-   the terminal consumers `rice-query`/`rice-terminal` (D-042). Nix defines
+   the terminal consumers `rice-query`/`rice-terminal` (D-042), which request
+   writes only through the `prefs claimDaily` IPC. Nix defines
    defaults; state files hold user drift; nothing else is mutable.
 
 ## Event flow

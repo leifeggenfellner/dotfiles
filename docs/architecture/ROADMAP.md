@@ -738,6 +738,10 @@ through one read-only adapter, and the daily tarot draw shows up in fish.
 - ✅ Tarot card catalog moved from `TarotDraw.qml` to
   `widgets.tarotDraw.settings.cards` (with stable ids); the plugin records
   `{ date, id, index }` and still reads the legacy `card` index.
+- ✅ Auto draw: with `greeting.daily.autoDraw`, the first terminal of the day
+  claims a card through `prefs claimDaily` IPC (`modules/prefs/PrefsIpc.qml` →
+  `PrefsState.claimDaily`, first writer per day wins); the dashboard shows the
+  same card. Without a running shell nothing is written.
 - ✅ LOTM wires the greeting to the tarot record ("Today's omen · XVIII · The
   Moon — …", or "The cards are still face-down…") and "Unknown incantation:
   <cmd>". Cyberpunk is unconfigured and keeps fish defaults.

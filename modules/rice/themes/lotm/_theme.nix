@@ -384,6 +384,7 @@ in
       terminal.settings = {
         greeting.daily = {
           record = "extras.tarotDraw.daily";
+          autoDraw = true;
           catalog = "widgets.tarotDraw.settings.cards";
           format = "Today's omen · {sequence} · {name} — {phrase}";
           pendingLabel = "The cards are still face-down under the gray fog.";

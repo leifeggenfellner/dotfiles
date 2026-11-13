@@ -20,7 +20,8 @@ import Quickshell.Io
 //   commands: recordWallpaper(theme, path),
 //             setReduceMotion(on), setAmbientMode(mode),
 //             setSoundMuted(on), setDoNotDisturb(on),
-//             setExtra(namespace, key, value)
+//             setExtra(namespace, key, value),
+//             claimDaily(namespace, key, record) → effective record
 
 Item {
     id: prefs
@@ -86,6 +87,19 @@ Item {
         else
             next.extras[namespace][key] = value;
         _writeData(next);
+    }
+
+    // First writer per day wins: records `record` (which must carry a
+    // `date` string) only if the stored extra is not already for that date.
+    // Returns the record in effect afterwards, or null when invalid (D-042).
+    function claimDaily(namespace, key, record) {
+        if (!record || typeof record.date !== "string" || record.date.length === 0)
+            return null;
+        const current = extra(namespace, key, null);
+        if (current && current.date === record.date)
+            return current;
+        setExtra(namespace, key, record);
+        return extra(namespace, key, null);
     }
 
     function _writeMotion(key, value) {

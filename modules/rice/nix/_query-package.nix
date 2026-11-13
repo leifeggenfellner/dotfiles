@@ -119,6 +119,7 @@ let
       echo "Usage: rice-terminal (greeting | command-not-found <command>)"
     }
 
+    quickshell="''${RICE_QUICKSHELL:-${pkgs.quickshell}/bin/quickshell}"
     color=1
     [ -t 1 ] && [ -z "''${NO_COLOR:-}" ] || color=0
 
@@ -152,22 +153,47 @@ let
         # configure a greeting, so unconfigured themes never touch them.
         prefs_source=/dev/null
         [ ! -r "$prefs_file" ] || prefs_source="$prefs_file"
-        # Daily record ({date, id?, index?}) from prefs, resolved against a
-        # manifest catalog by id, then by position.
-        render '
-          ($settings.greeting.daily // empty) as $daily |
-          ($prefs_raw | if test("^\\s*$") then {} else fromjson end
-            | getpath($daily.record | segments)) as $record |
-          ($manifest | getpath($daily.catalog | segments) // []) as $catalog |
-          (if ($record | type) == "object" and $record.date == $today then
-            (if $record.id != null then ([$catalog[] | select(.id == $record.id)] | first) else null end)
-            // (($record.index // $record.card) as $i
-                | if ($i | type) == "number" and $i >= 0 and $i < ($catalog | length) then $catalog[$i] else null end)
-          else null end) as $entry |
-          (if $entry != null then ($daily.format // "{name}") | fill($entry)
-           else ($daily.pendingLabel // empty) end) as $line |
-          paint as $on | $on + $line + (if $on == "" then "" else "\u001b[0m" end)
-        ' --rawfile prefs_raw "$prefs_source" --arg today "$(${pkgs.coreutils}/bin/date +%F)" ;;
+        today="$(${pkgs.coreutils}/bin/date +%F)"
+        # Daily record ({date, id?, index?}) from prefs (or an IPC-confirmed
+        # override), resolved against a manifest catalog by id, then by
+        # position. Emits `line<TAB>text`, or `draw<TAB>ns<TAB>key<TAB>json`
+        # when autoDraw may claim today's record under extras.<ns>.<key>.
+        greeting_pass() {
+          render '
+            def painted($line): paint as $on | $on + $line + (if $on == "" then "" else "\u001b[0m" end);
+            ($settings.greeting.daily // empty) as $daily |
+            (if $override != null then $override
+             else ($prefs_raw | if test("^\\s*$") then {} else fromjson end
+               | getpath($daily.record | segments)) end) as $record |
+            ($manifest | getpath($daily.catalog | segments) // []) as $catalog |
+            (if ($record | type) == "object" and $record.date == $today then
+              (if $record.id != null then ([$catalog[] | select(.id == $record.id)] | first) else null end)
+              // (($record.index // $record.card) as $i
+                  | if ($i | type) == "number" and $i >= 0 and $i < ($catalog | length) then $catalog[$i] else null end)
+            else null end) as $entry |
+            ($daily.record | segments) as $path |
+            if $entry != null then "line\t" + painted(($daily.format // "{name}") | fill($entry))
+            elif $allowDraw == 1 and $daily.autoDraw == true and ($catalog | length) > 0
+              and ($path | length) == 3 and $path[0] == "extras" then
+              ($seed % ($catalog | length)) as $i |
+              "draw\t\($path[1])\t\($path[2])\t"
+                + ({date: $today, id: $catalog[$i].id, index: $i} | with_entries(select(.value != null)) | tojson)
+            else "line\t" + painted($daily.pendingLabel // empty) end
+          ' --rawfile prefs_raw "$prefs_source" --arg today "$today" \
+            --argjson override "$1" --argjson allowDraw "$2" --argjson seed "$RANDOM"
+        }
+        out="$(greeting_pass null 1)"
+        if [[ "$out" == draw$'\t'* ]]; then
+          # PrefsState is the sole prefs writer: ask the running shell to
+          # claim the record (first writer per day wins). Without a shell
+          # the greeting falls back to the pending label.
+          IFS=$'\t' read -r _ claim_ns claim_key claim_record <<< "$out"
+          effective="$(${pkgs.coreutils}/bin/timeout 2 "$quickshell" -c rice ipc call prefs claimDaily \
+            "$claim_ns" "$claim_key" "$claim_record" 2>/dev/null)" || effective=""
+          "$jq" -e 'type == "object"' <<< "$effective" > /dev/null 2>&1 || effective=null
+          out="$(greeting_pass "$effective" 0)"
+        fi
+        printf '%s\n' "''${out#line$'\t'}" ;;
       command-not-found)
         [ "$#" -eq 1 ] || fail "command-not-found takes exactly one command"
         resolve_manifest

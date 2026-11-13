@@ -13,6 +13,7 @@ import "./modules/switcher"
 import "./modules/wallpapers"
 import "./modules/debug"
 import "./modules/lore"
+import "./modules/prefs"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -31,6 +32,8 @@ ShellRoot {
     NotificationIpc {}
 
     WallpaperIpc {}
+
+    PrefsIpc {}
 
     AmbientController {}
 

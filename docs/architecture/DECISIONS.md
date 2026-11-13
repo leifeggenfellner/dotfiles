@@ -709,6 +709,13 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   replaces fish's unknown-command line. Themes without these settings produce
   no output and exit 1, so fish falls back to its defaults. The fish greeting
   appends after other modules' greeting via `lib.mkAfter`.
+- `greeting.daily.autoDraw` lets the terminal draw when no record exists for
+  today (record path must be `extras.<ns>.<key>`). The terminal never writes
+  prefs itself: it proposes `{ date, id, index }` over the narrow
+  `prefs claimDaily <ns> <key> <json>` IPC, `PrefsState.claimDaily` stores it
+  only if the stored record is not already for that date (first writer per day
+  wins), and the terminal renders whatever record comes back. No running shell
+  → no write, pending label.
 - Theme-authored paths are the one sanctioned cross-widget read: a theme may
   point `greeting.daily.catalog` at another widget's settings (LOTM points it at
   `widgets.tarotDraw.settings.cards`). The consumer stays theme-blind; the
