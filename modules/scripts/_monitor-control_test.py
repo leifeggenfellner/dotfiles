@@ -407,6 +407,32 @@ class MonitorControlTests(unittest.TestCase):
         self.assertTrue(monitor_control.is_monitor_event("monitoraddedv2>>1,DP-4,desc"))
         self.assertFalse(monitor_control.is_monitor_event("workspace>>2"))
         self.assertFalse(monitor_control.is_monitor_event("monitoraddedlater>>DP-4"))
+        self.assertTrue(monitor_control.is_config_reload_event("configreloaded>>"))
+        self.assertFalse(monitor_control.is_config_reload_event("configreloadedx>>"))
+        self.assertFalse(monitor_control.is_monitor_event("configreloaded>>"))
+
+    def test_config_reload_reapplies_profile_and_routes(self):
+        scheduled = []
+
+        class Timer:
+            def cancel(self):
+                pass
+
+        def schedule_later(delay, callback):
+            scheduled.append(delay)
+            return Timer()
+
+        daemon = monitor_control.MonitorDaemon(CONFIG, schedule_later=schedule_later)
+        daemon.routes_applied = True
+        daemon.handle_event("workspace>>2\n")
+        self.assertEqual(scheduled, [])
+        self.assertTrue(daemon.routes_applied)
+        daemon.handle_event("monitoradded>>DP-4\n")
+        self.assertEqual(len(scheduled), 1)
+        self.assertTrue(daemon.routes_applied)
+        daemon.handle_event("configreloaded>>\n")
+        self.assertEqual(len(scheduled), 2)
+        self.assertFalse(daemon.routes_applied)
 
 
 class MonitorControlAsyncTests(unittest.IsolatedAsyncioTestCase):

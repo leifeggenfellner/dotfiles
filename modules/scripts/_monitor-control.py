@@ -319,6 +319,10 @@ def is_monitor_event(line):
     }
 
 
+def is_config_reload_event(line):
+    return line.partition(">>")[0] == "configreloaded"
+
+
 def desired_output(config, output, found):
     identity = config["monitors"][output["monitor"]]
     current = found[output["monitor"]]
@@ -693,6 +697,16 @@ class MonitorDaemon:
         writer.close()
         await writer.wait_closed()
 
+    def handle_event(self, line):
+        if is_config_reload_event(line):
+            # A reload (e.g. a rebuild rewriting hyprland.lua) drops every
+            # runtime monitor, workspace and window rule, so outputs fall
+            # back to auto scale; apply the whole plan, routes included.
+            self.routes_applied = False
+            self.schedule_reconcile()
+        elif is_monitor_event(line):
+            self.schedule_reconcile()
+
     async def watch_events(self):
         delay = 0.25
         while True:
@@ -712,8 +726,7 @@ class MonitorDaemon:
                 self.routes_applied = False
                 self.schedule_reconcile(0)
                 while line := await reader.readline():
-                    if is_monitor_event(line.decode(errors="replace")):
-                        self.schedule_reconcile()
+                    self.handle_event(line.decode(errors="replace"))
                 writer.close()
                 await writer.wait_closed()
             except (ConnectionError, FileNotFoundError, OSError) as error:
