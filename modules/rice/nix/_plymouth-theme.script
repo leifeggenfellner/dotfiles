@@ -1,0 +1,159 @@
+// Rice boot splash (D-044). Generated per theme by _plymouth-theme.nix:
+// Placeholders are replaced with theme colours (as "r, g, b" floats) and copy.
+// A sigil fades in through drifting fog, an ink ring fills with boot
+// progress, and passphrase/question prompts are drawn under the sigil.
+
+Window.SetBackgroundTopColor(@bgTop@);
+Window.SetBackgroundBottomColor(@bgBottom@);
+
+W = Window.GetWidth();
+H = Window.GetHeight();
+unit = Math.Min(W, H);
+font = "@font@";
+ring_frames = @ringFrames@;
+
+// Sigil and its glow share one padded canvas, so they scale together.
+sigil_size = Math.Int(unit * 0.34);
+sigil_x = Math.Int(W / 2 - sigil_size / 2);
+sigil_y = Math.Int(H * 0.44 - sigil_size / 2);
+
+glow = Sprite(Image("glow.png").Scale(sigil_size, sigil_size));
+glow.SetPosition(sigil_x, sigil_y, 9);
+glow.SetOpacity(0);
+
+sigil = Sprite(Image("sigil.png").Scale(sigil_size, sigil_size));
+sigil.SetPosition(sigil_x, sigil_y, 10);
+sigil.SetOpacity(0);
+
+// Ink ring: pre-rendered frames, centred on the sigil.
+ring_size = Math.Int(sigil_size * 1.08);
+for (i = 0; i < ring_frames; i++)
+  ring_image[i] = Image("ring-" + i + ".png").Scale(ring_size, ring_size);
+ring = Sprite(ring_image[0]);
+ring.SetPosition(Math.Int(W / 2 - ring_size / 2), Math.Int(sigil_y + sigil_size / 2 - ring_size / 2), 8);
+ring.SetOpacity(0);
+
+// Two fog banks drifting against each other along the floor.
+fog_image = Image("fog.png").Scale(Math.Int(W * 1.6), Math.Int(H * 0.55));
+fog_low = Sprite(fog_image);
+fog_low.SetPosition(Math.Int(-W * 0.3), Math.Int(H * 0.45), 5);
+fog_low.SetOpacity(0);
+fog_high = Sprite(fog_image);
+fog_high.SetPosition(Math.Int(-W * 0.3), Math.Int(H * 0.32), 4);
+fog_high.SetOpacity(0);
+
+global.tick = 0;
+global.progress = 0;
+global.shown = 0;
+global.prompting = 0;
+
+fun refresh_callback() {
+  global.tick = tick + 1;
+  fade = Math.Min(tick / 120, 1);
+  breath = Math.Sin(tick / 45);
+
+  sigil.SetOpacity(fade * (0.88 + 0.12 * breath) * (1 - 0.45 * prompting));
+  glow.SetOpacity(fade * (0.45 + 0.25 * breath));
+  fog_low.SetX(Math.Int(-W * 0.3 + Math.Sin(tick / 700) * W * 0.22));
+  fog_low.SetOpacity(fade * 0.55);
+  fog_high.SetX(Math.Int(-W * 0.3 - Math.Sin(tick / 900 + 1.3) * W * 0.18));
+  fog_high.SetOpacity(fade * 0.28);
+
+  // Boot progress jumps; the ink seeps toward it instead.
+  global.shown = shown + (progress - shown) * 0.04;
+  frame = Math.Int(Math.Clamp(shown, 0, 1) * (ring_frames - 1));
+  ring.SetImage(ring_image[frame]);
+  ring.SetOpacity(fade * 0.9);
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+fun boot_progress_callback(duration, value) {
+  if (value > progress)
+    global.progress = value;
+}
+Plymouth.SetBootProgressFunction(boot_progress_callback);
+
+// ── Prompts ─────────────────────────────────────────────────
+// The theme's label sits above the real prompt text, never instead of it.
+prompt_y = Math.Int(sigil_y + sigil_size + unit * 0.06);
+
+label_sprite = Sprite();
+prompt_sprite = Sprite();
+entry_sprite = Sprite();
+bullet_image = Image("bullet.png");
+bullet_size = Math.Max(Math.Int(unit * 0.014), 8);
+bullet_image = bullet_image.Scale(bullet_size, bullet_size);
+max_bullets = 32;
+
+fun place_centered(sprite, image, y) {
+  sprite.SetImage(image);
+  sprite.SetPosition(Math.Int(W / 2 - image.GetWidth() / 2), y, 20);
+  sprite.SetOpacity(1);
+}
+
+fun show_prompt(prompt) {
+  global.prompting = 1;
+  label = Image.Text("@promptLabel@", @labelColor@, 1, font + " 16");
+  place_centered(label_sprite, label, prompt_y);
+  text = Image.Text(prompt, @textColor@, 1, font + " 13");
+  place_centered(prompt_sprite, text, Math.Int(prompt_y + label.GetHeight() + unit * 0.012));
+  return Math.Int(prompt_y + label.GetHeight() + text.GetHeight() + unit * 0.035);
+}
+
+fun hide_bullets() {
+  for (i = 0; i < max_bullets; i++)
+    if (bullet_sprite[i])
+      bullet_sprite[i].SetOpacity(0);
+}
+
+fun display_password_callback(prompt, bullets) {
+  y = show_prompt(prompt);
+  entry_sprite.SetOpacity(0);
+  count = Math.Min(bullets, max_bullets);
+  gap = Math.Int(bullet_size * 0.7);
+  row = count * bullet_size + Math.Max(count - 1, 0) * gap;
+  for (i = 0; i < max_bullets; i++) {
+    // Function-level assignments are local in Plymouth script.
+    if (!bullet_sprite[i])
+      global.bullet_sprite[i] = Sprite(bullet_image);
+    if (i < count) {
+      bullet_sprite[i].SetPosition(Math.Int(W / 2 - row / 2 + i * (bullet_size + gap)), y, 20);
+      bullet_sprite[i].SetOpacity(1);
+    } else {
+      bullet_sprite[i].SetOpacity(0);
+    }
+  }
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_question_callback(prompt, entry) {
+  y = show_prompt(prompt);
+  hide_bullets();
+  place_centered(entry_sprite, Image.Text(entry + "_", @textColor@, 1, font + " 13"), y);
+}
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+
+fun display_normal_callback() {
+  global.prompting = 0;
+  label_sprite.SetOpacity(0);
+  prompt_sprite.SetOpacity(0);
+  entry_sprite.SetOpacity(0);
+  hide_bullets();
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+// ── Messages (fsck, systemd notices) ────────────────────────
+message_sprite = Sprite();
+
+fun message_callback(text) {
+  image = Image.Text(text, @mutedColor@, 1, font + " 11");
+  message_sprite.SetImage(image);
+  message_sprite.SetPosition(Math.Int(W / 2 - image.GetWidth() / 2), Math.Int(H * 0.92), 20);
+  message_sprite.SetOpacity(1);
+}
+Plymouth.SetMessageFunction(message_callback);
+
+fun hide_message_callback(text) {
+  message_sprite.SetOpacity(0);
+}
+Plymouth.SetHideMessageFunction(hide_message_callback);

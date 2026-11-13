@@ -468,6 +468,15 @@ in
     }
   ];
 
+  # Boot splash (D-044), applied at rebuild for the configured theme: the
+  # Fool sigil rises through the gray fog. The label sits above systemd's
+  # real passphrase prompt, never in place of it.
+  integration.boot = {
+    sigil = ./assets/pathways/fool.svg;
+    promptLabel = "The Threshold asks";
+    font = ./lockscreen/lotm/font/Cinzel-Bold.ttf;
+  };
+
   # Legacy palette bridge (D-012): fills the repo's classic palette
   # key space so GTK/Qt/hyprlock/Hyprland recolor from this theme.
   # Structural keys derive from tokens; chromatic extras are

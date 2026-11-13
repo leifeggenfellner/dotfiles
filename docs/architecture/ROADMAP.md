@@ -775,6 +775,31 @@ real PID, CPU, memory, process count, and workspace.
   core while open; after close `updatesActive` is false, no windows are held,
   and no `rice-inspector` layer remains; no QML warnings from the new files.
 
+## Phase 31 — Boot splash (the Threshold) + console palette ✅
+
+Concretized as D-044 (issues #68, #70): the LOTM build boots through the
+gray fog and its TTYs speak in parchment and umber.
+
+- ✅ `integration.boot` (sigil, promptLabel, font) validated by
+  `mkThemeManifest` and kept out of the runtime manifest; Cyberpunk's
+  manifest is byte-identical.
+- ✅ `_plymouth-theme.nix` + `_plymouth-theme.script`: generated script
+  theme with sigil, glow, drifting fog, 60-frame ink ring, themed
+  passphrase/question/message callbacks.
+- ✅ `rice-boot` NixOS module: Plymouth theme and font for opted-in themes,
+  `console.colors` from `palette.legacy` for every rice theme; follows
+  `rice.theme` and specialisations. LOTM gets the Fool sigil, "The Threshold
+  asks", and Cinzel; Cyberpunk keeps `nixos-bgrt` with its own palette.
+- ✅ `rice-boot` flake check: 16-colour palette contrast for every bundled
+  theme, complete splash build output.
+- Verified: QEMU VM (virtio-gpu, systemd initrd) boots the LOTM splash; a
+  stand-in `systemd-ask-password` unit shows the themed prompt, renders one
+  bullet per typed character, and unlocks with the typed passphrase; the
+  console shows all 16 colours on the LOTM background; `rice-lint`,
+  `nix flake check`, shitbox and stickytop builds.
+- Pending: a real boot on shitbox (stickytop has rice disabled, so it is
+  unchanged).
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

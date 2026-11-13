@@ -127,6 +127,11 @@ and exposes it exclusively through the `Theme` facade.
     qt = { style; };
     cursor = { name; size; };
     fonts = { packages = [ ]; };
+    boot = {                      # optional (D-044); never copied into manifest JSON
+      sigil = ./assets/<file>.svg;   # required: single-colour SVG, recoloured to accent.primary
+      promptLabel = "<copy>";        # optional: shown above the real passphrase prompt
+      font = ./<file>.ttf;           # optional: Plymouth prompt font
+    };
   };
 }
 ```

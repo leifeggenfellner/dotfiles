@@ -123,9 +123,28 @@ let
     ++ lib.optionals (theme ? integration) (
       [
         (checkClosed "integration"
-          [ "gtk" "qt" "cursor" "fonts" ]
+          [ "gtk" "qt" "cursor" "fonts" "boot" ]
           theme.integration)
       ]
+      ++ lib.optionals (theme.integration ? boot) (
+        let
+          boot = theme.integration.boot;
+          file = key: suffixes:
+            let v = boot.${key}; in
+            if !(builtins.isPath v) then fail "integration.boot.${key} must be a path"
+            else if !(builtins.pathExists v) then fail "integration.boot.${key} does not exist: ${toString v}"
+            else if !(lib.any (s: lib.hasSuffix s (lib.toLower (toString v))) suffixes)
+            then fail "integration.boot.${key} must be one of ${lib.concatStringsSep " " suffixes}"
+            else true;
+        in
+        [
+          (checkClosed "integration.boot" [ "sigil" "promptLabel" "font" ] boot)
+          (if boot ? sigil then file "sigil" [ ".svg" ] else fail "integration.boot.sigil is required")
+          (if !(boot ? promptLabel) || builtins.isString boot.promptLabel then true
+          else fail "integration.boot.promptLabel must be a string")
+        ]
+        ++ lib.optional (boot ? font) (file "font" [ ".ttf" ".otf" ])
+      )
       ++ lib.optionals (theme.integration ? gtk) [
         (checkClosed "integration.gtk" [ "theme" "iconTheme" ] theme.integration.gtk)
       ]
@@ -415,7 +434,11 @@ let
     })
     rasterize);
 
-  manifest = theme // {
+  # integration.boot is rebuild-time only (D-044): the boot module reads
+  # it from _theme.nix, so its paths never land in the runtime manifest.
+  integration = removeAttrs (theme.integration or { }) [ "boot" ];
+
+  manifest = removeAttrs theme [ "integration" ] // lib.optionalAttrs (integration != { }) { inherit integration; } // {
     inherit tokens;
     inherit plugins;
     assets = (removeAttrs (theme.assets or { }) [ "rasterize" "lockscreenVariant" ]) // {

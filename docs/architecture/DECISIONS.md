@@ -757,6 +757,42 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   provide, so the design makes polling strictly user-held and the surface
   strictly passive.
 
+### D-044 — Boot splash and console palette are rebuild-time theme surfaces
+
+- Date: 2026-11-13 · Status: active
+- NixOS module `rice-boot` (`modules/rice/nix/boot.nix`) dresses what runs
+  before the desktop from the **configured** `rice.theme`. Each
+  specialisation re-evaluates it, so every boot entry carries its own splash
+  (initrd) and palette (kernel parameters). Neither can follow `rice-switch`:
+  the pointer is user state and does not exist before login.
+- Boot splash: themes opt in with `integration.boot = { sigil; promptLabel?;
+  font?; }` in `_theme.nix` (the rebuild-time `integration` block, D-012).
+  Paths are Nix paths, validated by `mkThemeManifest` (closed keys, `.svg`
+  sigil, `.ttf`/`.otf` font, existence), and stripped from the runtime
+  manifest JSON. `_plymouth-theme.nix` builds a Plymouth script theme
+  `rice-<theme>`: the sigil recoloured to `accent.primary` with a glow, fog
+  banks in `accent.secondary`, a 60-frame ink ring (turbulence-displaced SVG
+  arcs rendered by resvg) that eases toward boot progress, and a vertical
+  `bg.sunken` → `bg.base` gradient. All images are generated at build; the
+  theme supplies only the sigil.
+- Prompts: passphrase and question callbacks show the theme's `promptLabel`
+  above systemd's real prompt text, then one bullet per typed character
+  (or the typed answer); messages (fsck, notices) sit at the bottom in
+  `fg.muted`. Themes without `integration.boot` keep the host's splash
+  (`hardware-base` sets `nixos-bgrt` with `mkDefault`).
+- Console: `console.colors` comes from `palette.legacy` for every rice theme
+  (`_console-palette.nix`): 0 crust (background), 1–6 red/green/yellow/blue/
+  mauve/teal, 7 subtext1 (default foreground), 8 overlay0, 9–14 the normal
+  colours lightened 30% toward white, 15 text. The `rice-boot` flake check
+  enforces contrast against colour 0 (≥7:1 for 7/15, ≥3:1 for colours,
+  ≥2.5:1 for the dim 8) and builds each opted-in splash.
+- Recovery: the splash never blocks unlock. Typed input reaches
+  `systemd-ask-password` even if the script fails to draw, other boot
+  entries (e.g. `rice-cyberpunk`) use the stock splash, and the
+  systemd-boot editor (`e`) accepts `plymouth.enable=0` for a text boot.
+- Why: the first and last thing a machine shows should already belong to the
+  theme, and both surfaces are cheap, static, and fully known at rebuild.
+
 ---
 
 ## Legacy imports
