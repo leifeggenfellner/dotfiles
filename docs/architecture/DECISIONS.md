@@ -715,7 +715,8 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   `prefs claimDaily <ns> <key> <json>` IPC, `PrefsState.claimDaily` stores it
   only if the stored record is not already for that date (first writer per day
   wins), and the terminal renders whatever record comes back. No running shell
-  → no write, pending label.
+  → no write, pending label. The dashboard draws through the same claim and
+  offers no redraw: the daily card is fixed until the date changes.
 - Theme-authored paths are the one sanctioned cross-widget read: a theme may
   point `greeting.daily.catalog` at another widget's settings (LOTM points it at
   `widgets.tarotDraw.settings.cards`). The consumer stays theme-blind; the

@@ -317,7 +317,6 @@ in
       tarotDraw.settings = {
         title = "Tarot Draw";
         prompt = "Draw today's omen";
-        redrawLabel = "redraw";
         emptyLabel = "The deck waits under the fog.";
         cards = [
           {

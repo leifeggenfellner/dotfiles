@@ -68,7 +68,6 @@ Rectangle {
     readonly property string today: Qt.formatDate(new Date(), "yyyy-MM-dd")
     readonly property string title: settings.title ?? "Tarot Draw"
     readonly property string prompt: settings.prompt ?? "Draw today's omen"
-    readonly property string redrawLabel: settings.redrawLabel ?? "redraw"
     readonly property string emptyLabel: settings.emptyLabel ?? "No omen has been drawn."
     readonly property var daily: prefs ? prefs.extra(namespace, key, ({})) : ({})
     readonly property int dailyIndex: cardIndex(daily)
@@ -123,12 +122,14 @@ Rectangle {
         return position >= 0 && position < cards.length ? position : -1;
     }
 
+    // One card per day: once drawn (here or by the terminal) it is fixed
+    // until tomorrow. claimDaily keeps the first record for the date (D-042).
     function draw() {
-        if (!prefs || cards.length === 0)
+        if (!prefs || cards.length === 0 || hasDaily)
             return;
         const seed = today.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) + Math.floor(Math.random() * 1000);
         const index = seed % cards.length;
-        prefs.setExtra(namespace, key, {
+        prefs.claimDaily(namespace, key, {
             date: today,
             id: cards[index].id,
             index: index
@@ -178,6 +179,7 @@ Rectangle {
                 id: drawMouse
                 anchors.fill: parent
                 hoverEnabled: true
+                enabled: !root.hasDaily
                 onClicked: root.draw()
             }
 
@@ -213,6 +215,7 @@ Rectangle {
 
                 Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: !root.hasDaily
                     width: drawText.width + root.theme.metrics.space.md * 2
                     height: 28
                     radius: root.theme.metrics.radius.small
@@ -223,7 +226,7 @@ Rectangle {
                     Text {
                         id: drawText
                         anchors.centerIn: parent
-                        text: root.hasDaily ? root.redrawLabel : root.prompt
+                        text: root.prompt
                         color: root.theme.colors.fg.primary
                         font.family: root.theme.typography.families.sans
                         font.pointSize: root.theme.typography.sizes.small
@@ -299,6 +302,7 @@ Rectangle {
                 id: compactDrawMouse
                 anchors.fill: parent
                 hoverEnabled: true
+                enabled: !root.hasDaily
                 onClicked: root.draw()
             }
 
@@ -333,6 +337,7 @@ Rectangle {
 
                 Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: !root.hasDaily
                     width: drawTextCompact.width + root.theme.metrics.space.md * 2
                     height: 28
                     radius: root.theme.metrics.radius.small
@@ -343,7 +348,7 @@ Rectangle {
                     Text {
                         id: drawTextCompact
                         anchors.centerIn: parent
-                        text: root.hasDaily ? root.redrawLabel : root.prompt
+                        text: root.prompt
                         color: root.theme.colors.fg.primary
                         font.family: root.theme.typography.families.sans
                         font.pointSize: root.theme.typography.sizes.small
