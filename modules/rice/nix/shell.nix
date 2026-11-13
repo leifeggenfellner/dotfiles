@@ -309,7 +309,27 @@ _: {
           rice-shell
           rice-sound-play
         ];
-        xdg.configFile."quickshell/rice".source = rice-runtime;
+        xdg.configFile."quickshell/rice" = {
+          source = rice-runtime;
+          # A running shell keeps the store path it resolved at launch, so a
+          # rebuild that changes the runtime restarts it. The launch goes
+          # through the running instance's Hyprland (its signature is read
+          # from the old process) so the new shell gets the session's
+          # environment exactly as at login. No session, no restart; never
+          # fails the activation.
+          onChange = ''
+            rice_pid="$(${pkgs.procps}/bin/pgrep -u "$(id -u)" -f -n '^quickshell (-c|--config) rice$' || true)"
+            if [ -n "$rice_pid" ]; then
+              rice_sig="$(tr '\0' '\n' < "/proc/$rice_pid/environ" 2>/dev/null | sed -n 's/^HYPRLAND_INSTANCE_SIGNATURE=//p' || true)"
+              if [ -n "$rice_sig" ]; then
+                XDG_RUNTIME_DIR="/run/user/$(id -u)" HYPRLAND_INSTANCE_SIGNATURE="$rice_sig" \
+                  ${osConfig.programs.hyprland.package}/bin/hyprctl dispatch 'hl.dsp.exec_cmd("uwsm app -- rice-shell --prod")' >/dev/null 2>&1 \
+                  && echo "Restarted the rice shell" \
+                  || echo "Could not restart the rice shell; run rice-shell" >&2
+              fi
+            fi
+          '';
+        };
       };
     };
 }
