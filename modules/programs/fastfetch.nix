@@ -82,7 +82,7 @@ _: {
             {
               type = "command";
               key = "│ {$2}󱎫{$1}  uptime";
-              text = "uptime -p | cut -d ' ' -f 2-";
+              text = "${pkgs.procps}/bin/uptime -p | cut -d ' ' -f 2-";
               format = " {$4}▐{$1} {$2}{>22}{$1} │";
             }
             {
