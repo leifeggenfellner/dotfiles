@@ -91,6 +91,7 @@ theme plugins → injected services + mount-provided theme/motion facades
    methods ([service-contract](contracts/service-contract.md)).
 2. **Shell UI state** — `core/ShellState.qml`: active popout, launcher visibility,
    OSD event edges (`osdKind`, `osdSerial`, `osdVisible`, D-031), debug overlay,
+   window inspector visibility (`inspectorVisible`, D-043),
    plus governor-pushed flags (`reduceMotion`,
    `ambientActive`, `idleApproaching` — written only by
    `modules/ambient/AmbientController`, D-021/D-029) and transient flavor-event

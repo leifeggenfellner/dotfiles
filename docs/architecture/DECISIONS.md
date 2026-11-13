@@ -726,6 +726,37 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: terminal flavour must follow `rice-switch` like the shell does, without
   each tool re-implementing pointer resolution or duplicating theme copy.
 
+### D-043 — Window inspector is an on-demand overlay over a held service
+
+- Date: 2026-11-13 · Status: active
+- `services/windows/WindowStatsState` lists visible windows (active or open
+  special workspace per monitor; only the fullscreen window when one is
+  shown) joined with CPU % (of one core) and RSS summed over each window's
+  process subtree. Backend is one short probe per tick (`hyprctl -j clients`,
+  `hyprctl -j monitors`, `/proc/*/stat`) — D-008 tier 4, because per-process
+  counters have no event source and Quickshell's `lastIpcObject` refresh is
+  asynchronous with no completion signal, so geometry and counters would come
+  from different instants. Updates run only while a consumer holds them
+  (`acquireUpdates`/`releaseUpdates`); release drops CPU baselines.
+- `modules/inspector`: `InspectorController` owns the `inspector` IPC target
+  (`open|close|toggle|status`) and holds the service while
+  `ShellState.inspectorVisible` is set; `InspectorOverlay` is a per-monitor,
+  input-transparent Overlay-layer surface loaded only while requested. Hidden
+  costs nothing: no timer, no process, no mapped layer.
+- Themes dress it through `widgets.inspector.settings` (title, subtitle,
+  `labels.{cpu,memory,processes,workspace}`, thresholds, tint). Labels are
+  prefixed to the plain metric and real value, never substituted. Aura colour
+  uses tokens only (accent.primary → state.warn → state.danger); motion is
+  the reveal/conceal fade and value-change colour easing, so reduce-motion
+  leaves a static overlay.
+- Hold-to-show is a Hyprland press bind (`open`) plus a `release = true` bind
+  (`close`) on Super+I; Super+Shift+I toggles. Releasing Super before I can
+  miss the release bind; pressing Super+I again clears it. IPC function names
+  avoid quickshell's `ipc` subcommands (`show` is one).
+- Why: an inspector needs live per-process numbers, which only polling can
+  provide, so the design makes polling strictly user-held and the surface
+  strictly passive.
+
 ---
 
 ## Legacy imports

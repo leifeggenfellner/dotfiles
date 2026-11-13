@@ -753,6 +753,28 @@ through one read-only adapter, and the daily tarot draw shows up in fish.
   manifest renders the tarot card from the settings catalog with the same
   warning set as the current manifest.
 
+## Phase 30 — Window inspector (Spirit Vision) ✅
+
+Concretized as D-043 (issue #76): hold Super+I to see every visible window's
+real PID, CPU, memory, process count, and workspace.
+
+- ✅ `services/windows/WindowStatsState.qml` — held-only probe (1s, first
+  follow-up at 350ms so CPU appears quickly) over `hyprctl -j clients/monitors`
+  and `/proc/*/stat`; subtree CPU/RSS; special and fullscreen visibility rules;
+  shared-PID windows flagged.
+- ✅ `modules/inspector/` — `InspectorController` (IPC `inspector
+  open|close|toggle|status`, service hold) and per-monitor `InspectorOverlay`
+  (input-transparent Overlay layer, load-coloured auras, info cards, header).
+- ✅ Keybinds on rice hosts: Super+I press/release, Super+Shift+I toggle.
+- ✅ LOTM dresses it as Spirit Vision ("Spirituality · CPU 4.2%",
+  "Corruption · RSS 6.7 GiB", "Entangled souls · processes 15", "Realm ·
+  workspace 3"). Cyberpunk is unconfigured and gets the neutral inspector.
+- Verified: `rice-lint`; generated Hyprland Lua carries the press and release
+  binds and passes `luac -p`; dev shell (LOTM and Cyberpunk manifests) opens via
+  IPC with 4 windows across 3 monitors and plausible PID/CPU/RSS, ~5% of one
+  core while open; after close `updatesActive` is false, no windows are held,
+  and no `rice-inspector` layer remains; no QML warnings from the new files.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

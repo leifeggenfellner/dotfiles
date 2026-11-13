@@ -23,6 +23,9 @@ Item {
     property string osdKind: "volume"
     property int osdSerial: 0
     property bool debugVisible: false
+    // Window inspector overlay (D-043). Written by modules/inspector's
+    // controller (IPC show/hide/toggle); the overlay only reads it.
+    property bool inspectorVisible: false
 
     // ── Ambient & motion flags (D-021/D-022) ──────────────────
     // Pushed by modules/ambient/AmbientController: the policy needs
@@ -153,6 +156,9 @@ Item {
     }
     function toggleTopBar() {
         topBarVisible = !topBarVisible;
+    }
+    function setInspectorVisible(on) {
+        inspectorVisible = !!on;
     }
     function toggleDebug() {
         debugVisible = !debugVisible;

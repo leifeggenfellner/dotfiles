@@ -55,6 +55,10 @@ let
       (mkBind (key mainAlt "W") (exec (riceIpc "wallpapers" "next")))
       (mkBind (key main "V") (exec (riceIpc "shell" "toggleSatchel")))
       (mkBind (key main "N") (exec (riceIpc "notifications" "toggleCenter")))
+      # Window inspector: hold Super+I; Super+Shift+I keeps it open.
+      (mkBind (key main "I") (exec (riceIpc "inspector" "open")))
+      (mkBindWith (key main "I") (exec (riceIpc "inspector" "close")) { release = true; })
+      (mkBind (key mainShift "I") (exec (riceIpc "inspector" "toggle")))
       (mkBind (key mainShiftCtrl "N") (exec (riceIpc "notifications" "clearAll")))
     ] else [
       (mkBind (key main "W") (exec (launch "foot -T wallpaper-picker -e wallpaper-picker")))

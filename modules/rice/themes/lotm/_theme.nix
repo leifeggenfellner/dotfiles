@@ -378,6 +378,19 @@ in
         ];
       };
 
+      # Window inspector (D-043): Spirit Vision. Labels sit beside the
+      # real CPU/RSS/process/workspace values, never instead of them.
+      inspector.settings = {
+        title = "Spirit Vision";
+        subtitle = "auras of the living";
+        labels = {
+          cpu = "Spirituality";
+          memory = "Corruption";
+          processes = "Entangled souls";
+          workspace = "Realm";
+        };
+      };
+
       # Terminal consumers (rice-terminal, D-042): the fish greeting shows the
       # same daily card the Observatory drew.
       terminal.settings = {

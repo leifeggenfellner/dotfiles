@@ -14,6 +14,7 @@ import "./modules/wallpapers"
 import "./modules/debug"
 import "./modules/lore"
 import "./modules/prefs"
+import "./modules/inspector"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -35,6 +36,8 @@ ShellRoot {
 
     PrefsIpc {}
 
+    InspectorController {}
+
     AmbientController {}
 
     SoundController {}
@@ -50,6 +53,17 @@ ShellRoot {
             requested: ShellState.ambientActive
             sourceComponent: AmbientLayer {
                 modelData: ambientLoader.modelData
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        SurfaceLoader {
+            id: inspectorLoader
+            requested: ShellState.inspectorVisible
+            sourceComponent: InspectorOverlay {
+                modelData: inspectorLoader.modelData
             }
         }
     }
