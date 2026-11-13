@@ -1,4 +1,7 @@
 { pkgs }:
+let
+  activeManifestLib = import ./_active-manifest-lib.nix { inherit pkgs; };
+in
 pkgs.writeShellScriptBin "rice-hyprland-theme" ''
   set -euo pipefail
 
@@ -16,40 +19,7 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
     exit 1
   }
 
-  canonical_store_file() {
-    local description="$1"
-    local candidate="$2"
-    local canonical
-    canonical="$(${pkgs.coreutils}/bin/realpath -e -- "$candidate")" || fail "$description does not resolve: $candidate"
-    case "$canonical" in
-      /nix/store/*) ;;
-      *) fail "$description must resolve to /nix/store: $candidate" ;;
-    esac
-    [ -f "$canonical" ] || fail "$description must resolve to a regular file: $candidate"
-    printf '%s' "$canonical"
-  }
-
-  resolve_active_manifest() {
-    index="$(canonical_store_file "theme index" "$index")"
-    "$jq" -e '
-      .schemaVersion == 1 and
-      (.default | type == "string") and
-      (.themes | type == "object") and
-      (.themes[.default].manifest | type == "string")
-    ' "$index" >/dev/null || fail "invalid theme index at $index"
-
-    local active
-    active="$("$jq" -r '.default' "$index")"
-    if [ -r "$pointer" ]; then
-      local selected
-      selected="$(cat "$pointer")"
-      if "$jq" -e --arg name "$selected" '.themes[$name].manifest | type == "string"' "$index" >/dev/null; then
-        active="$selected"
-      fi
-    fi
-    expected_theme="$active"
-    manifest="$("$jq" -er --arg name "$active" '.themes[$name].manifest' "$index")"
-  }
+  ${activeManifestLib}
 
   usage() {
     echo "Usage: rice-hyprland-theme [--check] (--active | --manifest <path> [--theme <name>])"
@@ -61,7 +31,9 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
         check_only=1; shift ;;
       --active)
         [ -z "$manifest" ] || fail "choose exactly one manifest source"
-        resolve_active_manifest; shift ;;
+        rice_resolve_active
+        expected_theme="$active_theme"
+        shift ;;
       --manifest)
         [ "$#" -ge 2 ] || fail "--manifest requires a path"
         [ -z "$manifest" ] || fail "choose exactly one manifest source"

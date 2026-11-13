@@ -98,7 +98,8 @@ theme plugins → injected services + mount-provided theme/motion facades
 3. **User prefs** — `$XDG_STATE_HOME/rice/`. The active-theme pointer is written
    only by `rice-switch` and read/watched by `core/ManifestLoader` as manifest-
    resolution input (D-018); `prefs.json` is written only by the `PrefsState`
-   service and read by `rice-switch` at switch time (D-019). Nix defines
+   service and read by `rice-switch` at switch time (D-019) and read-only by
+   the terminal consumers `rice-query`/`rice-terminal` (D-042). Nix defines
    defaults; state files hold user drift; nothing else is mutable.
 
 ## Event flow

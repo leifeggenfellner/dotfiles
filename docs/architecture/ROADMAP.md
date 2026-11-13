@@ -721,6 +721,34 @@ popout rather than reimplemented by the shell.
   production runtime and active LOTM manifest build; runtime smoke opens the
   system popout without QML errors; `git diff --check`; `nix flake check --print-build-logs`.
 
+## Phase 29 — Terminal adapter + daily tarot greeting ✅
+
+Concretized as D-042 (issues #71, #73): terminal tools read the active rice
+through one read-only adapter, and the daily tarot draw shows up in fish.
+
+- ✅ `_active-manifest-lib.nix` extracts the index → pointer → store-manifest
+  resolver; `rice-hyprland-theme` now uses it (unchanged behaviour, existing
+  switch check passes).
+- ✅ `rice-query` (`active`, `manifest`, `get`, `pref`, `--json`) with
+  0/1/2 exit semantics; ~15 ms per call.
+- ✅ `rice-terminal greeting | command-not-found`, driven by
+  `widgets.terminal.settings`; Home Manager module `rice-query` installs both
+  and appends the greeting to the fastfetch `fish_greeting` (`lib.mkAfter`)
+  and adds `fish_command_not_found` with fallback to fish's default handler.
+- ✅ Tarot card catalog moved from `TarotDraw.qml` to
+  `widgets.tarotDraw.settings.cards` (with stable ids); the plugin records
+  `{ date, id, index }` and still reads the legacy `card` index.
+- ✅ LOTM wires the greeting to the tarot record ("Today's omen · XVIII · The
+  Moon — …", or "The cards are still face-down…") and "Unknown incantation:
+  <cmd>". Cyberpunk is unconfigured and keeps fish defaults.
+- Verified: new `rice-query` flake check (shellcheck, pointer resolution,
+  get/pref, id/index/legacy/stale/missing records, corrupt prefs, unconfigured
+  theme, malformed/missing/mutable index, read-only); `rice-theme-switch`,
+  `rice-lint`, `rice-manifest-validation` pass; generated fish functions
+  inspected and run against a sandboxed state dir; dev shell with the new LOTM
+  manifest renders the tarot card from the settings catalog with the same
+  warning set as the current manifest.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

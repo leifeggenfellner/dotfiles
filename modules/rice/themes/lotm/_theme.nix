@@ -319,6 +319,76 @@ in
         prompt = "Draw today's omen";
         redrawLabel = "redraw";
         emptyLabel = "The deck waits under the fog.";
+        cards = [
+          {
+            id = "fool";
+            name = "The Fool";
+            sequence = "0";
+            phrase = "A door opens above the gray fog.";
+            face = "fool.png";
+            back = "fool.png";
+          }
+          {
+            id = "magician";
+            name = "The Magician";
+            sequence = "I";
+            phrase = "A precise hand turns chance into ritual.";
+            face = "magician.png";
+            back = "magician.png";
+          }
+          {
+            id = "high-priestess";
+            name = "The High Priestess";
+            sequence = "II";
+            phrase = "Silence keeps the safer half of knowledge.";
+            face = "priestess.png";
+            back = "priestess.png";
+          }
+          {
+            id = "hermit";
+            name = "The Hermit";
+            sequence = "IX";
+            phrase = "A lamp is enough when the path is honest.";
+            face = "hermit.png";
+            back = "hermit.png";
+          }
+          {
+            id = "wheel-of-fortune";
+            name = "Wheel of Fortune";
+            sequence = "X";
+            phrase = "The machine turns; the omen is timing.";
+            face = "wheel.png";
+            back = "wheel.png";
+          }
+          {
+            id = "moon";
+            name = "The Moon";
+            sequence = "XVIII";
+            phrase = "Not every shadow belongs to a monster.";
+            face = "moon.png";
+            back = "moon.png";
+          }
+          {
+            id = "world";
+            name = "The World";
+            sequence = "XXI";
+            phrase = "A circle closes without becoming a cage.";
+            face = "world.png";
+            back = "world.png";
+          }
+        ];
+      };
+
+      # Terminal consumers (rice-terminal, D-042): the fish greeting shows the
+      # same daily card the Observatory drew.
+      terminal.settings = {
+        greeting.daily = {
+          record = "extras.tarotDraw.daily";
+          catalog = "widgets.tarotDraw.settings.cards";
+          format = "Today's omen · {sequence} · {name} — {phrase}";
+          pendingLabel = "The cards are still face-down under the gray fog.";
+        };
+        commandNotFound.format = "Unknown incantation: {command}";
       };
 
       ritualLedger.settings = {

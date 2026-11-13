@@ -690,6 +690,34 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   identity avoids duplicate-description ambiguity, while the explicit selection
   rule avoids encoding a false distinction between physically identical docks.
 
+### D-042 — Terminal consumers read the active rice through rice-query
+
+- Date: 2026-11-13 · Status: active
+- `rice-query` is the read-only CLI adapter for shell tools that need the
+  **active** theme without a rebuild. It resolves index → pointer → immutable
+  manifest store file through the same resolver as `rice-hyprland-theme`
+  (`modules/rice/nix/_active-manifest-lib.nix`) and exposes `active`,
+  `manifest`, `get <dotted path>` (manifest) and `pref <dotted path>`
+  (`prefs.json`). Exit status is the contract: 0 found, 1 not set, 2 usage or
+  data error. It never writes: `PrefsState` stays the sole `prefs.json` writer
+  and `rice-switch` the sole pointer writer.
+- `rice-terminal` renders the theme-configured terminal surface from
+  `widgets.terminal.settings` (D-023 namespace): `greeting.daily` resolves a
+  daily record `{ date, id?, index? }` from a prefs path against a manifest
+  catalog path (by `id`, then position), formats it with `{field}`
+  placeholders, and otherwise prints `pendingLabel`; `commandNotFound.format`
+  replaces fish's unknown-command line. Themes without these settings produce
+  no output and exit 1, so fish falls back to its defaults. The fish greeting
+  appends after other modules' greeting via `lib.mkAfter`.
+- Theme-authored paths are the one sanctioned cross-widget read: a theme may
+  point `greeting.daily.catalog` at another widget's settings (LOTM points it at
+  `widgets.tarotDraw.settings.cards`). The consumer stays theme-blind; the
+  theme owns the wiring. The tarot card catalog moved from plugin QML into
+  those settings so the Observatory and terminal share one source, and the
+  plugin now records `{ date, id, index }` (still reading the legacy `card`).
+- Why: terminal flavour must follow `rice-switch` like the shell does, without
+  each tool re-implementing pointer resolution or duplicating theme copy.
+
 ---
 
 ## Legacy imports

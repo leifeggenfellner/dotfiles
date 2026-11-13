@@ -18,6 +18,9 @@
       rice-theme-switch =
         import ../rice/nix/_theme-switch-check.nix { inherit pkgs; };
 
+      rice-query =
+        import ../rice/nix/_query-check.nix { inherit pkgs; };
+
       monitor-control =
         import ../scripts/_monitor-control-check.nix { inherit pkgs; };
 

@@ -71,8 +71,9 @@ Rectangle {
     readonly property string redrawLabel: settings.redrawLabel ?? "redraw"
     readonly property string emptyLabel: settings.emptyLabel ?? "No omen has been drawn."
     readonly property var daily: prefs ? prefs.extra(namespace, key, ({})) : ({})
-    readonly property bool hasDaily: daily.date === today && daily.card !== undefined
-    readonly property var currentCard: hasDaily ? cards[Math.max(0, Math.min(cards.length - 1, daily.card))] : null
+    readonly property int dailyIndex: cardIndex(daily)
+    readonly property bool hasDaily: daily.date === today && dailyIndex >= 0
+    readonly property var currentCard: hasDaily ? cards[dailyIndex] : null
     readonly property real cardAspect: 1000 / 1778
     readonly property bool wide: width >= 560
     readonly property int cardHeight: wide ? 220 : 188
@@ -90,57 +91,9 @@ Rectangle {
 
     onHasDailyChanged: revealed = hasDaily
 
-    readonly property var cards: [
-        {
-            name: "The Fool",
-            sequence: "0",
-            phrase: "A door opens above the gray fog.",
-            face: "fool.png",
-            back: "fool.png"
-        },
-        {
-            name: "The Magician",
-            sequence: "I",
-            phrase: "A precise hand turns chance into ritual.",
-            face: "magician.png",
-            back: "magician.png"
-        },
-        {
-            name: "The High Priestess",
-            sequence: "II",
-            phrase: "Silence keeps the safer half of knowledge.",
-            face: "priestess.png",
-            back: "priestess.png"
-        },
-        {
-            name: "The Hermit",
-            sequence: "IX",
-            phrase: "A lamp is enough when the path is honest.",
-            face: "hermit.png",
-            back: "hermit.png"
-        },
-        {
-            name: "Wheel of Fortune",
-            sequence: "X",
-            phrase: "The machine turns; the omen is timing.",
-            face: "wheel.png",
-            back: "wheel.png"
-        },
-        {
-            name: "The Moon",
-            sequence: "XVIII",
-            phrase: "Not every shadow belongs to a monster.",
-            face: "moon.png",
-            back: "moon.png"
-        },
-        {
-            name: "The World",
-            sequence: "XXI",
-            phrase: "A circle closes without becoming a cage.",
-            face: "world.png",
-            back: "world.png"
-        }
-    ]
+    // Card catalog is theme data (widgets.tarotDraw.settings.cards) so terminal
+    // consumers can resolve the same daily record (D-042).
+    readonly property var cards: settings.cards ?? []
 
     function facePath(card) {
         return "assets/faces/" + card.face;
@@ -156,14 +109,29 @@ Rectangle {
         return backPath(root.currentCard);
     }
 
+    // Daily record: { date, id, index }. `id` survives catalog reordering;
+    // `index` and the pre-D-042 `card` field are positional fallbacks.
+    function cardIndex(record) {
+        if (!record || cards.length === 0)
+            return -1;
+        if (record.id !== undefined) {
+            const byId = cards.findIndex(card => card.id === record.id);
+            if (byId >= 0)
+                return byId;
+        }
+        const position = record.index ?? record.card;
+        return position >= 0 && position < cards.length ? position : -1;
+    }
+
     function draw() {
-        if (!prefs)
+        if (!prefs || cards.length === 0)
             return;
         const seed = today.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) + Math.floor(Math.random() * 1000);
         const index = seed % cards.length;
         prefs.setExtra(namespace, key, {
             date: today,
-            card: index
+            id: cards[index].id,
+            index: index
         });
         revealed = false;
         revealTimer.restart();

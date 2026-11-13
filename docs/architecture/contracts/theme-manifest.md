@@ -143,7 +143,9 @@ and exposes it exclusively through the `Theme` facade.
    only be read by the widget/plugin they belong to — never by runtime core.
    D-023 clarifies that long-lived built-in surfaces with widget-like settings
    (`launcher`, `dashboard`, `powermenu`, …) use this same id namespace and read
-   their data through `Theme.widgetConfig(surfaceId)`.
+   their data through `Theme.widgetConfig(surfaceId)`. D-042 adds the
+   out-of-shell `terminal` id (read by `rice-terminal`), whose settings may name
+   other manifest paths by theme-authored dotted path.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

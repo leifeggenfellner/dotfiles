@@ -37,5 +37,8 @@ Task-level rules for agents live in `.claude/skills/` (start with
   live via `$XDG_STATE_HOME/rice/active`. It is a per-user transaction covering
   Hyprland visual tokens, the pointer, Quickshell reload, and wallpaper; it never
   activates a system specialisation.
+- Shell tools read the active theme with `rice-query` (`active`, `manifest`,
+  `get <path>`, `pref <path>`); `rice-terminal` renders the fish greeting and
+  command-not-found line from `widgets.terminal.settings` (D-042).
 - Full rebuild-time chrome remains an explicit administrator workflow through
   `/run/current-system/specialisation/rice-<name>/bin/switch-to-configuration switch`.
