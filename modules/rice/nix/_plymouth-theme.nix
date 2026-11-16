@@ -37,9 +37,13 @@ let
   # Ink ring frame: a faint plain track, then the filled arc twice — a
   # blurred, wider pass that reads as ink soaking into paper and a crisp
   # pass on top — both roughened by a gentle turbulence displacement.
+  # `ring <length>` draws the arc from the top; `ring <length> <start>`
+  # draws only the segment after <start>, without the track, for the
+  # seep sprite the script fades in between frames.
   ringSvg = ''
     ring() {
-      local length="$1"
+      local length="$1" start="''${2:-}" track=""
+      [ -n "$start" ] || track='<circle cx="200" cy="200" r="168" stroke-width="2" stroke-opacity="0.16"/>'
       cat <<EOF
     <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
       <defs>
@@ -54,11 +58,11 @@ let
         </filter>
       </defs>
       <g transform="rotate(-90 200 200)" fill="none" stroke="${accent}">
-        <circle cx="200" cy="200" r="168" stroke-width="2" stroke-opacity="0.16"/>
+        $track
         <circle cx="200" cy="200" r="168" stroke-width="12" stroke-opacity="0.35" stroke-linecap="round"
-                stroke-dasharray="$length 2000" filter="url(#bleed)"/>
+                stroke-dasharray="$length 2000" stroke-dashoffset="-''${start:-0}" filter="url(#bleed)"/>
         <circle cx="200" cy="200" r="168" stroke-width="5" stroke-linecap="round"
-                stroke-dasharray="$length 2000" filter="url(#ink)"/>
+                stroke-dasharray="$length 2000" stroke-dashoffset="-''${start:-0}" filter="url(#ink)"/>
       </g>
     </svg>
     EOF
@@ -93,9 +97,15 @@ pkgs.runCommand "plymouth-theme-${name}"
   magick -size 32x32 xc:none -fill '${accent}' -draw 'polygon 16,2 30,16 16,30 2,16' "$dir/bullet.png"
 
   ${ringSvg}
+  arc() { awk -v i="$1" 'BEGIN { printf "%.2f", 2 * 3.14159265 * 168 * i / ${toString (ringFrames - 1)} }'; }
   for i in $(seq 0 ${toString (ringFrames - 1)}); do
-    ring "$(awk -v i="$i" 'BEGIN { printf "%.2f", 2 * 3.14159265 * 168 * i / ${toString (ringFrames - 1)} }')" > ring.svg
+    ring "$(arc "$i")" > ring.svg
     resvg ring.svg "$dir/ring-$i.png"
+  done
+  for i in $(seq 0 ${toString (ringFrames - 2)}); do
+    start=$(arc "$i")
+    ring "$(awk -v a="$start" -v b="$(arc $((i + 1)))" 'BEGIN { printf "%.2f", b - a }')" "$start" > seep.svg
+    resvg seep.svg "$dir/seep-$i.png"
   done
 
   cp ${script} "$dir/${name}.script"

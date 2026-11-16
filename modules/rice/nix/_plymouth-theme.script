@@ -25,15 +25,26 @@ sigil = Sprite(Image("sigil.png").Scale(sigil_size, sigil_size));
 sigil.SetPosition(sigil_x, sigil_y, 10);
 sigil.SetOpacity(0);
 
-// Ink ring: pre-rendered frames, centred on the sigil.
+// Ink ring: pre-rendered frames, centred on the sigil. Between frames
+// the next segment (seep-i: ink from frame i to i + 1, no track) fades
+// in over the current frame, so the ink seeps instead of stepping.
 ring_size = Math.Int(sigil_size * 1.08);
 for (i = 0; i < ring_frames; i++)
   ring_image[i] = Image("ring-" + i + ".png").Scale(ring_size, ring_size);
+for (i = 0; i < ring_frames - 1; i++)
+  seep_image[i] = Image("seep-" + i + ".png").Scale(ring_size, ring_size);
+ring_x = Math.Int(W / 2 - ring_size / 2);
+ring_y = Math.Int(sigil_y + sigil_size / 2 - ring_size / 2);
 ring = Sprite(ring_image[0]);
-ring.SetPosition(Math.Int(W / 2 - ring_size / 2), Math.Int(sigil_y + sigil_size / 2 - ring_size / 2), 8);
+ring.SetPosition(ring_x, ring_y, 8);
 ring.SetOpacity(0);
+seep = Sprite(seep_image[0]);
+seep.SetPosition(ring_x, ring_y, 8);
+seep.SetOpacity(0);
 
-// Two fog banks drifting against each other along the floor.
+// Two fog banks drifting against each other along the floor. Every move
+// repaints most of the screen in software, so they step together on
+// every fog_step-th tick rather than on alternating ticks.
 fog_image = Image("fog.png").Scale(Math.Int(W * 1.6), Math.Int(H * 0.55));
 fog_low = Sprite(fog_image);
 fog_low.SetPosition(Math.Int(-W * 0.3), Math.Int(H * 0.45), 5);
@@ -41,10 +52,13 @@ fog_low.SetOpacity(0);
 fog_high = Sprite(fog_image);
 fog_high.SetPosition(Math.Int(-W * 0.3), Math.Int(H * 0.32), 4);
 fog_high.SetOpacity(0);
+fog_step = 4;
 
 global.tick = 0;
 global.progress = 0;
+global.target = 0;
 global.shown = 0;
+global.frame = 0;
 global.prompting = 0;
 
 fun refresh_callback() {
@@ -52,18 +66,31 @@ fun refresh_callback() {
   fade = Math.Min(tick / 120, 1);
   breath = Math.Sin(tick / 45);
 
+  // Plymouth skips opacity changes under 0.01, so these rarely repaint.
   sigil.SetOpacity(fade * (0.88 + 0.12 * breath) * (1 - 0.45 * prompting));
   glow.SetOpacity(fade * (0.45 + 0.25 * breath));
-  fog_low.SetX(Math.Int(-W * 0.3 + Math.Sin(tick / 700) * W * 0.22));
-  fog_low.SetOpacity(fade * 0.55);
-  fog_high.SetX(Math.Int(-W * 0.3 - Math.Sin(tick / 900 + 1.3) * W * 0.18));
-  fog_high.SetOpacity(fade * 0.28);
+  if (tick % fog_step == 0 || tick <= 120) {
+    fog_low.SetX(Math.Int(-W * 0.3 + Math.Sin(tick / 1400) * W * 0.22));
+    fog_low.SetOpacity(fade * 0.55);
+    fog_high.SetX(Math.Int(-W * 0.3 - Math.Sin(tick / 1800 + 1.3) * W * 0.18));
+    fog_high.SetOpacity(fade * 0.28);
+  }
 
-  // Boot progress jumps; the ink seeps toward it instead.
-  global.shown = shown + (progress - shown) * 0.04;
-  frame = Math.Int(Math.Clamp(shown, 0, 1) * (ring_frames - 1));
-  ring.SetImage(ring_image[frame]);
+  // Progress is a time estimate from the last boot, which includes the
+  // passphrase wait; hold the ink while the Threshold asks.
+  if (!prompting)
+    global.target = progress;
+  // Seep toward the target at a capped rate (a full ring in ~3 s).
+  global.shown = shown + Math.Clamp((target - shown) * 0.03, 0, 0.006);
+  position = Math.Clamp(shown, 0, 1) * (ring_frames - 1);
+  current = Math.Min(Math.Int(position), ring_frames - 2);
+  if (current != frame) {
+    global.frame = current;
+    ring.SetImage(ring_image[current]);
+    seep.SetImage(seep_image[current]);
+  }
   ring.SetOpacity(fade * 0.9);
+  seep.SetOpacity(fade * 0.9 * (position - current));
 }
 Plymouth.SetRefreshFunction(refresh_callback);
 
