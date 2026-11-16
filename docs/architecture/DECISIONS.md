@@ -692,7 +692,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-042 — Terminal consumers read the active rice through rice-query
 
-- Date: 2026-11-13 · Status: active
+- Date: 2026-11-13 · Status: active (extended by D-050)
 - `rice-query` is the read-only CLI adapter for shell tools that need the
   **active** theme without a rebuild. It resolves index → pointer → immutable
   manifest store file through the same resolver as `rice-hyprland-theme`
@@ -953,6 +953,34 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: borders and group tabs are the only theme surface on every window.
   Token refs keep the gilt tied to the palette, and the once-per-focus sweep
   gives the glint without a moving UI.
+
+### D-050 — The Starship prompt follows the active rice through per-theme configs
+
+- Date: 2026-11-16 · Status: active · Extends D-042
+- `widgets.terminal.settings.prompt` (D-023 namespace) is a closed
+  vocabulary read by `modules/rice/nix/_prompt-lib.nix`: `workspace =
+  { catalog; glyph?; format?; }` (catalog is a theme-authored manifest path
+  to `[{ id; label; }]`, D-042's sanctioned cross-widget read; `format`
+  fills `{glyph} {label} {id}`), `git.label`, and `failure.label`. Labels
+  always sit beside the real value: git status keeps every flag with its
+  count, the failure marker keeps the exit code and signal name, and an
+  unlisted workspace shows its real name or id.
+- At rebuild, every packaged theme with a prompt block gets a Starship
+  config (the base `programs.starship.settings` plus the mapping) and a fish
+  snippet under `~/.config/rice/prompt/<theme>.fish`. Fish asks `rice-query
+  active` at startup and sources the matching snippet, which sets
+  `STARSHIP_CONFIG`. A new shell therefore follows `rice-switch` without a
+  rebuild; themes without the block (Cyberpunk) and shells without an
+  active rice keep the base prompt.
+- The workspace label is read with one `hyprctl` call when the shell starts
+  and on `fish_focus_in` (a moved terminal is refocused before use), never
+  per prompt: drawing the prompt costs what the base prompt costs (≈7.7 ms vs
+  7.4 ms measured); startup gains ≈22 ms. Outside Hyprland it is skipped.
+  A terminal moved to another workspace without being focused shows its old
+  label until it is focused.
+- Why: Starship has no runtime theming hook, so per-theme configs built from
+  the same base are the cheapest way to change the prompt live; building
+  them in Nix keeps the shell from parsing the manifest on every start.
 
 ---
 

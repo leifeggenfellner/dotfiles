@@ -24,6 +24,12 @@
       rice-boot =
         import ../rice/nix/_boot-check.nix { inherit pkgs; };
 
+      rice-prompt =
+        import ../rice/nix/_prompt-check.nix {
+          inherit pkgs;
+          baseSettings = config.flake.nixosConfigurations.shitbox.config.home-manager.users.leif.programs.starship.settings;
+        };
+
       monitor-control =
         import ../scripts/_monitor-control-check.nix { inherit pkgs; };
 

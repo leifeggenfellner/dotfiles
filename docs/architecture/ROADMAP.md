@@ -918,6 +918,22 @@ Concretized as D-049 (issue #81), extending D-047.
   LOTM chunk applied and read back exactly (gradients, Cinzel,
   `borderangle` once).
 
+## Phase 37 — Beyonder's notebook prompt ✅
+
+Concretized as D-050 (issue #72), extending D-042.
+
+- ✅ `widgets.terminal.settings.prompt`: workspace catalog/glyph/format, git
+  label, failure label; built per theme into a Starship config and a fish
+  snippet; fish selects the active theme's at startup via `rice-query`.
+- ✅ LOTM: `☉ White Tower 3` before the path, `Sequence [!3+1?1]` with the
+  real counts, and `failed ritual · 130 INT` beside the real exit code and
+  signal. Cyberpunk declares no prompt and keeps the base config.
+- ✅ Render time: the workspace is read on shell start and terminal focus,
+  not per prompt; measured 7.7 ms per prompt (base 7.4 ms), +22 ms startup.
+- Verified: new `rice-prompt` flake check (fish syntax, workspace mapping
+  and fallback, rendered labels beside real values, Cyberpunk builds
+  nothing), `nix flake check`; rendered in fish against the live session.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

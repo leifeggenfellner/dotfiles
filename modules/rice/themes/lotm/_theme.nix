@@ -487,6 +487,18 @@ in
           pendingLabel = "The cards are still face-down under the gray fog.";
         };
         commandNotFound.format = "Unknown incantation: {command}";
+        # Starship as a Beyonder's notebook (D-050): the pathway of the
+        # workspace beside its number, the git counts as Sequence notes,
+        # and a failed ritual beside the real exit code or signal.
+        prompt = {
+          workspace = {
+            catalog = "widgets.workspaces.settings.items";
+            glyph = "☉";
+            format = "{glyph} {label} {id}";
+          };
+          git.label = "Sequence";
+          failure.label = "failed ritual";
+        };
       };
 
       ritualLedger.settings = {
