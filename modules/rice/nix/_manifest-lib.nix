@@ -53,7 +53,7 @@ let
         [ "name" "displayName" "version" "schemaVersion" ]
         (theme.meta or { }))
       (checkClosed "tokens"
-        [ "colors" "typography" "metrics" "motion" "effects" ]
+        [ "colors" "typography" "metrics" "motion" "effects" "chrome" ]
         (theme.tokens or { }))
       (checkClosed "tokens.colors"
         (lib.attrNames colorSchema)
@@ -343,7 +343,42 @@ let
     windowsOut = "(slide|gnomed|popin( [0-9]{1,2}%)?)";
     workspaces = "(slide|slidevert|fade|slidefade( [0-9]{1,2}%)?|slidefadevert( [0-9]{1,2}%)?)";
     layers = "(slide|fade|popin( [0-9]{1,2}%)?)";
+    # Gradient sweep on focus change (D-049); never "loop" (L-007).
+    borderSweep = "once";
   };
+
+  # Window chrome (D-049): border gradient and group-bar colours, all
+  # colour token refs (L-005). The adapter re-checks the same shapes.
+  chromeChecks = lib.optionals (tokens ? chrome) (
+    let
+      c = tokens.chrome;
+      gradient = path: v:
+        if builtins.isList v && builtins.length v >= 1 && builtins.length v <= 4 && lib.all isTokenRef v then true
+        else fail "${path} must be a list of 1-4 colour token refs like \"accent.primary\" (L-005), got ${builtins.toJSON v}";
+      ref = path: v:
+        if isTokenRef v then true
+        else fail "${path} must be a colour token ref like \"fg.primary\" (L-005), got ${builtins.toJSON v}";
+    in
+    [ (checkClosed "tokens.chrome" [ "border" "groupbar" ] c) ]
+    ++ lib.optionals (c ? border) [
+      (checkClosed "tokens.chrome.border" [ "active" "angle" ] c.border)
+      (gradient "tokens.chrome.border.active" (c.border.active or null))
+      (if builtins.isInt (c.border.angle or 0) && (c.border.angle or 0) >= 0 && (c.border.angle or 0) < 360 then true
+      else fail "tokens.chrome.border.angle must be an integer in 0..359")
+    ]
+    ++ lib.optionals (c ? groupbar) (
+      let g = c.groupbar; in
+      [
+        (checkClosed "tokens.chrome.groupbar" [ "active" "inactive" "text" "textInactive" "font" ] g)
+        (if lib.elem (g.font or "sans") [ "display" "sans" "mono" ] then true
+        else fail "tokens.chrome.groupbar.font must be one of [display sans mono]")
+      ]
+      ++ lib.optional (g ? active) (gradient "tokens.chrome.groupbar.active" g.active)
+      ++ lib.optional (g ? inactive) (gradient "tokens.chrome.groupbar.inactive" g.inactive)
+      ++ lib.optional (g ? text) (ref "tokens.chrome.groupbar.text" g.text)
+      ++ lib.optional (g ? textInactive) (ref "tokens.chrome.groupbar.textInactive" g.textInactive)
+    )
+  );
 
   effectTypes = [ "fog" "particles" "vignette" "rain" ];
   # Sky conditions a preset may key on (D-046); the runtime's
@@ -532,7 +567,7 @@ let
   };
 
   checks = schemaChecks ++ descriptorChecks ++ tokenChecks ++ metricRangeChecks ++ metaChecks ++ iconChecks ++ soundChecks ++ rasterChecks
-    ++ motionExtraChecks ++ effectChecks ++ pluginChecks;
+    ++ motionExtraChecks ++ effectChecks ++ chromeChecks ++ pluginChecks;
 in
 {
   inherit manifest;

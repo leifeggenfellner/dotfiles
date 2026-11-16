@@ -15,6 +15,7 @@ let
     workspaces = "workspaces";
     layersIn = "layersIn";
     layersOut = "layersOut";
+    borderangle = "borderangle";
   };
   baselineFor = source:
     lib.findFirst (a: a.leaf == source) (throw "baseline animation '${source}' missing") baseline.animation;
@@ -27,6 +28,13 @@ let
       + lib.optionalString (a ? style) ", style = ${builtins.toJSON a.style}"
       + " })\n")
     overridable);
+
+  # Group-bar chrome every apply starts from (D-049), as in the generated
+  # config, so a theme without `tokens.chrome.groupbar` restores it.
+  chrome = (import ../../programs/hyprland/_chrome.nix).groupbar;
+  chromeLua = "hl.config({ group = { groupbar = { col = { active = ${builtins.toJSON chrome.col.active}, inactive = ${builtins.toJSON chrome.col.inactive} }, "
+    + "text_color = ${builtins.toJSON chrome.text_color}, text_color_inactive = ${builtins.toJSON chrome.text_color_inactive}, "
+    + "font_family = ${builtins.toJSON chrome.font_family} } } })\n";
 
   # Themes without `integration.cursor` get the base style's cursor
   # (what the generated config shows before any rice theme, D-048).
@@ -116,6 +124,11 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       "InElastic": [0.36, 0, 0.66, -0.56], "OutElastic": [0.34, 1.56, 0.64, 1],
       "InBounce": [0.36, 0, 0.66, -0.56], "OutBounce": [0.34, 1.56, 0.64, 1]
     }[.] // [0.33, 1, 0.68, 1];
+    def ref($colors): . as $r | $colors | getpath($r | split(".")) |
+      if color then . else error("colour ref \($r) does not resolve") end;
+    def refs: type == "array" and length >= 1 and length <= 4 and all(type == "string" and test("^(bg|fg|accent|state)\\.[a-zA-Z0-9]+$"));
+    def rgb: "\"rgb(" + ltrimstr("#") + ")\"";
+    def gradient($colors; $angle): "{ colors = { " + (map(ref($colors) | rgb) | join(", ")) + " }, angle = \($angle) }";
     def curve($name): "hl.curve(\"rice_\($name)\", { type = \"bezier\", points = { {\(.[0]), \(.[1])}, {\(.[2]), \(.[3])} } })\n";
     def anim($leaf; $ms; $curve; $style):
       "hl.animation({ leaf = \"\($leaf)\", enabled = true, speed = \($ms | speed), bezier = \"rice_\($curve)\""
@@ -132,18 +145,44 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       ([.tokens.motion.easings | .standard, .enter, .exit] | all(type == "string")) and
       ((.tokens.motion.compositor // {}) as $c |
         ($c | type == "object") and
-        ($c | keys - ["windowsIn", "windowsOut", "workspaces", "layers"] | length == 0) and
+        ($c | keys - ["windowsIn", "windowsOut", "workspaces", "layers", "borderSweep"] | length == 0) and
         ([$c.windowsIn, $c.windowsOut] | all(. == null or style("(slide|gnomed|popin( [0-9]{1,2}%)?)"))) and
         ($c.workspaces | . == null or style("(slide|slidevert|fade|slidefade( [0-9]{1,2}%)?|slidefadevert( [0-9]{1,2}%)?)")) and
-        ($c.layers | . == null or style("(slide|fade|popin( [0-9]{1,2}%)?)")))
+        ($c.layers | . == null or style("(slide|fade|popin( [0-9]{1,2}%)?)")) and
+        ($c.borderSweep | . == null or . == "once")) and
+      ((.tokens.chrome // {}) as $ch |
+        ($ch | type == "object") and
+        ($ch | keys - ["border", "groupbar"] | length == 0) and
+        ($ch.border | . == null or ((keys - ["active", "angle"] | length == 0) and (.active | refs) and
+          (.angle | . == null or (type == "number" and floor == . and . >= 0 and . < 360)))) and
+        ($ch.groupbar | . == null or ((keys - ["active", "inactive", "text", "textInactive", "font"] | length == 0) and
+          (.active | . == null or refs) and (.inactive | . == null or refs) and
+          ([.text, .textInactive] | all(. == null or ([.] | refs))) and
+          (.font | . == null or IN("display", "sans", "mono")))))
     ) |
     (.tokens.colors.accent.primary | ltrimstr("#")) as $active |
     (.tokens.colors.bg.elevated | ltrimstr("#")) as $inactive |
     (.tokens.motion.enabled and ($reduce | not)) as $animate |
     .tokens.motion as $m |
-    "hl.config({ general = { col = { active_border = \"rgb(\($active))\", inactive_border = \"rgb(\($inactive))\" } }, "
-    + "group = { col = { border_active = \"rgb(\($active))\", border_inactive = \"rgb(\($inactive))\" } }, "
+    .tokens.colors as $colors |
+    (.tokens.chrome // {}) as $ch |
+    (if $ch.border == null then "\"rgb(\($active))\""
+     else ($ch.border.active | gradient($colors; $ch.border.angle // 0)) end) as $activeBorder |
+    "hl.config({ general = { col = { active_border = \($activeBorder), inactive_border = \"rgb(\($inactive))\" } }, "
+    + "group = { col = { border_active = \($activeBorder), border_inactive = \"rgb(\($inactive))\" } }, "
     + "animations = { enabled = \($animate) } })\n"
+    + $chrome
+    + (if $ch.groupbar == null then "" else
+        ($ch.groupbar as $g |
+          [ ([ (if $g.active == null then empty else "active = \($g.active | gradient($colors; 90))" end),
+               (if $g.inactive == null then empty else "inactive = \($g.inactive | gradient($colors; 90))" end)
+             ] | select(length > 0) | "col = { " + join(", ") + " }"),
+            (if $g.text == null then empty else "text_color = \($g.text | ref($colors) | rgb)" end),
+            (if $g.textInactive == null then empty else "text_color_inactive = \($g.textInactive | ref($colors) | rgb)" end),
+            (if $g.font == null then empty else "font_family = \(.tokens.typography.families[$g.font] |
+              if type == "string" then tojson else error("typography.families.\($g.font) is missing") end)" end)
+          ] | "hl.config({ group = { groupbar = { " + join(", ") + " } } })\n")
+      end)
     + (if $animate then
         $baseline
         + (if $m.compositor == null then "" else
@@ -158,9 +197,11 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
             + anim("workspaces"; $m.durations.base; "standard"; $m.compositor.workspaces)
             + anim("layersIn"; $m.durations.base; "enter"; $m.compositor.layers)
             + anim("layersOut"; $m.durations.fast; "exit"; $m.compositor.layers)
+            + (if $m.compositor.borderSweep == null then "" else
+                anim("borderangle"; $m.durations.slow * 2; "standard"; $m.compositor.borderSweep) end)
           end)
       else "" end)
-  ' --arg baseline ${lib.escapeShellArg baselineLua} "$manifest")" || fail "manifest does not provide valid normalized Hyprland visual tokens: $manifest"
+  ' --arg baseline ${lib.escapeShellArg baselineLua} --arg chrome ${lib.escapeShellArg chromeLua} "$manifest")" || fail "manifest does not provide valid normalized Hyprland visual tokens: $manifest"
 
   # Cursor (D-048): the theme's, or the base style's. setcursor reports
   # "ok" even for a theme it cannot find, so a theme cursor must be

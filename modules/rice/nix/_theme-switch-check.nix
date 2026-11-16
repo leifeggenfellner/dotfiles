@@ -16,8 +16,13 @@ let
   lotmManifest = pkgs.writeText "lotm-manifest.json" (builtins.toJSON {
     meta = { name = "lotm"; schemaVersion = 2; };
     tokens = {
-      colors = { accent.primary = "#c79a3a"; bg.elevated = "#2a211a"; };
-      motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; }; };
+      colors = { accent.primary = "#c79a3a"; bg.elevated = "#2a211a"; bg.sunken = "#0e0a06"; state.warn = "#d9a441"; };
+      typography.families.display = "Cinzel";
+      motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; borderSweep = "once"; }; };
+      chrome = {
+        border = { active = [ "state.warn" "accent.primary" ]; angle = 45; };
+        groupbar = { active = [ "accent.primary" ]; text = "bg.sunken"; font = "display"; };
+      };
     };
     integration.cursor = { name = "fixture-quill"; size = 24; };
     assets.wallpapers = [ lotmWallpaper ];
@@ -158,6 +163,19 @@ pkgs.runCommand "rice-theme-switch"
     grep -q 'leaf = "windowsIn", enabled = true, speed = 6, bezier = "winIn", style = "slide"' "$RICE_TEST_LOG"
     grep -q 'leaf = "fadeIn", enabled = true, speed = 10, bezier = "default"' "$RICE_TEST_LOG"
     ! grep -q 'rice_' "$RICE_TEST_LOG"
+
+    echo "case: window chrome (D-049)"
+    grep -q 'active_border = "rgb(00e5ff)"' "$RICE_TEST_LOG"
+    grep -q 'groupbar = { col = { active = "rgba(ffff0066)", inactive = "rgba(77770066)" }, text_color = "rgb(ffffff)", text_color_inactive = "rgb(ffffff)", font_family = "" }' "$RICE_TEST_LOG"
+    grep -q 'leaf = "borderangle", enabled = false' "$RICE_TEST_LOG"
+    ! grep -q 'Cinzel' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
+    "$switch" lotm
+    grep -q 'active_border = { colors = { "rgb(d9a441)", "rgb(c79a3a)" }, angle = 45 }' "$RICE_TEST_LOG"
+    grep -q 'border_active = { colors = { "rgb(d9a441)", "rgb(c79a3a)" }, angle = 45 }' "$RICE_TEST_LOG"
+    grep -q 'groupbar = { col = { active = { colors = { "rgb(c79a3a)" }, angle = 90 } }, text_color = "rgb(0e0a06)", font_family = "Cinzel" }' "$RICE_TEST_LOG"
+    grep -q 'leaf = "borderangle", enabled = true, speed = 8, bezier = "rice_standard", style = "once"' "$RICE_TEST_LOG"
+    "$switch" cyberpunk
 
     echo "case: theme cursor applies live, base cursor without one (D-048)"
     grep -q '^hypr setcursor capitaine-cursors-white 16$' "$RICE_TEST_LOG"

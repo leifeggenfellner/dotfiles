@@ -1,4 +1,7 @@
 { style, colors }:
+let
+  chrome = import ./_chrome.nix;
+in
 {
   config = {
     general = {
@@ -51,7 +54,7 @@
       };
     };
     group = {
-      groupbar = {
+      groupbar = chrome.groupbar // {
         font_size = style.fontSizeSmall;
         gradients = true;
         render_titles = true;

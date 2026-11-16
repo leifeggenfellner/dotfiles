@@ -863,7 +863,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-047 — The Hyprland adapter speaks Lua and carries theme window motion
 
-- Date: 2026-11-16 · Status: active (extended by D-048) · Amends D-039
+- Date: 2026-11-16 · Status: active (extended by D-048, D-049) · Amends D-039
 - Transport: Hyprland 0.56's Lua config has no `keyword` request, so the
   D-039 adapter had silently applied nothing since the Lua migration.
   `rice-hyprland-theme` now emits one Lua chunk for `hyprctl eval`, which
@@ -928,6 +928,31 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the pointer is on screen more than any other theme element, and the
   existing transactional adapter already owns live Hyprland visuals, so the
   cursor joins its rollback for free.
+
+### D-049 — Theme window chrome: gilt border gradient and group-bar cards
+
+- Date: 2026-11-16 · Status: active · Extends D-047
+- `tokens.chrome` (optional; schemaVersion stays 2): `border = { active;
+  angle?; }` and `groupbar = { active?; inactive?; text?; textInactive?;
+  font?; }`. Gradients are lists of 1–4 colour token refs and single
+  colours are refs (L-005); `angle` is 0..359 (group-bar gradients are drawn
+  at 90°); `font` names a typography family (`display|sans|mono`). Both
+  `mkThemeManifest` and the adapter validate it.
+- The adapter maps `border.active` to the active general and group borders
+  (inactive stays `bg.elevated`) and the group-bar keys to
+  `group.groupbar.col.{active,inactive}`, `text_color[_inactive]` and
+  `font_family`. Every apply first re-emits the group-bar baseline from
+  `programs/hyprland/_chrome.nix`, which the generated config now also sets
+  (Hyprland's own defaults, made explicit), so switching away restores it.
+- Motion: `tokens.motion.compositor.borderSweep = "once"` turns on
+  `borderangle` with style `once` over two `slow` durations on the
+  `standard` curve, so the gradient turns once when a window takes focus
+  and then rests. `loop` is not accepted (L-007; permanently animated UI is
+  a rejected idea). The baseline leaf, now in `_animations.nix`, keeps it
+  off; reduce-motion turns all compositor animation off (D-047).
+- Why: borders and group tabs are the only theme surface on every window.
+  Token refs keep the gilt tied to the palette, and the once-per-focus sweep
+  gives the glint without a moving UI.
 
 ---
 

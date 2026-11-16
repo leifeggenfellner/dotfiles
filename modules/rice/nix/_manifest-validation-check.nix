@@ -214,6 +214,15 @@ let
       (setAtPath [ "plugins" ]
         [ ((builtins.head lotm.plugins) // { unloadWhenClosed = "false"; }) ]
         lotm))
+    # Window chrome (D-049).
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "active" ] [ "#c79a3a" ] lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "active" ] [ "accent.missing" ] lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "active" ] [ "accent.primary" "accent.primary" "accent.primary" "accent.primary" "accent.primary" ] lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "angle" ] 400 lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "groupbar" "font" ] "Cinzel" lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "groupbar" "text" ] [ "fg.primary" ] lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" ] { } lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderSweep" ] "loop" lotm))
     # Cursor (D-048).
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "name" ] "lotm quill" lotm))
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "size" ] 4 lotm))

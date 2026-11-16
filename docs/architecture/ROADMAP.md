@@ -896,6 +896,28 @@ Concretized as D-048 (issue #80), extending D-047.
 - Limitation: XWayland and GTK3 apps pick up a switched cursor only after
   they restart, and only once the rebuild-time default matches (D-048).
 
+## Phase 36 — Window chrome (gilt border, tarot group bar) ✅
+
+Concretized as D-049 (issue #81), extending D-047.
+
+- ✅ `tokens.chrome`: active-border gradient and group-bar colours, text and
+  font, all token refs; validated by `mkThemeManifest` and the adapter.
+- ✅ `borderSweep = "once"`: the border gradient turns once on focus change
+  (two `slow` durations, `standard` curve); never loops; off under
+  reduce-motion.
+- ✅ Group-bar baseline (`programs/hyprland/_chrome.nix`) shared by the
+  generated config and the adapter, so themes without chrome restore it.
+- ✅ LOTM: the focused border is antique gilt at 45° (pale glint
+  `state.warn` → gold → bronze shadow `bg.surface2` → gold) and sweeps once.
+  Group tabs are tarot cards: the chosen card gilded with dark ink in
+  Cinzel, the rest face-down in umber with muted text. Cyberpunk declares
+  none and keeps a single-colour border and the stock group bar.
+- Verified: `rice-theme-switch` (new case: chrome applied for the theme,
+  baseline restored on switching back), `rice-manifest-validation` (eight
+  negative chrome cases), `nix flake check`; live on Hyprland 0.56 the
+  LOTM chunk applied and read back exactly (gradients, Cinzel,
+  `borderangle` once).
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

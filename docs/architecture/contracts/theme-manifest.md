@@ -66,6 +66,15 @@ and exposes it exclusively through the `Theme` facade.
         windowsOut = "popin 92%"; #   slide | gnomed | popin N%
         workspaces = "slidefadevert 15%"; # slide | slidevert | fade | slidefade[vert] N%
         layers     = "fade";      #   slide | fade | popin N%
+        borderSweep = "once";     #   (D-049) gradient turns once on focus; never loops
+      };
+    };
+    chrome = {                    # OPTIONAL (D-049): Hyprland window chrome; colour TOKEN REFS (L-005)
+      border = { active = [ "state.warn" "accent.primary" ]; angle = 45; };  # 1-4 stops, angle 0..359
+      groupbar = {                # every key optional
+        active = [ "accent.primary" ]; inactive = [ "bg.elevated" ];       # 1-4 stops, drawn at 90°
+        text = "bg.sunken"; textInactive = "fg.muted";
+        font = "display";         # display | sans | mono → tokens.typography.families
       };
     };
     effects = {                   # OPTIONAL (D-021): ambient atmosphere layers,
@@ -200,7 +209,7 @@ defaultMinHeight = 180; }`. Optional assets and open-edge data continue to
    theme-root-relative entry path. Keep plugin-local assets under the plugin
    directory and resolve them from QML with relative URLs.
 
-## Hyprland visual mapping (D-039, amended by D-047, D-048)
+## Hyprland visual mapping (D-039, amended by D-047, D-048, D-049)
 
 The live Hyprland adapter (`rice-hyprland-theme`) consumes the normalized manifest
 and applies one Lua chunk through `hyprctl eval`. The complete mapping is
@@ -209,7 +218,12 @@ and applies one Lua chunk through `hyprctl eval`. The complete mapping is
 `animations.enabled` (off under the reduce-motion pref or
 `tokens.motion.enabled = false`), and, when present, `tokens.motion.compositor`
 window/workspace/layer styles with speeds and curves derived from
-`tokens.motion.durations` and `tokens.motion.easings`. Rounding and gaps are not
+`tokens.motion.durations` and `tokens.motion.easings` (the border sweep plays
+`borderangle` once over two `slow` durations). `tokens.chrome` (D-049) turns the
+active border into a gradient and sets group-bar colours, text colours and
+font; every apply first restores the group-bar baseline from
+`programs/hyprland/_chrome.nix`, so a theme without it shows the generated
+config's group bar. Rounding and gaps are not
 mapped; they stay with the generated Hyprland config. After the Lua chunk the
 adapter runs `hyprctl setcursor` with `integration.cursor` (D-048), or the base
 style's cursor for a theme without one; a theme cursor that is not installed in

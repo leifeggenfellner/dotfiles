@@ -98,6 +98,24 @@ in
       };
     };
 
+    # Window chrome (D-049): antique gilt on the focused border — a pale
+    # glint, the gold, and a bronze shadow — and group tabs drawn as
+    # tarot cards: the chosen card gilded with dark ink in Cinzel,
+    # the rest face-down in umber.
+    chrome = {
+      border = {
+        active = [ "state.warn" "accent.primary" "bg.surface2" "accent.primary" ];
+        angle = 45;
+      };
+      groupbar = {
+        active = [ "state.warn" "accent.primary" ];
+        inactive = [ "bg.surface1" "bg.elevated" ];
+        text = "bg.sunken";
+        textInactive = "fg.muted";
+        font = "display";
+      };
+    };
+
     motion = {
       durations = {
         fast = 160;
@@ -119,12 +137,14 @@ in
       # Window motion (D-047): windows emerge from the fog — a slow pop
       # in on the enter curve while they fade up — and burn away, a
       # quick shrink on the exit curve with a short fade. Workspaces
-      # drift through each other vertically; layers fade.
+      # drift through each other vertically; layers fade. The gilded
+      # border's glint turns once around a window as it takes focus.
       compositor = {
         windowsIn = "popin 85%";
         windowsOut = "popin 92%";
         workspaces = "slidefadevert 15%";
         layers = "fade";
+        borderSweep = "once";
       };
       # Opt into the ambient atmosphere tier (D-021); the runtime
       # governor still pauses it on battery/fullscreen/reduce-motion.

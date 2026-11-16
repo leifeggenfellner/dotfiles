@@ -17,6 +17,8 @@
     { leaf = "windowsOut"; enabled = true; speed = 5; bezier = "winOut"; style = "slide"; }
     { leaf = "windowsMove"; enabled = true; speed = 5; bezier = "wind"; style = "slide"; }
     { leaf = "border"; enabled = true; speed = 10; bezier = "liner"; }
+    # Off by default; a theme's border sweep turns it on (D-049).
+    { leaf = "borderangle"; enabled = false; speed = 8; bezier = "default"; }
     { leaf = "fade"; enabled = true; speed = 10; bezier = "default"; }
     { leaf = "layers"; enabled = true; speed = 4; bezier = "wind"; style = "slide"; }
     { leaf = "layersIn"; enabled = true; speed = 4; bezier = "winIn"; style = "slide"; }
