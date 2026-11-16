@@ -11,10 +11,12 @@ import "../../services/prefs"
 // be unique.
 
 Item {
+    // Effective DND: the user's pref, or a workspace mood that asks
+    // for quiet (D-045). The pref itself is never touched by a mood.
     Binding {
         target: ShellState
         property: "doNotDisturb"
-        value: PrefsState.doNotDisturb
+        value: PrefsState.doNotDisturb || ShellState.moodQuiet
     }
 
     IpcHandler {
@@ -23,7 +25,8 @@ Item {
         function status(): string {
             return JSON.stringify({
                 count: NotificationState.notifications.length,
-                doNotDisturb: PrefsState.doNotDisturb
+                doNotDisturb: PrefsState.doNotDisturb,
+                moodQuiet: ShellState.moodQuiet
             });
         }
 

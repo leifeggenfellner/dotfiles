@@ -37,7 +37,17 @@ Item {
     // so nothing behind the lock keeps rendering for hours.
     property bool locked: false
 
-    readonly property bool ambientAllowed: Theme.motion.ambient && Theme.motion.enabled && Effects.layers.length > 0 && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !PowerState.onBattery && !HyprState.anyFullscreen && !governor.locked
+    // Some screen has layers to render: the theme's, or a mood's (D-045).
+    readonly property bool hasLayers: {
+        if (Effects.layers.length > 0)
+            return true;
+        for (const name in ShellState.moods)
+            if ((ShellState.moods[name].layers ?? []).length > 0)
+                return true;
+        return false;
+    }
+
+    readonly property bool ambientAllowed: Theme.motion.ambient && Theme.motion.enabled && governor.hasLayers && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !PowerState.onBattery && !HyprState.anyFullscreen && !governor.locked
 
     readonly property bool idleAllowed: governor.idleHint && Theme.motion.ambient && Theme.motion.enabled && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !HyprState.anyFullscreen && !governor.locked
     readonly property int lockHandoffDelay: PrefsState.reduceMotion ? 0 : 90

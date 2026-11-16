@@ -7,7 +7,8 @@ import "../../components/effects"
 // ── AmbientLayer ──────────────────────────────────────────────
 // Per-monitor atmosphere surface (D-021): mounts the theme's
 // resolved effect layers (core/Effects) between the wallpaper and
-// application windows. Input-transparent (empty mask) and mapped
+// application windows — or, while this screen shows a workspace
+// with a mood (D-045), the mood's layers. Input-transparent (empty mask) and mapped
 // only while the governor says so — when ambient is off the window
 // is unmapped and the Loader unloaded, so the steady-state cost is
 // exactly zero (motion-contract budget).
@@ -18,7 +19,9 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    visible: ShellState.ambientActive && Effects.layers.length > 0
+    readonly property var layers: ShellState.moods[modelData.name]?.layers ?? Effects.layers
+
+    visible: ShellState.ambientActive && layers.length > 0
 
     WlrLayershell.namespace: "rice-ambient"
     WlrLayershell.layer: WlrLayer.Bottom
@@ -42,7 +45,7 @@ PanelWindow {
 
         sourceComponent: Item {
             Repeater {
-                model: Effects.layers
+                model: layerWin.layers
 
                 Loader {
                     id: effectMount

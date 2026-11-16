@@ -13,6 +13,10 @@ import QtQuick
 // Layer types v1: fog · particles · vignette. Tints arrive as
 // color token refs ("accent.primary") and resolve here (L-005:
 // effect colors derive from tokens, never literals).
+//
+// resolve() is also the path for a workspace mood's layer list
+// (D-045): modules/mood hands it the theme data, so mood layers
+// meet the same budgets without core reading widget settings.
 
 QtObject {
     id: effects
@@ -23,8 +27,9 @@ QtObject {
     readonly property int maxLayers: 4
     readonly property int maxParticles: 12
 
-    readonly property var layers: {
-        const raw = (Theme.effects ?? {}).layers ?? [];
+    readonly property var layers: resolve((Theme.effects ?? {}).layers ?? [])
+
+    function resolve(raw) {
         const out = [];
         for (const l of raw.slice(0, maxLayers)) {
             if (l.type === "fog")

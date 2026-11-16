@@ -150,7 +150,9 @@ and exposes it exclusively through the `Theme` facade.
    (`launcher`, `dashboard`, `powermenu`, …) use this same id namespace and read
    their data through `Theme.widgetConfig(surfaceId)`. D-042 adds the
    out-of-shell `terminal` id (read by `rice-terminal`), whose settings may name
-   other manifest paths by theme-authored dotted path.
+   other manifest paths by theme-authored dotted path. D-045 adds the `mood` id
+   (read by `modules/mood/MoodController`): `workspaces.<name>` gives a named
+   workspace an effects list, backdrop, title, DND, and entry sound.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

@@ -391,6 +391,23 @@ in
         };
       };
 
+      # Workspace moods (D-045): the focus workspace (Super+0) is the
+      # Sefirah Castle above the gray fog — the Fool's throne behind the
+      # windows, fog rising through the whole screen, letters held until
+      # you descend.
+      mood.settings.workspaces.focus = {
+        title = "Above the Gray Fog";
+        backdrop = "wallpapers/klein_chair.jpg";
+        dnd = true;
+        sound = "lore";
+        effects = [
+          { type = "fog"; tint = "accent.secondary"; opacity = 0.32; speed = 0.7; band = "full"; }
+          { type = "fog"; tint = "fg.subtle"; opacity = 0.22; speed = 0.5; band = "bottom"; }
+          { type = "particles"; tint = "accent.primary"; opacity = 0.3; count = 6; speed = 0.6; }
+          { type = "vignette"; tint = "bg.sunken"; opacity = 0.45; }
+        ];
+      };
+
       # Terminal consumers (rice-terminal, D-042): the fish greeting shows the
       # same daily card the Observatory drew.
       terminal.settings = {

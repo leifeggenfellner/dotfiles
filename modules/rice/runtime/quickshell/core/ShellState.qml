@@ -37,6 +37,21 @@ Item {
     property bool soundMuted: true
     property bool doNotDisturb: false
 
+    // ── Workspace moods (D-045) ──────────────────────────────
+    // Pushed by modules/mood/MoodController: { screenName: mood }
+    // for screens showing a workspace the theme gives a mood, where a
+    // mood is { workspace, title, backdrop, dnd, sound, layers } — layers
+    // already resolved by core/Effects, or null for the theme's own.
+    // Derived, never persisted: leaving the workspace, or restarting
+    // the shell, recomputes it.
+    property var moods: ({})
+    readonly property bool moodQuiet: {
+        for (const name in moods)
+            if (moods[name].dnd === true)
+                return true;
+        return false;
+    }
+
     // ── Flavor events (D-030) ────────────────────────────────
     // Runtime-owned garnish triggered by modules/lore and surfaces.
     // Themes provide only settings text/phrases; shell state carries

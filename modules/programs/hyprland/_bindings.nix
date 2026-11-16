@@ -78,6 +78,9 @@ in
     (mkBind (key mainShift "P") (exec (runOnce "grimblast --notify copy area")))
     (mkBind (key mainShift "T") (moveWorkspace "special"))
     (mkBind (key main "t") "hl.dsp.workspace.toggle_special(\"\")")
+    # Focus workspace: a named workspace themes may give a mood (D-045).
+    (mkBind (key main "0") (workspace "name:focus"))
+    (mkBind (key mainShift "0") (moveWorkspace "name:focus"))
     (mkBind (key mainShiftCtrl "Q") (exec "uwsm stop"))
     (mkBind (key main "Q") "hl.dsp.window.close()")
     (mkBind (key main "F") "hl.dsp.window.float({ action = \"toggle\" })")

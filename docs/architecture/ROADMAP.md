@@ -800,6 +800,27 @@ gray fog and its TTYs speak in parchment and umber.
 - Pending: a real boot on shitbox (stickytop has rice disabled, so it is
   unchanged).
 
+## Phase 32 — Workspace moods (Above the Gray Fog) ✅
+
+Concretized as D-045 (issue #77): Super+0 rises above the gray fog.
+
+- ✅ `HyprState.activeWorkspaceNames`; theme-neutral `focus` named workspace
+  on Super+0 / Super+Shift+0.
+- ✅ `modules/mood/` — `MoodController` (only reader of
+  `widgets.mood.settings`, IPC `mood status`, entry sound after startup
+  settles) and per-monitor `MoodBackdrop` (Background layer, fade, caption
+  beside the real workspace name).
+- ✅ Derived state only: effective DND is pref OR mood; `AmbientLayer` swaps
+  in the mood's resolved layers on that screen; `Effects.resolve` keeps the
+  budgets.
+- ✅ LOTM: "Above the Gray Fog" — the Fool's throne behind the windows, full
+  fog, sparse motes, deep vignette, DND, `lore` cue. Cyberpunk has no mood.
+- Verified: `rice-lint`, `nix flake check`; dev shell with the LOTM manifest:
+  entering `focus` sets the mood, DND (pref untouched), the mood layers and
+  the backdrop; leaving clears all and unloads the backdrop; restarting the
+  shell inside re-derives the mood. Cyberpunk: `mood status` shows nothing
+  configured and no `rice-mood` layer; its manifest is byte-identical.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

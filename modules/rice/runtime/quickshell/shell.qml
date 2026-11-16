@@ -15,6 +15,7 @@ import "./modules/debug"
 import "./modules/lore"
 import "./modules/prefs"
 import "./modules/inspector"
+import "./modules/mood"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -38,6 +39,8 @@ ShellRoot {
 
     InspectorController {}
 
+    MoodController {}
+
     AmbientController {}
 
     SoundController {}
@@ -45,6 +48,17 @@ ShellRoot {
     LoreController {}
 
     OsdController {}
+
+    Variants {
+        model: Quickshell.screens
+        SurfaceLoader {
+            id: moodLoader
+            requested: !!(ShellState.moods[modelData.name] ?? {}).backdrop
+            sourceComponent: MoodBackdrop {
+                modelData: moodLoader.modelData
+            }
+        }
+    }
 
     Variants {
         model: Quickshell.screens

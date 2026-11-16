@@ -11,6 +11,7 @@ import Quickshell.Wayland
 //
 //   state:    available, focusedScreenName ("" when unknown),
 //             activeWorkspace (id), activeWorkspaceForScreen(name),
+//             activeWorkspaceNames ({ screenName: workspace name }),
 //             anyFullscreen, monitorsRevision
 //   commands: switchWorkspace(id)
 //
@@ -36,6 +37,9 @@ Item {
     readonly property bool anyFullscreen: _fullscreenCount > 0
     property int monitorsRevision: 0
     property var _activeWorkspaces: ({})
+    // Named workspaces ("focus") have negative ids, so consumers that
+    // key on a workspace by name read this map instead.
+    property var activeWorkspaceNames: ({})
 
     function activeWorkspaceForScreen(screenName) {
         return hypr._activeWorkspaces[screenName] ?? Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1;
@@ -46,6 +50,14 @@ Item {
             return;
         hypr._activeWorkspaces = Object.assign({}, hypr._activeWorkspaces, {
             [screenName]: workspaceId
+        });
+    }
+
+    function _setActiveWorkspaceName(screenName, name) {
+        if (!screenName || hypr.activeWorkspaceNames[screenName] === name)
+            return;
+        hypr.activeWorkspaceNames = Object.assign({}, hypr.activeWorkspaceNames, {
+            [screenName]: name
         });
     }
 
@@ -85,10 +97,13 @@ Item {
             required property var modelData
             readonly property string screenName: modelData.name ?? ""
             readonly property int activeWorkspaceId: modelData.activeWorkspace?.id ?? 1
+            readonly property string activeWorkspaceName: modelData.activeWorkspace?.name ?? ""
 
             onActiveWorkspaceIdChanged: hypr._setActiveWorkspace(screenName, activeWorkspaceId)
+            onActiveWorkspaceNameChanged: hypr._setActiveWorkspaceName(screenName, activeWorkspaceName)
             Component.onCompleted: {
                 hypr._setActiveWorkspace(screenName, activeWorkspaceId);
+                hypr._setActiveWorkspaceName(screenName, activeWorkspaceName);
                 hypr.monitorsRevision++;
             }
             Component.onDestruction: Qt.callLater(() => hypr.monitorsRevision++)

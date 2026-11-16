@@ -793,6 +793,34 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the first and last thing a machine shows should already belong to the
   theme, and both surfaces are cheap, static, and fully known at rebuild.
 
+### D-045 — Workspace moods are derived from the active workspace
+
+- Date: 2026-11-16 · Status: active
+- A theme may give a named workspace a mood in
+  `widgets.mood.settings.workspaces.<name>`: `effects` (an ambient layer list,
+  same schema and budgets as `tokens.effects.layers`), `backdrop` (assets-root
+  path), `title` (caption beside the real workspace name), `dnd`, and `sound`
+  (semantic event on entering). Hyprland gains a theme-neutral named workspace
+  `focus` on Super+0 (Super+Shift+0 moves a window there).
+- `HyprState.activeWorkspaceNames` (event-driven, per screen) feeds
+  `modules/mood/MoodController`, the only reader of the mood settings. It
+  resolves layers through `Effects.resolve` and pushes plain data onto
+  `ShellState.moods`; core never reads the settings (contract rule 1).
+- Moods are derived and never written anywhere: effective DND is
+  `PrefsState.doNotDisturb || ShellState.moodQuiet`, and `AmbientLayer`
+  renders the mood's layers instead of the theme's on that screen. Leaving the
+  workspace, or restarting the shell inside it, therefore restores DND and
+  ambient exactly. Battery, fullscreen, and reduce-motion gates stay with
+  `AmbientController`; the static backdrop (`MoodBackdrop`, Background layer,
+  input-transparent, loaded only while shown) ignores the battery gate. The
+  entry sound fires only on a workspace edge after startup settles (D-024).
+- A named workspace, not a special one: Hyprland draws special workspaces over
+  the regular workspace's windows, and layer-shell surfaces sit below all
+  windows, so a backdrop or fog could only show in the gaps.
+- Why: a focus mode is a place the user goes, so its state should follow
+  where the user is rather than be toggled and later undone; deriving it
+  makes "restore exactly" true by construction.
+
 ---
 
 ## Legacy imports
