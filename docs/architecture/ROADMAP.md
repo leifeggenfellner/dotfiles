@@ -847,6 +847,29 @@ weather.
   shows the crimson copy beside the real moon data; returning to auto
   clears everything.
 
+## Phase 34 — Theme window motion (fog-emerge / burn-away) ✅
+
+Concretized as D-047 (issue #79), amending D-039.
+
+- ✅ `rice-hyprland-theme` emits Lua for `hyprctl eval` (the `keyword`
+  transport had been dead since the Lua config); runs on start and on
+  `config.reloaded`. Mapping: border colours (`bg.elevated` inactive, as the
+  generated config shows), `animations.enabled`, compositor motion; rounding
+  and gaps stay with the generated config.
+- ✅ `tokens.motion.compositor` validated by `mkThemeManifest` and the
+  adapter; baseline animations shared via `programs/hyprland/_animations.nix`.
+- ✅ Reduce-motion turns compositor animation off, live.
+- ✅ LOTM: windows pop in at 85% on OutQuint over 400 ms while fading up,
+  close in a 280 ms InCubic shrink with a 160 ms fade; workspaces
+  slide-fade vertically; layers fade. Cyberpunk declares nothing and keeps
+  the baseline; its manifest is byte-identical.
+- Verified: `rice-theme-switch` (new cases: theme motion, baseline restore
+  on switching back, reduce-motion; rollback still restores),
+  `rice-manifest-validation`, `rice-lint`, `nix flake check`; live on
+  Hyprland 0.56: LOTM → reduce → Cyberpunk → LOTM each produced the expected
+  `hyprctl animations` table and border colour, rounding unchanged, no
+  config errors.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

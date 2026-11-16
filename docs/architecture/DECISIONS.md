@@ -609,7 +609,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-039 — Rice switch owns live Hyprland visual tokens
 
-- Date: 2026-09-10 · Status: active
+- Date: 2026-09-10 · Status: active (mapping and transport amended by D-047)
 - `rice-switch` is the only installed theme-switch workflow. It validates the
   target's immutable normalized manifest, applies the mapped Hyprland visual
   keywords, atomically commits `$XDG_STATE_HOME/rice/active`, and reloads a
@@ -860,6 +860,40 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the desktop reacting to the real sky is atmosphere the user did not
   have to ask for, so it must stay cheap (one hourly probe, only if used),
   offline-safe, and inside the budgets the ambient tier already enforces.
+
+### D-047 — The Hyprland adapter speaks Lua and carries theme window motion
+
+- Date: 2026-11-16 · Status: active · Amends D-039
+- Transport: Hyprland 0.56's Lua config has no `keyword` request, so the
+  D-039 adapter had silently applied nothing since the Lua migration.
+  `rice-hyprland-theme` now emits one Lua chunk for `hyprctl eval`, which
+  exits non-zero with the Lua error on failure, so `rice-switch`'s rollback
+  (D-040) still holds. Generated Lua also runs the adapter on
+  `config.reloaded`, since a reload (every rebuild) drops live values.
+- Mapping (closed): `accent.primary` → active general/group borders,
+  `bg.elevated` → inactive borders (what the generated config already
+  shows), `animations.enabled`, and compositor motion. Rounding and gaps
+  leave the mapping and stay with the generated Hyprland config, so fixing
+  the transport does not reshape windows.
+- `tokens.motion.compositor` (optional; schemaVersion stays 2) names styles
+  only — `windowsIn`/`windowsOut` (`slide|gnomed|popin N%`), `workspaces`
+  (`slide|slidevert|fade|slidefade[vert] N%`), `layers` (`slide|fade|popin
+  N%`). Speeds and curves derive from the theme's motion tokens: windows and
+  fade in on `slow`/`enter`, out on `base`/`exit` (fade out on `fast`),
+  moves and workspaces on `base`/`standard`, layers on `base`/`enter` and
+  `fast`/`exit`. Qt easing names map to cubic beziers (`rice_*` curves);
+  Elastic/Bounce use their Back neighbour.
+- Every apply first re-emits the overridable leaves from
+  `modules/programs/hyprland/_animations.nix` (shared with the generated
+  config), so a theme without the block restores the baseline exactly.
+- Reduce-motion (pref) or `tokens.motion.enabled = false` sets
+  `animations.enabled = false`. The shell re-runs the adapter when the pref
+  changes, passing the new value (`RICE_REDUCE_MOTION`) since prefs.json may
+  not be written yet.
+- Why: window motion is the most visible part of a theme's tempo, and the
+  existing transactional switch is the right owner; keeping geometry out of
+  it preserves the look the user has, which the broken adapter had never
+  changed.
 
 ---
 

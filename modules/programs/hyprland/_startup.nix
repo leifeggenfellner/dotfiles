@@ -18,8 +18,24 @@ let
   '';
 in
 {
-  on._args = [
-    "hyprland.start"
-    (lib.generators.mkLuaInline startFunction)
-  ];
+  on = [
+    {
+      _args = [
+        "hyprland.start"
+        (lib.generators.mkLuaInline startFunction)
+      ];
+    }
+  ]
+  # A reload (every rebuild) re-runs the config and drops the live theme's
+  # colours and animations (D-047); put them back.
+  ++ lib.optional riceEnabled {
+    _args = [
+      "config.reloaded"
+      (lib.generators.mkLuaInline ''
+        function()
+          hl.exec_cmd(${builtins.toJSON applyRiceTheme})
+        end
+      '')
+    ];
+  };
 }

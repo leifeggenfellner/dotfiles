@@ -95,7 +95,7 @@ let
         [ "columnCount" "compactBreakpoint" "sidebarRatio" "sidebarMinWidth" "sidebarMaxWidth" "mainMinWidth" "epigraphMinHeight" "defaultMinHeight" ]
         (get [ "metrics" "dashboard" ] tokens))
       (checkClosed "tokens.motion"
-        [ "durations" "easings" "intensity" "ambient" "enabled" ]
+        [ "durations" "easings" "intensity" "ambient" "enabled" "compositor" ]
         (get [ "motion" ] tokens))
       (checkClosed "tokens.motion.durations"
         [ "fast" "base" "slow" "overlay" "ceremonial" ]
@@ -292,7 +292,27 @@ let
       else fail "tokens.motion.ambient must be a bool")
       (if builtins.isBool (get [ "motion" "enabled" ] tokens) then true
       else fail "tokens.motion.enabled must be a bool")
-    ];
+    ]
+    ++ lib.optionals (tokens.motion ? compositor) (
+      let c = tokens.motion.compositor; in
+      [ (checkClosed "tokens.motion.compositor" (lib.attrNames compositorStyles) c) ]
+      ++ lib.mapAttrsToList
+        (key: pattern:
+          if !(c ? ${key}) || (builtins.isString c.${key} && builtins.match pattern c.${key} != null)
+          then true
+          else fail "tokens.motion.compositor.${key} must match ${pattern}, got ${builtins.toJSON c.${key}}")
+        compositorStyles
+    );
+
+  # Hyprland animation styles a theme may pick (D-047). Timings are not
+  # here: the adapter derives speeds and curves from durations/easings.
+  # The rice-hyprland-theme adapter re-checks the same patterns.
+  compositorStyles = {
+    windowsIn = "(slide|gnomed|popin( [0-9]{1,2}%)?)";
+    windowsOut = "(slide|gnomed|popin( [0-9]{1,2}%)?)";
+    workspaces = "(slide|slidevert|fade|slidefade( [0-9]{1,2}%)?|slidefadevert( [0-9]{1,2}%)?)";
+    layers = "(slide|fade|popin( [0-9]{1,2}%)?)";
+  };
 
   effectTypes = [ "fog" "particles" "vignette" "rain" ];
   # Sky conditions a preset may key on (D-046); the runtime's

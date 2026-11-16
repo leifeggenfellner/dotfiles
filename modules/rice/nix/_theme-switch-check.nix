@@ -2,15 +2,23 @@
 let
   packages = import ./_switch-package.nix { inherit pkgs; };
   cyberWallpaper = pkgs.writeText "cyber-wallpaper.png" "cyber";
+  fixtureMotion = {
+    enabled = true;
+    durations = { fast = 160; base = 280; slow = 400; };
+    easings = { standard = "OutCubic"; enter = "OutQuint"; exit = "InCubic"; };
+  };
   lotmWallpaper = pkgs.writeText "lotm-wallpaper.png" "lotm";
   cyberManifest = pkgs.writeText "cyberpunk-manifest.json" (builtins.toJSON {
     meta = { name = "cyberpunk"; schemaVersion = 2; };
-    tokens = { colors = { accent.primary = "#00e5ff"; bg.surface1 = "#1e2940"; }; metrics = { radius.medium = 4; space = { sm = 8; md = 12; }; }; };
+    tokens = { colors = { accent.primary = "#00e5ff"; bg.elevated = "#141b2b"; }; motion = fixtureMotion; };
     assets.wallpapers = [ cyberWallpaper ];
   });
   lotmManifest = pkgs.writeText "lotm-manifest.json" (builtins.toJSON {
     meta = { name = "lotm"; schemaVersion = 2; };
-    tokens = { colors = { accent.primary = "#c79a3a"; bg.surface1 = "#3e3121"; }; metrics = { radius.medium = 10; space = { sm = 8; md = 12; }; }; };
+    tokens = {
+      colors = { accent.primary = "#c79a3a"; bg.elevated = "#2a211a"; };
+      motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; }; };
+    };
     assets.wallpapers = [ lotmWallpaper ];
   });
   invalidManifest = pkgs.writeText "invalid-manifest.json" ''{"meta":{"name":"invalid","schemaVersion":2}}'';
@@ -135,6 +143,26 @@ pkgs.runCommand "rice-theme-switch"
     test "$(cat "$HOME/.config/wallpaper/current")" = ${lotmWallpaper}
     grep -q "awww img ${lotmWallpaper}" "$RICE_TEST_LOG"
 
+    echo "case: compositor motion (D-047)"
+    grep -q 'leaf = "windowsIn", enabled = true, speed = 4, bezier = "rice_enter", style = "popin 85%"' "$RICE_TEST_LOG"
+    grep -q 'hl.curve("rice_enter", { type = "bezier", points = { {0.22, 1}, {0.36, 1} } })' "$RICE_TEST_LOG"
+    grep -q 'animations = { enabled = true }' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
+    "$switch" cyberpunk
+    grep -q 'rgb(00e5ff)' "$RICE_TEST_LOG"
+    # Baseline leaves come back; no theme curve is referenced.
+    grep -q 'leaf = "windowsIn", enabled = true, speed = 6, bezier = "winIn", style = "slide"' "$RICE_TEST_LOG"
+    grep -q 'leaf = "fadeIn", enabled = true, speed = 10, bezier = "default"' "$RICE_TEST_LOG"
+    ! grep -q 'rice_' "$RICE_TEST_LOG"
+
+    echo "case: reduce-motion disables compositor animation"
+    printf '%s' '{"motion":{"reduce":true}}' > "$XDG_STATE_HOME/rice/prefs.json"
+    : > "$RICE_TEST_LOG"
+    "$switch" lotm
+    grep -q 'animations = { enabled = false }' "$RICE_TEST_LOG"
+    ! grep -q 'hl.animation' "$RICE_TEST_LOG"
+    rm "$XDG_STATE_HOME/rice/prefs.json"
+
     echo "case: trust boundary"
     reset_state
     printf %s '{}' > "$TMPDIR/mutable-index.json"
@@ -153,7 +181,7 @@ pkgs.runCommand "rice-theme-switch"
     export RICE_FAIL_HYPR_MATCH='rgb(c79a3a)'
     expect_failure "$switch" lotm
     test "$(cat "$XDG_STATE_HOME/rice/active")" = cyberpunk
-    tail -n 1 "$RICE_TEST_LOG" | grep -q 'rgb(00e5ff)'
+    grep '^hypr ' "$RICE_TEST_LOG" | tail -n 1 | grep -q 'rgb(00e5ff)'
     grep -q 'rollback completed' "$TMPDIR/stderr"
 
     echo "case: failed visual compensation recovery command"

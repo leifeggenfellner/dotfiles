@@ -54,22 +54,21 @@ let
     };
   };
 
+  # What rice-hyprland-theme applies (D-047): border colours only;
+  # rounding and gaps stay with the generated Hyprland config.
   hyprlandVisual = manifest: {
     activeBorder = manifest.tokens.colors.accent.primary;
-    inactiveBorder = manifest.tokens.colors.bg.surface1;
-    rounding = manifest.tokens.metrics.radius.medium;
+    inactiveBorder = manifest.tokens.colors.bg.elevated;
   };
 
   expectedHyprlandVisuals = {
     cyberpunk = {
       activeBorder = "#00e5ff";
-      inactiveBorder = "#1e2940";
-      rounding = 4;
+      inactiveBorder = "#141b2b";
     };
     lotm = {
       activeBorder = "#c79a3a";
-      inactiveBorder = "#3e3121";
-      rounding = 10;
+      inactiveBorder = "#2a211a";
     };
   };
 
@@ -163,6 +162,10 @@ let
         layers = [{ type = "fog"; tint = "accent.primary"; shader = "custom.qsb"; }];
       }
       cyberpunk)
+    # Compositor motion (D-047).
+    (setAtPath [ "tokens" "motion" "compositor" "windowsIn" ] "explode" cyberpunk)
+    (setAtPath [ "tokens" "motion" "compositor" "windowsIn" ] "popin 150%" cyberpunk)
+    (setAtPath [ "tokens" "motion" "compositor" "speed" ] 4 cyberpunk)
     # Conditional presets (D-046).
     (setAtPath [ "tokens" "effects" ]
       {

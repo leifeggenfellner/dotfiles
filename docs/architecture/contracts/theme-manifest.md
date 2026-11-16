@@ -61,6 +61,12 @@ and exposes it exclusively through the `Theme` facade.
       intensity = "calm" | "lively";                       # global scaler hint
       ambient   = false;          # opt-in to the ambient effect tier
       enabled   = true;           # theme-level motion kill switch
+      compositor = {              # OPTIONAL (D-047): Hyprland window motion styles;
+        windowsIn  = "popin 85%"; #   timings derive from durations/easings above.
+        windowsOut = "popin 92%"; #   slide | gnomed | popin N%
+        workspaces = "slidefadevert 15%"; # slide | slidevert | fade | slidefade[vert] N%
+        layers     = "fade";      #   slide | fade | popin N%
+      };
     };
     effects = {                   # OPTIONAL (D-021): ambient atmosphere layers,
       layers = [                  # rendered only while motion.ambient opts in

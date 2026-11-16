@@ -72,6 +72,15 @@ Item {
         value: PrefsState.reduceMotion
     }
 
+    // Hyprland's animations follow the same pref (D-047). The value is
+    // passed along because prefs.json may not be written yet.
+    Connections {
+        target: PrefsState
+        function onReduceMotionChanged() {
+            Quickshell.execDetached(["env", "RICE_REDUCE_MOTION=" + (PrefsState.reduceMotion ? "1" : "0"), "rice-hyprland-theme", "--active"]);
+        }
+    }
+
     Binding {
         target: ShellState
         property: "ambientActive"

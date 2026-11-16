@@ -116,6 +116,16 @@ in
         emphasis = "InOutBack";
       };
       intensity = "calm";
+      # Window motion (D-047): windows emerge from the fog — a slow pop
+      # in on the enter curve while they fade up — and burn away, a
+      # quick shrink on the exit curve with a short fade. Workspaces
+      # drift through each other vertically; layers fade.
+      compositor = {
+        windowsIn = "popin 85%";
+        windowsOut = "popin 92%";
+        workspaces = "slidefadevert 15%";
+        layers = "fade";
+      };
       # Opt into the ambient atmosphere tier (D-021); the runtime
       # governor still pauses it on battery/fullscreen/reduce-motion.
       ambient = true;
