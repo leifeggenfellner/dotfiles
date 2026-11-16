@@ -44,23 +44,35 @@ _: {
             })
             cards);
           # Returns 1 (the base greeting runs) when the active theme has no
-          # card. Terminals that draw images get the gilded PNG; the rest
-          # keep the card's braille logo.
+          # card. Terminals that draw images get the gilded PNG, encoded by
+          # chafa (fastfetch's own sixel encoder draws nothing in foot) and
+          # sized from the terminal's cell geometry; the rest keep the
+          # card's braille logo.
           programs.fish.functions.__rice_fastfetch = ''
             set -q __rice_active[1]; or return 1
             set -l dir ${config.xdg.configHome}/rice/fastfetch
             test -r $dir/$__rice_active.jsonc; or return 1
-            set -l logo
+            set -l format
             if test -r $dir/$__rice_active.png
                 switch "$TERM"
                     case 'foot*' 'mlterm*' 'contour*'
-                        set logo --logo-type sixel
+                        set format sixels
                     case xterm-kitty xterm-ghostty
-                        set logo --logo-type kitty-direct
+                        set format kitty
                 end
-                set -q logo[1]; and set -a logo --logo $dir/$__rice_active.png --logo-width 24 --logo-height 12
             end
-            fastfetch -c $dir/$__rice_active.jsonc $logo
+            if set -q format[1]
+                set -l image (mktemp)
+                if ${pkgs.chafa.bin}/bin/chafa -f $format -s 24x12 --animate off --probe off --polite on \
+                        $dir/$__rice_active.png > $image
+                    fastfetch -c $dir/$__rice_active.jsonc --logo-type raw --logo $image --logo-width 24 --logo-height 12
+                    set -l status_ff $status
+                    rm -f $image
+                    return $status_ff
+                end
+                rm -f $image
+            end
+            fastfetch -c $dir/$__rice_active.jsonc
           '';
         })
       ]);

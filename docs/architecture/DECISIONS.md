@@ -992,8 +992,11 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   diegetic label beside the plain key. `logo` is a single-colour SVG under
   the theme's `assets/`, recoloured to `accent.primary` into a 512 px PNG at
   build. Terminals that draw images show that PNG (foot/mlterm/contour via
-  sixel, kitty/ghostty via the kitty protocol, sized 24×12 cells by
-  fastfetch); every other terminal gets the same sigil in braille (chafa). The greeting calls `__rice_fastfetch`, which prints
+  sixel, kitty/ghostty via the kitty protocol): chafa encodes it at greeting
+  time from the terminal's cell geometry (≈20 ms, `--probe off`) and
+  fastfetch places it as a raw 24×12-cell logo. fastfetch's own sixel
+  encoder is not used: its output draws nothing in foot. Every other
+  terminal gets the same sigil in braille. The greeting calls `__rice_fastfetch`, which prints
   the active theme's card or returns 1 so the base art and fastfetch run.
   `__rice_active` (`rice-query active`, once per interactive shell) is
   shared with the prompt (D-050).
