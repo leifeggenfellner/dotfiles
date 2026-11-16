@@ -20,7 +20,9 @@ Item {
         _run(["lock-screen"]);
     }
     function logout() {
-        _run(["hyprctl", "dispatch", "exit"]);
+        // uwsm stops the session units cleanly (same as Super+Shift+Ctrl+Q);
+        // `hyprctl dispatch exit` is not valid under the Lua config.
+        _run(["uwsm", "stop"]);
     }
     function reboot() {
         _run(["systemctl", "reboot"]);

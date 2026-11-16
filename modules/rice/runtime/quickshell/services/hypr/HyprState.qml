@@ -61,8 +61,13 @@ Item {
         });
     }
 
+    // Hyprland's Lua config takes Lua for dispatch, not the old
+    // "workspace N" dispatcher syntax.
     function switchWorkspace(id) {
-        Hyprland.dispatch("workspace " + id);
+        const n = Number(id);
+        if (!Number.isInteger(n))
+            return;
+        Hyprland.dispatch("hl.dsp.focus({ workspace = " + n + " })");
     }
 
     function _recountFullscreen() {
