@@ -8,6 +8,9 @@
     }:
     let
       hyprctl = "${pkgs.hyprland}/bin/hyprctl";
+      # Lua dispatch (D-038 config). The action must be a table field: a
+      # bare string is ignored and the dispatcher toggles instead.
+      dpms = action: "${hyprctl} dispatch 'hl.dsp.dpms({ action = \"${action}\" })'";
       lock = "${pkgs.systemd}/bin/systemctl suspend";
 
       cfg = config.service.hypridle;
@@ -66,7 +69,7 @@
               # the loginctl session state. lock_cmd's pgrep guard
               # short-circuits the redundant relaunch.
               before_sleep_cmd = "${pkgs.util-linux}/bin/setsid -f lock-screen --fast >/dev/null 2>&1; ${pkgs.systemd}/bin/loginctl lock-session";
-              after_sleep_cmd = "${hyprctl} dispatch dpms on";
+              after_sleep_cmd = dpms "on";
               lock_cmd = "pgrep -x hyprlock || pgrep -f '[q]uickshell.*lock[.]qml' || lock-screen";
               ignore_dbus_inhibit = true;
             };
@@ -79,8 +82,8 @@
               ++
               (lib.optional cfg.dpms {
                 inherit (cfg) timeout;
-                on-timeout = "${hyprctl} dispatch dpms off";
-                on-resume = "${hyprctl} dispatch dpms on";
+                on-timeout = dpms "off";
+                on-resume = dpms "on";
               })
               ++ (lib.optional cfg.suspend {
                 timeout = cfg.timeout + cfg.suspendTimer;

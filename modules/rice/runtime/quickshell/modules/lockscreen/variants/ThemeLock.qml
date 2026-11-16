@@ -122,10 +122,8 @@ Item {
             // Safe when the rice shell isn't running (IPC just fails).
             Quickshell.execDetached(["quickshell", "-c", "rice", "ipc", "call", "ambient", "setIdleHint", "off"]);
 
-            // Hyprland re-lock workaround.
-            if (Quickshell.env("XDG_CURRENT_DESKTOP") === "Hyprland" || Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") !== "") {
-                Quickshell.execDetached(["hyprctl", "keyword", "misc:allow_session_lock_restore", "1"]);
-            }
+            // Re-lock after unlock relies on Hyprland's
+            // misc.allow_session_lock_restore, set in the generated config.
             Quickshell.execDetached(["loginctl", "unlock-session"]);
 
             // Optional unlock chime. Off unless RICE_LOCK_CHIME

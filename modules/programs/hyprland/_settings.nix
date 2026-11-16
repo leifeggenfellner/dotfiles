@@ -80,6 +80,9 @@
       mouse_move_focuses_monitor = true;
       enable_swallow = true;
       swallow_regex = "^(foot|alacritty|kitty)$";
+      # Let a crashed or relaunched lock client take the session lock
+      # back (the rice lock screen relies on this when re-locking).
+      allow_session_lock_restore = true;
     };
     xwayland.force_zero_scaling = true;
     debug.disable_logs = false;

@@ -21,7 +21,7 @@ Item {
     }
     function logout() {
         // uwsm stops the session units cleanly (same as Super+Shift+Ctrl+Q);
-        // `hyprctl dispatch exit` is not valid under the Lua config.
+        // the old exit dispatcher is not valid under the Lua config.
         _run(["uwsm", "stop"]);
     }
     function reboot() {

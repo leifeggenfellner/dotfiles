@@ -32,6 +32,14 @@
       };
 
       eca-workflow-hooks = import ../programs/eca/_workflow-check.nix { inherit pkgs; };
+      # Hyprland runs a Lua config (D-038); fail on IPC calls in the
+      # source that still use the old dispatch/keyword syntax (#89).
+      hyprland-lua-syntax = pkgs.runCommand "hyprland-lua-syntax-check"
+        { nativeBuildInputs = [ pkgs.python3 ]; }
+        ''
+          python3 ${./_hyprland-lua-syntax.py} ${../.}
+          touch $out
+        '';
     } // lib.optionalAttrs (system == "x86_64-linux") {
       hyprland-generated-config =
         let
