@@ -276,6 +276,17 @@ in
         };
       };
 
+      # Session awakening (D-053): the first shell start of a login opens
+      # veiled in gray fog; the Fool's words surface beside the real user
+      # and time, then the fog lifts off the desktop.
+      awakening.settings = {
+        title = "Above the Gray Fog";
+        subtitle = "The Fool awakens";
+        hold = 1100;
+        lift = 2600;
+        sound = "lore";
+      };
+
       epigraph.settings = {
         title = "Observatory";
         lines = [

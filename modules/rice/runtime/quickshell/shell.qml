@@ -17,6 +17,7 @@ import "./modules/prefs"
 import "./modules/inspector"
 import "./modules/mood"
 import "./modules/sky"
+import "./modules/awakening"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -51,6 +52,8 @@ ShellRoot {
     LoreController {}
 
     OsdController {}
+
+    AwakeningController {}
 
     Variants {
         model: Quickshell.screens
@@ -99,6 +102,17 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         LoreOverlay {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        SurfaceLoader {
+            id: awakeningLoader
+            requested: ShellState.awakening !== null
+            sourceComponent: AwakeningOverlay {
+                modelData: awakeningLoader.modelData
+            }
+        }
     }
 
     Variants {

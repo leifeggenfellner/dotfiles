@@ -1036,6 +1036,32 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   active theme like the prompt does; generating data modules keeps the
   runtime Lua small and theme-blind.
 
+### D-053 — A once-per-login session awakening
+
+- Date: 2026-11-16 · Status: active · Extends D-022, D-024, D-030
+- `widgets.awakening.settings = { title; subtitle?; hold?; lift?; sound?; }`
+  opts a theme in; no `title`, no ritual (instant, as before). `hold`
+  (0–3000 ms, default 900) is how long the fog holds; `lift` (300–5000 ms,
+  default 2400) is how long it takes to rise away.
+- `modules/awakening/AwakeningController` decides once per shell start,
+  after prefs and manifest are read. A marker in `$XDG_RUNTIME_DIR` keyed by
+  `HYPRLAND_INSTANCE_SIGNATURE` makes it once per login: `rice-shell`
+  restarts and rebuild restarts run inside the same Hyprland instance and
+  find the marker. The marker is written even when the theme has no ritual,
+  so a mid-session theme switch never plays one late.
+- `AwakeningOverlay` (one per screen, Overlay layer) opens veiled in
+  `bg.sunken` with a full-band fog, fades in the title and subtitle beside
+  the real user and time, holds, then lifts: the veil fades, the fog rises
+  and thins. Its input region is empty and it takes no keyboard focus, so
+  the session is usable from the first frame; it unloads when done.
+- Reduce-motion (or `motion.enabled = false`) collapses it to nothing. The
+  optional sound goes through `core/Sound`, so it stays muted by default.
+- IPC: `quickshell -c rice ipc call awakening status | trigger`; `trigger`
+  forces a play for smoke tests (still honouring reduce-motion).
+- Why: the greetd → Hyprland handoff popped straight onto the desktop; a
+  short, input-transparent reveal continues the boot splash's (D-044)
+  visual language without ever delaying the session.
+
 ---
 
 ## Legacy imports

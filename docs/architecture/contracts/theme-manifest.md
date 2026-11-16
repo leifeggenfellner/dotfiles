@@ -183,7 +183,10 @@ and exposes it exclusively through the `Theme` facade.
    other manifest paths by theme-authored dotted path. D-046 adds `skyLines`
    (epigraph) and `skyLabels` (calendar) keyed by sky condition. D-045 adds the `mood` id
    (read by `modules/mood/MoodController`): `workspaces.<name>` gives a named
-   workspace an effects list, backdrop, title, DND, and entry sound.
+   workspace an effects list, backdrop, title, DND, and entry sound. D-053 adds
+   the `awakening` id (read by `modules/awakening/AwakeningController`):
+   `{ title; subtitle?; hold?; lift?; sound?; }` opts the theme into the
+   once-per-login fog-lift.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

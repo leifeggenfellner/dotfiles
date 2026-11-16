@@ -974,6 +974,22 @@ Concretized as D-052 (issue #75).
   Cyberpunk builds nothing), `nix flake check`; screenshots in foot under
   a headless cage compositor.
 
+## Phase 40 — Session awakening on login ✅
+
+Concretized as D-053 (issue #69).
+
+- ✅ `widgets.awakening.settings`: a once-per-login fog-lift over every
+  screen, input-transparent, gated by a per-Hyprland-instance marker so
+  shell restarts and rebuilds don't replay it.
+- ✅ LOTM: "Above the Gray Fog" / "The Fool awakens" surfaces in gold
+  through the fog beside the real user and time, holds 1.1 s, then the
+  fog rises off the desktop over 2.6 s; the `lore` seal sounds if unmuted.
+- ✅ Reduce-motion and Cyberpunk: nothing plays (Cyberpunk's manifest is
+  byte-identical).
+- Verified: `rice-lint`, `nix flake check`; dev shell under a headless sway
+  compositor — first start plays, a restart reports `seen`, IPC `trigger`
+  forces it, reduce-motion reports `reduced`, Cyberpunk `unconfigured`.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

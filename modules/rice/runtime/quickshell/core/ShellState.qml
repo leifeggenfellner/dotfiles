@@ -95,6 +95,12 @@ Item {
         onTriggered: shell.awakened = true
     }
 
+    // Session awakening (D-053): while the login fog-lift plays,
+    // { title, subtitle, hold, lift } resolved from theme settings;
+    // null otherwise. Written by modules/awakening's controller; the
+    // overlay only reads it.
+    property var awakening: null
+
     // Single-open popout (L-002): the widgetId whose popout is up.
     property string activePopout: ""
 

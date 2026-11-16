@@ -28,6 +28,9 @@ Item {
 
     readonly property bool mock: false
     readonly property bool available: true
+    // True once prefs.json has been read (or found missing), so startup
+    // consumers can act on the user's real prefs, not the defaults.
+    property bool ready: false
 
     property var _data: ({ schemaVersion: 1, wallpapers: {}, sound: { muted: true }, notifications: { dnd: false }, extras: {} })
 
@@ -142,9 +145,10 @@ Item {
             } catch (e) {
                 console.warn("PrefsState: invalid prefs.json:", e);
             }
+            prefs.ready = true;
         }
         // Missing file: keep defaults — it appears on first record.
-        onLoadFailed: {}
+        onLoadFailed: prefs.ready = true
         onFileChanged: reload()
         onSaveFailed: error => console.warn("PrefsState: failed to write", prefs.prefsPath, "-", error)
     }
