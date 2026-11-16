@@ -69,7 +69,9 @@
     ];
     path = [ pkgs.coreutils ];
     serviceConfig = {
-      Type = "oneshot";
+      # Not oneshot: the script sleeps ~30 s, and a oneshot would hold
+      # multi-user.target (and so graphical.target and the session) for it.
+      Type = "exec";
       ExecStart = pkgs.writeShellScript "rapl-floor" ''
         floor=28000000
         zone=/sys/class/powercap/intel-rapl-mmio:0
