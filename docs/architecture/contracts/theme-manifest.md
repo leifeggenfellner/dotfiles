@@ -156,6 +156,7 @@ and exposes it exclusively through the `Theme` facade.
       };
     };
     fonts = { packages = [ ]; };
+    tools = [ "btop" "bat" "yazi" "cava" ];  # optional (D-051): token-derived tool themes at rebuild
     boot = {                      # optional (D-044); never copied into manifest JSON
       sigil = ./assets/<file>.svg;   # required: single-colour SVG, recoloured to accent.primary
       promptLabel = "<copy>";        # optional: shown above the real passphrase prompt

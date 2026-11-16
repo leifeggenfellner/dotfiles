@@ -499,6 +499,21 @@ in
           git.label = "Sequence";
           failure.label = "failed ritual";
         };
+        # fastfetch as a Beyonder Characteristic card (D-051): the Fool
+        # sigil in gilt, each row's diegetic label beside its real key.
+        fastfetch = {
+          title = "Beyonder Characteristic";
+          logo = "pathways/fool.svg";
+          labels = {
+            user = "Vessel";
+            distro = "Pathway";
+            kernel = "Sequence";
+            uptime = "Awakened";
+            shell = "Grimoire";
+            mem = "Spirituality";
+            pkgs = "Artefacts";
+          };
+        };
       };
 
       ritualLedger.settings = {
@@ -565,41 +580,48 @@ in
     }
   ];
 
-  # Boot splash (D-044), applied at rebuild for the configured theme: the
-  # Fool sigil rises through the gray fog. The label sits above systemd's
-  # real passphrase prompt, never in place of it.
-  integration.boot = {
-    sigil = ./assets/pathways/fool.svg;
-    promptLabel = "The Threshold asks";
-    font = ./lockscreen/lotm/font/Cinzel-Bold.ttf;
-  };
-
-  # Cursor (D-048): a quill to write with and a gloved hand to point,
-  # gilded on umber ink. Built into hyprcursor + XCursor at rebuild;
-  # rice-switch applies it live. Hotspots are fractions of the SVG.
-  integration.cursor =
-    let
-      shape = file: hotspot: { svg = ./assets/cursor + "/${file}.svg"; inherit hotspot; };
-      centre = file: shape file [ 0.5 0.5 ];
-    in
-    {
-      name = "lotm-quill";
-      size = 24;
-      shapes = {
-        default = shape "default" [ 0.0625 0.0625 ];
-        progress = shape "progress" [ 0.0625 0.0625 ];
-        pointer = shape "pointer" [ 0.375 0.0625 ];
-        text = centre "text";
-        wait = centre "wait";
-        ns-resize = centre "ns-resize";
-        ew-resize = centre "ew-resize";
-        nwse-resize = centre "nwse-resize";
-        nesw-resize = centre "nesw-resize";
-        move = centre "move";
-        crosshair = centre "crosshair";
-        not-allowed = centre "not-allowed";
-      };
+  # Rebuild-time surfaces (D-012), for the configured theme.
+  integration = {
+    # Boot splash (D-044): the Fool sigil rises through the gray fog. The
+    # label sits above systemd's real passphrase prompt, never in place of it.
+    boot = {
+      sigil = ./assets/pathways/fool.svg;
+      promptLabel = "The Threshold asks";
+      font = ./lockscreen/lotm/font/Cinzel-Bold.ttf;
     };
+
+    # Terminal tools themed from these tokens (D-051): btop's meters run
+    # fog → gold → rust, bat reads like an annotated grimoire, yazi wears
+    # gilt tabs, cava burns like a candle.
+    tools = [ "btop" "bat" "yazi" "cava" ];
+
+    # Cursor (D-048): a quill to write with and a gloved hand to point,
+    # gilded on umber ink. Built into hyprcursor + XCursor at rebuild;
+    # rice-switch applies it live. Hotspots are fractions of the SVG.
+    cursor =
+      let
+        shape = file: hotspot: { svg = ./assets/cursor + "/${file}.svg"; inherit hotspot; };
+        centre = file: shape file [ 0.5 0.5 ];
+      in
+      {
+        name = "lotm-quill";
+        size = 24;
+        shapes = {
+          default = shape "default" [ 0.0625 0.0625 ];
+          progress = shape "progress" [ 0.0625 0.0625 ];
+          pointer = shape "pointer" [ 0.375 0.0625 ];
+          text = centre "text";
+          wait = centre "wait";
+          ns-resize = centre "ns-resize";
+          ew-resize = centre "ew-resize";
+          nwse-resize = centre "nwse-resize";
+          nesw-resize = centre "nesw-resize";
+          move = centre "move";
+          crosshair = centre "crosshair";
+          not-allowed = centre "not-allowed";
+        };
+      };
+  };
 
   # Legacy palette bridge (D-012): fills the repo's classic palette
   # key space so GTK/Qt/hyprlock/Hyprland recolor from this theme.

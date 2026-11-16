@@ -692,7 +692,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-042 — Terminal consumers read the active rice through rice-query
 
-- Date: 2026-11-13 · Status: active (extended by D-050)
+- Date: 2026-11-13 · Status: active (extended by D-050, D-051)
 - `rice-query` is the read-only CLI adapter for shell tools that need the
   **active** theme without a rebuild. It resolves index → pointer → immutable
   manifest store file through the same resolver as `rice-hyprland-theme`
@@ -981,6 +981,31 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: Starship has no runtime theming hook, so per-theme configs built from
   the same base are the cheapest way to change the prompt live; building
   them in Nix keeps the shell from parsing the manifest on every start.
+
+### D-051 — Terminal tools: a live fastfetch card and rebuild-time tool themes
+
+- Date: 2026-11-16 · Status: active · Extends D-012, D-042
+- fastfetch (live): `widgets.terminal.settings.fastfetch = { title; logo?;
+  labels; }` is read by `_fastfetch-lib.nix`, which builds one fastfetch
+  config per packaged theme with the base greeting's rows, glyphs and values
+  (user, distro, kernel, uptime, shell, mem, pkgs). Each row shows the
+  diegetic label beside the plain key. `logo` is a single-colour SVG under
+  the theme's `assets/`, recoloured to `accent.primary` and drawn as braille
+  with chafa at build. The greeting calls `__rice_fastfetch`, which prints
+  the active theme's card or returns 1 so the base art and fastfetch run.
+  `__rice_active` (`rice-query active`, once per interactive shell) is
+  shared with the prompt (D-050).
+- Tools (rebuild-time): `integration.tools` lists any of `btop bat yazi
+  cava`. For the configured theme, `_tools-lib.nix` generates a btop theme
+  (all 42 keys), a bat TextMate theme, a yazi theme and a cava gradient from
+  its colour tokens and `palette.legacy`, through one theme-blind role
+  mapping (keywords and titles `accent.primary`, functions and cached
+  memory `accent.secondary`, strings `state.ok`, meters fog → gold →
+  danger, and so on). The program modules set their own values with
+  `mkDefault`, so a theme that does not opt in keeps them exactly.
+- Why: the tools follow the rebuild-time palette like GTK/Qt (D-012); only
+  the greeting needs per-theme copy at runtime, and it reuses the D-050
+  pattern: build per theme, select by the active pointer.
 
 ---
 

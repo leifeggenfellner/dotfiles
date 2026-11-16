@@ -25,7 +25,8 @@ _: {
             };
           };
 
-          theme = {
+          # A rice theme with `integration.tools` overrides this (D-051).
+          theme = lib.mkDefault {
             manager = {
               cwd = { fg = "#${c.base0D}"; };
               hovered = { bg = "#${c.base02}"; };

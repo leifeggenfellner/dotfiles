@@ -39,12 +39,15 @@ _: {
     {
       config = lib.mkIf (osConfig.environment.desktop.windowManager == "hyprland") {
         home.packages = [ pkgs.fastfetch ];
+        # A rice theme may draw its own card instead (D-051).
         programs.fish.functions.fish_greeting = ''
-          echo -ne '${accent1}'
-          command cat ${artFile}
-          echo -ne '${reset}'
-          echo ""
-          fastfetch
+          if not functions -q __rice_fastfetch; or not __rice_fastfetch
+              echo -ne '${accent1}'
+              command cat ${artFile}
+              echo -ne '${reset}'
+              echo ""
+              fastfetch
+          end
         '';
         xdg.configFile."fastfetch/config.jsonc".text = builtins.toJSON {
           "$schema" = "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json";

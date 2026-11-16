@@ -214,6 +214,9 @@ let
       (setAtPath [ "plugins" ]
         [ ((builtins.head lotm.plugins) // { unloadWhenClosed = "false"; }) ]
         lotm))
+    # Terminal tools (D-051).
+    (evaluates "lotm" (setAtPath [ "integration" "tools" ] [ "htop" ] lotm))
+    (evaluates "lotm" (setAtPath [ "integration" "tools" ] "btop" lotm))
     # Window chrome (D-049).
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "active" ] [ "#c79a3a" ] lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "active" ] [ "accent.missing" ] lotm))

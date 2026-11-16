@@ -123,7 +123,7 @@ let
     ++ lib.optionals (theme ? integration) (
       [
         (checkClosed "integration"
-          [ "gtk" "qt" "cursor" "fonts" "boot" ]
+          [ "gtk" "qt" "cursor" "fonts" "boot" "tools" ]
           theme.integration)
       ]
       ++ lib.optionals (theme.integration ? boot) (
@@ -185,6 +185,13 @@ let
           ++ lib.mapAttrsToList shapeCheck cursor.shapes
         )
       )
+      ++ lib.optionals (theme.integration ? tools) [
+        (
+          let known = [ "btop" "bat" "yazi" "cava" ]; v = theme.integration.tools; in
+          if builtins.isList v && lib.all (x: lib.elem x known) v then true
+          else fail "integration.tools must be a list drawn from [${lib.concatStringsSep " " known}], got ${builtins.toJSON v}"
+        )
+      ]
       ++ lib.optionals (theme.integration ? fonts) [
         (checkClosed "integration.fonts" [ "packages" ] theme.integration.fonts)
       ]

@@ -22,7 +22,8 @@ _: {
             smoothing = {
               noise_reduction = 77;
             };
-            color = {
+            # A rice theme with `integration.tools` overrides this (D-051).
+            color = lib.mkDefault {
               gradient = 1;
               gradient_count = 6;
               gradient_color_1 = "'${fmt.hex c.blue}'";

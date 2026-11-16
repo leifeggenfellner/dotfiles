@@ -13,6 +13,12 @@ _: {
       config = lib.mkIf (cfg.enable or false) {
         home.packages = [ packages.riceQuery packages.riceTerminal ];
 
+        # The active theme, resolved once per interactive shell for the
+        # prompt (D-050) and the greeting card (D-051).
+        programs.fish.interactiveShellInit = lib.mkOrder 400 ''
+          set -g __rice_active (rice-query active 2>/dev/null)
+        '';
+
         programs.fish.functions = {
           fish_greeting = lib.mkAfter ''
             ${riceTerminal} greeting 2>/dev/null

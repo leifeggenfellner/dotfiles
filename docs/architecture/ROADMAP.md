@@ -934,6 +934,27 @@ Concretized as D-050 (issue #72), extending D-042.
   and fallback, rendered labels beside real values, Cyberpunk builds
   nothing), `nix flake check`; rendered in fish against the live session.
 
+## Phase 38 — Beyonder Characteristic card + themed terminal tools ✅
+
+Concretized as D-051 (issue #74).
+
+- ✅ fastfetch card per theme from `widgets.terminal.settings.fastfetch`,
+  picked from the active theme at greeting time; LOTM shows the gilded Fool
+  sigil in braille beside "Beyonder Characteristic": Vessel · user, Pathway
+  · distro, Sequence · kernel, Awakened · uptime, Grimoire · shell,
+  Spirituality · mem, Artefacts · pkgs, each beside its real value, then
+  the daily omen.
+- ✅ `integration.tools`: LOTM's btop meters run fog → gold → rust, bat reads
+  gold keywords, verdigris strings and fog functions, yazi wears gilt tabs
+  and mode badges, and cava burns umber → gold → parchment.
+- ✅ Cyberpunk: tool configs, starship and bat settings evaluate to the same
+  store paths as before; only the greeting function gained the card guard,
+  which falls through to the unchanged base greeting.
+- Verified: new `rice-tools` flake check (aligned card, labels beside keys,
+  logo drawn, bat theme compiles and colours roles, btop key count),
+  `rice-manifest-validation` (two negative `integration.tools` cases),
+  `nix flake check`; the LOTM greeting rendered end to end with live values.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

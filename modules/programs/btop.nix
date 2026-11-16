@@ -20,7 +20,8 @@ _: {
         programs.btop = {
           enable = true;
           settings = {
-            color_theme = btopTheme;
+            # A rice theme with `integration.tools` overrides this (D-051).
+            color_theme = lib.mkDefault btopTheme;
             theme_background = false;
             vim_keys = true;
             rounded_corners = true;
