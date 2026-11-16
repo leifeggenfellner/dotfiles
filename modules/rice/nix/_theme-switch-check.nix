@@ -19,6 +19,7 @@ let
       colors = { accent.primary = "#c79a3a"; bg.elevated = "#2a211a"; };
       motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; }; };
     };
+    integration.cursor = { name = "fixture-quill"; size = 24; };
     assets.wallpapers = [ lotmWallpaper ];
   });
   invalidManifest = pkgs.writeText "invalid-manifest.json" ''{"meta":{"name":"invalid","schemaVersion":2}}'';
@@ -114,7 +115,10 @@ pkgs.runCommand "rice-theme-switch"
     export RICE_TEST_LOG="$TMPDIR/effects.log"
     export RICE_RELOAD_COUNT="$TMPDIR/reload.count"
     export RICE_MV_COUNT="$TMPDIR/mv.count"
+    export XDG_DATA_DIRS="$TMPDIR/share"
     mkdir -p "$HOME/.config/rice" "$HOME/.config/wallpaper" "$XDG_STATE_HOME/rice" "$XDG_RUNTIME_DIR"
+    mkdir -p "$XDG_DATA_DIRS/icons/fixture-quill"
+    touch "$XDG_DATA_DIRS/icons/fixture-quill/manifest.hl"
     custom_wallpaper="$TMPDIR/custom wallpaper.png"
     printf custom > "$custom_wallpaper"
     : > "$RICE_TEST_LOG"
@@ -155,6 +159,19 @@ pkgs.runCommand "rice-theme-switch"
     grep -q 'leaf = "fadeIn", enabled = true, speed = 10, bezier = "default"' "$RICE_TEST_LOG"
     ! grep -q 'rice_' "$RICE_TEST_LOG"
 
+    echo "case: theme cursor applies live, base cursor without one (D-048)"
+    grep -q '^hypr setcursor capitaine-cursors-white 16$' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
+    "$switch" lotm
+    grep -q '^hypr setcursor fixture-quill 24$' "$RICE_TEST_LOG"
+    mv "$XDG_DATA_DIRS/icons/fixture-quill" "$TMPDIR/uninstalled-quill"
+    reset_state
+    expect_failure "$switch" lotm
+    grep -q "cursor theme 'fixture-quill' is not installed" "$TMPDIR/stderr"
+    test "$(cat "$XDG_STATE_HOME/rice/active")" = cyberpunk
+    test ! -s "$RICE_TEST_LOG"
+    mv "$TMPDIR/uninstalled-quill" "$XDG_DATA_DIRS/icons/fixture-quill"
+
     echo "case: reduce-motion disables compositor animation"
     printf '%s' '{"motion":{"reduce":true}}' > "$XDG_STATE_HOME/rice/prefs.json"
     : > "$RICE_TEST_LOG"
@@ -181,7 +198,8 @@ pkgs.runCommand "rice-theme-switch"
     export RICE_FAIL_HYPR_MATCH='rgb(c79a3a)'
     expect_failure "$switch" lotm
     test "$(cat "$XDG_STATE_HOME/rice/active")" = cyberpunk
-    grep '^hypr ' "$RICE_TEST_LOG" | tail -n 1 | grep -q 'rgb(00e5ff)'
+    grep '^hypr eval ' "$RICE_TEST_LOG" | tail -n 1 | grep -q 'rgb(00e5ff)'
+    grep '^hypr ' "$RICE_TEST_LOG" | tail -n 1 | grep -q 'setcursor capitaine-cursors-white'
     grep -q 'rollback completed' "$TMPDIR/stderr"
 
     echo "case: failed visual compensation recovery command"

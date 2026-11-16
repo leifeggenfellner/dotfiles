@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Broken wax seal; hotspot at the centre. -->
+  <circle cx="16" cy="16" r="12.5" fill="#0e0a06"/>
+  <circle cx="16" cy="16" r="10.8" fill="#8a3b3b"/>
+  <circle cx="16" cy="16" r="7.6" fill="none" stroke="#5e3038" stroke-width="1.2"/>
+  <path d="M8.4 8.4 L23.6 23.6" stroke="#0e0a06" stroke-width="4.2" stroke-linecap="round"/>
+  <path d="M8.4 8.4 L23.6 23.6" stroke="#c79a3a" stroke-width="2" stroke-linecap="round"/>
+</svg>

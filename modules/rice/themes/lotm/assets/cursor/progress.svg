@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Quill with a small hourglass beside it; hotspot at the nib (2,2). -->
+  <g stroke="#0e0a06" stroke-width="2.2" stroke-linejoin="round" fill="#0e0a06">
+    <path d="M2 2 L7.5 4.2 L4.2 7.5 Z"/>
+    <path d="M5 5 C12.5 5.5 20 10.5 23 23 C10.5 20 5.5 12.5 5 5 Z"/>
+  </g>
+  <path d="M5 5 C12.5 5.5 20 10.5 23 23 C10.5 20 5.5 12.5 5 5 Z" fill="#e6d7b8"/>
+  <path d="M5 5 C12.5 5.5 20 10.5 23 23 C17 14 12 9 5 5 Z" fill="#cbbb99"/>
+  <path d="M5 5 L23 23" stroke="#c79a3a" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M2 2 L7.5 4.2 L4.2 7.5 Z" fill="#c79a3a"/>
+  <g stroke="#0e0a06" stroke-width="2" stroke-linejoin="round" fill="#0e0a06">
+    <path d="M20 17 L30 17 L30 19 C30 22 26 23 26 24 C26 25 30 26 30 29 L30 31 L20 31 L20 29 C20 26 24 25 24 24 C24 23 20 22 20 19 Z"/>
+  </g>
+  <path d="M20.6 19 L29.4 19 C29.4 21.6 26 22.6 26 24 C26 25.4 29.4 26.4 29.4 29 L20.6 29 C20.6 26.4 24 25.4 24 24 C24 22.6 20.6 21.6 20.6 19 Z" fill="#3e3121"/>
+  <path d="M22.4 20.6 L27.6 20.6 C26.8 22 25.4 22.8 25 24 C24.6 22.8 23.2 22 22.4 20.6 Z M21.6 29 C22.2 27.4 23.8 26.8 25 26.8 C26.2 26.8 27.8 27.4 28.4 29 Z" fill="#e6d7b8"/>
+  <rect x="20" y="17" width="10" height="2" fill="#c79a3a"/>
+  <rect x="20" y="29" width="10" height="2" fill="#c79a3a"/>
+</svg>

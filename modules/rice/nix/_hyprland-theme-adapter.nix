@@ -27,6 +27,10 @@ let
       + lib.optionalString (a ? style) ", style = ${builtins.toJSON a.style}"
       + " })\n")
     overridable);
+
+  # Themes without `integration.cursor` get the base style's cursor
+  # (what the generated config shows before any rice theme, D-048).
+  baseStyle = import ../../themes/_style.nix;
 in
 pkgs.writeShellScriptBin "rice-hyprland-theme" ''
   set -euo pipefail
@@ -158,10 +162,36 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       else "" end)
   ' --arg baseline ${lib.escapeShellArg baselineLua} "$manifest")" || fail "manifest does not provide valid normalized Hyprland visual tokens: $manifest"
 
+  # Cursor (D-048): the theme's, or the base style's. setcursor reports
+  # "ok" even for a theme it cannot find, so a theme cursor must be
+  # installed (any icon dir on the XDG path) before anything is applied.
+  cursor="$("$jq" -er '
+    (.integration.cursor // null) as $c |
+    if $c == null then "${baseStyle.cursor_name} ${toString baseStyle.cursor_size}"
+    elif ($c.name | type == "string" and test("^[A-Za-z0-9._-]+$")) and ($c.size | type == "number" and floor == . and . >= 8 and . <= 128)
+    then "\($c.name) \($c.size)"
+    else error("invalid integration.cursor") end
+  ' "$manifest")" || fail "manifest has an invalid integration.cursor: $manifest"
+  cursor_name="''${cursor% *}"
+  if [ "$cursor_name" != ${lib.escapeShellArg baseStyle.cursor_name} ]; then
+    found=0
+    IFS=: read -ra data_dirs <<< "''${XDG_DATA_HOME:-$HOME/.local/share}:''${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+    for icons in "$HOME/.icons" "''${data_dirs[@]/%//icons}"; do
+      if [ -e "$icons/$cursor_name/manifest.hl" ] || [ -d "$icons/$cursor_name/cursors" ]; then
+        found=1; break
+      fi
+    done
+    [ "$found" -eq 1 ] || fail "cursor theme '$cursor_name' is not installed in any icon directory"
+  fi
+
   [ "$check_only" -eq 0 ] || exit 0
 
   # eval exits non-zero and prints the Lua error on failure.
   if ! out="$("$hyprctl" eval "$lua" 2>&1)"; then
     fail "Hyprland rejected the theme: $out"
+  fi
+  # shellcheck disable=SC2086 # "<name> <size>", both validated above
+  if ! out="$("$hyprctl" setcursor $cursor 2>&1)"; then
+    fail "Hyprland rejected the cursor: $out"
   fi
 ''

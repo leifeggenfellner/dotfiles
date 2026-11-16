@@ -870,6 +870,32 @@ Concretized as D-047 (issue #79), amending D-039.
   `hyprctl animations` table and border colour, rounding unchanged, no
   config errors.
 
+## Phase 35 — Theme cursor (quill and glove) ✅
+
+Concretized as D-048 (issue #80), extending D-047.
+
+- ✅ `integration.cursor.shapes`: theme SVGs plus fractional hotspots,
+  validated by `mkThemeManifest`; `_cursor-theme.nix` builds hyprcursor and
+  XCursor into one icon theme with the standard alias names.
+- ✅ `rice-hyprland-theme` applies the cursor live after its Lua chunk and
+  refuses a cursor that is not installed (checked before any effect); themes
+  without one get the base style cursor back.
+- ✅ The rebuild-time default follows the configured theme through the rice
+  bridge (`HYPRCURSOR_THEME`, startup `setcursor`, GTK).
+- ✅ LOTM `lotm-quill` at 24 px: gilded quill (default), white butler's
+  glove (pointer), serifed I-beam, brass hourglass (wait; static, so nothing
+  animates under reduce-motion), quill with hourglass (progress), gilded
+  double arrows with a crimson lozenge (resize), compass rose (move),
+  astrolabe reticle (crosshair), broken wax seal (not-allowed). Cyberpunk
+  declares none; its manifest JSON is unchanged.
+- Verified: `rice-theme-switch` (new case: theme cursor live, base cursor on
+  switching back, uninstalled cursor fails with no effects; rollback ends
+  on the previous cursor), `rice-manifest-validation` (seven negative cursor
+  cases, shapes stripped from JSON), `nix flake check`; live on Hyprland
+  0.56 the built theme loaded through hyprcursor at size 24.
+- Limitation: XWayland and GTK3 apps pick up a switched cursor only after
+  they restart, and only once the rebuild-time default matches (D-048).
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

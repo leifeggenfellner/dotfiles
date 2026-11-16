@@ -542,6 +542,33 @@ in
     font = ./lockscreen/lotm/font/Cinzel-Bold.ttf;
   };
 
+  # Cursor (D-048): a quill to write with and a gloved hand to point,
+  # gilded on umber ink. Built into hyprcursor + XCursor at rebuild;
+  # rice-switch applies it live. Hotspots are fractions of the SVG.
+  integration.cursor =
+    let
+      shape = file: hotspot: { svg = ./assets/cursor + "/${file}.svg"; inherit hotspot; };
+      centre = file: shape file [ 0.5 0.5 ];
+    in
+    {
+      name = "lotm-quill";
+      size = 24;
+      shapes = {
+        default = shape "default" [ 0.0625 0.0625 ];
+        progress = shape "progress" [ 0.0625 0.0625 ];
+        pointer = shape "pointer" [ 0.375 0.0625 ];
+        text = centre "text";
+        wait = centre "wait";
+        ns-resize = centre "ns-resize";
+        ew-resize = centre "ew-resize";
+        nwse-resize = centre "nwse-resize";
+        nesw-resize = centre "nesw-resize";
+        move = centre "move";
+        crosshair = centre "crosshair";
+        not-allowed = centre "not-allowed";
+      };
+    };
+
   # Legacy palette bridge (D-012): fills the repo's classic palette
   # key space so GTK/Qt/hyprlock/Hyprland recolor from this theme.
   # Structural keys derive from tokens; chromatic extras are

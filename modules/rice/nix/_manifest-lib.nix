@@ -151,9 +151,40 @@ let
       ++ lib.optionals (theme.integration ? qt) [
         (checkClosed "integration.qt" [ "style" ] theme.integration.qt)
       ]
-      ++ lib.optionals (theme.integration ? cursor) [
-        (checkClosed "integration.cursor" [ "name" "size" ] theme.integration.cursor)
-      ]
+      ++ lib.optionals (theme.integration ? cursor) (
+        let
+          cursor = theme.integration.cursor;
+          inherit (import ./_cursor-theme.nix { inherit pkgs lib; }) aliases required;
+          shapeCheck = shape: s:
+            let at = "integration.cursor.shapes.${shape}"; in
+            if !(aliases ? ${shape}) then fail "${at} is not a known shape (${lib.concatStringsSep " " (lib.attrNames aliases)})"
+            else if !(checkClosed at [ "svg" "hotspot" ] s) then false
+            else if !(s ? svg) || !(builtins.isPath s.svg) || !(builtins.pathExists s.svg) || !(lib.hasSuffix ".svg" (toString s.svg))
+            then fail "${at}.svg must be an existing .svg path"
+            else if !(s ? hotspot) || !(builtins.isList s.hotspot) || builtins.length s.hotspot != 2
+            || !(lib.all (v: (builtins.isInt v || builtins.isFloat v) && v >= 0 && v <= 1) s.hotspot)
+            then fail "${at}.hotspot must be [ x y ] fractions in 0..1"
+            else true;
+        in
+        [
+          (checkClosed "integration.cursor" [ "name" "size" "shapes" ] cursor)
+          (if builtins.isString (cursor.name or null) && builtins.match "[A-Za-z0-9._-]+" cursor.name != null then true
+          else fail "integration.cursor.name must match [A-Za-z0-9._-]+")
+          (if builtins.isInt (cursor.size or null) && cursor.size >= 8 && cursor.size <= 128 then true
+          else fail "integration.cursor.size must be an integer in 8..128")
+        ]
+        ++ lib.optionals (cursor ? shapes) (
+          [
+            (if builtins.isAttrs cursor.shapes then true else fail "integration.cursor.shapes must be an attrset")
+            (
+              let missing = lib.subtractLists (lib.attrNames cursor.shapes) required; in
+              if missing == [ ] then true
+              else fail "integration.cursor.shapes is missing ${lib.concatStringsSep ", " missing}"
+            )
+          ]
+          ++ lib.mapAttrsToList shapeCheck cursor.shapes
+        )
+      )
       ++ lib.optionals (theme.integration ? fonts) [
         (checkClosed "integration.fonts" [ "packages" ] theme.integration.fonts)
       ]
@@ -479,7 +510,12 @@ let
 
   # integration.boot is rebuild-time only (D-044): the boot module reads
   # it from _theme.nix, so its paths never land in the runtime manifest.
-  integration = removeAttrs (theme.integration or { }) [ "boot" ];
+  # Cursor shapes are build inputs too (D-048); the manifest keeps the
+  # name and size the live adapter applies.
+  integration = removeAttrs (theme.integration or { }) [ "boot" ]
+    // lib.optionalAttrs (theme ? integration.cursor) {
+    cursor = removeAttrs theme.integration.cursor [ "shapes" ];
+  };
 
   manifest = removeAttrs theme [ "integration" ] // lib.optionalAttrs (integration != { }) { inherit integration; } // {
     inherit tokens;

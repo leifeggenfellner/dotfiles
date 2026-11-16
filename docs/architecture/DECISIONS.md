@@ -863,7 +863,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-047 — The Hyprland adapter speaks Lua and carries theme window motion
 
-- Date: 2026-11-16 · Status: active · Amends D-039
+- Date: 2026-11-16 · Status: active (extended by D-048) · Amends D-039
 - Transport: Hyprland 0.56's Lua config has no `keyword` request, so the
   D-039 adapter had silently applied nothing since the Lua migration.
   `rice-hyprland-theme` now emits one Lua chunk for `hyprctl eval`, which
@@ -894,6 +894,40 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   existing transactional switch is the right owner; keeping geometry out of
   it preserves the look the user has, which the broken adapter had never
   changed.
+
+### D-048 — Theme cursors are built from SVG and switched live
+
+- Date: 2026-11-16 · Status: active · Extends D-012 and D-047
+- `integration.cursor = { name; size; shapes?; }`. `shapes` maps CSS /
+  cursor-shape-v1 names (`default pointer text wait ns-resize ew-resize
+  move` required; `progress nwse-resize nesw-resize crosshair not-allowed`
+  optional) to `{ svg; hotspot = [ x y ]; }`, hotspots as fractions of the
+  square SVG. `mkThemeManifest` validates it (closed keys, name pattern,
+  size 8..128, known shapes, existing `.svg`, hotspots in 0..1). A cursor
+  without `shapes` names an icon theme installed some other way.
+- `_cursor-theme.nix` builds one icon-theme directory per theme with both
+  formats: hyprcursor (scalable SVG, for Hyprland) and XCursor at 24/32/48/64
+  (for XWayland and clients that draw their own cursor). The builder owns
+  the alias table (`left_ptr`, `hand2`, `xterm`, `fleur`, ...); themes only
+  draw. The shapes stay out of the runtime manifest; `name` and `size` stay.
+- Live: `rice-hyprland-theme` runs `hyprctl setcursor` after its Lua chunk
+  with the theme's cursor, or the base style's (`themes/_style.nix`) for a
+  theme without one, so switching back restores it. `setcursor` answers "ok"
+  even for unknown themes, so the adapter first checks that a theme cursor
+  is installed in an icon directory on the XDG path, during `--check` and
+  before any IPC; a missing cursor fails the switch with nothing applied.
+- Every packaged theme's cursor is installed in the user profile, so any of
+  them can be applied live. The rebuild-time default follows the configured
+  theme: the rice bridge sets `environment.desktop.theme.style.cursorName` and
+  `cursorSize` (`mkDefault`), which feed `HYPRCURSOR_THEME`, the startup
+  `setcursor`, and the GTK cursor setting.
+- Limitation: Hyprland draws the cursor for clients using cursor-shape-v1
+  (GTK4, Qt 6, most Wayland apps), so those follow a switch at once. Clients
+  that load their own cursor images (XWayland, GTK3) keep the rebuild-time
+  cursor until they restart after a rebuild or specialisation switch.
+- Why: the pointer is on screen more than any other theme element, and the
+  existing transactional adapter already owns live Hyprland visuals, so the
+  cursor joins its rollback for free.
 
 ---
 

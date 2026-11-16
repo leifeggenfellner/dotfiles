@@ -129,7 +129,8 @@ theme plugins → injected services + mount-provided theme/motion facades
    previously persisted, rollback restores that absence and reports partial
    rollback when a possibly changed visual wallpaper cannot be restored;
    incomplete compensation is always reported as a partial rollback.
-4. GTK/Qt/cursor/icons/fonts follow at rebuild via the legacy theme bridge (D-012).
+4. GTK/Qt/icons/fonts follow at rebuild via the legacy theme bridge (D-012); the
+   compositor cursor switches live with the Hyprland adapter (D-048).
    Generated system specialisations remain a separate explicit rebuild-time
    workflow and are never entered by `rice-switch` (D-040).
 

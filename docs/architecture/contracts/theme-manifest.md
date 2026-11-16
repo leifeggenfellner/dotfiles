@@ -137,7 +137,15 @@ and exposes it exclusively through the `Theme` facade.
   integration = {                 # consumed at rebuild by the Nix propagation layer (D-012)
     gtk = { theme; iconTheme; };
     qt = { style; };
-    cursor = { name; size; };
+    cursor = {                    # optional (D-048); applied live by rice-hyprland-theme
+      name = "<icon-theme-name>"; # [A-Za-z0-9._-]+
+      size = 24;                  # 8..128
+      shapes = {                  # optional: build the cursor from theme SVGs
+        default = { svg = ./assets/cursor/<file>.svg; hotspot = [ 0.06 0.06 ]; };
+        # required: default pointer text wait ns-resize ew-resize move;
+        # optional: progress nwse-resize nesw-resize crosshair not-allowed
+      };
+    };
     fonts = { packages = [ ]; };
     boot = {                      # optional (D-044); never copied into manifest JSON
       sigil = ./assets/<file>.svg;   # required: single-colour SVG, recoloured to accent.primary
@@ -192,7 +200,7 @@ defaultMinHeight = 180; }`. Optional assets and open-edge data continue to
    theme-root-relative entry path. Keep plugin-local assets under the plugin
    directory and resolve them from QML with relative URLs.
 
-## Hyprland visual mapping (D-039, amended by D-047)
+## Hyprland visual mapping (D-039, amended by D-047, D-048)
 
 The live Hyprland adapter (`rice-hyprland-theme`) consumes the normalized manifest
 and applies one Lua chunk through `hyprctl eval`. The complete mapping is
@@ -202,7 +210,10 @@ and applies one Lua chunk through `hyprctl eval`. The complete mapping is
 `tokens.motion.enabled = false`), and, when present, `tokens.motion.compositor`
 window/workspace/layer styles with speeds and curves derived from
 `tokens.motion.durations` and `tokens.motion.easings`. Rounding and gaps are not
-mapped; they stay with the generated Hyprland config. Adding another live
+mapped; they stay with the generated Hyprland config. After the Lua chunk the
+adapter runs `hyprctl setcursor` with `integration.cursor` (D-048), or the base
+style's cursor for a theme without one; a theme cursor that is not installed in
+an icon directory fails the adapter before any IPC. Adding another live
 Hyprland value requires extending this explicit contract and its adapter tests.
 Binds, rules, input, and other behavioral settings are never manifest-controlled.
 

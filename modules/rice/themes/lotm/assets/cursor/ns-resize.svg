@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Gilded double arrow with a crimson lozenge; hotspot at the centre. -->
+  <g transform="rotate(90 16 16)"><g stroke="#0e0a06" stroke-width="2.4" stroke-linejoin="round" fill="#0e0a06"><path d="M2 16 L8.5 10 L8.5 13.6 L23.5 13.6 L23.5 10 L30 16 L23.5 22 L23.5 18.4 L8.5 18.4 L8.5 22 Z"/></g><path d="M2 16 L8.5 10 L8.5 13.6 L23.5 13.6 L23.5 10 L30 16 L23.5 22 L23.5 18.4 L8.5 18.4 L8.5 22 Z" fill="#c79a3a"/><path d="M16 12.6 L19.4 16 L16 19.4 L12.6 16 Z" fill="#8a3b3b" stroke="#0e0a06" stroke-width="1"/></g>
+</svg>

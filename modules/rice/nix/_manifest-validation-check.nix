@@ -214,7 +214,17 @@ let
       (setAtPath [ "plugins" ]
         [ ((builtins.head lotm.plugins) // { unloadWhenClosed = "false"; }) ]
         lotm))
+    # Cursor (D-048).
+    (evaluates "lotm" (setAtPath [ "integration" "cursor" "name" ] "lotm quill" lotm))
+    (evaluates "lotm" (setAtPath [ "integration" "cursor" "size" ] 4 lotm))
+    (evaluates "lotm" (setAtPath [ "integration" "cursor" "custom" ] true lotm))
+    (evaluates "lotm" (removeAtPath [ "integration" "cursor" "shapes" "pointer" ] lotm))
+    (evaluates "lotm" (setAtPath [ "integration" "cursor" "shapes" "zoom" ] lotm.integration.cursor.shapes.move lotm))
+    (evaluates "lotm" (setAtPath [ "integration" "cursor" "shapes" "move" "hotspot" ] [ 0.5 1.5 ] lotm))
+    (evaluates "lotm" (setAtPath [ "integration" "cursor" "shapes" "move" "svg" ] ../themes/lotm/assets/preview.png lotm))
   ];
+
+  lotmManifest = (mkThemeManifest { themeName = "lotm"; themeDir = themeDirs.lotm; }).manifest;
 in
 assert lib.all (result: result) validThemes;
 assert oldSchemaV2Manifest.tokens.metrics.workspaces == expectedMetricDefaults.workspaces;
@@ -228,6 +238,9 @@ assert hyprlandVisual (mkThemeManifest {
   themeDir = themeDirs.lotm;
 }).manifest == expectedHyprlandVisuals.lotm;
 assert lib.all (result: !result) invalidResults;
+# Cursor shapes are build inputs; the runtime manifest keeps name + size.
+assert lotmManifest.integration.cursor == { name = "lotm-quill"; size = 24; };
+assert !(cyberpunk ? integration.cursor);
 pkgs.runCommand "rice-manifest-validation" { } ''
   touch $out
 ''
