@@ -851,6 +851,12 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   replaces the epigraph lines, `calendar.settings.skyLabels.<c> = { text,
   tint }` replaces the moon label; the real phase and illumination stay
   beneath it.
+- Weather source: the host option `rice.weather.location = { name; latitude;
+  longitude; }` (exported by `rice-shell` as `RICE_WEATHER_*`) switches
+  `WeatherState` to MET Norway's locationforecast for that point, with an
+  identifying User-Agent as MET's terms require; feels-like is a wind chill
+  since MET has none. Unset keeps wttr.in's IP guess. Added because wttr.in
+  named shitbox's Tromsø area "Guleng" and reported sun under cloud.
 - Why: the desktop reacting to the real sky is atmosphere the user did not
   have to ask for, so it must stay cheap (one hourly probe, only if used),
   offline-safe, and inside the budgets the ambient tier already enforces.

@@ -1,12 +1,18 @@
 pragma Singleton
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import "../../utils"
 
 // ── WeatherState — REAL/FALLBACK ─────────────────────────────
 // Weather and calendar-adjacent sky state for dashboard widgets.
-// Current conditions refresh on demand and hourly via wttr.in when
-// curl/network are available; lunar data is local and always valid.
+// Current conditions refresh on demand and hourly when curl/network
+// are available; lunar data is local and always valid.
+//
+// Source: a pinned location (rice.weather.location, exported by the
+// rice-shell launcher as RICE_WEATHER_{NAME,LAT,LON}) uses MET Norway's
+// locationforecast for that point; otherwise wttr.in guesses from the
+// IP address. MET has no feels-like value, so it is a wind chill.
 
 Item {
     id: weather
@@ -27,6 +33,16 @@ Item {
     // drizzle, showers, thunder), "fog" (mist, fog), "snow" (incl.
     // sleet), "clear" otherwise; "" while unavailable.
     property string kind: ""
+
+    readonly property string pinnedName: Quickshell.env("RICE_WEATHER_NAME") ?? ""
+    readonly property real pinnedLat: _envNumber("RICE_WEATHER_LAT")
+    readonly property real pinnedLon: _envNumber("RICE_WEATHER_LON")
+    readonly property bool pinned: Number.isFinite(pinnedLat) && Number.isFinite(pinnedLon)
+
+    function _envNumber(name) {
+        const v = Quickshell.env(name);
+        return typeof v === "string" && v.length > 0 ? Number(v) : NaN;
+    }
 
     readonly property var moonPhase: Moon.phase(now)
     readonly property string moonName: moonPhase.name
@@ -57,7 +73,62 @@ Item {
         return "clear";
     }
 
+    // MET symbol_code ("lightrainshowers_day") → coarse kind, same
+    // buckets as _kind (sleet counts as snow, thunder as rain).
+    function _metKind(symbol) {
+        if (symbol.startsWith("fog"))
+            return "fog";
+        if (symbol.includes("snow") || symbol.includes("sleet"))
+            return "snow";
+        if (symbol.includes("rain") || symbol.includes("thunder"))
+            return "rain";
+        return "clear";
+    }
+
+    function _metCondition(symbol) {
+        const names = {
+            clearsky: "Clear sky",
+            fair: "Fair",
+            partlycloudy: "Partly cloudy",
+            cloudy: "Cloudy",
+            fog: "Fog"
+        };
+        if (names[symbol])
+            return names[symbol];
+        // MET's legend spells some codes "lightssleet…".
+        const words = symbol.replace("ssleet", "sleet").replace("andthunder", " and thunder").replace(/^(light|heavy)/, "$1 ").replace(/(rain|sleet|snow)showers/, "$1 showers");
+        return words.charAt(0).toUpperCase() + words.slice(1);
+    }
+
+    // Environment Canada wind chill; plain temperature where it does
+    // not apply (above 10 °C or under 4.8 km/h).
+    function _feelsLike(t, kph) {
+        if (t > 10 || kph < 4.8)
+            return t;
+        const v = Math.pow(kph, 0.16);
+        return 13.12 + 0.6215 * t - 11.37 * v + 0.3965 * t * v;
+    }
+
+    function _parseMet(text) {
+        const series = JSON.parse(text).properties?.timeseries ?? [];
+        if (series.length === 0)
+            throw new Error("missing timeseries");
+        const data = series[0].data;
+        const now = data.instant.details;
+        const symbol = String((data.next_1_hours ?? data.next_6_hours ?? {}).summary?.symbol_code ?? "cloudy").replace(/_(day|night|polartwilight)$/, "");
+        location = pinnedName;
+        condition = _metCondition(symbol);
+        temperatureC = _num(now.air_temperature, -999);
+        windKph = _num(now.wind_speed, -1) * 3.6;
+        feelsLikeC = temperatureC > -999 && windKph >= 0 ? _feelsLike(temperatureC, windKph) : temperatureC;
+        humidity = Math.round(_num(now.relative_humidity, -1));
+        kind = _metKind(symbol);
+        available = true;
+    }
+
     function _parse(text) {
+        if (pinned)
+            return _parseMet(text);
         const doc = JSON.parse(text);
         const current = doc.current_condition && doc.current_condition.length > 0 ? doc.current_condition[0] : null;
         if (!current)
@@ -93,7 +164,11 @@ Item {
 
     Process {
         id: probe
-        command: ["sh", "-c", "command -v curl >/dev/null 2>&1 || exit 127; curl -fsS --max-time 4 'https://wttr.in/?format=j1'"]
+        // MET's terms require an identifying User-Agent.
+        command: weather.pinned
+            ? ["sh", "-c", "command -v curl >/dev/null 2>&1 || exit 127; curl -fsS --max-time 6 -A 'rice-dotfiles/1.0 github.com/leifeggenfellner/dotfiles' \"$1\"", "sh",
+                "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=" + weather.pinnedLat.toFixed(4) + "&lon=" + weather.pinnedLon.toFixed(4)]
+            : ["sh", "-c", "command -v curl >/dev/null 2>&1 || exit 127; curl -fsS --max-time 4 'https://wttr.in/?format=j1'"]
         stdout: StdioCollector {
             id: stdout
             waitForEnd: true

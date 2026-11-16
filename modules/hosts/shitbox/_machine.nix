@@ -142,6 +142,7 @@
     enable = true;
     theme = "lotm";
     specialisations.enable = false;
+    weather.location = { name = "Tromsø"; latitude = 69.65; longitude = 18.96; };
   };
 
   system = {

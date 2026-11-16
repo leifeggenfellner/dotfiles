@@ -48,6 +48,24 @@ _: {
               description = "Active rice theme profile.";
             };
 
+            weather.location = lib.mkOption {
+              type = lib.types.nullOr (lib.types.submodule {
+                options = {
+                  name = lib.mkOption {
+                    type = lib.types.str;
+                    description = "Place name shown beside the conditions.";
+                  };
+                  latitude = lib.mkOption { type = lib.types.float; };
+                  longitude = lib.mkOption { type = lib.types.float; };
+                };
+              });
+              default = null;
+              description = ''
+                Fixed weather location. When set, the shell reads MET Norway's
+                forecast for this point; when null, wttr.in guesses from the IP.
+              '';
+            };
+
             specialisations = {
               enable = lib.mkOption {
                 type = lib.types.bool;

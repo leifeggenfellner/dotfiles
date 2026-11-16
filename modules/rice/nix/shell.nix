@@ -92,6 +92,11 @@ _: {
           args=(--config rice)
         fi
 
+        ${lib.optionalString ((cfg.weather.location or null) != null) (with cfg.weather.location; ''
+          export RICE_WEATHER_NAME=${lib.escapeShellArg name}
+          export RICE_WEATHER_LAT=${toString latitude}
+          export RICE_WEATHER_LON=${toString longitude}
+        '')}
         if [ "$foreground" = "1" ]; then
           exec quickshell "''${args[@]}"
         else
