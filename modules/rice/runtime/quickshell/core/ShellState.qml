@@ -40,8 +40,9 @@ Item {
     // ── Workspace moods (D-045) ──────────────────────────────
     // Pushed by modules/mood/MoodController: { screenName: mood }
     // for screens showing a workspace the theme gives a mood, where a
-    // mood is { workspace, title, backdrop, dnd, sound, layers } — layers
-    // already resolved by core/Effects, or null for the theme's own.
+    // mood is { workspace, title, backdrop, dnd, sound, layers, veil } —
+    // layers already resolved by core/Effects, or null for the theme's
+    // own; veil null or { tint, wash, density } for the backdrop.
     // Derived, never persisted: leaving the workspace, or restarting
     // the shell, recomputes it.
     property var moods: ({})

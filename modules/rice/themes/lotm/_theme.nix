@@ -400,11 +400,14 @@ in
         backdrop = "wallpapers/klein_chair.jpg";
         dnd = true;
         sound = "lore";
+        # The gray fog itself: a pale wash that greys the castle out, and
+        # a dense fog sea rolling under it.
+        veil = { tint = "accent.secondary"; wash = 0.3; density = 0.85; };
         effects = [
-          { type = "fog"; tint = "accent.secondary"; opacity = 0.32; speed = 0.7; band = "full"; }
-          { type = "fog"; tint = "fg.subtle"; opacity = 0.22; speed = 0.5; band = "bottom"; }
-          { type = "particles"; tint = "accent.primary"; opacity = 0.3; count = 6; speed = 0.6; }
-          { type = "vignette"; tint = "bg.sunken"; opacity = 0.45; }
+          { type = "fog"; tint = "accent.secondary"; opacity = 0.35; speed = 0.6; band = "full"; }
+          { type = "fog"; tint = "fg.primary"; opacity = 0.3; speed = 0.4; band = "bottom"; }
+          { type = "particles"; tint = "accent.primary"; opacity = 0.25; count = 4; speed = 0.5; }
+          { type = "vignette"; tint = "bg.sunken"; opacity = 0.18; }
         ];
       };
 

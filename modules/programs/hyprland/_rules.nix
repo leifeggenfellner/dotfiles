@@ -28,7 +28,12 @@ let
   };
 in
 {
-  workspace_rule = { workspace = "special:magic"; gaps_in = 20; gaps_out = 40; };
+  workspace_rule = [
+    { workspace = "special:magic"; gaps_in = 20; gaps_out = 40; }
+    # Focus workspace (D-045): room around the windows for a mood's
+    # backdrop and fog to show.
+    { workspace = "name:focus"; gaps_in = 16; gaps_out = 56; }
+  ];
 
   layer_rule = map
     (namespace: { match.namespace = namespace; blur = true; ignore_alpha = 0; })

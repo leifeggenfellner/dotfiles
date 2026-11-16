@@ -2,13 +2,16 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../../core"
+import "../../components/effects"
 
 // ── MoodBackdrop ─────────────────────────────────────────────
 // Per-monitor backdrop for a workspace mood (D-045): the mood's image
 // over the wallpaper, under the ambient layers and every window, with
-// the theme's caption beside the real workspace name. Static, so it
-// shows on battery too; input-transparent and loaded only while this
-// screen's mood has a backdrop. The last mood is kept while it fades
+// the theme's caption beside the real workspace name. An optional
+// veil fogs the backdrop itself: a flat wash and a rolling fog sea. The
+// image shows on battery too; the fog only drifts while ambient runs
+// and holds still otherwise. Input-transparent and loaded only while
+// this screen's mood has a backdrop. The last mood is kept while it fades
 // out, so leaving does not pop.
 
 PanelWindow {
@@ -68,6 +71,33 @@ PanelWindow {
             sourceSize.width: backdrop.width
             asynchronous: true
             cache: false
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible: !!backdrop._last.veil
+            color: backdrop._last.veil?.tint ?? "transparent"
+            opacity: backdrop._last.veil?.wash ?? 0
+        }
+
+        // A thin haze over everything, then the dense sea along the floor.
+        FogLayer {
+            anchors.fill: parent
+            visible: !!backdrop._last.veil
+            tint: backdrop._last.veil?.tint ?? "transparent"
+            strength: (backdrop._last.veil?.density ?? 0) * 0.55
+            speed: 0.35
+            band: "full"
+            running: ShellState.ambientActive
+        }
+        FogLayer {
+            anchors.fill: parent
+            visible: !!backdrop._last.veil
+            tint: backdrop._last.veil?.tint ?? "transparent"
+            strength: backdrop._last.veil?.density ?? 0
+            speed: 0.55
+            band: "bottom"
+            running: ShellState.ambientActive
         }
 
         Column {

@@ -10,6 +10,8 @@ import "../../services/hypr"
 //   effects   ambient layer list replacing the theme's on that screen
 //             (same schema and budgets as tokens.effects.layers)
 //   backdrop  assets-root path drawn over the wallpaper
+//   veil      { tint, wash, density }: fog over the backdrop only — a
+//             flat tint wash (≤ 0.6) and a rolling fog sea (≤ 0.9)
 //   title     caption shown beside the real workspace name
 //   dnd       true → toasts are held while any screen shows it
 //   sound     semantic sound event played on entering (muted default)
@@ -41,10 +43,24 @@ Item {
                 backdrop: typeof mood.backdrop === "string" ? mood.backdrop : "",
                 dnd: mood.dnd === true,
                 sound: typeof mood.sound === "string" ? mood.sound : "",
-                layers: effects ? Effects.resolve(effects) : null
+                layers: effects ? Effects.resolve(effects) : null,
+                veil: controller._veil(mood.veil)
             };
         }
         return out;
+    }
+
+    // The veil only covers the backdrop, under every window, so it may
+    // be far denser than the desktop-wide ambient caps.
+    function _veil(raw) {
+        if (!raw || typeof raw !== "object")
+            return null;
+        const clamp = (v, fallback, hi) => Math.max(0, Math.min(hi, typeof v === "number" ? v : fallback));
+        return {
+            tint: Effects.colorRef(raw.tint ?? "fg.subtle"),
+            wash: clamp(raw.wash, 0.25, 0.6),
+            density: clamp(raw.density, 0.6, 0.9)
+        };
     }
 
     // Startup hydration (or a shell restart inside a mood) must not

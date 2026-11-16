@@ -65,6 +65,12 @@ QtObject {
         return out;
     }
 
+    // Public token-ref resolver for effect data outside `layers`
+    // (a mood backdrop's veil, D-045).
+    function colorRef(ref) {
+        return _colorRef(ref);
+    }
+
     function _clamp(v, lo, hi) {
         return Math.max(lo, Math.min(hi, v));
     }

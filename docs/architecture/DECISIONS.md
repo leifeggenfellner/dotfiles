@@ -799,9 +799,15 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - A theme may give a named workspace a mood in
   `widgets.mood.settings.workspaces.<name>`: `effects` (an ambient layer list,
   same schema and budgets as `tokens.effects.layers`), `backdrop` (assets-root
-  path), `title` (caption beside the real workspace name), `dnd`, and `sound`
-  (semantic event on entering). Hyprland gains a theme-neutral named workspace
-  `focus` on Super+0 (Super+Shift+0 moves a window there).
+  path), `veil` (`{ tint, wash ≤ 0.6, density ≤ 0.9 }`: a flat tint wash and a
+  rolling fog sea drawn on the backdrop surface only), `title` (caption beside
+  the real workspace name), `dnd`, and `sound` (semantic event on entering).
+  Hyprland gains a theme-neutral named workspace `focus` on Super+0
+  (Super+Shift+0 moves a window there) with wider gaps so the backdrop shows.
+- The veil may exceed the ambient opacity caps because it covers only the
+  backdrop, beneath every window, on a workspace the user chose to enter; the
+  caps protect readability of the ordinary desktop. Its fog drifts only while
+  ambient is active and otherwise holds still (T0 degradation).
 - `HyprState.activeWorkspaceNames` (event-driven, per screen) feeds
   `modules/mood/MoodController`, the only reader of the mood settings. It
   resolves layers through `Effects.resolve` and pushes plain data onto
