@@ -108,7 +108,7 @@ let
         (theme.assets or { }))
     ]
     ++ lib.optionals (tokens ? effects) [
-      (checkClosed "tokens.effects" [ "layers" ] tokens.effects)
+      (checkClosed "tokens.effects" [ "layers" "presets" ] tokens.effects)
     ]
     ++ lib.mapAttrsToList
       (id: descriptor: checkClosed "widgets.${id}"
@@ -294,7 +294,10 @@ let
       else fail "tokens.motion.enabled must be a bool")
     ];
 
-  effectTypes = [ "fog" "particles" "vignette" ];
+  effectTypes = [ "fog" "particles" "vignette" "rain" ];
+  # Sky conditions a preset may key on (D-046); the runtime's
+  # SkyController is the only source of these names.
+  skyConditions = [ "fullMoon" "rain" "fog" ];
   # Tints are color TOKEN REFS (L-005: effects derive from tokens,
   # never literal colors): "<bg|fg|accent|state>.<key>". The reference
   # path is relative to tokens.colors and must resolve there.
@@ -302,30 +305,50 @@ let
     builtins.isString v
     && builtins.match "(bg|fg|accent|state)\\.[a-zA-Z0-9]+" v != null
     && lib.hasAttrByPath (lib.splitString "." v) tokens.colors;
+  layerCheck = l:
+    if !builtins.isAttrs l
+    then fail "tokens.effects layers must be attrsets"
+    else if !(checkClosed "tokens.effects layer"
+      [ "type" "tint" "opacity" "speed" "count" "band" ]
+      l)
+    then false
+    else if !(lib.elem (l.type or null) effectTypes)
+    then fail "tokens.effects layer type must be one of [${lib.concatStringsSep " " effectTypes}], got ${builtins.toJSON (l.type or null)}"
+    else if !(l ? tint) || !isTokenRef l.tint
+    then fail "tokens.effects tint is required and must resolve to an existing color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON (l.tint or null)}"
+    else true;
+  # Conditional presets (D-046): while a sky condition holds, retint
+  # layers by type, scale their strength, and/or add layers (all still
+  # clamped by the runtime's budgets).
+  presetCheck = p:
+    if !builtins.isAttrs p
+    then fail "tokens.effects presets must be attrsets"
+    else if !(checkClosed "tokens.effects preset" [ "when" "window" "tints" "strength" "layers" ] p)
+    then false
+    else if !(lib.elem (p.when or null) skyConditions)
+    then fail "tokens.effects preset when must be one of [${lib.concatStringsSep " " skyConditions}], got ${builtins.toJSON (p.when or null)}"
+    else if p ? window && !(builtins.isInt p.window || builtins.isFloat p.window)
+    then fail "tokens.effects preset window must be a number of days"
+    else if !lib.all (t: lib.elem t effectTypes && isTokenRef p.tints.${t}) (lib.attrNames (p.tints or { }))
+    then fail "tokens.effects preset tints must map layer types to color token refs, got ${builtins.toJSON (p.tints or null)}"
+    else if !lib.all (t: lib.elem t effectTypes && (builtins.isInt p.strength.${t} || builtins.isFloat p.strength.${t})) (lib.attrNames (p.strength or { }))
+    then fail "tokens.effects preset strength must map layer types to numbers, got ${builtins.toJSON (p.strength or null)}"
+    else if !builtins.isList (p.layers or [ ])
+    then fail "tokens.effects preset layers must be a list"
+    else lib.all layerCheck (p.layers or [ ]);
   effectChecks =
     let
       layers =
         if tokens ? effects
         then tokens.effects.layers or (fail "missing tokens.effects.layers")
         else [ ];
+      presets = (tokens.effects or { }).presets or [ ];
     in
     if !builtins.isList layers
     then fail "tokens.effects.layers must be a list"
-    else
-      map
-        (l:
-          if !builtins.isAttrs l
-          then fail "tokens.effects layers must be attrsets"
-          else if !(checkClosed "tokens.effects layer"
-            [ "type" "tint" "opacity" "speed" "count" "band" ]
-            l)
-          then false
-          else if !(lib.elem (l.type or null) effectTypes)
-          then fail "tokens.effects layer type must be one of [${lib.concatStringsSep " " effectTypes}], got ${builtins.toJSON (l.type or null)}"
-          else if !(l ? tint) || !isTokenRef l.tint
-          then fail "tokens.effects tint is required and must resolve to an existing color token ref like \"accent.primary\" (L-005), got ${builtins.toJSON (l.tint or null)}"
-          else true)
-        layers;
+    else if !builtins.isList presets
+    then fail "tokens.effects.presets must be a list"
+    else map layerCheck layers ++ map presetCheck presets;
 
   iconChecks = lib.mapAttrsToList
     (name: value:

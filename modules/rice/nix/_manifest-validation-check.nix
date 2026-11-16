@@ -163,6 +163,37 @@ let
         layers = [{ type = "fog"; tint = "accent.primary"; shader = "custom.qsb"; }];
       }
       cyberpunk)
+    # Conditional presets (D-046).
+    (setAtPath [ "tokens" "effects" ]
+      {
+        layers = [ ];
+        presets = [{ when = "eclipse"; }];
+      }
+      cyberpunk)
+    (setAtPath [ "tokens" "effects" ]
+      {
+        layers = [ ];
+        presets = [{ when = "fullMoon"; tints.fog = "#ff0000"; }];
+      }
+      cyberpunk)
+    (setAtPath [ "tokens" "effects" ]
+      {
+        layers = [ ];
+        presets = [{ when = "rain"; strength.fog = "more"; }];
+      }
+      cyberpunk)
+    (setAtPath [ "tokens" "effects" ]
+      {
+        layers = [ ];
+        presets = [{ when = "rain"; layers = [{ type = "rain"; }]; }];
+      }
+      cyberpunk)
+    (setAtPath [ "tokens" "effects" ]
+      {
+        layers = [ ];
+        presets = [{ when = "fog"; custom = true; }];
+      }
+      cyberpunk)
     (setAtPath [ "assets" "custom" ] true cyberpunk)
     (setAtPath [ "widgets" "workspaces" "custom" ] true cyberpunk)
     (setAtPath [ "widgets" "workspaces" "unloadWhenClosed" ] "false" cyberpunk)

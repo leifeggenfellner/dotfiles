@@ -16,6 +16,7 @@ import "./modules/lore"
 import "./modules/prefs"
 import "./modules/inspector"
 import "./modules/mood"
+import "./modules/sky"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -40,6 +41,8 @@ ShellRoot {
     InspectorController {}
 
     MoodController {}
+
+    SkyController {}
 
     AmbientController {}
 

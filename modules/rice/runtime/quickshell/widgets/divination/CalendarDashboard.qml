@@ -5,6 +5,9 @@ import "../../components"
 // ── CalendarDashboard ────────────────────────────────────────
 // Calendar and moon panel for the Observatory. Services: weather
 // supplies the local lunar phase even when weather is unavailable.
+// settings.skyLabels.<condition> = { text, tint } (D-046) replaces
+// the moon label while that sky condition holds; the real phase and
+// illumination stay underneath it.
 
 Item {
     id: root
@@ -20,7 +23,15 @@ Item {
             icon: "moon"
         })
     readonly property string title: settings.title ?? "Calendar"
-    readonly property string moonLabel: settings.moonLabel ?? "moon"
+    readonly property var skyLabel: {
+        const labels = settings.skyLabels ?? {};
+        for (const c of ShellState.skyConditions)
+            if (labels[c] && labels[c].text)
+                return labels[c];
+        return null;
+    }
+    readonly property string moonLabel: skyLabel ? skyLabel.text : (settings.moonLabel ?? "moon")
+    readonly property color moonLabelColor: skyLabel && skyLabel.tint ? Effects.colorRef(skyLabel.tint) : Theme.colors.fg.subtle
     readonly property var secret: settings.secret ?? ({})
     readonly property bool compact: width < 520
     readonly property int moonIconSize: compact ? 64 : 76
@@ -119,7 +130,7 @@ Item {
 
                 Text {
                     text: root.moonLabel
-                    color: Theme.colors.fg.subtle
+                    color: root.moonLabelColor
                     font.family: Theme.typography.families.display
                     font.pointSize: Theme.typography.sizes.small + 1
                 }
@@ -206,7 +217,7 @@ Item {
                 Text {
                     width: parent.width
                     text: root.moonLabel
-                    color: Theme.colors.fg.subtle
+                    color: root.moonLabelColor
                     wrapMode: Text.WordWrap
                     font.family: Theme.typography.families.display
                     font.pointSize: Theme.typography.sizes.small + 1

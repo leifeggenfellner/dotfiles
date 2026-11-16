@@ -827,6 +827,34 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   where the user is rather than be toggled and later undone; deriving it
   makes "restore exactly" true by construction.
 
+### D-046 — Sky conditions drive conditional effect presets
+
+- Date: 2026-11-16 · Status: active
+- `modules/sky/SkyController` is the one place the runtime decides the sky
+  conditions `fullMoon`, `rain`, and `fog`, pushed onto
+  `ShellState.skyConditions`. `fullMoon` comes from the local lunar
+  calculation (within the largest `window` any fullMoon preset declares,
+  default 1.5 days) and needs no network. `rain`/`fog` come from
+  `WeatherState.kind` (wttr.in weather code), read only when a preset keys
+  on weather, so themes without one never start the probe; no weather means
+  neither condition. IPC `sky setMoon|setWeather|status` overrides for smoke
+  tests (not persisted).
+- `tokens.effects.presets` (additive; schemaVersion stays 2): `{ when; window;
+  tints; strength; layers }`. While `when` holds, `core/Effects.resolve`
+  appends the preset's layers before the 4-layer budget, replaces tints by
+  layer type (token refs, L-005), and multiplies opacity by layer type before
+  the caps. Mood layers (D-045) go through the same resolver.
+- New layer type `rain`: two pre-painted streak textures scrolling (T1,
+  transform-only steady state); `count` is streak density per texture
+  (10–120), not live particles, so it is outside the particle budget.
+- Surface copy keys on the same names: `epigraph.settings.skyLines.<c>`
+  replaces the epigraph lines, `calendar.settings.skyLabels.<c> = { text,
+  tint }` replaces the moon label; the real phase and illumination stay
+  beneath it.
+- Why: the desktop reacting to the real sky is atmosphere the user did not
+  have to ask for, so it must stay cheap (one hourly probe, only if used),
+  offline-safe, and inside the budgets the ambient tier already enforces.
+
 ---
 
 ## Legacy imports

@@ -64,12 +64,18 @@ and exposes it exclusively through the `Theme` facade.
     };
     effects = {                   # OPTIONAL (D-021): ambient atmosphere layers,
       layers = [                  # rendered only while motion.ambient opts in
-        # type ∈ "fog" | "particles" | "vignette" (v1 set);
+        # type ∈ "fog" | "particles" | "vignette" | "rain" (rain: D-046);
         # tint is a color TOKEN REF ("accent.primary"), never a literal (L-005);
         # opacity/speed/count are clamped to the motion-contract budgets.
         # Shader-capable layer types use runtime-owned shaders when compiled
         # (D-028); themes never ship shader source or bytecode.
         # { type = "fog"; tint = "accent.secondary"; opacity = 0.1; speed = 1.0; band = "bottom"; }
+      ];
+      presets = [                 # OPTIONAL (D-046): applied while a sky condition holds
+        # when ∈ "fullMoon" | "rain" | "fog"; window = days around full (fullMoon);
+        # tints = { <layer type> = token ref; }; strength = { <layer type> = gain; };
+        # layers = [ extra layers, same schema; still within the 4-layer budget ];
+        # { when = "fullMoon"; window = 1.5; tints.vignette = "accent.tertiary"; }
       ];
     };
   };
@@ -150,7 +156,8 @@ and exposes it exclusively through the `Theme` facade.
    (`launcher`, `dashboard`, `powermenu`, …) use this same id namespace and read
    their data through `Theme.widgetConfig(surfaceId)`. D-042 adds the
    out-of-shell `terminal` id (read by `rice-terminal`), whose settings may name
-   other manifest paths by theme-authored dotted path. D-045 adds the `mood` id
+   other manifest paths by theme-authored dotted path. D-046 adds `skyLines`
+   (epigraph) and `skyLabels` (calendar) keyed by sky condition. D-045 adds the `mood` id
    (read by `modules/mood/MoodController`): `workspaces.<name>` gives a named
    workspace an effects list, backdrop, title, DND, and entry sound.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;

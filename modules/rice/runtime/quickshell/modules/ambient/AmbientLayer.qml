@@ -56,6 +56,7 @@ PanelWindow {
                     sourceComponent: modelData.type === "fog" ? fogComponent
                         : modelData.type === "particles" ? particleComponent
                         : modelData.type === "vignette" ? vignetteComponent
+                        : modelData.type === "rain" ? rainComponent
                         : null
 
                     onLoaded: {
@@ -64,7 +65,7 @@ PanelWindow {
                         if (modelData.type === "fog") {
                             item.speed = modelData.speed;
                             item.band = modelData.band;
-                        } else if (modelData.type === "particles") {
+                        } else if (modelData.type === "particles" || modelData.type === "rain") {
                             item.speed = modelData.speed;
                             item.count = modelData.count;
                         }
@@ -87,6 +88,12 @@ PanelWindow {
             Component {
                 id: vignetteComponent
                 VignetteLayer {}
+            }
+            Component {
+                id: rainComponent
+                RainLayer {
+                    running: ShellState.ambientActive
+                }
             }
         }
     }

@@ -131,6 +131,23 @@ in
       { type = "particles"; tint = "accent.primary"; opacity = 0.42; count = 12; speed = 1.1; }
       { type = "vignette"; tint = "bg.sunken"; opacity = 0.30; }
     ];
+
+    # Sky presets (D-046). Near a full moon the Crimson Moon rises: fog,
+    # embers and vignette turn ritual crimson. Rain draws fine fog-blue
+    # streaks; real fog outside thickens the fog inside.
+    effects.presets = [
+      {
+        when = "fullMoon";
+        window = 1.5;
+        tints = { fog = "accent.tertiary"; particles = "state.danger"; vignette = "accent.tertiary"; };
+        strength = { fog = 1.3; vignette = 1.5; };
+      }
+      {
+        when = "rain";
+        layers = [{ type = "rain"; tint = "accent.secondary"; opacity = 0.22; count = 90; speed = 1.0; }];
+      }
+      { when = "fog"; strength.fog = 1.8; }
+    ];
   };
 
   assets = {
@@ -236,6 +253,22 @@ in
           "A scholar records the machine before interpreting the miracle."
           "Quiet instruments reveal what loud rituals conceal."
         ];
+        # Sky conditions (D-046) swap in their own sets.
+        skyLines = {
+          fullMoon = [
+            "The Crimson Moon is high; madness walks closer to the surface."
+            "Under the red moon, keep your rituals short and your doors locked."
+            "Moonlight the colour of old blood — a night for careful Beyonders."
+          ];
+          rain = [
+            "Rain over Tingen; the Nighthawks walk their rounds regardless."
+            "Wet cobblestones remember every footstep."
+          ];
+          fog = [
+            "Real fog at the window, gray fog above it."
+            "On nights like this, the boundary thins."
+          ];
+        };
       };
 
       meters.settings = {
@@ -305,6 +338,8 @@ in
       calendar.settings = {
         title = "Almanac";
         moonLabel = "Lunar divination";
+        # The real phase and illumination stay under the flavour label.
+        skyLabels.fullMoon = { text = "Crimson Moon"; tint = "accent.tertiary"; };
         secret = {
           enabled = true;
           event = "calendarSecret";

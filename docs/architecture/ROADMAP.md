@@ -822,6 +822,31 @@ Concretized as D-045 (issue #77): Super+0 rises above the gray fog.
   shell inside re-derives the mood. Cyberpunk: `mood status` shows nothing
   configured and no `rice-mood` layer; its manifest is byte-identical.
 
+## Phase 33 — Sky conditions (Crimson Moon + living weather) ✅
+
+Concretized as D-046 (issue #78): the atmosphere follows the real moon and
+weather.
+
+- ✅ `modules/sky/SkyController` — `fullMoon` (local lunar calc, window),
+  `rain`/`fog` (WeatherState kind, only probed when a preset needs it), IPC
+  `sky setMoon|setWeather|status`.
+- ✅ `tokens.effects.presets` validated by `mkThemeManifest` (new negative
+  cases in `rice-manifest-validation`); `core/Effects` applies extra layers,
+  retints, and strength gains within the budgets; new `rain` layer type
+  (`components/effects/RainLayer`).
+- ✅ `skyLines` (epigraph) and `skyLabels` (calendar) settings.
+- ✅ LOTM: the Crimson Moon turns fog, embers and vignette ritual crimson and
+  switches the Observatory to crimson-moon lines, with "Crimson Moon" above
+  the real phase and illumination; rain adds fog-blue streaks; real fog
+  thickens the fog layer. Cyberpunk declares nothing; its manifest is
+  byte-identical.
+- Verified: `rice-lint`, `rice-manifest-validation`, `nix flake check`; dev
+  shell with compiled shaders and the LOTM manifest: auto state (first
+  quarter, clear) has no conditions; forcing full moon, rain, and fog each
+  activates exactly its preset (rain adds a fourth layer); the dashboard
+  shows the crimson copy beside the real moon data; returning to auto
+  clears everything.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

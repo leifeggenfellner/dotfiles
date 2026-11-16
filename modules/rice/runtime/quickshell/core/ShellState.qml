@@ -37,6 +37,15 @@ Item {
     property bool soundMuted: true
     property bool doNotDisturb: false
 
+    // ── Sky conditions (D-046) ───────────────────────────────
+    // Pushed by modules/sky/SkyController: the active subset of
+    // "fullMoon" | "rain" | "fog". Effects presets and surface copy key
+    // on these names; nothing here knows what a theme does with them.
+    property var skyConditions: []
+    function skyHas(condition) {
+        return skyConditions.indexOf(condition) !== -1;
+    }
+
     // ── Workspace moods (D-045) ──────────────────────────────
     // Pushed by modules/mood/MoodController: { screenName: mood }
     // for screens showing a workspace the theme gives a mood, where a
