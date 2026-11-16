@@ -692,7 +692,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-042 — Terminal consumers read the active rice through rice-query
 
-- Date: 2026-11-13 · Status: active (extended by D-050, D-051)
+- Date: 2026-11-13 · Status: active (extended by D-050, D-051, D-052)
 - `rice-query` is the read-only CLI adapter for shell tools that need the
   **active** theme without a rebuild. It resolves index → pointer → immutable
   manifest store file through the same resolver as `rice-hyprland-theme`
@@ -1011,6 +1011,30 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the tools follow the rebuild-time palette like GTK/Qt (D-012); only
   the greeting needs per-theme copy at runtime, and it reuses the D-050
   pattern: build per theme, select by the active pointer.
+
+### D-052 — Neovim follows the active rice through generated data modules
+
+- Date: 2026-11-16 · Status: active · Extends D-042
+- `widgets.terminal.settings.neovim = { colorscheme?; start?; }`, read by
+  `_neovim-lib.nix`. `colorscheme = true` maps the theme's colour tokens and
+  `palette.legacy` to ~120 highlight groups (UI, syntax, Treesitter, LSP,
+  diagnostics, diff, Telescope) through one theme-blind table. Red
+  (`state.danger`) is reserved for errors and deletions (L-006). `start =
+  { title; epigraphs; recentLabel?; }` takes epigraphs as a list or as a
+  theme-authored manifest path (D-042's cross-widget read).
+- Each packaged theme with the block becomes a pure-data Lua module
+  (`lua/rice/themes/<theme>.lua`, `lib.generators.toLua`). The theme-blind
+  loader (`modules/rice/nvim/rice/init.lua`) asks `rice-query active` at
+  startup (≈8 ms) and loads the matching module. A new editor therefore
+  follows `rice-switch` without a rebuild; no module, no rice, or any error
+  leaves the editor as `programs/neovim.nix` configures it.
+- The start screen (`rice/start.lua`, no plugin) shows only when Neovim
+  starts with nothing to edit: the title, one epigraph per day, and up to
+  nine recent files with their real paths behind `[1]`–`[9]`, plus `[e]`
+  new file and `[q]` quit. Normal background stays transparent, as before.
+- Why: the editor is opened from many terminals and should match the
+  active theme like the prompt does; generating data modules keeps the
+  runtime Lua small and theme-blind.
 
 ---
 

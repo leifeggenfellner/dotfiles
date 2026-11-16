@@ -956,6 +956,24 @@ Concretized as D-051 (issue #74).
   `rice-manifest-validation` (two negative `integration.tools` cases),
   `nix flake check`; the LOTM greeting rendered end to end with live values.
 
+## Phase 39 — Neovim colourscheme + epigraph start screen ✅
+
+Concretized as D-052 (issue #75).
+
+- ✅ `widgets.terminal.settings.neovim`: a token-derived colourscheme and a
+  start screen, built per theme into Lua data modules and loaded from the
+  active theme at startup.
+- ✅ LOTM: gold keywords, verdigris strings, fog functions, parchment
+  properties, muted italic comments; rust only for errors and deletions.
+  The start screen opens on "Above the Gray Fog" with the day's
+  Observatory epigraph and "Recent manuscripts" beside the real paths.
+- ✅ Cyberpunk and non-rice hosts: no module, so the editor keeps its
+  current look; files and stdin skip the start screen.
+- Verified: new `rice-neovim` flake check (scheme and start screen load,
+  a file skips the start screen, an unknown theme changes nothing,
+  Cyberpunk builds nothing), `nix flake check`; screenshots in foot under
+  a headless cage compositor.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

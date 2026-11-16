@@ -499,6 +499,16 @@ in
           git.label = "Sequence";
           failure.label = "failed ritual";
         };
+        # Neovim (D-052): the scheme from these tokens, and a start screen
+        # that opens on the Observatory's epigraphs above recent files.
+        neovim = {
+          colorscheme = true;
+          start = {
+            title = "Above the Gray Fog";
+            epigraphs = "widgets.epigraph.settings.lines";
+            recentLabel = "Recent manuscripts";
+          };
+        };
         # fastfetch as a Beyonder Characteristic card (D-051): the Fool
         # sigil in gilt, each row's diegetic label beside its real key.
         fastfetch = {

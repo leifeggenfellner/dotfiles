@@ -24,6 +24,9 @@
       rice-boot =
         import ../rice/nix/_boot-check.nix { inherit pkgs; };
 
+      rice-neovim =
+        import ../rice/nix/_neovim-check.nix { inherit pkgs; };
+
       rice-tools =
         import ../rice/nix/_tools-check.nix { inherit pkgs; };
 
