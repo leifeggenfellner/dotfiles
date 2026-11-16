@@ -2,7 +2,9 @@
 # Theme copy (a title and one diegetic label per row) and an asset logo
 # go in; one fastfetch config per theme comes out, chosen at greeting
 # time from the active theme. Rows and values match the base greeting,
-# so the card loses nothing: each label sits beside the plain key.
+# so the card loses nothing: each label sits beside the plain key. The
+# result is `{ config; image; }`; the greeting swaps the braille logo for
+# `image` where the terminal can draw it.
 { pkgs, lib }:
 { themeName, themeDir, theme }:
 let
@@ -45,15 +47,19 @@ let
     format = " {$3}▐{$1} {$4}${lib.removeSuffix "}" r.value}>${toString valueWidth}}{$1} │";
   } // lib.optionalAttrs (r ? text) { inherit (r) text; };
 
-  # The theme's single-colour SVG, gilded with accent.primary and drawn in
-  # braille so it prints in any terminal.
-  logo = pkgs.runCommand "rice-${themeName}-fastfetch-logo"
-    { nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick pkgs.chafa ]; }
+  # The theme's single-colour SVG, gilded with accent.primary: a PNG for
+  # terminals that draw images (sixel, kitty), and braille for the rest.
+  image = pkgs.runCommand "rice-${themeName}-fastfetch-logo.png"
+    { nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick ]; }
     ''
-      resvg --width 400 ${themeDir + "/assets/${card.logo}"} sigil.png
-      magick sigil.png -fill '${colors.accent.primary}' -colorize 100 gilded.png
+      resvg --width 512 ${themeDir + "/assets/${card.logo}"} sigil.png
+      magick sigil.png -fill '${colors.accent.primary}' -colorize 100 $out
+    '';
+  logo = pkgs.runCommand "rice-${themeName}-fastfetch-logo"
+    { nativeBuildInputs = [ pkgs.chafa ]; }
+    ''
       chafa --format symbols --symbols braille --fg-only --size 26x13 -c full --threshold 0.3 \
-        --animate off --polite on gilded.png > $out
+        --animate off --polite on ${image} > $out
     '';
 
   config = pkgs.writeText "rice-${themeName}-fastfetch.jsonc" (builtins.toJSON {
@@ -83,4 +89,5 @@ let
     ];
   });
 in
-if card == null then null else config
+if card == null then null
+else { inherit config; image = if card ? logo then image else null; }

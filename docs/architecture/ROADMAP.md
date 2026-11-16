@@ -940,7 +940,8 @@ Concretized as D-051 (issue #74).
 
 - ✅ fastfetch card per theme from `widgets.terminal.settings.fastfetch`,
   picked from the active theme at greeting time; LOTM shows the gilded Fool
-  sigil in braille beside "Beyonder Characteristic": Vessel · user, Pathway
+  sigil as an image (sixel in foot, kitty protocol in kitty; braille
+  elsewhere) beside "Beyonder Characteristic": Vessel · user, Pathway
   · distro, Sequence · kernel, Awakened · uptime, Grimoire · shell,
   Spirituality · mem, Artefacts · pkgs, each beside its real value, then
   the daily omen.

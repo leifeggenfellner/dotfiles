@@ -36,15 +36,31 @@ _: {
           programs.cava.settings.color = generated.cava;
         })
         (lib.mkIf (cards != { }) {
-          xdg.configFile = lib.mapAttrs'
-            (themeName: card: lib.nameValuePair "rice/fastfetch/${themeName}.jsonc" { source = card; })
-            cards;
-          # Returns 1 (the base greeting runs) when the active theme has no card.
+          xdg.configFile = lib.mkMerge (lib.mapAttrsToList
+            (themeName: card: {
+              "rice/fastfetch/${themeName}.jsonc".source = card.config;
+            } // lib.optionalAttrs (card.image != null) {
+              "rice/fastfetch/${themeName}.png".source = card.image;
+            })
+            cards);
+          # Returns 1 (the base greeting runs) when the active theme has no
+          # card. Terminals that draw images get the gilded PNG; the rest
+          # keep the card's braille logo.
           programs.fish.functions.__rice_fastfetch = ''
             set -q __rice_active[1]; or return 1
-            set -l card ${config.xdg.configHome}/rice/fastfetch/$__rice_active.jsonc
-            test -r $card; or return 1
-            fastfetch -c $card
+            set -l dir ${config.xdg.configHome}/rice/fastfetch
+            test -r $dir/$__rice_active.jsonc; or return 1
+            set -l logo
+            if test -r $dir/$__rice_active.png
+                switch "$TERM"
+                    case 'foot*' 'mlterm*' 'contour*'
+                        set logo --logo-type sixel
+                    case xterm-kitty xterm-ghostty
+                        set logo --logo-type kitty-direct
+                end
+                set -q logo[1]; and set -a logo --logo $dir/$__rice_active.png --logo-width 24 --logo-height 12
+            end
+            fastfetch -c $dir/$__rice_active.jsonc $logo
           '';
         })
       ]);

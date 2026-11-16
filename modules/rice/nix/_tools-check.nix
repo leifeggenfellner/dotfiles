@@ -21,7 +21,8 @@ pkgs.runCommand "rice-tools"
 }
   ''
     export HOME="$TMPDIR" USER=rice COLORTERM=truecolor
-    fastfetch -c ${card "lotm"} > card.ansi 2>&1
+    fastfetch -c ${(card "lotm").config} > card.ansi 2>&1
+    test -s ${(card "lotm").image}
     python3 - card.ansi <<'PY'
     import re, sys
     text = re.sub(r"\x1b\[[0-9;?]*[a-zA-Z]", "", open(sys.argv[1], encoding="utf-8").read())
