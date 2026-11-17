@@ -37,23 +37,32 @@ _: {
         })
         (lib.mkIf (cards != { }) {
           xdg.configFile = lib.mkMerge (lib.mapAttrsToList
-            (themeName: card: {
-              "rice/fastfetch/${themeName}.jsonc".source = card.config;
-            } // lib.optionalAttrs (card.image != null) {
-              "rice/fastfetch/${themeName}.png".source = card.image;
-            })
+            (themeName: card: lib.mkMerge (lib.mapAttrsToList
+              (file: build: {
+                "rice/fastfetch/${file}.jsonc".source = build.config;
+              } // lib.optionalAttrs (build.image != null) {
+                "rice/fastfetch/${file}.png".source = build.image;
+              })
+              ({ ${themeName} = card; } // lib.mapAttrs' (id: lib.nameValuePair "${themeName}@${id}") card.variants)))
             cards);
           # Returns 1 (the base greeting runs) when the active theme has no
           # card. Terminals that draw images get the gilded PNG, encoded by
           # chafa (fastfetch's own sixel encoder draws nothing in foot) and
           # sized from the terminal's cell geometry; the rest keep the
-          # card's braille logo.
+          # card's braille logo. On a day with a daily accent (D-054) the
+          # card drawn in that entry's colour and sigil stands in.
           programs.fish.functions.__rice_fastfetch = ''
             set -q __rice_active[1]; or return 1
             set -l dir ${config.xdg.configHome}/rice/fastfetch
             test -r $dir/$__rice_active.jsonc; or return 1
+            set -l card $dir/$__rice_active
+            if count $dir/$__rice_active@*.jsonc > /dev/null
+                set -l daily (rice-query daily id 2>/dev/null)
+                and test -r $dir/$__rice_active@$daily.jsonc
+                and set card $dir/$__rice_active@$daily
+            end
             set -l format
-            if test -r $dir/$__rice_active.png
+            if test -r $card.png
                 switch "$TERM"
                     case 'foot*' 'mlterm*' 'contour*'
                         set format sixels
@@ -64,15 +73,15 @@ _: {
             if set -q format[1]
                 set -l image (mktemp)
                 if ${pkgs.chafa.bin}/bin/chafa -f $format -s 24x12 --animate off --probe off --polite on \
-                        $dir/$__rice_active.png > $image
-                    fastfetch -c $dir/$__rice_active.jsonc --logo-type raw --logo $image --logo-width 24 --logo-height 12
+                        $card.png > $image
+                    fastfetch -c $card.jsonc --logo-type raw --logo $image --logo-width 24 --logo-height 12
                     set -l status_ff $status
                     rm -f $image
                     return $status_ff
                 end
                 rm -f $image
             end
-            fastfetch -c $dir/$__rice_active.jsonc
+            fastfetch -c $card.jsonc
           '';
         })
       ]);

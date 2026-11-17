@@ -18,6 +18,7 @@ import "./modules/inspector"
 import "./modules/mood"
 import "./modules/sky"
 import "./modules/awakening"
+import "./modules/dailyAccent"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -54,6 +55,8 @@ ShellRoot {
     OsdController {}
 
     AwakeningController {}
+
+    DailyAccentController {}
 
     Variants {
         model: Quickshell.screens

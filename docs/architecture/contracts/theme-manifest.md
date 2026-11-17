@@ -186,7 +186,12 @@ and exposes it exclusively through the `Theme` facade.
    workspace an effects list, backdrop, title, DND, and entry sound. D-053 adds
    the `awakening` id (read by `modules/awakening/AwakeningController`):
    `{ title; subtitle?; hold?; lift?; sound?; }` opts the theme into the
-   once-per-login fog-lift.
+   once-per-login fog-lift. D-054 adds the `dailyAccent` id (read by
+   `modules/dailyAccent/DailyAccentController`, `rice-query`, `rice-terminal`,
+   the fastfetch card and the Hyprland adapter): `{ record; catalog; }`, where
+   `record` is `extras.<ns>.<key>` and catalog entries may carry `accent`
+   (`#rrggbb`, replacing `accent.primary` on their day) and `sigil` (an
+   assets-relative `.svg`).
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

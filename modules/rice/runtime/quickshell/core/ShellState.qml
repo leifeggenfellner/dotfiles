@@ -101,6 +101,11 @@ Item {
     // overlay only reads it.
     property var awakening: null
 
+    // Daily accent (D-054): "#rrggbb" standing in for accent.primary
+    // today, or "" for the theme's own. Written by modules/dailyAccent's
+    // controller; Theme reads it.
+    property string dailyAccent: ""
+
     // Single-open popout (L-002): the widgetId whose popout is up.
     property string activePopout: ""
 

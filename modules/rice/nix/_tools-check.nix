@@ -1,6 +1,9 @@
 # Terminal tools (D-051): LOTM's fastfetch card renders as an aligned box
 # with every base row, its bat theme compiles, and Cyberpunk opts into
-# nothing (no card, no tools) so its configs stay the host's.
+# nothing (no card, no tools) so its configs stay the host's. Daily
+# accents (D-054): every tarot card names a pathway with a text-safe
+# accent (≥ 4.5:1 on bg.base) and a sigil, and has a card variant
+# drawn in that accent.
 { pkgs }:
 let
   inherit (pkgs) lib;
@@ -12,7 +15,11 @@ let
     theme = theme name;
   };
   lotmTools = import ./_tools-lib.nix { inherit pkgs lib; } (theme "lotm");
+  lotmCards = (theme "lotm").widgets.tarotDraw.settings.cards;
+  inherit (card "lotm") variants;
 in
+assert lib.all (c: c ? pathway && c ? accent && c ? sigil) lotmCards;
+assert lib.attrNames variants == lib.sort lib.lessThan (map (c: c.id) lotmCards);
 assert card "cyberpunk" == null;
 assert !((theme "cyberpunk") ? integration.tools);
 pkgs.runCommand "rice-tools"
@@ -34,6 +41,24 @@ pkgs.runCommand "rice-tools"
         assert any(label in l and key in l for l in box), (label, key)
     assert "⣿" in text or any(0x2800 <= ord(c) <= 0x28ff for c in text), "logo missing"
     PY
+
+    python3 - ${lib.escapeShellArg (theme "lotm").tokens.colors.bg.base} ${lib.escapeShellArgs (map (c: "${c.id}=${c.accent}") lotmCards)} <<'PY'
+    import sys
+    def luminance(hex_):
+        channels = [int(hex_[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        linear = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    base = luminance(sys.argv[1])
+    for pair in sys.argv[2:]:
+        card, accent = pair.split("=")
+        hi, lo = sorted((luminance(accent), base), reverse=True)
+        ratio = (hi + 0.05) / (lo + 0.05)
+        assert ratio >= 4.5, f"{card}: accent {accent} is {ratio:.2f}:1 on bg.base, needs 4.5"
+    PY
+    fastfetch -c ${variants.moon.config} > moon.ansi 2>&1
+    grep -q '38;2;221;122;110m╭─ Beyonder Characteristic' moon.ansi
+    test -s ${variants.moon.image}
+    ! cmp -s ${variants.moon.image} ${(card "lotm").image}
 
     mkdir -p bat/themes
     cp ${lotmTools.bat} bat/themes/rice.tmTheme

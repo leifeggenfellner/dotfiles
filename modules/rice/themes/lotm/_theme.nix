@@ -30,6 +30,39 @@ let
 
   # "#rrggbb" → "rrggbb" for the legacy palette key space.
   strip = c: builtins.substring 1 6 c;
+
+  # The one pathway table (#90). `color` is the pathway's hue (workspace
+  # tints, the compass); `accent` is a text-safe variant (≥ 4.5:1 on
+  # bg.base) that stands in for accent.primary on the day its tarot card
+  # is drawn (D-054). Sigils live at assets/pathways/<id>.svg.
+  pathways = {
+    fool = { name = "Fool"; color = "#756a92"; accent = "#aaa3cf"; };
+    door = { name = "Door"; color = "#478eb0"; accent = "#6fb2d6"; };
+    white_tower = { name = "White Tower"; color = "#6678cc"; };
+    visionary = { name = "Visionary"; color = "#8a9aa9"; };
+    darkness = { name = "Darkness"; color = "#5a6d93"; };
+    sun = { name = "Sun"; color = "#bc9249"; };
+    error = { name = "Error"; color = "#8a96a7"; };
+    hermit = { name = "Hermit"; color = "#7d4f72"; accent = "#d48fc0"; };
+    wheel_of_fortune = { name = "Wheel of Fortune"; color = "#4f8a6a"; accent = "#7cc49b"; };
+    moon = { name = "Moon"; color = accent.tertiary; accent = "#dd7a6e"; };
+  };
+
+  # A tarot card belongs to the pathway of its Tarot Club holder: the
+  # Magician is Fors (Door), the Hermit and the High Priestess Cattleya's
+  # Mystery Pryers, the Moon Emlyn, the World Klein's Gehrman Sparrow.
+  tarot = pathway: card: card // {
+    pathway = pathways.${pathway}.name;
+    inherit (pathways.${pathway}) accent;
+    sigil = "pathways/${pathway}.svg";
+  };
+  compassPoint = pathway: point: point // { inherit (pathways.${pathway}) name color; };
+  workspace = id: pathway: {
+    inherit id;
+    label = pathways.${pathway}.name;
+    icon = "pathways_png/${pathway}.png";
+    inherit (pathways.${pathway}) color;
+  };
 in
 {
   meta = {
@@ -395,62 +428,62 @@ in
         prompt = "Draw today's omen";
         emptyLabel = "The deck waits under the fog.";
         cards = [
-          {
+          (tarot "fool" {
             id = "fool";
             name = "The Fool";
             sequence = "0";
             phrase = "A door opens above the gray fog.";
             face = "fool.png";
             back = "fool.png";
-          }
-          {
+          })
+          (tarot "door" {
             id = "magician";
             name = "The Magician";
             sequence = "I";
             phrase = "A precise hand turns chance into ritual.";
             face = "magician.png";
             back = "magician.png";
-          }
-          {
+          })
+          (tarot "hermit" {
             id = "high-priestess";
             name = "The High Priestess";
             sequence = "II";
             phrase = "Silence keeps the safer half of knowledge.";
             face = "priestess.png";
             back = "priestess.png";
-          }
-          {
+          })
+          (tarot "hermit" {
             id = "hermit";
             name = "The Hermit";
             sequence = "IX";
             phrase = "A lamp is enough when the path is honest.";
             face = "hermit.png";
             back = "hermit.png";
-          }
-          {
+          })
+          (tarot "wheel_of_fortune" {
             id = "wheel-of-fortune";
             name = "Wheel of Fortune";
             sequence = "X";
             phrase = "The machine turns; the omen is timing.";
             face = "wheel.png";
             back = "wheel.png";
-          }
-          {
+          })
+          (tarot "moon" {
             id = "moon";
             name = "The Moon";
             sequence = "XVIII";
             phrase = "Not every shadow belongs to a monster.";
             face = "moon.png";
             back = "moon.png";
-          }
-          {
+          })
+          (tarot "fool" {
             id = "world";
             name = "The World";
             sequence = "XXI";
             phrase = "A circle closes without becoming a cage.";
             face = "world.png";
             back = "world.png";
-          }
+          })
         ];
       };
 
@@ -487,6 +520,13 @@ in
         ];
       };
 
+      # Daily accent (D-054): the day's tarot card lends its pathway's
+      # accent to the shell, the window borders and the terminal card.
+      dailyAccent.settings = {
+        record = "extras.tarotDraw.daily";
+        catalog = "widgets.tarotDraw.settings.cards";
+      };
+
       # Terminal consumers (rice-terminal, D-042): the fish greeting shows the
       # same daily card the Observatory drew.
       terminal.settings = {
@@ -494,7 +534,7 @@ in
           record = "extras.tarotDraw.daily";
           autoDraw = true;
           catalog = "widgets.tarotDraw.settings.cards";
-          format = "Today's omen · {sequence} · {name} — {phrase}";
+          format = "Today's omen · {sequence} · {name} · {pathway} pathway — {phrase}";
           pendingLabel = "The cards are still face-down under the gray fog.";
         };
         commandNotFound.format = "Unknown incantation: {command}";
@@ -551,20 +591,20 @@ in
         title = "Pathway Compass";
         activeIndex = 0;
         pathways = [
-          { name = "Fool"; sequence = "9"; state = "acting"; color = "#756a92"; }
-          { name = "Door"; sequence = "8"; state = "listening"; color = "#478eb0"; }
-          { name = "Visionary"; sequence = "7"; state = "recording"; color = "#8a9aa9"; }
+          (compassPoint "fool" { sequence = "9"; state = "acting"; })
+          (compassPoint "door" { sequence = "8"; state = "listening"; })
+          (compassPoint "visionary" { sequence = "7"; state = "recording"; })
         ];
       };
 
       workspaces.settings.items = [
-        { id = 1; label = "Fool"; icon = "pathways_png/fool.png"; color = "#756a92"; }
-        { id = 2; label = "Door"; icon = "pathways_png/door.png"; color = "#478eb0"; }
-        { id = 3; label = "White Tower"; icon = "pathways_png/white_tower.png"; color = "#6678cc"; }
-        { id = 4; label = "Visionary"; icon = "pathways_png/visionary.png"; color = "#8a9aa9"; }
-        { id = 5; label = "Darkness"; icon = "pathways_png/darkness.png"; color = "#5a6d93"; }
-        { id = 6; label = "Sun"; icon = "pathways_png/sun.png"; color = "#bc9249"; }
-        { id = 7; label = "Error"; icon = "pathways_png/error.png"; color = "#8a96a7"; }
+        (workspace 1 "fool")
+        (workspace 2 "door")
+        (workspace 3 "white_tower")
+        (workspace 4 "visionary")
+        (workspace 5 "darkness")
+        (workspace 6 "sun")
+        (workspace 7 "error")
       ];
     };
 

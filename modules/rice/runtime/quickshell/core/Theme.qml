@@ -27,7 +27,8 @@ QtObject {
             readonly property color subtle: theme._t.colors.fg.subtle
         }
         readonly property QtObject accent: QtObject {
-            readonly property color primary: theme._t.colors.accent.primary
+            // The day's accent (D-054) when the theme has one.
+            readonly property color primary: ShellState.dailyAccent.length > 0 ? ShellState.dailyAccent : theme._t.colors.accent.primary
             readonly property color secondary: theme._t.colors.accent.secondary
             readonly property color tertiary: theme._t.colors.accent.tertiary
         }

@@ -226,6 +226,13 @@ let
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "groupbar" "text" ] [ "fg.primary" ] lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" ] { } lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderSweep" ] "loop" lotm))
+    # Daily accent (D-054).
+    (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "record" ] "tarotDraw.daily" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "catalog" ] "widgets.tarotDraw.settings.missing" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "custom" ] true lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "tarotDraw" "settings" "cards" ] [{ id = "fool"; accent = "gold"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "tarotDraw" "settings" "cards" ] [{ id = "fool"; accent = "#aaa3cf"; sigil = "pathways/missing.svg"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "tarotDraw" "settings" "cards" ] [{ id = "a b"; accent = "#aaa3cf"; }] lotm))
     # Cursor (D-048).
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "name" ] "lotm quill" lotm))
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "size" ] 4 lotm))

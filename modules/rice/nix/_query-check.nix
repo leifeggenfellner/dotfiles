@@ -11,8 +11,12 @@ let
     widgets = {
       tarotDraw.settings.cards = [
         { id = "fool"; name = "The Fool"; sequence = "0"; }
-        { id = "moon"; name = "The Moon"; sequence = "XVIII"; }
+        { id = "moon"; name = "The Moon"; sequence = "XVIII"; accent = "#dd7a6e"; }
       ];
+      dailyAccent.settings = {
+        record = "extras.tarotDraw.daily";
+        catalog = "widgets.tarotDraw.settings.cards";
+      };
       terminal.settings = {
         greeting.daily = {
           record = "extras.tarotDraw.daily";
@@ -116,16 +120,32 @@ pkgs.runCommand "rice-query"
   printf '{"extras":{"tarotDraw":{"daily":{"date":"%s","id":"moon"}}}}' "$today" > "$XDG_STATE_HOME/rice/prefs.json"
   expect moon "$query" pref extras.tarotDraw.daily.id
 
+  # daily (D-054): today's entry or a field of it; unset when not drawn,
+  # when the entry has no such field, or when the record is stale.
+  expect '{"accent":"#dd7a6e","id":"moon","name":"The Moon","sequence":"XVIII"}' "$query" daily
+  expect "#dd7a6e" "$query" daily accent
+  expect '"#dd7a6e"' "$query" --json daily accent
+  expect_status 1 "$query" daily nope
+  expect_status 2 "$query" daily a b
+  # The greeting is painted in today's accent; the stored record's card
+  # has one (moon), so not in the theme's gold.
+  expect "$(printf '\033[38;2;221;122;110momen XVIII The Moon\033[0m')" env RICE_TERMINAL_COLOR=1 "$terminal" greeting
+  expect "omen XVIII The Moon" env RICE_TERMINAL_COLOR=1 NO_COLOR=1 "$terminal" greeting
+
   # greeting: by id, by index, legacy card field, stale date, no prefs.
   expect "omen XVIII The Moon" "$terminal" greeting
   printf '{"extras":{"tarotDraw":{"daily":{"date":"%s","id":"gone","index":0}}}}' "$today" > "$XDG_STATE_HOME/rice/prefs.json"
   expect "omen 0 The Fool" "$terminal" greeting
+  expect_status 1 "$query" daily accent
+  expect "$(printf '\033[38;2;199;154;58momen 0 The Fool\033[0m')" env RICE_TERMINAL_COLOR=1 "$terminal" greeting
   printf '{"extras":{"tarotDraw":{"daily":{"date":"%s","card":1}}}}' "$today" > "$XDG_STATE_HOME/rice/prefs.json"
   expect "omen XVIII The Moon" "$terminal" greeting
   printf '{"extras":{"tarotDraw":{"daily":{"date":"2000-01-01","card":1}}}}' > "$XDG_STATE_HOME/rice/prefs.json"
   expect face-down "$terminal" greeting
+  expect_status 1 "$query" daily
   rm -f "$XDG_STATE_HOME/rice/prefs.json"
   expect face-down "$terminal" greeting
+  expect_status 1 "$query" daily
 
   # autoDraw: no record today → claim through the shell, then reuse it.
   rm -f "$XDG_STATE_HOME/rice/prefs.json"
@@ -155,6 +175,7 @@ pkgs.runCommand "rice-query"
   echo cyberpunk > "$XDG_STATE_HOME/rice/active"
   expect_status 1 "$terminal" greeting
   expect_status 1 "$terminal" command-not-found gti
+  expect_status 1 "$query" daily
 
   # Broken environment.
   expect_status 2 env RICE_INDEX=${malformedIndex} "$query" active

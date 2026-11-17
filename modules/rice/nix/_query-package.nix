@@ -6,6 +6,7 @@
 { pkgs }:
 let
   activeManifestLib = import ./_active-manifest-lib.nix { inherit pkgs; };
+  dailyLib = import ./_daily-lib.nix;
 
   # Shared prologue: environment overrides mirror rice-hyprland-theme so the
   # same flake check fixtures drive both programs.
@@ -44,6 +45,8 @@ let
       manifest        store path of the active theme's manifest
       get <path>      value at a dotted path in the active manifest
       pref <path>     value at a dotted path in prefs.json (read-only)
+      daily [<path>]  today's widgets.dailyAccent catalog entry (D-054), or
+                      a dotted path inside it; unset until today is drawn
 
     Paths are dot-separated keys; numeric segments index arrays
     (e.g. widgets.tarotDraw.settings.cards.0.name). Strings print raw unless
@@ -104,6 +107,24 @@ let
         [ "$#" -eq 1 ] || fail "pref takes exactly one path"
         [ -e "$prefs_file" ] || exit 1
         lookup "$1" "$prefs_file" ;;
+      daily)
+        [ "$#" -le 1 ] || fail "daily takes at most one path"
+        resolve_manifest
+        prefs_source=/dev/null
+        [ ! -r "$prefs_file" ] || prefs_source="$prefs_file"
+        status=0
+        entry="$("$jq" -ec --rawfile prefs_raw "$prefs_source" --arg today "$(${pkgs.coreutils}/bin/date +%F)" '
+          ${dailyLib}
+          # Themes without a daily accent never parse prefs.
+          select(.widgets.dailyAccent != null)
+          | daily($prefs_raw | if test("^\\s*$") then {} else fromjson end; $today) // empty
+        ' "$manifest")" || status=$?
+        case "$status" in
+          0) ;;
+          1|4) exit 1 ;;
+          *) fail "could not resolve today's entry from $manifest" ;;
+        esac
+        if [ "$#" -eq 0 ]; then printf '%s\n' "$entry"; else lookup "$1" /dev/stdin <<< "$entry"; fi ;;
       *)
         usage >&2; exit 2 ;;
     esac
@@ -111,7 +132,8 @@ let
 
   # Placeholders `{field}` in a format string are replaced from an object;
   # unknown fields render empty. Colour comes from the manifest's primary
-  # accent and is skipped when NO_COLOR is set or stdout is not a terminal.
+  # accent, or today's daily accent (D-054), and is skipped when NO_COLOR
+  # is set or stdout is not a terminal.
   riceTerminal = pkgs.writeShellScriptBin "rice-terminal" ''
     ${prologue "rice-terminal"}
 
@@ -120,17 +142,19 @@ let
     }
 
     quickshell="''${RICE_QUICKSHELL:-${pkgs.quickshell}/bin/quickshell}"
+    # RICE_TERMINAL_COLOR=1 paints captured output (the fish greeting
+    # resolves its line before printing it); NO_COLOR still wins.
     color=1
-    [ -t 1 ] && [ -z "''${NO_COLOR:-}" ] || color=0
+    { [ -t 1 ] || [ "''${RICE_TERMINAL_COLOR:-}" = 1 ]; } && [ -z "''${NO_COLOR:-}" ] || color=0
 
     render() {
       local filter="$1"; shift
       local status=0
       "$jq" -er --argjson color "$color" "$@" '
-        def segments: split(".") | map(if test("^[0-9]+$") then tonumber else . end);
+        ${dailyLib}
         def fill($fields): gsub("\\{(?<k>[A-Za-z0-9_]+)\\}"; ($fields[.k] // "" | tostring));
         def hexbyte: ascii_downcase | explode | reduce .[] as $c (0; . * 16 + (if $c >= 97 then $c - 87 else $c - 48 end));
-        def paint: (.tokens.colors.accent.primary? // "") as $accent |
+        def paint($m): ($m.tokens.colors.accent.primary? // "") as $accent |
           if $color == 1 and ($accent | type == "string" and test("^#[0-9a-fA-F]{6}$"))
           then "\u001b[38;2;" + ([$accent[1:3], $accent[3:5], $accent[5:7]] | map(hexbyte | tostring) | join(";")) + "m"
           else "" end;
@@ -160,18 +184,16 @@ let
         # when autoDraw may claim today's record under extras.<ns>.<key>.
         greeting_pass() {
           render '
-            def painted($line): paint as $on | $on + $line + (if $on == "" then "" else "\u001b[0m" end);
             ($settings.greeting.daily // empty) as $daily |
-            (if $override != null then $override
-             else ($prefs_raw | if test("^\\s*$") then {} else fromjson end
-               | getpath($daily.record | segments)) end) as $record |
-            ($manifest | getpath($daily.catalog | segments) // []) as $catalog |
-            (if ($record | type) == "object" and $record.date == $today then
-              (if $record.id != null then ([$catalog[] | select(.id == $record.id)] | first) else null end)
-              // (($record.index // $record.card) as $i
-                  | if ($i | type) == "number" and $i >= 0 and $i < ($catalog | length) then $catalog[$i] else null end)
-            else null end) as $entry |
             ($daily.record | segments) as $path |
+            # An IPC-confirmed record stands in for the stored one, so the
+            # daily accent follows a claim prefs.json may not show yet.
+            ($prefs_raw | if test("^\\s*$") then {} else fromjson end
+              | if $override != null then setpath($path; $override) else . end) as $prefs |
+            ($manifest | with_daily_accent($prefs; $today)) as $tinted |
+            def painted($line): paint($tinted) as $on | $on + $line + (if $on == "" then "" else "\u001b[0m" end);
+            ($manifest | getpath($daily.catalog | segments) // []) as $catalog |
+            daily_entry(($prefs | getpath($path)); $catalog; $today) as $entry |
             if $entry != null then "line\t" + painted(($daily.format // "{name}") | fill($entry))
             elif $allowDraw == 1 and $daily.autoDraw == true and ($catalog | length) > 0
               and ($path | length) == 3 and $path[0] == "extras" then

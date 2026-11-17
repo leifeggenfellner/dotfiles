@@ -115,6 +115,37 @@ let
         [ "enabled" "region" "priority" "monitorPolicy" "settings" "unloadWhenClosed" ]
         descriptor)
       (theme.widgets or { })
+    ++ lib.optionals ((theme.widgets.dailyAccent.settings or null) != null) (
+      # Daily accent (D-054): an extras record resolved against a theme
+      # list; every entry's accent and sigil must resolve.
+      let
+        at = "widgets.dailyAccent.settings";
+        s = theme.widgets.dailyAccent.settings;
+        record = lib.splitString "." (s.record or "");
+        catalog =
+          if builtins.isString (s.catalog or null)
+          then lib.attrByPath (lib.splitString "." s.catalog) null theme
+          else null;
+        entryCheck = i: e:
+          let entryAt = "${s.catalog}.${toString i}"; in
+          if !(e ? accent) then true
+          else if !(builtins.isString (e.id or null)) || builtins.match "[A-Za-z0-9_-]+" e.id == null
+          then fail "${entryAt}.id must match [A-Za-z0-9_-]+ when it carries an accent"
+          else if !(builtins.seq (hex e.accent) true) then false
+          else if e ? sigil && !(builtins.isString e.sigil && lib.hasSuffix ".svg" e.sigil
+          && builtins.pathExists (themeDir + "/assets/${e.sigil}"))
+          then fail "${entryAt}.sigil must be an .svg under assets/, got ${builtins.toJSON e.sigil}"
+          else true;
+      in
+      [
+        (checkClosed at [ "record" "catalog" ] s)
+        (if builtins.length record == 3 && builtins.head record == "extras" then true
+        else fail "${at}.record must be extras.<namespace>.<key>")
+        (if builtins.isList catalog then true
+        else fail "${at}.catalog must name a list in the theme")
+      ]
+      ++ lib.optionals (builtins.isList catalog) (lib.imap0 entryCheck catalog)
+    )
     ++ map
       (plugin: checkClosed "plugins entry"
         [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]

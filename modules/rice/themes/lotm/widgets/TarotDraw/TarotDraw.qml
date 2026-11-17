@@ -78,6 +78,9 @@ Rectangle {
     readonly property int cardHeight: wide ? 220 : 188
     readonly property int cardWidth: Math.round(cardHeight * cardAspect)
     readonly property color cardMatte: "#d9c59b"
+    // The card's pathway (D-054): its name beside the colour it lends
+    // the day's accent.
+    readonly property string pathwayLabel: currentCard && currentCard.pathway ? currentCard.pathway + " pathway" : ""
 
     property bool revealed: hasDaily
 
@@ -252,6 +255,15 @@ Rectangle {
 
             Text {
                 width: parent.width
+                visible: root.pathwayLabel.length > 0
+                text: root.pathwayLabel
+                color: root.theme.colors.accent.primary
+                font.family: root.theme.typography.families.display
+                font.pointSize: root.theme.typography.sizes.body
+            }
+
+            Text {
+                width: parent.width
                 text: root.currentCard ? root.currentCard.phrase : "A single card may be recorded for the day."
                 color: root.theme.colors.fg.muted
                 wrapMode: Text.WordWrap
@@ -370,6 +382,15 @@ Rectangle {
                 wrapMode: Text.WordWrap
                 font.family: root.theme.typography.families.display
                 font.pointSize: root.theme.typography.sizes.heading
+            }
+
+            Text {
+                width: parent.width
+                visible: root.pathwayLabel.length > 0
+                text: root.pathwayLabel
+                color: root.theme.colors.accent.primary
+                font.family: root.theme.typography.families.display
+                font.pointSize: root.theme.typography.sizes.body
             }
 
             Text {

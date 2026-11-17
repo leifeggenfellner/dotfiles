@@ -3,8 +3,11 @@
 # go in; one fastfetch config per theme comes out, chosen at greeting
 # time from the active theme. Rows and values match the base greeting,
 # so the card loses nothing: each label sits beside the plain key. The
-# result is `{ config; image; }`; the greeting swaps the braille logo for
-# `image` where the terminal can draw it.
+# result is `{ config; image; variants; }`; the greeting swaps the braille
+# logo for `image` where the terminal can draw it. `variants` holds one
+# `{ config; image; }` per daily-accent entry (D-054), keyed by entry id:
+# the frame in that entry's accent and its `sigil` (or the card's logo)
+# in the same colour. The greeting picks today's at startup.
 { pkgs, lib }:
 { themeName, themeDir, theme }:
 let
@@ -47,47 +50,68 @@ let
     format = " {$3}▐{$1} {$4}${lib.removeSuffix "}" r.value}>${toString valueWidth}}{$1} │";
   } // lib.optionalAttrs (r ? text) { inherit (r) text; };
 
-  # The theme's single-colour SVG, gilded with accent.primary: a PNG for
-  # terminals that draw images (sixel, kitty), and braille for the rest.
-  image = pkgs.runCommand "rice-${themeName}-fastfetch-logo.png"
-    { nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick ]; }
-    ''
-      resvg --width 512 ${themeDir + "/assets/${card.logo}"} sigil.png
-      magick sigil.png -fill '${colors.accent.primary}' -colorize 100 $out
-    '';
-  logo = pkgs.runCommand "rice-${themeName}-fastfetch-logo"
-    { nativeBuildInputs = [ pkgs.chafa ]; }
-    ''
-      chafa --format symbols --symbols braille --fg-only --size 26x13 -c full --threshold 0.3 \
-        --animate off --polite on ${image} > $out
-    '';
-
-  config = pkgs.writeText "rice-${themeName}-fastfetch.jsonc" (builtins.toJSON {
-    "$schema" = "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json";
-    logo = if card ? logo then { type = "file-raw"; source = "${logo}"; padding = { top = 1; right = 2; }; } else { type = "none"; };
-    display = {
-      separator = "";
-      key.paddingLeft = 2;
-      color.output = "white";
-      constants = [
-        (ansi colors.fg.primary)
-        (ansi colors.accent.primary)
-        (ansi colors.fg.subtle)
-        (ansi colors.fg.primary)
-      ];
+  # One card in one accent. The single-colour SVG is gilded with it: a PNG
+  # for terminals that draw images (sixel, kitty), and braille for the rest.
+  build = { name, accent, logoPath }:
+    let
+      image = pkgs.runCommand "${name}-fastfetch-logo.png"
+        { nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick ]; }
+        ''
+          resvg --width 512 ${themeDir + "/assets/${logoPath}"} sigil.png
+          magick sigil.png -fill '${accent}' -colorize 100 $out
+        '';
+      logo = pkgs.runCommand "${name}-fastfetch-logo"
+        { nativeBuildInputs = [ pkgs.chafa ]; }
+        ''
+          chafa --format symbols --symbols braille --fg-only --size 26x13 -c full --threshold 0.3 \
+            --animate off --polite on ${image} > $out
+        '';
+    in
+    {
+      image = if logoPath != null then image else null;
+      config = pkgs.writeText "${name}-fastfetch.jsonc" (builtins.toJSON {
+        "$schema" = "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json";
+        logo = if logoPath != null then { type = "file-raw"; source = "${logo}"; padding = { top = 1; right = 2; }; } else { type = "none"; };
+        display = {
+          separator = "";
+          key.paddingLeft = 2;
+          color.output = "white";
+          constants = [
+            (ansi colors.fg.primary)
+            (ansi accent)
+            (ansi colors.fg.subtle)
+            (ansi colors.fg.primary)
+          ];
+        };
+        modules = [
+          "break"
+          { type = "custom"; key = "{$2}${top}{$1}"; }
+        ]
+        ++ map row rows
+        ++ [
+          { type = "custom"; key = "{$2}${bottom}{$1}"; }
+          "break"
+          { type = "colors"; paddingLeft = 4; symbol = "circle"; block = { range = [ 0 15 ]; width = 3; }; }
+          "break"
+        ];
+      });
     };
-    modules = [
-      "break"
-      { type = "custom"; key = "{$2}${top}{$1}"; }
-    ]
-    ++ map row rows
-    ++ [
-      { type = "custom"; key = "{$2}${bottom}{$1}"; }
-      "break"
-      { type = "colors"; paddingLeft = 4; symbol = "circle"; block = { range = [ 0 15 ]; width = 3; }; }
-      "break"
-    ];
-  });
+
+  # Daily-accent entries (D-054) that carry an accent; ids are file names.
+  daily = theme.widgets.dailyAccent.settings or null;
+  entries =
+    if daily == null then [ ]
+    else lib.filter (e: e ? accent) (lib.attrByPath (lib.splitString "." daily.catalog) [ ] theme);
+  variant = e:
+    if !(builtins.isString (e.id or null)) || builtins.match "[A-Za-z0-9_-]+" e.id == null
+    then throw "${themeName}: daily-accent entry ids must match [A-Za-z0-9_-]+, got ${builtins.toJSON (e.id or null)}"
+    else
+      lib.nameValuePair e.id (build {
+        name = "rice-${themeName}-${e.id}";
+        inherit (e) accent;
+        logoPath = e.sigil or card.logo or null;
+      });
 in
 if card == null then null
-else { inherit config; image = if card ? logo then image else null; }
+else build { name = "rice-${themeName}"; accent = colors.accent.primary; logoPath = card.logo or null; }
+  // { variants = lib.listToAttrs (map variant entries); }

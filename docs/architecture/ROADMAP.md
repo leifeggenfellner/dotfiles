@@ -982,13 +982,30 @@ Concretized as D-053 (issue #69).
   screen, input-transparent, gated by a per-Hyprland-instance marker so
   shell restarts and rebuilds don't replay it.
 - ✅ LOTM: "Above the Gray Fog" / "The Fool awakens" surfaces in gold
-  through the fog beside the real user and time, holds 1.1 s, then the
-  fog rises off the desktop over 2.6 s; the `lore` seal sounds if unmuted.
+  through the fog beside the real user and time, holds 2.2 s, then the
+  fog rises off the desktop over 3.2 s; the `lore` seal sounds if unmuted.
 - ✅ Reduce-motion and Cyberpunk: nothing plays (Cyberpunk's manifest is
   byte-identical).
 - Verified: `rice-lint`, `nix flake check`; dev shell under a headless sway
   compositor — first start plays, a restart reports `seen`, IPC `trigger`
   forces it, reduce-motion reports `reduced`, Cyberpunk `unconfigured`.
+
+## Phase 41 — Daily pathway colours from the tarot draw ✅
+
+Concretized as D-054 (issue #90).
+
+- ✅ `widgets.dailyAccent.settings`: the day's daily record lends its
+  catalog entry's `accent` to `accent.primary` — the bar, dashboard,
+  effects, Hyprland borders and group bar, the terminal greeting and the
+  fastfetch card (variant per entry, sigil recoloured).
+- ✅ LOTM: one pathway table feeds workspaces, the compass and the cards;
+  each card maps to its Tarot Club holder's pathway, with a text-safe
+  accent and its sigil. The Observatory card and the omen line name the
+  pathway beside its colour. No draw today → antique gold and the Fool.
+- ✅ `rice-query daily`; the greeting claims before the card is drawn.
+- ✅ Cyberpunk: no settings, manifest unchanged, adapter output unchanged.
+- Verified: `rice-lint`, `nix flake check` (manifest validation, adapter,
+  query, tools contrast and variant checks).
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 

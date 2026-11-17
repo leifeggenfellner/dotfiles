@@ -1062,6 +1062,58 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   short, input-transparent reveal continues the boot splash's (D-044)
   visual language without ever delaying the session.
 
+### D-054 — The daily record may lend the day an accent
+
+- Date: 2026-11-17 · Status: active · Extends D-042, D-047, D-051
+- `widgets.dailyAccent.settings = { record; catalog; }` opts a theme in:
+  `record` is a prefs path `extras.<ns>.<key>` holding a daily record
+  `{ date, id?, index? }` (D-042), `catalog` a theme list it resolves
+  against (by `id`, then position). On a day whose record resolves to an
+  entry with an `accent` (`#rrggbb`), that colour stands in for
+  `accent.primary` everywhere it is read at runtime; otherwise the theme's
+  own accent stands. An entry may also name a `sigil` (an `.svg` under
+  `assets/`). `mkThemeManifest` validates the record shape, the catalog,
+  each accent, entry ids, and that each sigil exists.
+- Shell: `modules/dailyAccent/DailyAccentController` resolves the entry
+  from `PrefsState` and the manifest, re-reading the date every minute,
+  and pushes the colour onto `ShellState.dailyAccent`; `Theme` returns it
+  for `colors.accent.primary`. It is derived, never stored: no record
+  for today, a midnight rollover, or a theme without the settings gives
+  the theme's accent back. Effects and token refs (`"accent.primary"`)
+  follow because they resolve through `Theme`.
+- Compositor: the Hyprland adapter (D-047) substitutes the day's accent
+  before its mapping, so the active border, group borders and every
+  `tokens.chrome` gradient ref to `accent.primary` follow. It resolves
+  the record from `prefs.json` itself (`rice-switch`, Hyprland reloads);
+  the controller re-runs it with `RICE_DAILY_ACCENT=#rrggbb|none` when the
+  accent changes within a theme, since prefs.json may lag the claim.
+- Terminal: `rice-query daily [path]` prints today's entry; `rice-terminal`
+  paints the greeting in the day's accent. `_fastfetch-lib.nix` builds one
+  card variant per accented entry (`<theme>@<id>`: frame in its accent,
+  its sigil in the same colour); the fish greeting picks today's. The
+  greeting's daily line is now resolved before the card is drawn, so a
+  draw it claims colours the same greeting, and printed after it as
+  before (`RICE_TERMINAL_COLOR=1` keeps captured output painted).
+- The shell (`DailyAccentController`) and the CLI tools
+  (`nix/_daily-lib.nix`, shared jq) are the only two resolvers.
+- Contrast: an accent replaces `accent.primary` as text, so the
+  `rice-tools` check holds LOTM's card accents to ≥ 4.5:1 on `bg.base`.
+  A theme's pathway hue may be darker; it carries a separate text-safe
+  `accent`.
+- Rebuild-time surfaces (Plymouth, GTK/Qt, btop/bat/yazi/cava, the
+  generated Hyprland config, Starship and Neovim) stay on the theme
+  palette; they cannot follow a daily value. The lock screen also keeps
+  the theme accent.
+- LOTM: one pathway table in `_theme.nix` feeds workspaces, the compass
+  and the tarot cards (the manifest's workspaces and compass are
+  unchanged). Each card belongs to the pathway of its Tarot Club holder:
+  Fool and World → Fool, Magician → Door, High Priestess and Hermit →
+  Hermit, Wheel of Fortune → Wheel of Fortune, Moon → Moon.
+- Why: the tarot draw was the one daily ritual with no visible
+  consequence outside its own card; letting it tint the day makes the
+  draw matter, and deriving the tint from the record keeps "restore
+  exactly" true without a second piece of state.
+
 ---
 
 ## Legacy imports
