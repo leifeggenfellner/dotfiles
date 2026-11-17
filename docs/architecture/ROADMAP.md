@@ -1009,6 +1009,20 @@ Concretized as D-054 (issue #90).
 - Verified: `rice-lint`, `nix flake check` (manifest validation, adapter,
   query, tools contrast and variant checks).
 
+## Phase 42 — HyprFM follows the rice ✅
+
+Concretized as D-055 (issue #91).
+
+- ✅ HyprFM replaces PCManFM (flake input, SUPER+SHIFT+D, float rule,
+  `inode/directory` default, gvfs/usbmuxd and preview tools).
+- ✅ `rice-hyprfm-theme` writes `themes/rice.toml` from the active
+  tokens and the day's accent; HyprFM reloads it live on activation,
+  `rice-switch` and a daily-accent change. Activation points
+  `config.toml` at it and leaves the rest of HyprFM's settings alone.
+- Verified: `nix flake check` (`rice-hyprfm`: mapping, terminal palette,
+  daily accent, partial palette, bad tokens, unset-up hosts;
+  `rice-theme-switch`: a HyprFM failure never blocks a switch).
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

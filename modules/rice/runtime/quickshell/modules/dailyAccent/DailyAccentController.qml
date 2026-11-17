@@ -18,9 +18,9 @@ import "../../services/prefs"
 // record for today, an entry without an accent, or no settings, the
 // theme's own accent stands. The date is re-read every minute, so the
 // accent returns at midnight. rice-cli tools resolve the same way
-// (nix/_daily-lib.nix); Hyprland borders follow through the adapter,
-// re-run here when the accent changes within a theme (a theme switch
-// re-runs it itself).
+// (nix/_daily-lib.nix); Hyprland borders and HyprFM (D-055) follow
+// through their adapters, re-run here when the accent changes within a
+// theme (a theme switch re-runs them itself).
 //
 //   quickshell -c rice ipc call dailyAccent status
 
@@ -67,8 +67,11 @@ Item {
         if (!PrefsState.ready || !ManifestLoader.loaded)
             return;
         const theme = Theme.activeName;
-        if (_settled && theme === _theme && accent !== _applied)
-            Quickshell.execDetached(["env", "RICE_DAILY_ACCENT=" + (accent.length > 0 ? accent : "none"), "rice-hyprland-theme", "--active"]);
+        if (_settled && theme === _theme && accent !== _applied) {
+            const env = "RICE_DAILY_ACCENT=" + (accent.length > 0 ? accent : "none");
+            Quickshell.execDetached(["env", env, "rice-hyprland-theme", "--active"]);
+            Quickshell.execDetached(["env", env, "rice-hyprfm-theme", "--active"]);
+        }
         _settled = true;
         _theme = theme;
         _applied = accent;

@@ -30,6 +30,9 @@
       rice-tools =
         import ../rice/nix/_tools-check.nix { inherit pkgs; };
 
+      rice-hyprfm =
+        import ../rice/nix/_hyprfm-check.nix { inherit pkgs; };
+
       rice-prompt =
         import ../rice/nix/_prompt-check.nix {
           inherit pkgs;

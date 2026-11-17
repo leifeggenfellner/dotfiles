@@ -19,7 +19,7 @@ _: {
     in
     {
       config = lib.mkIf (cfg.enable or false) {
-        home.packages = [ packages.riceSwitch packages.hyprlandTheme ] ++ cursors;
+        home.packages = [ packages.riceSwitch packages.hyprlandTheme packages.hyprfmTheme ] ++ cursors;
       };
     };
 }

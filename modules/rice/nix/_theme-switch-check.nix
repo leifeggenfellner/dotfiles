@@ -231,6 +231,15 @@ pkgs.runCommand "rice-theme-switch"
     grep -q 'active_border = "rgb(00e5ff)"' "$RICE_TEST_LOG"
     rm "$XDG_STATE_HOME/rice/prefs.json"
 
+    echo "case: HyprFM colours (D-055) follow a switch but never block it"
+    # These fixture manifests lack the full colour tokens, so the adapter
+    # fails once HyprFM is set up; the switch still lands.
+    mkdir "$HOME/.config/hyprfm"
+    "$switch" lotm 2> "$TMPDIR/hyprfm.err"
+    test "$(cat "$XDG_STATE_HOME/rice/active")" = lotm
+    grep -q 'could not update HyprFM colours' "$TMPDIR/hyprfm.err"
+    rmdir "$HOME/.config/hyprfm"
+
     echo "case: trust boundary"
     reset_state
     printf %s '{}' > "$TMPDIR/mutable-index.json"

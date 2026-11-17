@@ -1,11 +1,13 @@
 { pkgs }:
 let
   hyprlandTheme = import ./_hyprland-theme-adapter.nix { inherit pkgs; };
+  hyprfmTheme = import ./_hyprfm-theme-adapter.nix { inherit pkgs; };
   riceSwitch = pkgs.writeShellScriptBin "rice-switch" ''
     set -euo pipefail
 
     jq="''${RICE_JQ:-${pkgs.jq}/bin/jq}"
     hyprland_theme="''${RICE_HYPRLAND_THEME:-${hyprlandTheme}/bin/rice-hyprland-theme}"
+    hyprfm_theme="''${RICE_HYPRFM_THEME:-${hyprfmTheme}/bin/rice-hyprfm-theme}"
     quickshell="''${RICE_QUICKSHELL:-${pkgs.quickshell}/bin/quickshell}"
     wallpaper_apply="''${RICE_WALLPAPER_APPLY:-wallpaper-apply}"
     mv_command="''${RICE_MV:-${pkgs.coreutils}/bin/mv}"
@@ -338,9 +340,13 @@ let
     transaction_complete=1
     trap - INT TERM HUP EXIT
     cleanup || fail "theme switched but transaction cleanup failed"
+    # Outside the transaction: HyprFM colours (D-055) follow the switch but
+    # never block or roll it back.
+    "$hyprfm_theme" --active ||
+      echo "rice-switch: could not update HyprFM colours; run rice-hyprfm-theme --active" >&2
     echo "rice-switch: active theme -> $theme"
   '';
 in
 {
-  inherit hyprlandTheme riceSwitch;
+  inherit hyprlandTheme hyprfmTheme riceSwitch;
 }

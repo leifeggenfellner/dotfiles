@@ -1115,6 +1115,34 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   draw matter, and deriving the tint from the record keeps "restore
   exactly" true without a second piece of state.
 
+### D-055 — HyprFM follows the active rice live
+
+- Date: 2026-11-17 · Status: active · Extends D-039, D-054 · Issue #91
+- `rice-hyprfm-theme` (`nix/_hyprfm-theme-adapter.nix`) maps the active
+  manifest's colour tokens onto HyprFM's theme keys (base, mantle, crust
+  ← `bg.sunken`, surface/overlay ← `bg.surface1/2`, text/subtext/muted ←
+  `fg.*`, accent, success/warning/error ← `state.*`), plus a 16-colour
+  terminal palette from `palette.legacy` laid out like the console
+  palette (D-044) with a surface for black, emitted only when complete.
+  It writes `~/.config/hyprfm/themes/rice.toml` atomically; HyprFM
+  watches that file and reloads live.
+- Unlike the rebuild-time tool themes (D-051) it is theme-blind and
+  applies to every theme: HyprFM has no host colours to preserve, and a
+  GUI window beside the bar should switch with it. It follows the day's
+  accent (D-054) exactly as the Hyprland adapter does, prefs or
+  `RICE_DAILY_ACCENT`.
+- Runs: on activation, after a committed `rice-switch` (outside the
+  transaction — a failure warns and never rolls a switch back), and from
+  `DailyAccentController` when the accent changes within a theme. It does
+  nothing where `~/.config/hyprfm` does not exist.
+- HyprFM rewrites `config.toml` from its own Settings panel, so Home
+  Manager never owns it; activation only sets `[general] theme = "rice"`
+  (the edit upstream documents for scripts), leaving every other key the
+  user's. Radius and motion stay HyprFM's settings.
+- Why: PCManFM ignored the rice entirely; HyprFM's TOML themes map almost
+  one-to-one onto the token roles, and its live reload lets a file
+  manager follow switches and the daily draw like the shell does.
+
 ---
 
 ## Legacy imports
