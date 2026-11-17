@@ -1019,6 +1019,8 @@ Concretized as D-055 (issue #91).
   tokens and the day's accent; HyprFM reloads it live on activation,
   `rice-switch` and a daily-accent change. Activation points
   `config.toml` at it and leaves the rest of HyprFM's settings alone.
+- ✅ Folder icons follow too: a generated `rice` icon theme recolours
+  Adwaita's folders in the accent (the tarot card's on a drawn day).
 - Verified: `nix flake check` (`rice-hyprfm`: mapping, terminal palette,
   daily accent, partial palette, bad tokens, unset-up hosts;
   `rice-theme-switch`: a HyprFM failure never blocks a switch).

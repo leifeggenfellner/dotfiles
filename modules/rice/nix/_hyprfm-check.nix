@@ -1,7 +1,8 @@
 # HyprFM colours (D-055): rice-hyprfm-theme maps a theme's colour tokens
 # onto HyprFM's keys, takes the daily accent (D-054) like the Hyprland
 # adapter, derives a 16-colour terminal palette from palette.legacy only
-# when it is complete, and writes nothing where HyprFM is not set up.
+# when it is complete, recolours Adwaita's folders into a "rice" icon
+# theme, and writes nothing where HyprFM is not set up.
 { pkgs }:
 let
   adapter = (import ./_switch-package.nix { inherit pkgs; }).hyprfmTheme;
@@ -77,6 +78,16 @@ pkgs.runCommand "rice-hyprfm"
     grep -qx 'accent = "#c79a3a"' "$theme"
     RICE_DAILY_ACCENT='#8899ee' $run --active
     grep -qx 'accent = "#8899ee"' "$theme"
+
+    # The "rice" icon theme: Adwaita's folders in the day's accent, by role.
+    icons="$HOME/.local/share/icons/rice"
+    grep -qx 'Inherits=Adwaita,hicolor' "$icons/index.theme"
+    test "$(ls "$icons/scalable/places" | wc -l)" = "$(ls ${pkgs.adwaita-icon-theme}/share/icons/Adwaita/scalable/places/{folder,folder-*,user-home,user-desktop,user-bookmarks}.svg | wc -l)"
+    grep -q 'fill="#8899ee"' "$icons/scalable/places/folder.svg"         # front
+    grep -q 'stop-color="#7786d1"' "$icons/scalable/places/folder.svg"   # rim: darkened 12%
+    grep -q 'fill="#616eab"' "$icons/scalable/places/folder.svg"         # back: darkened 28%
+    ! grep -qiE '#(62a0ea|438de6|a4caee|afd4ff|c0d5ea)' "$icons"/scalable/places/*.svg
+    test -z "$(find "$icons" -name '.rice.*' -print -quit)"
 
     # An incomplete legacy palette leaves the terminal on HyprFM's own.
     $run --print --manifest ${partial} > partial.toml

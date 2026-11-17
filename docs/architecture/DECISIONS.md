@@ -1126,6 +1126,12 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   palette (D-044) with a surface for black, emitted only when complete.
   It writes `~/.config/hyprfm/themes/rice.toml` atomically; HyprFM
   watches that file and reloads live.
+- Folder icons: the same run writes a `rice` icon theme to
+  `~/.local/share/icons/rice` (where HyprFM's `auto_refresh_icons`
+  watcher looks): Adwaita's folder-shaped `places` icons recoloured by
+  role (pale front → the accent, rim and back → darker shades, glints →
+  lighter), inheriting Adwaita for everything else. So the folders wear
+  the theme's accent, and the tarot card's on a day it lends one.
 - Unlike the rebuild-time tool themes (D-051) it is theme-blind and
   applies to every theme: HyprFM has no host colours to preserve, and a
   GUI window beside the bar should switch with it. It follows the day's
@@ -1136,9 +1142,9 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   `DailyAccentController` when the accent changes within a theme. It does
   nothing where `~/.config/hyprfm` does not exist.
 - HyprFM rewrites `config.toml` from its own Settings panel, so Home
-  Manager never owns it; activation only sets `[general] theme = "rice"`
-  (the edit upstream documents for scripts), leaving every other key the
-  user's. Radius and motion stay HyprFM's settings.
+  Manager never owns it; activation only sets `[general] theme` and
+  `icon_theme` to `"rice"` (the edit upstream documents for scripts),
+  leaving every other key the user's. Radius and motion stay HyprFM's settings.
 - Why: PCManFM ignored the rice entirely; HyprFM's TOML themes map almost
   one-to-one onto the token roles, and its live reload lets a file
   manager follow switches and the daily draw like the shell does.
