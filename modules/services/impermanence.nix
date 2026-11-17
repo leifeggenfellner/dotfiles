@@ -18,6 +18,10 @@ _: {
     {
       environment.persistence."/persist" = {
         hideMounts = true;
+        # GIO treats bind mounts of subdirectories as system internal and
+        # refuses to trash on them; x-gvfs-trash opts back in, so files in
+        # persisted folders trash to <folder>/.Trash-<uid> on /persist.
+        allowTrash = true;
         directories = [
           "/etc/NetworkManager/system-connections"
           "/etc/ssh"
