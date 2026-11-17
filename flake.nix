@@ -74,5 +74,9 @@
       url = "github:youwen5/zen-browser-flake/458cd16116c362a5e92d5db6bdc3599e4e8b1f4a";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprfm = {
+      url = "github:soyeb-jim285/hyprfm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }

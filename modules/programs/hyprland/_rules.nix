@@ -11,7 +11,7 @@ let
     "^(nm-connection-editor)$"
     "^(Color Picker)$"
     "^(Network)$"
-    "^(pcmanfm)$"
+    "^(hyprfm)$"
     "^(com.github.flxzt.rnote)$"
     "^(xdg-desktop-portal)$"
     "^(xdg-desktop-portal-gnome)$"

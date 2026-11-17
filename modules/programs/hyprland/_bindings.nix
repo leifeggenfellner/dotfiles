@@ -73,7 +73,7 @@ in
     (mkBind (key main "B") (exec (toggle "foot -T btop -e btop")))
     (mkBind (key main "R") (exec (toggle "foot -T yazi -e yazi")))
     (mkBind (key main "S") (exec (launch "spotify")))
-    (mkBind (key mainShift "D") (exec (runOnce "pcmanfm")))
+    (mkBind (key mainShift "D") (exec (runOnce "hyprfm")))
     (mkBind (key mainShift "L") (exec "lock-screen"))
     (mkBind (key mainShift "P") (exec (runOnce "grimblast --notify copy area")))
     (mkBind (key mainShift "T") (moveWorkspace "special"))

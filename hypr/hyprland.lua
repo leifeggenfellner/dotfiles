@@ -368,7 +368,7 @@ bind_exec(key(main_mod, "Return"), launch("foot"))
 bind_exec(key(main_mod, "B"), toggle("foot -T btop -e btop"))
 bind_exec(key(main_mod, "R"), toggle("foot -T yazi -e yazi"))
 bind_exec(key(main_mod, "S"), launch("spotify"))
-bind_exec(key(main_shift, "D"), run_once("pcmanfm"))
+bind_exec(key(main_shift, "D"), run_once("hyprfm"))
 bind_exec(key(main_shift, "W"), launch("foot -T theme-switcher -e theme-switcher"))
 bind_exec(key(main_shift, "L"), "lock-screen")
 bind_exec(key(main_shift, "P"), run_once("grimblast --notify copy area"))
@@ -445,7 +445,7 @@ local floating_class_rules = {
     "^(nm-connection-editor)$",
     "^(Color Picker)$",
     "^(Network)$",
-    "^(pcmanfm)$",
+    "^(hyprfm)$",
     "^(com.github.flxzt.rnote)$",
     "^(xdg-desktop-portal)$",
     "^(xdg-desktop-portal-gnome)$",
