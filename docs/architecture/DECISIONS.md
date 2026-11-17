@@ -1108,7 +1108,8 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   and the tarot cards (the manifest's workspaces and compass are
   unchanged). Each card belongs to the pathway of its Tarot Club holder:
   Fool and World → Fool, Magician → Door, High Priestess and Hermit →
-  Hermit, Wheel of Fortune → Wheel of Fortune, Moon → Moon.
+  Hermit, Wheel of Fortune → Wheel of Fortune, Star → Darkness (Leonard),
+  Moon → Moon.
 - Why: the tarot draw was the one daily ritual with no visible
   consequence outside its own card; letting it tint the day makes the
   draw matter, and deriving the tint from the record keeps "restore

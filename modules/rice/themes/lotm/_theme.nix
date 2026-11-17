@@ -40,7 +40,7 @@ let
     door = { name = "Door"; color = "#478eb0"; accent = "#6fb2d6"; };
     white_tower = { name = "White Tower"; color = "#6678cc"; };
     visionary = { name = "Visionary"; color = "#8a9aa9"; };
-    darkness = { name = "Darkness"; color = "#5a6d93"; };
+    darkness = { name = "Darkness"; color = "#5a6d93"; accent = "#8899ee"; };
     sun = { name = "Sun"; color = "#bc9249"; };
     error = { name = "Error"; color = "#8a96a7"; };
     hermit = { name = "Hermit"; color = "#7d4f72"; accent = "#d48fc0"; };
@@ -50,7 +50,8 @@ let
 
   # A tarot card belongs to the pathway of its Tarot Club holder: the
   # Magician is Fors (Door), the Hermit and the High Priestess Cattleya's
-  # Mystery Pryers, the Moon Emlyn, the World Klein's Gehrman Sparrow.
+  # Mystery Pryers, the Star Leonard (Darkness), the Moon Emlyn, the
+  # World Klein's Gehrman Sparrow.
   tarot = pathway: card: card // {
     pathway = pathways.${pathway}.name;
     inherit (pathways.${pathway}) accent;
@@ -467,6 +468,14 @@ in
             phrase = "The machine turns; the omen is timing.";
             face = "wheel.png";
             back = "wheel.png";
+          })
+          (tarot "darkness" {
+            id = "star";
+            name = "The Star";
+            sequence = "XVII";
+            phrase = "The night keeps its vigil; hope returns to the water.";
+            face = "star.png";
+            back = "star.png";
           })
           (tarot "moon" {
             id = "moon";

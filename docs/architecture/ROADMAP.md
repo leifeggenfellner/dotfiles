@@ -1002,6 +1002,8 @@ Concretized as D-054 (issue #90).
   each card maps to its Tarot Club holder's pathway, with a text-safe
   accent and its sigil. The Observatory card and the omen line name the
   pathway beside its colour. No draw today → antique gold and the Fool.
+- ✅ The Star (XVII, Leonard's Darkness pathway) joins the deck as its
+  eighth card.
 - ✅ `rice-query daily`; the greeting claims before the card is drawn.
 - ✅ Cyberpunk: no settings, manifest unchanged, adapter output unchanged.
 - Verified: `rice-lint`, `nix flake check` (manifest validation, adapter,
