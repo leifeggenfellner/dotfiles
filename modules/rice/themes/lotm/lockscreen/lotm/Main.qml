@@ -608,7 +608,9 @@ Rectangle {
                     height: 0
                 }
                 selectionColor: root.gold
-                rightPadding: root.passwordText.length > 0 ? 50 * s : 0
+                // Verifying clears the text; keeping the padding then stops
+                // the caret sliding right under the login sigil.
+                rightPadding: root.passwordText.length > 0 || root.authPending ? 50 * s : 0
                 onTextEdited: {
                     if (!root.authPending)
                         root.setPasswordText(passInput.text);
@@ -652,7 +654,7 @@ Rectangle {
                     color: root.gold
                     anchors.verticalCenter: parent.verticalCenter
                     x: passInput.cursorRectangle.x
-                    visible: passInput.focus && (passInput.text.length > 0 || passInput.wasClicked)
+                    visible: passInput.focus && !root.authPending && (passInput.text.length > 0 || passInput.wasClicked)
                     SequentialAnimation {
                         loops: Animation.Infinite
                         running: customCursor.visible
