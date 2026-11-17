@@ -282,8 +282,8 @@ in
       awakening.settings = {
         title = "Above the Gray Fog";
         subtitle = "The Fool awakens";
-        hold = 1100;
-        lift = 2600;
+        hold = 2200;
+        lift = 3200;
         sound = "lore";
       };
 

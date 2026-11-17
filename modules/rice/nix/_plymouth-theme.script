@@ -60,6 +60,8 @@ global.target = 0;
 global.shown = 0;
 global.frame = 0;
 global.prompting = 0;
+global.now = 0;
+global.last = 0;
 
 fun refresh_callback() {
   global.tick = tick + 1;
@@ -77,11 +79,17 @@ fun refresh_callback() {
   }
 
   // Progress is a time estimate from the last boot, which includes the
-  // passphrase wait; hold the ink while the Threshold asks.
+  // passphrase wait, so it leaps to nearly full on unlock and only a few
+  // seconds of boot remain; hold the ink while the Threshold asks.
   if (!prompting)
     global.target = progress;
-  // Seep toward the target at a capped rate (a full ring in ~3 s).
-  global.shown = shown + Math.Clamp((target - shown) * 0.03, 0, 0.006);
+  // Seep toward the target by wall-clock time, not ticks: software
+  // repaints of the fog stretch ticks well past the nominal refresh rate.
+  // Capped at 0.6 ring/s with an eased tail, a full ring takes ~2 s and
+  // closes before the splash quits.
+  dt = Math.Clamp(now - last, 0, 0.25);
+  global.last = now;
+  global.shown = shown + Math.Clamp((target - shown) * 4 * dt, 0, 0.6 * dt);
   position = Math.Clamp(shown, 0, 1) * (ring_frames - 1);
   current = Math.Min(Math.Int(position), ring_frames - 2);
   if (current != frame) {
@@ -94,7 +102,9 @@ fun refresh_callback() {
 }
 Plymouth.SetRefreshFunction(refresh_callback);
 
+// `duration` is seconds since the splash started: the script's clock.
 fun boot_progress_callback(duration, value) {
+  global.now = duration;
   if (value > progress)
     global.progress = value;
 }
