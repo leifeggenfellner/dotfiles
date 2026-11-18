@@ -62,11 +62,13 @@ PanelWindow {
         const next = JSON.parse(JSON.stringify(sealed));
         if (next[entry.key] !== undefined)
             delete next[entry.key];
-        else
+        else {
             next[entry.key] = {
                 preview: entry.preview,
                 kind: entry.kind
             };
+            Sound.play("satchel-seal");
+        }
         PrefsState.setExtra("satchel", "sealed", next);
     }
 

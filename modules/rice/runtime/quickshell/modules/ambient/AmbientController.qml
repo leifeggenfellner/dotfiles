@@ -168,10 +168,18 @@ Item {
         }
 
         function setLocked(v: string): void {
+            // Lock cues (D-057): a lock the user asked for (the veil
+            // path, or a direct lock with no idle warning up) seals with
+            // a sound; one the idle timer took does not (D-024). Unlock
+            // is always the user returning.
             if (governor.parseToggle(v)) {
+                if (!governor.locked && (governor.lockInFlight || !governor.idleHint))
+                    Sound.play("lock");
                 lockSettleTimer.restart();
                 return;
             }
+            if (governor.locked || lockSettleTimer.running)
+                Sound.play("unlock");
             // Lock gone means the user is back: drop the veil state
             // too, same as setIdleHint("off").
             lockSettleTimer.stop();

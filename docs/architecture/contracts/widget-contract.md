@@ -66,8 +66,9 @@ Every widget exports a descriptor with:
   `modules/rice/themes/<name>/widgets/<Dir>/`. Theme manifests specify `source`
   as a theme-relative plugin directory; the runtime receives a Nix store root and
   an `entry` path to the QML file inside that root (D-027).
-- A plugin receives `theme` and `motion` facades from the mount plus its declared
-  services by injection — nothing else. It must not import runtime `core/`,
+- A plugin receives `theme`, `motion` and `sound` facades from the mount plus its
+  declared services by injection — nothing else. `sound.play(cue)` follows
+  D-024/D-057 (muted by default, user-driven edges only). It must not import runtime `core/`,
   `components/`, `modules/`, `widgets/`, or `services/` internals from its store
   path; those imports instantiate separate singleton copies and may be refactored
   freely without notice. Pure `utils/` imports may be introduced later only with a

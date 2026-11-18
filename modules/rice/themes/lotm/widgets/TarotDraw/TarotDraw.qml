@@ -2,8 +2,8 @@ import QtQuick
 
 // ── TarotDraw ────────────────────────────────────────────────
 // LOTM theme plugin. Receives `prefs` by widget service injection;
-// receives theme/motion facades by mount injection so it does not
-// instantiate runtime singletons from its packaged store path.
+// receives theme/motion/sound facades by mount injection so it does
+// not instantiate runtime singletons from its packaged store path.
 
 Rectangle {
     id: root
@@ -62,6 +62,8 @@ Rectangle {
             }
         })
 
+    // Sound facade (D-057); null when mounted without one.
+    property var sound: null
     readonly property var prefs: services.prefs ?? null
     readonly property string namespace: "tarotDraw"
     readonly property string key: "daily"
@@ -139,6 +141,8 @@ Rectangle {
         });
         revealed = false;
         revealTimer.restart();
+        if (sound)
+            sound.play("tarot-flip");
     }
 
     Timer {

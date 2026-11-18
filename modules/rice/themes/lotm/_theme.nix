@@ -248,6 +248,14 @@ in
       notification = "sounds/sealed-letter.wav";
       notification-critical = "sounds/red-seal.wav";
       messenger = "sounds/messenger.wav";
+      # Shell cues (D-057); recipes in assets/sounds/src.
+      launcher-open = "sounds/launcher-open.wav";
+      power-open = "sounds/power-open.wav";
+      lock = "sounds/lock.wav";
+      unlock = "sounds/unlock.wav";
+      workspace = "sounds/workspace.wav";
+      satchel-seal = "sounds/satchel-seal.wav";
+      tarot-flip = "sounds/tarot-flip.wav";
       hour-bell = "sounds/sealed-letter.wav";
       lore = "sounds/red-seal.wav";
     };

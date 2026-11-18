@@ -35,6 +35,8 @@ Item {
     property bool ambientActive: false
     property bool idleApproaching: false
     property bool soundMuted: true
+    // Cue names silenced one by one (D-057), from PrefsState.
+    property var soundOff: []
     property bool doNotDisturb: false
 
     // ── Sky conditions (D-046) ───────────────────────────────

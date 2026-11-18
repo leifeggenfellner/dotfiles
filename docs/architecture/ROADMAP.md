@@ -1038,6 +1038,20 @@ Concretized as D-056 (issue #86).
   rejects malformed personas); headless smoke test with
   `notify-send -a discord` (letter card) beside `-a firefox` (plain).
 
+## Phase 44 — Shell sound cues ✅
+
+Concretized as D-057 (issue #82).
+
+- ✅ Cues for launcher, power, lock/unlock, workspace (rate-limited),
+  satchel seal and tarot flip; plugins get a `sound` facade.
+- ✅ Per-cue opt-out in prefs (`sound setCue <cue> off`).
+- ✅ LoTM renders seven original cues from sox recipes in
+  `assets/sounds/src/`, levelled to the existing set.
+- Verified: `rice-lint`, `nix flake check`; headless shell with a
+  logging `rice-sound-play`: every `sound test <cue>` plays on LoTM and
+  nothing on Cyberpunk; launcher plays on open only; a manual lock
+  plays, an idle lock does not; `setCue unlock off` silences unlock.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

@@ -452,7 +452,7 @@ Item {
             try {
                 item[propertyName] = value;
             } catch (error) {
-                if (propertyName !== "theme" && propertyName !== "motion" && propertyName !== "surfaceActive")
+                if (propertyName !== "theme" && propertyName !== "motion" && propertyName !== "sound" && propertyName !== "surfaceActive")
                     console.warn("DashboardGrid: failed to inject", propertyName, "into", descriptor.widgetId, "-", error);
             }
         }
@@ -462,6 +462,7 @@ Item {
             assignIfPossible(item, "settings", injectedSettings);
             assignIfPossible(item, "theme", Theme);
             assignIfPossible(item, "motion", Motion);
+            assignIfPossible(item, "sound", Sound);
             assignIfPossible(item, "surfaceActive", grid.surfaceActive);
         }
 

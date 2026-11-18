@@ -1181,6 +1181,41 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   apart, and the persona can mark them without hiding which app sent
   them or adding a theme-specific runtime path.
 
+### D-057 — A vocabulary of shell sound cues
+
+- Date: 2026-11-18 · Status: active · Extends D-024 · Issue #82
+- The runtime names seven more semantic cues, each played on a
+  user-driven edge and silent unless the theme maps it in
+  `assets.sounds`:
+  - `launcher-open` and `power-open`: the launcher opening, the power
+    popout opening (`SoundController`).
+  - `workspace`: the focused workspace changing (`SoundController`). It
+    is rate-limited to once per 400 ms, waits out the 1.5 s startup
+    settle like moods (D-045), and yields to a mood that has its own
+    entry sound.
+  - `lock` and `unlock`: from `AmbientController.setLocked`. A lock
+    plays only when the user asked for it (the veil path, or a direct
+    lock with no idle warning up), never one the idle timer took.
+    Unlock plays when a lock that was up ends.
+  - `satchel-seal`: sealing an artifact in the Satchel (not unsealing).
+  - `tarot-flip`: drawing the day's card. Plugins now receive a
+    `sound` facade from the mount beside `theme` and `motion`.
+- `Sound.play(cue, minInterval)` drops repeats of a cue inside
+  `minInterval` ms. Playback stays one command at a time, so cues
+  never stack.
+- Per-cue opt-out: `prefs.json` `sound.off` lists silenced cues,
+  bridged onto `ShellState.soundOff`; set with
+  `quickshell -c rice ipc call sound setCue <cue> on|off`. Global mute
+  still defaults on (D-024).
+- Authoring: LoTM's cues are rendered offline with sox from recipes in
+  `assets/sounds/src/` (`render-all.sh`), and the WAVs are committed.
+  `lib.sh` levels each cue's RMS to that of `sealed-letter.wav`, with
+  per-cue offsets: the workspace whisper sits 12 dB under the rest.
+- Cyberpunk maps none of them and stays silent.
+- Why: the desktop's ritual moments deserve a voice, but each must
+  come from the user's own action, stay quiet by default, and be
+  individually removable.
+
 ---
 
 ## Legacy imports

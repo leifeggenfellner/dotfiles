@@ -16,10 +16,10 @@ import Quickshell.Io
 //
 //   state:    available, lastWallpaper(theme),
 //             reduceMotion, ambientMode ("auto" | "off"),
-//             soundMuted, doNotDisturb, extra(namespace, key, fallback)
+//             soundMuted, soundOff[], doNotDisturb, extra(namespace, key, fallback)
 //   commands: recordWallpaper(theme, path),
 //             setReduceMotion(on), setAmbientMode(mode),
-//             setSoundMuted(on), setDoNotDisturb(on),
+//             setSoundMuted(on), setSoundCue(cue, on), setDoNotDisturb(on),
 //             setExtra(namespace, key, value),
 //             claimDaily(namespace, key, record) → effective record
 
@@ -48,6 +48,8 @@ Item {
     readonly property bool reduceMotion: (_data.motion ?? {}).reduce ?? false
     readonly property string ambientMode: (_data.motion ?? {}).ambient ?? "auto"
     readonly property bool soundMuted: (_data.sound ?? {}).muted ?? true
+    // Cues silenced one by one (D-057); absent means every cue plays.
+    readonly property var soundOff: (_data.sound ?? {}).off ?? []
     readonly property bool doNotDisturb: (_data.notifications ?? {}).dnd ?? false
 
     function setReduceMotion(on) {
@@ -64,6 +66,16 @@ Item {
 
     function setSoundMuted(on) {
         _writeBucket("sound", "muted", !!on);
+    }
+
+    function setSoundCue(cue, on) {
+        if (!cue || cue.length === 0)
+            return;
+        const off = soundOff.filter(c => c !== cue);
+        if (!on)
+            off.push(cue);
+        if (off.length !== soundOff.length)
+            _writeBucket("sound", "off", off);
     }
 
     function setDoNotDisturb(on) {
