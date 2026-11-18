@@ -12,8 +12,9 @@ import "../../utils"
 //   fullMoon  the local lunar calculation is within `window` days of
 //             full (the largest window any fullMoon preset declares,
 //             default 1.5); needs no network
-//   rain/fog  WeatherState's kind — read only when a preset keys on
-//             weather, so themes without one never start the probe;
+//   rain/fog  WeatherState's kind — read only when a preset or a sound
+//             bed layer (D-058) keys on weather, so themes without one
+//             never start the probe;
 //             no weather (offline, no curl) simply means neither
 //
 // Overrides for smoke tests (not persisted):
@@ -35,7 +36,7 @@ Item {
                 w = Math.max(w, typeof p.window === "number" ? p.window : 1.5);
         return w > 0 ? w : 1.5;
     }
-    readonly property bool needsWeather: Effects.presets.some(p => p.when === "rain" || p.when === "fog")
+    readonly property bool needsWeather: Effects.presets.concat((Theme.widgetConfig("soundscape").settings ?? ({})).layers ?? []).some(p => p.when === "rain" || p.when === "fog")
 
     readonly property var moon: Moon.phase(sky.now)
     readonly property real daysFromFull: Math.abs(sky.moon.age - Moon.cycleDays / 2)

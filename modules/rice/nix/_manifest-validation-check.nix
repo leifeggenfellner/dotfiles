@@ -240,6 +240,14 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; variant = "scroll"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; sound = "missing"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; colour = "red"; }] lotm))
+    # Sound bed layers (D-058).
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] { sound = "bed-rain"; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "missing"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "bed-rain"; volume = 1.5; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "bed-rain"; volume = "loud"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "bed-rain"; when = "snow"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "bed-rain"; mood = "nowhere"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "bed-rain"; pan = 0.5; }] lotm))
     # Cursor (D-048).
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "name" ] "lotm quill" lotm))
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "size" ] 4 lotm))

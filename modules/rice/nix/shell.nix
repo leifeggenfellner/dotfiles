@@ -25,6 +25,56 @@ _: {
         exec ${pkgs.pipewire}/bin/pw-play --volume 0.35 "$file"
       '';
 
+      # The ambient sound bed (D-058): every layer loops on its own
+      # period, mixed into one PipeWire stream. It fades in from the
+      # start; on SIGTERM it fades the stream out before it stops, and
+      # it stops by itself if the shell that started it goes away.
+      rice-soundscape-play = pkgs.writeShellApplication {
+        name = "rice-soundscape-play";
+        runtimeInputs = [ pkgs.sox pkgs.pipewire pkgs.wireplumber pkgs.jq pkgs.procps ];
+        text = ''
+          # Usage: rice-soundscape-play <volume> <file> [<volume> <file>]...
+          if [ $# -lt 2 ] || [ $(($# % 2)) -ne 0 ]; then
+            echo "rice-soundscape-play: expected <volume> <file> pairs" >&2
+            exit 64
+          fi
+          inputs=()
+          while [ $# -gt 0 ]; do
+            inputs+=(-v "$1" "|sox -q '$2' -p rate 48000 channels 2 repeat -")
+            shift 2
+          done
+          [ ''${#inputs[@]} -gt 3 ] && inputs=(-m "''${inputs[@]}")
+
+          sox -q -G "''${inputs[@]}" -t raw -r 48000 -c 2 -b 16 -e signed - vol 0.35 fade q 3 \
+            | pw-cat --playback --raw --rate 48000 --channels 2 --format s16 \
+              -P '{ node.name = "rice-soundscape" media.name = "Soundscape" }' - &
+          player=$!
+
+          # shellcheck disable=SC2329  # invoked by the trap below
+          stop() {
+            trap - TERM INT
+            node="$(pw-dump 2>/dev/null | jq -r --argjson pid "$player" \
+              'first(.[] | select(.info.props["application.process.id"]? == $pid) | .id) // empty' || true)"
+            if [ -n "$node" ]; then
+              for v in 0.7 0.45 0.25 0.1 0.03 0; do
+                wpctl set-volume "$node" "$v" 2>/dev/null || break
+                sleep 0.1
+              done
+            fi
+            pkill -P $$ || true
+            exit 0
+          }
+          trap stop TERM INT
+
+          parent=$PPID
+          (while kill -0 "$parent" 2>/dev/null; do sleep 2; done; kill -TERM $$) &
+          status=0
+          wait "$player" || status=$?
+          pkill -P $$ || true
+          exit "$status"
+        '';
+      };
+
       rice-runtime = pkgs.runCommand "rice-quickshell-runtime"
         { nativeBuildInputs = [ pkgs.qt6.qtshadertools ]; } ''
         cp -R ${../runtime/quickshell} "$out"
@@ -313,6 +363,7 @@ _: {
           rice-lock-screen
           rice-shell
           rice-sound-play
+          rice-soundscape-play
         ];
         xdg.configFile."quickshell/rice" = {
           source = rice-runtime;

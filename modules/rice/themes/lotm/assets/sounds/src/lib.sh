@@ -25,5 +25,36 @@ finish() {
     cap = 20 * log(0.708 / p) / log(10)
     printf "%.2f", (g < cap ? g : cap)
   }')"
-    sox "$tmp/joined.wav" -b 16 "$out" gain "$gain"
+    case "$out" in
+        *.ogg) sox "$tmp/joined.wav" -C 3 "$out" gain "$gain" ;;
+        *) sox "$tmp/joined.wav" -b 16 "$out" gain "$gain" ;;
+    esac
+}
+
+# Sound beds (D-058) loop forever, so they are rendered as small Ogg files
+# and made seamless here.
+
+# impulses <out.wav> <seconds> <per second> <seed>: a sparse train of
+# random-height clicks (rain drops, record crackle) once filtered. The
+# seed keeps every render the same.
+impulses() {
+    awk -v d="$2" -v n="$3" -v seed="$4" 'BEGIN {
+    srand(seed); r = 8000
+    print "; Sample Rate " r; print "; Channels 1"
+    for (i = 0; i < d * r; i++) printf "%.6f %.4f\n", i / r, (rand() < n / r ? rand() * 1.2 - 0.6 : 0)
+  }' > "$tmp/impulses.dat"
+    sox "$tmp/impulses.dat" -r 44100 -b 16 "$1"
+}
+
+# loop <in.wav> <out.wav> <seconds> <crossfade>: the first <seconds> of
+# <in>, with the <crossfade> seconds after them faded over the start, so
+# the end runs into the beginning without a seam. <in> must be at least
+# <seconds> + <crossfade> long.
+loop() {
+    local in="$1" out="$2" len="$3" x="$4"
+    sox "$in" "$tmp/loop-head.wav" trim 0 "$x" fade q "$x"
+    sox "$in" "$tmp/loop-tail.wav" trim "$len" "$x" fade q 0 "$x" "$x"
+    sox -m -v 1 "$tmp/loop-head.wav" -v 1 "$tmp/loop-tail.wav" "$tmp/loop-seam.wav"
+    sox "$in" "$tmp/loop-body.wav" trim "$x" "$(awk -v l="$len" -v x="$x" 'BEGIN { print l - x }')"
+    sox "$tmp/loop-seam.wav" "$tmp/loop-body.wav" "$out"
 }

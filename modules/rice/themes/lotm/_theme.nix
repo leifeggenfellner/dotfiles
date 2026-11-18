@@ -256,6 +256,11 @@ in
       workspace = "sounds/workspace.wav";
       satchel-seal = "sounds/satchel-seal.wav";
       tarot-flip = "sounds/tarot-flip.wav";
+      # Sound bed loops (D-058).
+      bed-rain = "sounds/bed-rain.ogg";
+      bed-crackle = "sounds/bed-crackle.ogg";
+      bed-bells = "sounds/bed-bells.ogg";
+      bed-fog = "sounds/bed-fog.ogg";
       hour-bell = "sounds/sealed-letter.wav";
       lore = "sounds/red-seal.wav";
     };
@@ -549,6 +554,16 @@ in
           { type = "vignette"; tint = "bg.sunken"; opacity = 0.18; }
         ];
       };
+
+      # Sound bed (D-058), opt-in: a gramophone left running in a Tingen
+      # study, bells across the city, Backlund rain when it really rains.
+      # Above the gray fog the city falls away to the fog's own wind.
+      soundscape.settings.layers = [
+        { sound = "bed-crackle"; volume = 0.6; }
+        { sound = "bed-bells"; volume = 0.3; }
+        { sound = "bed-rain"; volume = 0.8; when = "rain"; }
+        { sound = "bed-fog"; volume = 0.9; mood = "focus"; }
+      ];
 
       # Daily accent (D-054): the day's tarot card lends its pathway's
       # accent to the shell, the window borders and the terminal card.

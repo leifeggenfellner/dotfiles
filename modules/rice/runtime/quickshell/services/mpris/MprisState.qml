@@ -7,7 +7,7 @@ import Quickshell.Services.Mpris
 // is the currently playing client when possible, otherwise the first
 // known client; widgets never touch native player objects directly.
 //
-//   state:    available, players[], nowPlaying
+//   state:    available, players[], nowPlaying, anyPlaying
 //   commands: toggle(), next(), previous(), seekFraction(fraction)
 
 Item {
@@ -23,6 +23,8 @@ Item {
         const p = _activePlayer();
         return p ? _entry(p) : null;
     }
+
+    readonly property bool anyPlaying: _players().some(p => p.isPlaying)
 
     function _players() {
         return Mpris.players.values ?? [];

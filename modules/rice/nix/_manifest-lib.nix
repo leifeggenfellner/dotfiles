@@ -171,6 +171,30 @@ let
       if builtins.isList personas then lib.imap0 personaCheck personas
       else [ (fail "widgets.correspondence.settings.personas must be a list") ]
     )
+    ++ lib.optionals ((theme.widgets.soundscape.settings or null) != null) (
+      # Sound bed (D-058): looped layers keyed on sky conditions or a
+      # workspace mood; every sound must be one of the theme's.
+      let
+        s = theme.widgets.soundscape.settings;
+        moods = theme.widgets.mood.settings.workspaces or { };
+        layerCheck = i: l:
+          let at = "widgets.soundscape.settings.layers.${toString i}"; in
+          builtins.seq (checkClosed at [ "sound" "volume" "when" "mood" ] l) (
+            if !(builtins.isString (l.sound or null) && (theme.assets.sounds or { }) ? ${l.sound})
+            then fail "${at}.sound must name an entry in assets.sounds"
+            else if l ? volume && !(builtins.isFloat l.volume || builtins.isInt l.volume) || (l.volume or 1) < 0 || (l.volume or 1) > 1
+            then fail "${at}.volume must be a number from 0 to 1"
+            else if l ? when && !(builtins.elem l.when [ "rain" "fog" "fullMoon" ])
+            then fail "${at}.when must be one of rain, fog, fullMoon"
+            else if l ? mood && !(builtins.isString l.mood && moods ? ${l.mood})
+            then fail "${at}.mood must name a workspace in widgets.mood.settings.workspaces"
+            else true
+          );
+      in
+      [ (checkClosed "widgets.soundscape.settings" [ "layers" ] s) ]
+      ++ (if builtins.isList (s.layers or null) then lib.imap0 layerCheck s.layers
+      else [ (fail "widgets.soundscape.settings.layers must be a list") ])
+    )
     ++ map
       (plugin: checkClosed "plugins entry"
         [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]

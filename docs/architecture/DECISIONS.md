@@ -1216,6 +1216,47 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   come from the user's own action, stay quiet by default, and be
   individually removable.
 
+### D-058 — An opt-in ambient sound bed under the governor
+
+- Date: 2026-11-18 · Status: active · Extends D-021, D-024, D-045, D-046 · Issue #83
+- A theme may list looped layers in `widgets.soundscape.settings.layers`,
+  each `{ sound, volume?, when?, mood? }`: `sound` names an
+  `assets.sounds` entry, `volume` is 0–1 within the bed, `when` waits
+  for a sky condition (`rain`, `fog`, `fullMoon`), and `mood` ties the
+  layer to a workspace mood. While a screen shows that mood's
+  workspace, its layers replace the rest, as mood effects replace the
+  theme's layers. The manifest validates all of it.
+- The bed is the one sound that does not come from a user's action, so
+  it is opt-in twice: sound must be unmuted (D-024) and
+  `prefs.json` `sound.soundscape` true, set with
+  `quickshell -c rice ipc call ambient setSoundscape on|off`.
+- The governor (`AmbientController.soundscapeAllowed`) owns when it may
+  run: opted in, unmuted, ambient mode not off, no reduce-motion, not
+  on battery, no fullscreen window, not locked, and no MPRIS player
+  playing. The visual-only gates (theme ambient tier, layers present)
+  do not apply. `ambient status` reports it under `soundscape`.
+- One managed process, `rice-soundscape-play <volume> <file>...`,
+  loops every layer on its own period through sox and plays the mix
+  as one PipeWire stream (`node.name` `rice-soundscape`). It fades in
+  over 3 s; on SIGTERM it fades the stream's volume out before it
+  stops; it stops by itself if its parent shell goes away. Off means
+  no process. Layer changes settle for 800 ms before the player
+  restarts, so a passing workspace or a flicker of media doesn't
+  stutter it; a player that ends on its own stays down until the next
+  change.
+- Weather (D-046) is fetched when an effect preset or a bed layer keys
+  on `rain` or `fog`.
+- Authoring: LoTM's beds are sox recipes in `assets/sounds/src/`
+  (`bed-*.sh`), rendered to small mono Ogg files that are committed.
+  `lib.sh` gains `impulses` (seeded random clicks for drops and
+  crackle) and `loop` (crossfades the tail over the head so the loop
+  has no seam).
+- Cyberpunk declares no bed and stays silent.
+- Why: atmosphere you hear is as much a part of the world as the fog
+  you see, but a sound that plays by itself must be asked for, must
+  give way to the user's own media, and must leave nothing running
+  when it is off.
+
 ---
 
 ## Legacy imports

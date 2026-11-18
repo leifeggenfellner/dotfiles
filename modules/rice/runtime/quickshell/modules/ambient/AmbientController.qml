@@ -5,6 +5,7 @@ import "../../core"
 import "../../services/prefs"
 import "../../services/power"
 import "../../services/hypr"
+import "../../services/mpris"
 
 // ── AmbientController ─────────────────────────────────────────
 // The ambient governor (D-021): the ONLY place the run/pause
@@ -50,6 +51,10 @@ Item {
     readonly property bool ambientAllowed: Theme.motion.ambient && Theme.motion.enabled && governor.hasLayers && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !PowerState.onBattery && !HyprState.anyFullscreen && !governor.locked
 
     readonly property bool idleAllowed: governor.idleHint && Theme.motion.ambient && Theme.motion.enabled && !PrefsState.reduceMotion && PrefsState.ambientMode !== "off" && !HyprState.anyFullscreen && !governor.locked
+    // The sound bed (D-058) is opt-in and unmuted on top of the visual
+    // gates, minus the visual-only ones, and gives way to any media.
+    readonly property bool soundscapeAllowed: PrefsState.soundscape && !ShellState.soundMuted && PrefsState.ambientMode !== "off" && !PrefsState.reduceMotion && !PowerState.onBattery && !HyprState.anyFullscreen && !governor.locked && !MprisState.anyPlaying
+
     readonly property int lockHandoffDelay: PrefsState.reduceMotion ? 0 : 90
 
     function parseToggle(value) {
@@ -85,6 +90,11 @@ Item {
         target: ShellState
         property: "ambientActive"
         value: governor.ambientAllowed
+    }
+
+    Soundscape {
+        id: soundscape
+        allowed: governor.soundscapeAllowed
     }
 
     Binding {
@@ -146,11 +156,23 @@ Item {
                 idleHint: governor.idleHint,
                 idleApproaching: ShellState.idleApproaching,
                 lockInFlight: governor.lockInFlight,
-                locked: governor.locked
+                locked: governor.locked,
+                soundscape: {
+                    enabled: PrefsState.soundscape,
+                    allowed: governor.soundscapeAllowed,
+                    mediaPlaying: MprisState.anyPlaying,
+                    playing: soundscape.playing,
+                    layers: soundscape.playingLayers,
+                    error: soundscape.error
+                }
             });
         }
         function setMode(mode: string): void {
             PrefsState.setAmbientMode(mode);
+        }
+        // The sound bed is opt-in: setSoundscape on (needs sound unmuted).
+        function setSoundscape(v: string): void {
+            PrefsState.setSoundscape(governor.parseToggle(v));
         }
         function setReduceMotion(v: string): void {
             PrefsState.setReduceMotion(governor.parseToggle(v));

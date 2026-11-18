@@ -9,7 +9,7 @@ import Quickshell.Io
 // does not gain an undeclared QtMultimedia import dependency.
 //
 //   state:    available, muted
-//   commands: play(eventName, minInterval?)
+//   commands: play(eventName, minInterval?), path(eventName) → file path or ""
 //
 // Cues (D-057) are semantic names the theme may map in
 // assets.sounds; an unmapped cue is silent. Frequent cues pass a
@@ -32,12 +32,8 @@ Item {
         if (ShellState.soundOff.indexOf(eventName) !== -1)
             return false;
 
-        const url = Theme.soundUrl(eventName);
-        if (url.length === 0)
-            return false;
-
-        const path = _filePath(url);
-        if (path.length === 0)
+        const file = path(eventName);
+        if (file.length === 0)
             return false;
 
         const now = Date.now();
@@ -46,9 +42,15 @@ Item {
         _lastPlayed[eventName] = now;
 
         error = "";
-        player.command = ["rice-sound-play", path];
+        player.command = ["rice-sound-play", file];
         player.running = true;
         return true;
+    }
+
+    // The theme's file for a sound name, for players other than play().
+    function path(eventName) {
+        const url = Theme.soundUrl(eventName);
+        return url.length > 0 ? _filePath(url) : "";
     }
 
     function _filePath(url) {

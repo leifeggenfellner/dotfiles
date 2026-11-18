@@ -1052,6 +1052,28 @@ Concretized as D-057 (issue #82).
   nothing on Cyberpunk; launcher plays on open only; a manual lock
   plays, an idle lock does not; `setCue unlock off` silences unlock.
 
+## Phase 45 — Ambient sound bed ✅
+
+Concretized as D-058 (issue #83).
+
+- ✅ Theme-declared bed layers with volume, sky condition and workspace
+  mood; validated in the manifest.
+- ✅ One managed `rice-soundscape-play` process under the ambient
+  governor; pauses for MPRIS media, fades in and out, and stops itself
+  if the shell dies.
+- ✅ Opt-in pref (`ambient setSoundscape on`) on top of unmute;
+  `ambient status` reports the bed.
+- ✅ LoTM: gramophone crackle and distant bells, Backlund rain when it
+  rains, and the gray fog's own wind above the fog (focus workspace).
+- Verified: `rice-lint`, `nix flake check`. Headless shell with a
+  logging player: opt-in starts the bed; rain adds the rain layer;
+  mute, reduce-motion, ambient mode off, lock, opt-out and MPRIS
+  playback (mpv) each stop it and undoing them restarts it; a
+  rain/clear flicker inside the settle window changes nothing; the
+  pref persists. The real player was checked against PipeWire with
+  silent files: one stream, a fade before stopping, nothing left
+  running, and it stops itself when its parent dies.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).
