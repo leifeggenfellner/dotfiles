@@ -14,7 +14,6 @@ _: {
           add_newline = true;
           format = lib.strings.concatStrings [
             "$nix_shell"
-            "$os"
             "$directory"
             "$container"
             "$git_branch $git_status"
@@ -50,7 +49,7 @@ _: {
           };
           nix_shell = {
             disabled = false;
-            format = "[](fg:white)[ ](bg:white fg:black)[](fg:white) ";
+            format = " [](fg:white)[ ](bg:white fg:black)[](fg:white)";
           };
           container = {
             symbol = " 󰏖";
@@ -77,21 +76,6 @@ _: {
             symbol = "";
             style = "";
             format = "[ $symbol $branch](fg:purple)(:$remote_branch)";
-          };
-          os = {
-            disabled = false;
-            # format = "[](fg:blue)[$symbol](bg:blue fg:black)[](fg:blue)";
-            format = "$symbol";
-          };
-          os.symbols = {
-            Arch = "[ ](fg:bright-blue)";
-            Debian = "[ ](fg:red)";
-            EndeavourOS = "[ ](fg:purple)";
-            Fedora = "[ ](fg:blue)";
-            NixOS = "[ ](fg:blue)";
-            openSUSE = "[ ](fg:green)";
-            SUSE = "[ ](fg:green)";
-            Ubuntu = "[ ](fg:bright-purple)";
           };
           python = lang "" "yellow";
           nodejs = lang " " "yellow";

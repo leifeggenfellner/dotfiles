@@ -10,6 +10,7 @@
 let
   prompt = theme.widgets.terminal.settings.prompt or null;
   accent = theme.tokens.colors.accent.primary;
+  ground = theme.tokens.colors.bg.base;
 
   # Starship format strings treat these as syntax.
   escape = lib.replaceStrings [ "\\" "[" "]" "(" ")" "$" ] [ "\\\\" "\\[" "\\]" "\\(" "\\)" "\\$" ];
@@ -53,7 +54,7 @@ let
       format = "\${env_var.RICE_WORKSPACE}" + baseSettings.format;
       env_var.RICE_WORKSPACE = {
         variable = "RICE_WORKSPACE";
-        format = "[$env_value ](fg:${accent})";
+        format = "[](fg:${accent})[$env_value](bg:${accent} fg:${ground})[](fg:${accent})";
       };
     })
   ];
