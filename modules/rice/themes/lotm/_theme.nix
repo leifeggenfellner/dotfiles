@@ -698,8 +698,9 @@ in
 
     # Terminal tools themed from these tokens (D-051): btop's meters run
     # fog → gold → rust, bat reads like an annotated grimoire, yazi wears
-    # gilt tabs, cava burns like a candle.
-    tools = [ "btop" "bat" "yazi" "cava" ];
+    # gilt tabs, cava burns like a candle. VS Code, Spotify and Discord
+    # (D-059) wear the bar's umber and gold.
+    tools = [ "btop" "bat" "yazi" "cava" "vscode" "spotify" "discord" ];
 
     # Cursor (D-048): a quill to write with and a gloved hand to point,
     # gilded on umber ink. Built into hyprcursor + XCursor at rebuild;

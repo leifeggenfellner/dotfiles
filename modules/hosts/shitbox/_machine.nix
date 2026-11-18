@@ -130,7 +130,7 @@
         terminal = { class = "^(Alacritty|alacritty|foot)$"; workspace = 2; };
         zen = { class = "^(zen|ZenBrowser)$"; workspace = 3; };
         slack = { class = "^(Slack)$"; workspace = 4; };
-        discord = { class = "^(discord)$"; workspace = 4; };
+        discord = { class = "^(discord|vesktop)$"; workspace = 4; };
         spotify = { class = "^(spotify)$"; workspace = 5; };
       };
     };

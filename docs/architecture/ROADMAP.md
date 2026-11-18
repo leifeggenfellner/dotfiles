@@ -1074,6 +1074,23 @@ Concretized as D-058 (issue #83).
   silent files: one stream, a fade before stopping, nothing left
   running, and it stops itself when its parent dies.
 
+## Phase 46 — VS Code, Spotify and Discord themes ✅
+
+Concretized as D-059 (issue #85).
+
+- ✅ VS Code colour theme extension generated from tokens, sharing bat's
+  syntax roles; replaces the scheme map's theme when opted in.
+- ✅ Spotify via Spicetify with a generated colour scheme.
+- ✅ Discord via Vesktop with a generated Vencord CSS theme (colour
+  variables only).
+- Verified: `rice-lint`, `nix flake check` (`rice-tools` checks the
+  extension's JSON, the full Spicetify key set and the CSS shape); bat's
+  theme is byte-identical after the role table moved; the home
+  configuration builds, with the colours in Spotify's `colors.css`, the
+  theme in VS Code's settings and `enabledThemes` merged for Vencord;
+  evaluated with Cyberpunk, all three stay stock. Not yet seen running:
+  the apps themselves.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

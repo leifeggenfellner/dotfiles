@@ -329,9 +329,10 @@
               ];
 
             userSettings = {
-              # Theme settings — derived from environment.desktop.theme.scheme
-              "workbench.colorTheme" = activeVscodeTheme;
-              "workbench.preferredDarkColorTheme" = activeVscodeTheme;
+              # Theme settings — derived from environment.desktop.theme.scheme;
+              # a rice theme that opts in replaces them with its own (D-059).
+              "workbench.colorTheme" = lib.mkDefault activeVscodeTheme;
+              "workbench.preferredDarkColorTheme" = lib.mkDefault activeVscodeTheme;
               "workbench.preferredLightColorTheme" = "Light Modern";
               "window.autoDetectColorScheme" = false;
 

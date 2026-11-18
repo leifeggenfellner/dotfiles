@@ -496,7 +496,7 @@ local workspace_rules = {
     { match = "class", pattern = "^(Alacritty|alacritty|foot)$", workspace = "2" },
     { match = "class", pattern = "^(zen|ZenBrowser)$", workspace = "3" },
     { match = "class", pattern = "^(Slack)$", workspace = "4" },
-    { match = "class", pattern = "^(discord)$", workspace = "4" },
+    { match = "class", pattern = "^(discord|vesktop)$", workspace = "4" },
     { match = "class", pattern = "^(spotify)$", workspace = "5" },
     { match = "class", pattern = "^(btop|htop|nvtop|MissionCenter)$", workspace = "6" },
 }

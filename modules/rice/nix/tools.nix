@@ -1,6 +1,6 @@
-# Terminal tools dressed by the rice (D-051). The configured theme's
-# `integration.tools` swaps in token-derived btop/bat/yazi/cava themes at
-# rebuild; every packaged theme's `widgets.terminal.settings.fastfetch`
+# Tools and apps dressed by the rice (D-051, D-059). The configured theme's
+# `integration.tools` swaps in token-derived btop/bat/yazi/cava themes and
+# a VS Code, Spotify (Spicetify) and Discord (Vesktop) theme at rebuild; every packaged theme's `widgets.terminal.settings.fastfetch`
 # becomes a card the greeting picks from the active theme at startup.
 _: {
   flake.homeModules.rice-tools =
@@ -12,7 +12,9 @@ _: {
       theme = import (themeDir + "/_theme.nix");
       tools = theme.integration.tools or [ ];
       generated = import ./_tools-lib.nix { inherit pkgs lib; } theme;
-      wants = tool: lib.elem tool tools && config.programs.${tool}.enable;
+      # The program each tool's theme dresses; its own module installs it.
+      program = tool: { spotify = "spicetify"; discord = "vesktop"; }.${tool} or tool;
+      wants = tool: lib.elem tool tools && (config.programs.${program tool}.enable or false);
 
       mkCard = import ./_fastfetch-lib.nix { inherit pkgs lib; };
       cards = lib.filterAttrs (_: c: c != null) (lib.mapAttrs
@@ -34,6 +36,26 @@ _: {
         })
         (lib.mkIf (wants "cava") {
           programs.cava.settings.color = generated.cava;
+        })
+        (lib.mkIf (wants "vscode") {
+          programs.vscode.profiles.default = {
+            extensions = [ generated.vscode ];
+            userSettings = {
+              "workbench.colorTheme" = generated.vscodeThemeName;
+              "workbench.preferredDarkColorTheme" = generated.vscodeThemeName;
+            };
+          };
+        })
+        {
+          # Spicetify's options are one submodule, so the condition goes on
+          # the value: guarding the block on its own `enable` would recurse.
+          programs.spicetify.customColorScheme = lib.mkIf (wants "spotify") generated.spotify;
+        }
+        (lib.mkIf (wants "discord") {
+          programs.vesktop.vencord = {
+            themes.rice = generated.discord;
+            settings.enabledThemes = [ "rice.css" ];
+          };
         })
         (lib.mkIf (cards != { }) {
           xdg.configFile = lib.mkMerge (lib.mapAttrsToList

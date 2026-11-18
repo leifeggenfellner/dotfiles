@@ -3,7 +3,10 @@
 # nothing (no card, no tools) so its configs stay the host's. Daily
 # accents (D-054): every tarot card names a pathway with a text-safe
 # accent (≥ 4.5:1 on bg.base) and a sigil, and has a card variant
-# drawn in that accent.
+# drawn in that accent. App themes (D-059): the VS Code extension carries
+# a valid colour theme with code coloured by the shared roles, the Spotify
+# scheme has every Spicetify key, and the Discord CSS only sets colour
+# variables to resolved hex values.
 { pkgs }:
 let
   inherit (pkgs) lib;
@@ -22,9 +25,30 @@ assert lib.all (c: c ? pathway && c ? accent && c ? sigil) lotmCards;
 assert lib.attrNames variants == lib.sort lib.lessThan (map (c: c.id) lotmCards);
 assert card "cyberpunk" == null;
 assert !((theme "cyberpunk") ? integration.tools);
+assert lib.attrNames lotmTools.spotify == lib.sort lib.lessThan [
+  "text"
+  "subtext"
+  "main"
+  "main-elevated"
+  "highlight"
+  "highlight-elevated"
+  "sidebar"
+  "player"
+  "card"
+  "shadow"
+  "selected-row"
+  "button"
+  "button-active"
+  "button-disabled"
+  "tab-active"
+  "notification"
+  "notification-error"
+  "misc"
+];
+assert lib.all (v: builtins.match "[0-9a-f]{6}" v != null) (lib.attrValues lotmTools.spotify);
 pkgs.runCommand "rice-tools"
 {
-  nativeBuildInputs = [ pkgs.fastfetch pkgs.bat pkgs.python3 pkgs.gnugrep ];
+  nativeBuildInputs = [ pkgs.fastfetch pkgs.bat pkgs.python3 pkgs.gnugrep pkgs.jq ];
 }
   ''
     export HOME="$TMPDIR" USER=rice COLORTERM=truecolor
@@ -67,5 +91,17 @@ pkgs.runCommand "rice-tools"
     grep -q '38;2;134;163;97m' bat.ansi   # strings: state.ok
     grep -q '38;2;133;117;86m' bat.ansi   # comments: fg.subtle
     grep -c 'theme\[' ${lotmTools.btop} | grep -qx 42
+
+    ext=${lotmTools.vscode}/share/vscode/extensions/rice.rice-theme
+    jq -e '.contributes.themes[0].label == "Lord of the Mysteries" and .contributes.themes[0].uiTheme == "vs-dark"' $ext/package.json > /dev/null
+    jq -e '(.colors | length) > 100 and (.tokenColors | length) == 23
+      and ([.colors[], .tokenColors[].settings.foreground] | all(test("^#[0-9a-f]{6}([0-9a-f]{2})?$")))
+      and .colors["editor.background"] == "#1b1510"
+      and (.tokenColors[] | select(.name == "String") | .settings.foreground) == "#86a361"' \
+      $ext/themes/rice-color-theme.json > /dev/null
+
+    css=${lotmTools.discord}
+    grep -q '^ \* @name Lord of the Mysteries (rice)$' $css
+    ! grep -vE '^(/\*\*| \*.*|\.theme-dark, .*\{|  --[a-z0-9-]+: #[0-9a-f]{6}([0-9a-f]{2})?;|\}|)$' $css
     touch $out
   ''

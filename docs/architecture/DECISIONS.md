@@ -1257,6 +1257,45 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   give way to the user's own media, and must leave nothing running
   when it is off.
 
+### D-059 — VS Code, Spotify and Discord themes from tokens
+
+- Date: 2026-11-18 · Status: active · Extends D-051 · Issue #85
+- `integration.tools` also accepts `vscode`, `spotify` and `discord`.
+  `_tools-lib.nix` generates each from the configured theme's colour
+  tokens and `palette.legacy`, with no hand-copied hex values:
+  - VS Code: a colour theme extension (`rice.rice-theme`) built by Nix,
+    labelled with the theme's display name, dark or light by
+    `bg.base`'s luminance. The workbench wears the bar's surfaces
+    (sunken chrome, mantle side bar and panels, base editor) and the
+    accent marks focus, the active tab and buttons. Code colours come
+    from the syntax role table bat already used, now shared, so code
+    reads the same in both. `programs/vscode.nix` sets its scheme-map
+    theme with `mkDefault`, so the rice's choice wins and a theme that
+    does not opt in keeps the map exactly.
+  - Spotify: a Spicetify `customColorScheme` on the default theme.
+  - Discord: a Vencord CSS theme that only overrides Discord's own
+    colour variables on the dark appearances, without class selectors,
+    so a client update can at worst leave a surface stock. It is
+    enabled through Vencord's `enabledThemes`.
+- Client changes (each chosen by the user for #85), made in the program
+  modules for every theme on Hyprland hosts, so switching themes never
+  switches clients or logins:
+  - Spotify is patched by Spicetify (`spicetify-nix` flake input). With
+    no scheme the default theme keeps Spotify's own look.
+  - Discord is replaced by Vesktop (Vencord built in), configured with
+    home-manager's `programs.vesktop`; Vesktop's and Vencord's settings
+    stay writable and ours are merged in at activation.
+    `enabledThemes` defaults to empty. The window route to workspace 4
+    matches `discord|vesktop`.
+  - GNOME hosts keep the official clients.
+- Spicetify's options are one submodule, so the rice conditions the
+  scheme's value, not the block, on `programs.spicetify.enable`;
+  guarding the block on its own option recurses.
+- Cyberpunk opts into none of them: stock Spotify and Discord colours,
+  and VS Code's scheme map as before.
+- Why: the apps open beside the shell all day; they should wear the
+  same palette, generated so a token change reaches all of them.
+
 ---
 
 ## Legacy imports
