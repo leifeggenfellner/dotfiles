@@ -13,7 +13,6 @@ _: {
         settings = {
           add_newline = true;
           format = lib.strings.concatStrings [
-            "$nix_shell"
             "$directory"
             "$container"
             "$git_branch $git_status"
@@ -46,10 +45,6 @@ _: {
           character = {
             success_symbol = "[❯](bold purple)";
             error_symbol = "[❯](bold red)";
-          };
-          nix_shell = {
-            disabled = false;
-            format = " [](fg:white)[ ](bg:white fg:black)[](fg:white)";
           };
           container = {
             symbol = " 󰏖";
