@@ -233,6 +233,13 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "tarotDraw" "settings" "cards" ] [{ id = "fool"; accent = "gold"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "tarotDraw" "settings" "cards" ] [{ id = "fool"; accent = "#aaa3cf"; sigil = "pathways/missing.svg"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "tarotDraw" "settings" "cards" ] [{ id = "a b"; accent = "#aaa3cf"; }] lotm))
+    # Notification personas (D-056).
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] { apps = [ "discord" ]; label = "x"; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ ]; label = "x"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; variant = "scroll"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; sound = "missing"; }] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; colour = "red"; }] lotm))
     # Cursor (D-048).
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "name" ] "lotm quill" lotm))
     (evaluates "lotm" (setAtPath [ "integration" "cursor" "size" ] 4 lotm))

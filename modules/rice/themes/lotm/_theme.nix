@@ -229,6 +229,7 @@ in
       lock = "icons/sigil_lock.svg";
       settings = "icons/sigil_settings.svg";
       logout = "icons/sigil_logout.svg";
+      messenger = "icons/sigil_messenger.svg";
       monitor = "icons/sigil_eye.svg";
       moon = "icons/sigil_moon.svg";
       moon-new = "icons/sigil_moon.svg";
@@ -246,6 +247,7 @@ in
     sounds = {
       notification = "sounds/sealed-letter.wav";
       notification-critical = "sounds/red-seal.wav";
+      messenger = "sounds/messenger.wav";
       hour-bell = "sounds/sealed-letter.wav";
       lore = "sounds/red-seal.wav";
     };
@@ -379,6 +381,17 @@ in
         audibleLabel = "open";
         emptyLabel = "No letters under the door.";
         dndEmptyLabel = "The mailbox is sealed.";
+        # Personas (D-056): these apps' letters arrive by messenger. The
+        # label sits beside the real app name; summary and actions stay.
+        personas = [
+          {
+            apps = [ "discord" "vesktop" "slack" "signal" "telegram" "org.telegram.desktop" "element" "whatsapp" ];
+            label = "borne by Reinette Tinekerr";
+            icon = "messenger";
+            sound = "messenger";
+            variant = "letter";
+          }
+        ];
       };
 
       satchel.settings = {

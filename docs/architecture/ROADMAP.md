@@ -1025,6 +1025,19 @@ Concretized as D-055 (issue #91).
   daily accent, partial palette, bad tokens, unset-up hosts;
   `rice-theme-switch`: a HyprFM failure never blocks a switch).
 
+## Phase 43 — Messenger notification personas ✅
+
+Concretized as D-056 (issue #86).
+
+- ✅ `correspondence.settings.personas` maps apps to a toast persona:
+  a `letter` card variant, a seal icon, a sound cue and a label beside
+  the real app name. Urgency, DND, mute and reduce-motion still apply.
+- ✅ LoTM: messaging apps arrive "borne by Reinette Tinekerr" with
+  `sigil_messenger.svg` and `sounds/messenger.wav`.
+- Verified: `rice-lint`, `nix flake check` (`rice-manifest-validation`
+  rejects malformed personas); headless smoke test with
+  `notify-send -a discord` (letter card) beside `-a firefox` (plain).
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

@@ -146,6 +146,31 @@ let
       ]
       ++ lib.optionals (builtins.isList catalog) (lib.imap0 entryCheck catalog)
     )
+    ++ lib.optionals ((theme.widgets.correspondence.settings.personas or null) != null) (
+      # Notification personas (D-056): dressing for chosen apps' toasts.
+      # Variants are the runtime's closed set; a sound must be one of
+      # the theme's, an icon is any name Theme.icon resolves.
+      let
+        personas = theme.widgets.correspondence.settings.personas;
+        personaCheck = i: p:
+          let
+            at = "widgets.correspondence.settings.personas.${toString i}";
+            sound = p.sound or null;
+          in
+          builtins.seq (checkClosed at [ "apps" "label" "icon" "sound" "variant" ] p) (
+            if !(builtins.isList (p.apps or null) && p.apps != [ ] && lib.all builtins.isString p.apps)
+            then fail "${at}.apps must be a non-empty list of app names"
+            else if !(builtins.isString (p.label or null)) then fail "${at}.label must be a string"
+            else if (p.variant or "letter") != "letter" then fail "${at}.variant must be \"letter\""
+            else if p ? sound && !(builtins.isString sound && (theme.assets.sounds or { }) ? ${sound})
+            then fail "${at}.sound must name an entry in assets.sounds"
+            else if p ? icon && !builtins.isString p.icon then fail "${at}.icon must be an icon name"
+            else true
+          );
+      in
+      if builtins.isList personas then lib.imap0 personaCheck personas
+      else [ (fail "widgets.correspondence.settings.personas must be a list") ]
+    )
     ++ map
       (plugin: checkClosed "plugins entry"
         [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]

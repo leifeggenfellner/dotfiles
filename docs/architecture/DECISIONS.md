@@ -1149,6 +1149,37 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   one-to-one onto the token roles, and its live reload lets a file
   manager follow switches and the daily draw like the shell does.
 
+### D-056 — Notification personas dress chosen apps' toasts
+
+- Date: 2026-11-18 · Status: active · Extends D-024 · Issue #86
+- `widgets.correspondence.settings.personas` is a list of
+  `{ apps, label, icon?, sound?, variant? }`. The toast surface matches
+  an incoming notification's app name or desktop entry, case-insensitively,
+  against `apps`; the first persona that matches dresses its card.
+- Variants are the runtime's closed set, currently only `letter`: an
+  elevated card with an accent hairline, the persona's icon on a seal
+  in place of the urgency stripe, and an arrival slide from the screen
+  edge. Motion uses `Motion.panelOpen` and `Motion.sealPress`, so it
+  collapses under reduce-motion.
+- The label sits beside the real app name ("discord · borne by …"); the
+  summary, body, actions, dismissal and Correspondence history are
+  untouched. Urgency still wins: a critical toast keeps the danger
+  colours and the critical sound.
+- Sound: the persona's `sound` names an `assets.sounds` event and plays
+  in place of `notification` under the D-024 rules (after the toast is
+  appended, never under DND, muted by default). An unplayable cue falls
+  back to `notification`.
+- Validated at build: closed keys, non-empty `apps`, string `label`,
+  `variant` in the closed set, `sound` present in the theme's sounds,
+  `icon` a string (`Theme.icon` resolves it, with runtime defaults).
+- LoTM maps Discord, Vesktop, Slack, Signal, Telegram, Element and
+  WhatsApp to Reinette Tinekerr's delivery, with a sealed-envelope
+  sigil and a short knock-and-flutter cue. Cyberpunk declares none, so
+  its toasts are unchanged.
+- Why: messages from people are the notifications most worth telling
+  apart, and the persona can mark them without hiding which app sent
+  them or adding a theme-specific runtime path.
+
 ---
 
 ## Legacy imports
