@@ -1296,6 +1296,49 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the apps open beside the shell all day; they should wear the
   same palette, generated so a token change reaches all of them.
 
+### D-060 — Zen's chrome and a new-tab page from the rice
+
+- Date: 2026-11-18 · Status: active · Extends D-042, D-051, D-059 · Issue #84
+- `programs/zen.nix` builds Zen through nixpkgs' `wrapFirefox` itself,
+  as the flake does, and adds `program.zen.autoconfig`: JavaScript
+  appended to Zen's `mozilla.cfg`. While it is non-empty, the autoconfig
+  sandbox is off, because the code needs chrome privileges; the file is
+  in the store, so the sandbox guarded nothing. `program.zen.newtabLinks`
+  holds the page's links (user data, not theme data).
+- Chrome (`integration.tools` lists `zen`): `_browser-lib.nix` generates
+  a stylesheet that sets only Zen's and Firefox's colour variables,
+  inside `@-moz-document url("chrome://browser/content/browser.xhtml")`.
+  Autoconfig registers it as a user sheet through the style-sheet
+  service, so no profile directory (whose name is random) is touched and
+  `userChrome.css` stays the user's. A user `!important` beats the
+  workspace gradient, text colour and primary colour that Zen writes
+  inline on its own elements, so those, the colour scheme and the
+  floating URL bar's background are set on every chrome element. The
+  workspace name takes the display font.
+- New-tab page (`widgets.newtab.settings = { title; tagline?;
+  epigraphs?; daily?; labels?; }`): a static page built per configured
+  theme into `~/.local/share/rice/newtab/index.html`. Autoconfig makes it
+  the new-tab URL (`AboutNewTab.newTabURL`) and the default homepage, and
+  turns off `zen.urlbar.replace-newtab` by default so Ctrl+T opens a tab.
+  All three are defaults, so `about:config` still wins. The page works out
+  the real date and picks the epigraph by day of the month, as the
+  dashboard does. It renders all text with `textContent`.
+- Live part: `modules/newtab/NewtabFeed` writes
+  `$XDG_STATE_HOME/rice/newtab-feed.js` (`window.riceNewtab = { updated,
+  theme, weather, moon, sky, omen }`), which the page loads as a script;
+  file pages can load scripts but not fetch JSON. Weather is null until
+  `WeatherState` has a reading; `omen` is today's record formatted like
+  the terminal greeting (D-042) or the pending label. It is rewritten
+  when an input changes and every half hour, and only for themes with the
+  settings. Without the file the page says the shell sent nothing, beside
+  "weather unavailable".
+- Chrome and page follow the configured theme at rebuild like the other
+  tools (D-051); the feed follows the running shell.
+- Cyberpunk declares neither, and Zen stays stock.
+- Why: the browser is the window open most of the day; it should belong
+  to the world without hiding the real date, weather or URL bar, and
+  without selectors that break on each Zen release.
+
 ---
 
 ## Legacy imports

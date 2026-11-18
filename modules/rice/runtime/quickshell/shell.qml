@@ -19,6 +19,7 @@ import "./modules/mood"
 import "./modules/sky"
 import "./modules/awakening"
 import "./modules/dailyAccent"
+import "./modules/newtab"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -57,6 +58,8 @@ ShellRoot {
     AwakeningController {}
 
     DailyAccentController {}
+
+    NewtabFeed {}
 
     Variants {
         model: Quickshell.screens

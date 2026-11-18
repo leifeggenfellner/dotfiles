@@ -1091,6 +1091,25 @@ Concretized as D-059 (issue #85).
   evaluated with Cyberpunk, all three stay stock. Not yet seen running:
   the apps themselves.
 
+## Phase 47 — Zen chrome and the Backlund Daily ✅
+
+Concretized as D-060 (issue #84).
+
+- ✅ Zen wrapped with autoconfig; a token-derived chrome sheet registered
+  as a user sheet (colour variables only).
+- ✅ New-tab page and homepage generated per theme; the shell writes the
+  live feed (weather, moon, today's omen).
+- ✅ LoTM: The Backlund Daily, with the dashboard's epigraphs and the
+  tarot omen; Cyberpunk keeps stock Zen.
+- Verified: `rice-lint`, `nix flake check` (`rice-tools` checks the sheet's
+  shape, the page and that Cyberpunk gets neither). Headless Zen (sway,
+  fresh profile): autoconfig runs, the sheet and new-tab URL apply, the
+  chrome and floating URL bar wear the theme, and the page renders the
+  feed. Headless shell: the feed is written from real weather, and
+  claiming today's card turns the pending line into the omen. Ctrl+T
+  couldn't be delivered headlessly; the page loads as Zen's new-tab page
+  on startup.
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

@@ -195,6 +195,32 @@ let
       ++ (if builtins.isList (s.layers or null) then lib.imap0 layerCheck s.layers
       else [ (fail "widgets.soundscape.settings.layers must be a list") ])
     )
+    ++ lib.optionals ((theme.widgets.newtab.settings or null) != null) (
+      # Browser new-tab page (D-060): copy, epigraphs as a list or a theme
+      # path, and a daily record resolved like the terminal greeting's.
+      let
+        at = "widgets.newtab.settings";
+        s = theme.widgets.newtab.settings;
+        str = key: v: if builtins.isString v then true else fail "${at}.${key} must be a string";
+        listPath = p: builtins.isString p && builtins.isList (lib.attrByPath (lib.splitString "." p) null theme);
+      in
+      [
+        (checkClosed at [ "title" "tagline" "epigraphs" "daily" "labels" ] s)
+        (str "title" (s.title or ""))
+        (str "tagline" (s.tagline or ""))
+        (if !(s ? epigraphs) || builtins.isList s.epigraphs || listPath s.epigraphs then true
+        else fail "${at}.epigraphs must be a list or name a list in the theme")
+        (checkClosed "${at}.labels" [ "weather" "moon" "omen" "links" "offline" "unavailable" ] (s.labels or { }))
+      ]
+      ++ lib.mapAttrsToList (k: str "labels.${k}") (s.labels or { })
+      ++ lib.optionals (s ? daily) [
+        (checkClosed "${at}.daily" [ "record" "catalog" "format" "pendingLabel" ] s.daily)
+        (if builtins.match "extras[.][^.]+[.][^.]+" (s.daily.record or "") != null then true
+        else fail "${at}.daily.record must be extras.<namespace>.<key>")
+        (if listPath (s.daily.catalog or null) then true
+        else fail "${at}.daily.catalog must name a list in the theme")
+      ]
+    )
     ++ map
       (plugin: checkClosed "plugins entry"
         [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]
@@ -267,7 +293,7 @@ let
       )
       ++ lib.optionals (theme.integration ? tools) [
         (
-          let known = [ "btop" "bat" "yazi" "cava" "vscode" "spotify" "discord" ]; v = theme.integration.tools; in
+          let known = [ "btop" "bat" "yazi" "cava" "vscode" "spotify" "discord" "zen" ]; v = theme.integration.tools; in
           if builtins.isList v && lib.all (x: lib.elem x known) v then true
           else fail "integration.tools must be a list drawn from [${lib.concatStringsSep " " known}], got ${builtins.toJSON v}"
         )

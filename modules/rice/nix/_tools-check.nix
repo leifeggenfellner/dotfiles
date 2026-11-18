@@ -6,7 +6,9 @@
 # drawn in that accent. App themes (D-059): the VS Code extension carries
 # a valid colour theme with code coloured by the shared roles, the Spotify
 # scheme has every Spicetify key, and the Discord CSS only sets colour
-# variables to resolved hex values.
+# variables to resolved hex values. Zen (D-060): LOTM's chrome sheet only
+# sets variables inside browser.xhtml, its new-tab page carries the
+# masthead, epigraphs and feed script, and Cyberpunk gets neither.
 { pkgs }:
 let
   inherit (pkgs) lib;
@@ -18,12 +20,19 @@ let
     theme = theme name;
   };
   lotmTools = import ./_tools-lib.nix { inherit pkgs lib; } (theme "lotm");
+  browser = name: import ./_browser-lib.nix { inherit pkgs lib; } {
+    theme = theme name;
+    feedPath = "/state/rice/newtab-feed.js";
+    links = [{ label = "Example <b>"; url = "https://example.org"; }];
+  };
+  lotmBrowser = browser "lotm";
   lotmCards = (theme "lotm").widgets.tarotDraw.settings.cards;
   inherit (card "lotm") variants;
 in
 assert lib.all (c: c ? pathway && c ? accent && c ? sigil) lotmCards;
 assert lib.attrNames variants == lib.sort lib.lessThan (map (c: c.id) lotmCards);
 assert card "cyberpunk" == null;
+assert (browser "cyberpunk").newtab == null && (browser "cyberpunk").zenChrome == null;
 assert !((theme "cyberpunk") ? integration.tools);
 assert lib.attrNames lotmTools.spotify == lib.sort lib.lessThan [
   "text"
@@ -99,6 +108,16 @@ pkgs.runCommand "rice-tools"
       and .colors["editor.background"] == "#1b1510"
       and (.tokenColors[] | select(.name == "String") | .settings.foreground) == "#86a361"' \
       $ext/themes/rice-color-theme.json > /dev/null
+
+    zen=${lotmBrowser.zenChrome}
+    head -1 $zen | grep -qx '@-moz-document url("chrome://browser/content/browser.xhtml") {'
+    ! grep -vE '^(@-moz-document .*\{|  [:.a-z, *-]+ \{|    (color-scheme|font-family|color|--[a-z0-9-]+): [^;{}]+;|  \}|\}|)$' $zen
+
+    page=${lotmBrowser.newtab}/index.html
+    grep -q '<title>The Backlund Daily</title>' $page
+    grep -q '<script src="file:///state/rice/newtab-feed.js"></script>' $page
+    grep -q 'Quiet instruments reveal what loud rituals conceal' $page
+    grep -q '"label":"Example <b>"' $page
 
     css=${lotmTools.discord}
     grep -q '^ \* @name Lord of the Mysteries (rice)$' $css

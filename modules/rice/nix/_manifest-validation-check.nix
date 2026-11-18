@@ -240,6 +240,13 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; variant = "scroll"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; sound = "missing"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; colour = "red"; }] lotm))
+    # Browser new-tab page (D-060).
+    (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "title" ] 42 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "epigraphs" ] "widgets.epigraph.settings.missing" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "labels" ] { weather = "x"; headline = "y"; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "daily" "record" ] "tarotDraw.daily" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "daily" "catalog" ] "widgets.tarotDraw.settings.missing" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "edition" ] "Evening" lotm))
     # Sound bed layers (D-058).
     (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] { sound = "bed-rain"; } lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "soundscape" "settings" "layers" ] [{ sound = "missing"; }] lotm))

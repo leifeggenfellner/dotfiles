@@ -565,6 +565,27 @@ in
         { sound = "bed-fog"; volume = 0.9; mood = "focus"; }
       ];
 
+      # Zen's new tab as a Backlund broadsheet (D-060): the real date,
+      # weather and moon from the shell, the day's omen and an epigraph.
+      newtab.settings = {
+        title = "The Backlund Daily";
+        tagline = "Printed above the gray fog · All the news the Church permits";
+        epigraphs = "widgets.epigraph.settings.lines";
+        daily = {
+          record = "extras.tarotDraw.daily";
+          catalog = "widgets.tarotDraw.settings.cards";
+          format = "{sequence} · {name} · {pathway} pathway — {phrase}";
+          pendingLabel = "The cards are still face-down under the gray fog.";
+        };
+        labels = {
+          weather = "Weather over Backlund";
+          moon = "The Crimson Moon";
+          omen = "Today's omen";
+          links = "Notices";
+          offline = "No dispatch from the shell";
+        };
+      };
+
       # Daily accent (D-054): the day's tarot card lends its pathway's
       # accent to the shell, the window borders and the terminal card.
       dailyAccent.settings = {
@@ -700,7 +721,7 @@ in
     # fog → gold → rust, bat reads like an annotated grimoire, yazi wears
     # gilt tabs, cava burns like a candle. VS Code, Spotify and Discord
     # (D-059) wear the bar's umber and gold.
-    tools = [ "btop" "bat" "yazi" "cava" "vscode" "spotify" "discord" ];
+    tools = [ "btop" "bat" "yazi" "cava" "vscode" "spotify" "discord" "zen" ];
 
     # Cursor (D-048): a quill to write with and a gloved hand to point,
     # gilded on umber ink. Built into hyprcursor + XCursor at rebuild;
