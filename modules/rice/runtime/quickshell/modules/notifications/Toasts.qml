@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Shapes
 import "../../core"
 import "../../components"
 import "../../services/notifications"
@@ -99,6 +100,10 @@ PanelWindow {
 
                 required property var model
                 readonly property bool letter: card.model.variant === "letter"
+                // Letters open before they are read: 0 while sealed, 1
+                // once the envelope has given way to the message.
+                property real reveal: card.letter ? 0 : 1
+                property real flapAngle: 0
 
                 width: stack.width
                 height: content.height + Theme.metrics.space.md * 2
@@ -123,6 +128,133 @@ PanelWindow {
                 Component.onCompleted: {
                     opacity = 0.97;
                     arrival.x = 0;
+                    if (card.letter)
+                        opening.start();
+                }
+
+                // Arrive sealed, lift the flap, then let the envelope
+                // fall away as the message and its seal come forward.
+                // Every step is a Motion spec, so reduce-motion opens
+                // the letter at once.
+                SequentialAnimation {
+                    id: opening
+                    PauseAnimation {
+                        duration: Motion.panelOpen.duration
+                    }
+                    MotionAnim {
+                        target: card
+                        property: "flapAngle"
+                        to: 180
+                        spec: Motion.cardFlip
+                    }
+                    ParallelAnimation {
+                        MotionAnim {
+                            target: card
+                            property: "reveal"
+                            to: 1
+                            spec: Motion.panelOpen
+                        }
+                        MotionAnim {
+                            target: seal
+                            property: "scale"
+                            from: 1.15
+                            to: 1
+                            spec: Motion.sealPress
+                        }
+                    }
+                }
+
+                Item {
+                    id: envelope
+                    visible: card.letter && opacity > 0
+                    height: card.height - Theme.metrics.space.sm * 2
+                    width: height * 1.45
+                    anchors.centerIn: parent
+                    opacity: 1 - card.reveal
+                    scale: 1 + card.reveal * 0.12
+
+                    readonly property color ink: card.model.urgency === 2 ? Theme.colors.state.danger : Theme.colors.accent.primary
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 2
+                        color: Theme.colors.bg.sunken
+                        border.width: 1
+                        border.color: envelope.ink
+                    }
+
+                    // The folds below the flap.
+                    Shape {
+                        anchors.fill: parent
+                        preferredRendererType: Shape.CurveRenderer
+                        ShapePath {
+                            strokeColor: envelope.ink
+                            strokeWidth: 1
+                            fillColor: "transparent"
+                            startX: 1
+                            startY: envelope.height - 1
+                            PathLine {
+                                x: envelope.width / 2
+                                y: envelope.height * 0.5
+                            }
+                            PathLine {
+                                x: envelope.width - 1
+                                y: envelope.height - 1
+                            }
+                        }
+                    }
+
+                    // The flap swings up on its top edge and fades as it
+                    // passes upright; the wax at its tip goes with it.
+                    Item {
+                        width: envelope.width
+                        height: envelope.height * 0.6
+                        opacity: card.flapAngle < 90 ? 1 : (180 - card.flapAngle) / 90
+                        transform: Rotation {
+                            origin.x: 0
+                            origin.y: 0
+                            axis {
+                                x: 1
+                                y: 0
+                                z: 0
+                            }
+                            angle: card.flapAngle
+                        }
+
+                        Shape {
+                            anchors.fill: parent
+                            preferredRendererType: Shape.CurveRenderer
+                            ShapePath {
+                                strokeColor: envelope.ink
+                                strokeWidth: 1
+                                fillColor: Theme.colors.bg.elevated
+                                joinStyle: ShapePath.RoundJoin
+                                startX: 0.5
+                                startY: 0.5
+                                PathLine {
+                                    x: envelope.width - 0.5
+                                    y: 0.5
+                                }
+                                PathLine {
+                                    x: envelope.width / 2
+                                    y: envelope.height * 0.6
+                                }
+                                PathLine {
+                                    x: 0.5
+                                    y: 0.5
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            width: envelope.height * 0.24
+                            height: width
+                            radius: width / 2
+                            x: (envelope.width - width) / 2
+                            y: envelope.height * 0.6 - height * 0.7
+                            color: envelope.ink
+                        }
+                    }
                 }
 
                 Behavior on opacity {
@@ -162,14 +294,7 @@ PanelWindow {
                     color: Theme.colors.bg.sunken
                     border.width: 1
                     border.color: card.model.urgency === 2 ? Theme.colors.state.danger : Theme.colors.accent.primary
-
-                    scale: 1.15
-                    Component.onCompleted: scale = 1
-                    Behavior on scale {
-                        MotionAnim {
-                            spec: Motion.sealPress
-                        }
-                    }
+                    opacity: card.reveal
 
                     Icon {
                         anchors.centerIn: parent
@@ -181,6 +306,7 @@ PanelWindow {
 
                 Column {
                     id: content
+                    opacity: card.reveal
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: card.letter ? seal.right : parent.left
                     anchors.right: parent.right

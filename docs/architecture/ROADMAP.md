@@ -1030,8 +1030,8 @@ Concretized as D-055 (issue #91).
 Concretized as D-056 (issue #86).
 
 - ✅ `correspondence.settings.personas` maps apps to a toast persona:
-  a `letter` card variant, a seal icon, a sound cue and a label beside
-  the real app name. Urgency, DND, mute and reduce-motion still apply.
+  a `letter` card variant (a sealed envelope opens before the message
+  shows), a seal icon, a sound cue and a label beside the real app name. Urgency, DND, mute and reduce-motion still apply.
 - ✅ LoTM: messaging apps arrive "borne by Reinette Tinekerr" with
   `sigil_messenger.svg` and `sounds/messenger.wav`.
 - Verified: `rice-lint`, `nix flake check` (`rice-manifest-validation`

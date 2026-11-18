@@ -1158,9 +1158,10 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   against `apps`; the first persona that matches dresses its card.
 - Variants are the runtime's closed set, currently only `letter`: an
   elevated card with an accent hairline, the persona's icon on a seal
-  in place of the urgency stripe, and an arrival slide from the screen
-  edge. Motion uses `Motion.panelOpen` and `Motion.sealPress`, so it
-  collapses under reduce-motion.
+  in place of the urgency stripe. It arrives as a sealed envelope that
+  slides in from the screen edge, lifts its flap, then gives way to the
+  message. The steps use `Motion.panelOpen`, `cardFlip` and `sealPress`,
+  so under reduce-motion the letter is open on arrival.
 - The label sits beside the real app name ("discord · borne by …"); the
   summary, body, actions, dismissal and Correspondence history are
   untouched. Urgency still wins: a critical toast keeps the danger
