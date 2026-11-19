@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""Generate the Quickshell API reference for the quickshell-runtime skill.
+
+Reads every .qmltypes file under <quickshell>/lib/qt-6/qml/Quickshell and
+writes one Markdown file per public import (Quickshell, Quickshell.Hyprland,
+...) plus an index into <out-dir>. Internal `_X` sub-modules are folded into
+the import that re-exports them, since that is what QML code writes.
+
+The output is signatures only: qmltypes carries no doc comments. It exists so
+the reference always matches the pinned package; the `quickshell-api-ref`
+flake check fails when it drifts.
+
+Usage: quickshell-api-ref.py <quickshell-store-path> <version> <out-dir>
+"""
+import re
+import sys
+from pathlib import Path
+
+TOKEN = re.compile(r'"(?:[^"\\]|\\.)*"|-?\d+(?:\.\d+)?|[A-Za-z_][\w.]*|[{}\[\]:;,]')
+
+QT_TYPES = {
+    "QString": "string", "bool": "bool", "int": "int", "uint": "int",
+    "qint64": "int", "quint64": "int", "qreal": "real", "double": "real",
+    "float": "real", "QVariant": "var", "QJSValue": "var", "QVariantMap": "object",
+    "QVariantList": "list", "QStringList": "list<string>", "QUrl": "url",
+    "QColor": "color", "QDateTime": "date", "QDate": "date", "QRect": "rect",
+    "QRectF": "rect", "QPoint": "point", "QPointF": "point", "QSize": "size",
+    "QSizeF": "size", "QObject": "QtObject", "QQuickItem": "Item",
+    "QQuickWindow": "Window", "QQmlComponent": "Component", "void": "void",
+}
+
+
+def parse(text):
+    """Parse qmltypes into nested (name, fields, children) blocks."""
+    tokens = TOKEN.findall(re.sub(r"//[^\n]*", "", text))
+    pos = 0
+
+    def value():
+        nonlocal pos
+        tok = tokens[pos]
+        pos += 1
+        if tok == "[":
+            items = []
+            while tokens[pos] != "]":
+                if tokens[pos] == ",":
+                    pos += 1
+                    continue
+                items.append(value())
+            pos += 1
+            return items
+        if tok.startswith('"'):
+            return tok[1:-1]
+        return {"true": True, "false": False}.get(tok, tok)
+
+    def block():
+        nonlocal pos
+        name = tokens[pos]
+        pos += 2  # name, {
+        fields, children = {}, []
+        while tokens[pos] != "}":
+            if tokens[pos] == ";":
+                pos += 1
+            elif tokens[pos + 1] == ":":
+                key = tokens[pos]
+                pos += 2
+                fields[key] = value()
+            else:
+                children.append(block())
+        pos += 1
+        return name, fields, children
+
+    while tokens[pos] != "Module":
+        pos += 1
+    return block()
+
+
+def public_module(module):
+    """Quickshell.Hyprland._Ipc -> Quickshell.Hyprland."""
+    parts = module.split(".")
+    while parts and parts[-1].startswith("_"):
+        parts.pop()
+    return ".".join(parts)
+
+
+def main(root, version, out):
+    components = []
+    for path in sorted(Path(root, "lib/qt-6/qml/Quickshell").rglob("*.qmltypes")):
+        _, _, children = parse(path.read_text())
+        components += [fields | {"_children": kids} for kind, fields, kids in children if kind == "Component"]
+
+    # C++ name -> QML name, for prototypes and member types.
+    qml_name = {}
+    for c in components:
+        exports = c.get("exports") or []
+        if exports:
+            qml_name[c["name"]] = exports[0].split("/")[1].split(" ")[0]
+        elif "name" in c:
+            qml_name.setdefault(c["name"], c["name"].split("::")[-1])
+
+    def type_name(raw, is_list=False):
+        raw = (raw or "void").rstrip("*").strip()
+        m = re.fullmatch(r"(?:QList|QVector)<(.+?)\*?>", raw)
+        if m:
+            return f"list<{type_name(m.group(1))}>"
+        # Quickshell enums are namespaces: `ExclusionMode::Enum` -> ExclusionMode.
+        raw = re.sub(r"::Enum$", "", raw)
+        name = QT_TYPES.get(raw) or qml_name.get(raw) or raw.split("::")[-1]
+        return f"list<{name}>" if is_list else name
+
+    def params(kids):
+        return ", ".join(
+            f"{f.get('name', '')}: {type_name(f.get('type'), f.get('isList'))}"
+            for kind, f, _ in kids if kind == "Parameter"
+        )
+
+    modules = {}
+    for c in components:
+        exports = c.get("exports") or []
+        module = public_module(exports[0].split("/")[0]) if exports else None
+        if module is None:
+            # Unexported base classes still carry members their subclasses
+            # inherit; file them next to the first type that extends them.
+            subclasses = [d for d in components if d.get("prototype") == c.get("name") and d.get("exports")]
+            if not subclasses:
+                continue
+            module = public_module(subclasses[0]["exports"][0].split("/")[0])
+        modules.setdefault(module, []).append(c)
+
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    for stale in out.glob("*.md"):
+        stale.unlink()
+
+    index = [
+        f"# Quickshell {version} API reference",
+        "",
+        "Generated by `scripts/quickshell-api-ref.py` from the pinned package's",
+        "`.qmltypes`; do not edit by hand. Signatures only. For behaviour, read the",
+        "Quickshell docs for this version or the runtime code that already uses a type.",
+        "",
+        "| Import | Types |",
+        "|---|---|",
+    ]
+    for module in sorted(modules):
+        lines = [f"# `import {module}` (Quickshell {version})", ""]
+        names = []
+        for c in sorted(modules[module], key=lambda c: qml_name.get(c["name"], c["name"]).lower()):
+            name = qml_name.get(c["name"], c["name"])
+            if c.get("exports"):
+                names.append(name)
+            kids = c["_children"]
+            tags = []
+            if c.get("isSingleton"):
+                tags.append("singleton")
+            if not c.get("exports"):
+                tags.append("base type, not importable")
+            if c.get("attachedType"):
+                tags.append(f"attached: {type_name(c['attachedType'])}")
+            heading = f"## {name}"
+            if c.get("prototype"):
+                heading += f" : {type_name(c['prototype'])}"
+            lines.append(heading)
+            if tags:
+                lines.append(f"*{', '.join(tags)}*")
+            if c.get("defaultProperty"):
+                lines.append(f"default property: `{c['defaultProperty']}`")
+            for kind, f, sub in kids:
+                if kind == "Property":
+                    flags = " (readonly)" if f.get("isReadonly") else ""
+                    lines.append(f"- `{f['name']}: {type_name(f.get('type'), f.get('isList'))}`{flags}")
+            # Change notifiers are implied by the property list.
+            notifiers = {f"{f['name']}Changed" for kind, f, _ in kids if kind == "Property"}
+            for kind, f, sub in kids:
+                if kind == "Signal" and f["name"] not in notifiers:
+                    lines.append(f"- signal `{f['name']}({params(sub)})`")
+            for kind, f, sub in kids:
+                if kind == "Method" and not f["name"].startswith("_"):
+                    ret = type_name(f.get("type"), f.get("isList"))
+                    suffix = "" if ret == "void" else f": {ret}"
+                    lines.append(f"- `{f['name']}({params(sub)}){suffix}`")
+            for kind, f, sub in kids:
+                if kind == "Enum":
+                    lines.append(f"- enum `{f['name']}`: {', '.join(f.get('values', []))}")
+            lines.append("")
+        filename = f"{module}.md"
+        (out / filename).write_text("\n".join(lines))
+        index.append(f"| [`{module}`]({filename}) | {', '.join(names)} |")
+    (out / "README.md").write_text("\n".join(index) + "\n")
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:])

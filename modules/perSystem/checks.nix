@@ -24,6 +24,17 @@
       rice-boot =
         import ../rice/nix/_boot-check.nix { inherit pkgs; };
 
+      # The quickshell-runtime skill's API reference matches the pinned
+      # Quickshell; after a nixpkgs bump, `nix run .#quickshell-api-ref`.
+      quickshell-api-ref = pkgs.runCommand "quickshell-api-ref-check"
+        { nativeBuildInputs = [ pkgs.python3 ]; }
+        ''
+          python3 ${../../scripts/quickshell-api-ref.py} ${pkgs.quickshell} ${pkgs.quickshell.version} generated
+          diff -ru ${../../.claude/skills/quickshell-runtime/references/quickshell-api} generated \
+            || { echo "Quickshell API reference is stale: nix run .#quickshell-api-ref"; exit 1; }
+          touch $out
+        '';
+
       rice-neovim =
         import ../rice/nix/_neovim-check.nix { inherit pkgs; };
 

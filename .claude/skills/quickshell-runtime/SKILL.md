@@ -41,6 +41,18 @@ ownership. (During migration, the legacy location is
 - Run `scripts/rice-lint.sh` (once it exists) after structural changes; it
   enforces the import allowlist and the theme-literal ban.
 
+## Quickshell API
+
+Before using a Quickshell type, property, signal or method you have not
+already seen in the runtime, look it up in
+[references/quickshell-api/](references/quickshell-api/README.md): one file
+per import, generated from the pinned package's `.qmltypes`, so it matches
+the Quickshell this repo actually runs. Do not trust memory or other shells'
+code for Quickshell names; versions differ. The reference is signatures only;
+for behaviour, read existing runtime code that uses the type. After a
+nixpkgs bump, `nix run .#quickshell-api-ref` regenerates it (the
+`quickshell-api-ref` flake check fails until then).
+
 ## Forbidden
 
 - Feature logic in `shell.qml` or surface compositors — they iterate
