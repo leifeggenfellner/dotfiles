@@ -1,7 +1,6 @@
 # The Brass Rail: taskbar redesign brief
 
-Status: **proposed** (design brief, no code yet). Tracks the GitHub issue
-"Taskbar redesign: the Brass Rail". When a phase lands, its decision goes into
+Status: **proposed** (design brief, no code yet). Tracked in issue #92. When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 
 ## Why
