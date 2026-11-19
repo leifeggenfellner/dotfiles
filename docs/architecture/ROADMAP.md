@@ -1116,6 +1116,24 @@ Concretized as D-060 (issue #84).
   couldn't be delivered headlessly; the page loads as Zen's new-tab page
   on startup.
 
+## Phase 48 — Launcher v3: memory and a focus card ✅
+
+Concretized as D-061.
+
+- ✅ `utils/Frecency.qml` and launch history in PrefsState extras;
+  `AppsState.search` takes usage boosts; used apps lead an empty query.
+- ✅ Focus card for the top result, list for the rest, linear keyboard
+  selection; LoTM drops its `columns` setting.
+- Verified: `rice-lint`; headless shell (sway) with the LoTM and
+  Cyberpunk manifests: seeded history orders the empty query (Zen, Foot,
+  Code, Vesktop, then alphabetical), a query ranks matches, Cyberpunk
+  keeps the neutral copy; a probe desktop entry launched with Enter ran
+  and was recorded in `launcher.history`. Headless typing needs one
+  `wtype` call for text and keys: each new virtual keyboard drops its
+  first key.
+- Next: polkit authentication as a themed shell surface (replacing
+  `polkit-gnome`).
+
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
 The ambient effects tier landed as Phase 13 (D-021).

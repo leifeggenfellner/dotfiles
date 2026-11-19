@@ -1,3 +1,4 @@
 # Pure, side-effect-free helpers.
 singleton Fuzzy 1.0 Fuzzy.qml
 singleton Moon 1.0 Moon.qml
+singleton Frecency 1.0 Frecency.qml

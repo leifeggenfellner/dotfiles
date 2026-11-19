@@ -1347,6 +1347,29 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   to the world without hiding the real date, weather or URL bar, and
   without selectors that break on each Zen release.
 
+### D-061 — The launcher remembers launches and leads with one result
+
+- Date: 2026-11-19 · Status: active · Extends D-023, D-025
+- Launches are recorded as frecency in PrefsState extras
+  (`launcher.history`: `{ <desktop id>: { count, last } }`, at most 64
+  ids). `utils/Frecency.qml` holds the pure math: launch count weighted
+  by age bucket (4 h, 1 day, 1 week, 1 month, older), so a few recent
+  launches outrank many stale ones.
+- `AppsState.search(query, limit, boosts)` takes the scores from the
+  caller (services never import services). An empty query lists used
+  apps first, then the rest alphabetically. With a query, the usage bonus
+  (at most 1200) reorders matches within about one match tier, so an
+  exact or prefix match still beats a loose one, and a non-match is
+  never lifted. Scores are taken when the launcher opens, so results
+  hold still while it is up.
+- Layout: the top result is a focus card (large icon, name in the
+  display face, generic name, comment); the rest follow as a scrolling
+  list. Up/Down and Tab/Shift+Tab move the selection; Left/Right stay
+  with the text cursor. `widgets.launcher.settings.columns` is gone;
+  `visibleRows` (default 7) sets the list height.
+- Why: the grid gave every match the same weight, and a launcher
+  that forgets what you open is slower each time it is used.
+
 ---
 
 ## Legacy imports

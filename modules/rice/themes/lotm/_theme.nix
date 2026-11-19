@@ -302,7 +302,6 @@ in
             }
           ];
         };
-        columns = 4;
         maxResults = 16;
       };
 

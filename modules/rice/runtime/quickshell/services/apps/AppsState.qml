@@ -10,7 +10,7 @@ import "../../utils"
 // to DesktopEntries' model details.
 //
 //   state:    available, apps, error
-//   commands: search(query, limit), findApp(match), rowForApp(app), launch(app)
+//   commands: search(query, limit, boosts?), findApp(match), rowForApp(app), launch(app)
 
 Item {
     id: appsState
@@ -21,16 +21,26 @@ Item {
 
     readonly property var apps: _visibleApps(DesktopEntries.applications.values)
 
-    function search(query, limit) {
+    // `boosts` (optional) maps app id → usage score (utils/Frecency).
+    // With no query, used apps lead and the rest follow alphabetically;
+    // with a query, usage reorders matches within roughly one match tier
+    // of each other but never lifts a non-match.
+    function search(query, limit, boosts) {
         const max = limit ?? 24;
+        const usage = boosts ?? {};
         const normalized = Fuzzy.normalize(query);
         const ranked = [];
         const list = apps;
         for (let i = 0; i < list.length; i++) {
             const app = list[i];
-            const score = normalized.length === 0 ? (1000 - i) : Fuzzy.bestScore(_fields(app), normalized);
-            if (score >= 0)
-                ranked.push(_row(app, score));
+            const used = usage[app.id] ?? 0;
+            const match = normalized.length === 0 ? 0 : Fuzzy.bestScore(_fields(app), normalized);
+            if (match < 0)
+                continue;
+            const score = normalized.length === 0 ? used : match + Math.min(used * 60, 1200);
+            const row = _row(app, score);
+            row.used = used > 0;
+            ranked.push(row);
         }
         ranked.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
         return ranked.slice(0, max);
@@ -97,6 +107,7 @@ Item {
             id: app.id,
             name: app.name,
             subtitle: subtitle ?? "",
+            comment: app.comment ?? "",
             iconName: app.icon ?? "",
             iconPath: iconPath ?? ""
         };
