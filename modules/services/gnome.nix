@@ -29,9 +29,13 @@ _: {
           };
           programs.dconf.enable = true;
           systemd = {
+            # Only one polkit agent can register per session. With the rice
+            # shell running it is the agent (D-062), so this unit stays
+            # defined for recovery (`systemctl --user start
+            # polkit-gnome-authentication-agent-1`) but no longer autostarts.
             user.services.polkit-gnome-authentication-agent-1 = {
               description = "polkit-gnome-authentication-agent-1";
-              wantedBy = [ "graphical-session.target" ];
+              wantedBy = lib.optionals (!config.rice.enable) [ "graphical-session.target" ];
               wants = [ "graphical-session.target" ];
               after = [ "graphical-session.target" ];
               serviceConfig = {

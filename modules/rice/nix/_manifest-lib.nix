@@ -221,6 +221,17 @@ let
         else fail "${at}.daily.catalog must name a list in the theme")
       ]
     )
+    ++ lib.optionals ((theme.widgets.polkit.settings or null) != null) (
+      # Polkit prompt copy (D-062): strings only; `sound` names a theme sound.
+      let
+        at = "widgets.polkit.settings";
+        s = theme.widgets.polkit.settings;
+      in
+      [ (checkClosed at [ "title" "epigraph" "submitLabel" "cancelLabel" "identityLabel" "maskCharacter" "retryText" "icon" "sound" ] s) ]
+      ++ lib.mapAttrsToList (k: v: if builtins.isString v then true else fail "${at}.${k} must be a string") s
+      ++ lib.optional (s ? sound && !((theme.assets.sounds or { }) ? ${s.sound}))
+        (fail "${at}.sound must name a sound in assets.sounds")
+    )
     ++ map
       (plugin: checkClosed "plugins entry"
         [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]

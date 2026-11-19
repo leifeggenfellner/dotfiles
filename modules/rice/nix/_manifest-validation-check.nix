@@ -240,6 +240,10 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; variant = "scroll"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; sound = "missing"; }] lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "personas" ] [{ apps = [ "discord" ]; label = "x"; colour = "red"; }] lotm))
+    # Polkit prompt (D-062).
+    (evaluates "lotm" (setAtPath [ "widgets" "polkit" "settings" "titel" ] "x" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "polkit" "settings" "sound" ] "missing" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "polkit" "settings" "title" ] 42 lotm))
     # Browser new-tab page (D-060).
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "title" ] 42 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "epigraphs" ] "widgets.epigraph.settings.missing" lotm))

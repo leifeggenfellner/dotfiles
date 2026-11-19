@@ -1370,6 +1370,20 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the grid gave every match the same weight, and a launcher
   that forgets what you open is slower each time it is used.
 
+### D-062 — The shell is the session's polkit agent
+
+- Date: 2026-11-19 · Status: active · Extends D-008, D-023
+- `services/polkit/PolkitState` wraps Quickshell's `PolkitAgent`; the
+  response goes straight from `submit()` to the agent and is never
+  stored or logged. `modules/polkit/PolkitPrompt` shows the real
+  message, identity, action id and PAM prompt under theme copy from
+  `widgets.polkit.settings` (closed keys, validated), on the focused
+  screen, with exclusive keyboard focus. A failed attempt clears the
+  field, shakes the card and shows `retryText`.
+- On rice hosts `polkit-gnome` no longer autostarts (one agent per
+  session) but stays defined for recovery.
+- Why: privileged prompts were the last plain GTK dialog in the session.
+
 ---
 
 ## Legacy imports

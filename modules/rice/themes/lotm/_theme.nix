@@ -305,6 +305,20 @@ in
         maxResults = 16;
       };
 
+      # Polkit prompt (D-062): a privileged act needs a higher seal. The
+      # real request, identity and action id are always shown beneath.
+      polkit.settings = {
+        title = "A Seal of Authority";
+        epigraph = "This rite reaches beyond your own Sequence. Affix your seal to let it pass.";
+        submitLabel = "Affix the seal";
+        cancelLabel = "Withdraw";
+        identityLabel = "sealed by";
+        retryText = "The seal did not take. Try again.";
+        maskCharacter = "◆";
+        icon = "lock";
+        sound = "satchel-seal";
+      };
+
       worldEvents.settings = {
         hourBell = {
           enabled = true;

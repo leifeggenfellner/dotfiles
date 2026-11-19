@@ -20,6 +20,7 @@ import "./modules/sky"
 import "./modules/awakening"
 import "./modules/dailyAccent"
 import "./modules/newtab"
+import "./modules/polkit"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -183,6 +184,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         Toasts {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        PolkitSurface {}
     }
 
     Variants {
