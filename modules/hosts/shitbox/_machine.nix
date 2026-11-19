@@ -19,6 +19,11 @@
   ########################################
   hardware.graphics.enable = true;
 
+  # Early KMS: without i915 in the initrd, Plymouth draws on simpledrm
+  # until stage 2 loads the driver mid-splash and the display changes
+  # under it.
+  boot.initrd.kernelModules = [ "i915" ];
+
   boot.blacklistedKernelModules = [
     "nouveau"
     "nvidia"

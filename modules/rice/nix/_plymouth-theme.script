@@ -1,58 +1,85 @@
 // Rice boot splash (D-044). Generated per theme by _plymouth-theme.nix:
 // Placeholders are replaced with theme colours (as "r, g, b" floats) and copy.
 // A sigil fades in through drifting fog, an ink ring fills with boot
-// progress, and passphrase/question prompts are drawn under the sigil.
+// progress (and drains while the machine shuts down or reboots), and
+// passphrase/question prompts are drawn under the sigil.
 
 Window.SetBackgroundTopColor(@bgTop@);
 Window.SetBackgroundBottomColor(@bgBottom@);
 
-W = Window.GetWidth();
-H = Window.GetHeight();
-unit = Math.Min(W, H);
 font = "@font@";
 ring_frames = @ringFrames@;
 
-// Sigil and its glow share one padded canvas, so they scale together.
-sigil_size = Math.Int(unit * 0.34);
-sigil_x = Math.Int(W / 2 - sigil_size / 2);
-sigil_y = Math.Int(H * 0.44 - sigil_size / 2);
-
-glow = Sprite(Image("glow.png").Scale(sigil_size, sigil_size));
-glow.SetPosition(sigil_x, sigil_y, 9);
-glow.SetOpacity(0);
-
-sigil = Sprite(Image("sigil.png").Scale(sigil_size, sigil_size));
-sigil.SetPosition(sigil_x, sigil_y, 10);
-sigil.SetOpacity(0);
-
-// Ink ring: pre-rendered frames, centred on the sigil. Between frames
-// the next segment (seep-i: ink from frame i to i + 1, no track) fades
-// in over the current frame, so the ink seeps instead of stepping.
-ring_size = Math.Int(sigil_size * 1.08);
+sigil_raw = Image("sigil.png");
+glow_raw = Image("glow.png");
+fog_raw = Image("fog.png");
+bullet_raw = Image("bullet.png");
 for (i = 0; i < ring_frames; i++)
-  ring_image[i] = Image("ring-" + i + ".png").Scale(ring_size, ring_size);
+  ring_raw[i] = Image("ring-" + i + ".png");
 for (i = 0; i < ring_frames - 1; i++)
-  seep_image[i] = Image("seep-" + i + ".png").Scale(ring_size, ring_size);
-ring_x = Math.Int(W / 2 - ring_size / 2);
-ring_y = Math.Int(sigil_y + sigil_size / 2 - ring_size / 2);
-ring = Sprite(ring_image[0]);
-ring.SetPosition(ring_x, ring_y, 8);
-ring.SetOpacity(0);
-seep = Sprite(seep_image[0]);
-seep.SetPosition(ring_x, ring_y, 8);
-seep.SetOpacity(0);
+  seep_raw[i] = Image("seep-" + i + ".png");
 
-// Two fog banks drifting against each other along the floor. Every move
-// repaints most of the screen in software, so they step together on
-// every fog_step-th tick rather than on alternating ticks.
-fog_image = Image("fog.png").Scale(Math.Int(W * 1.6), Math.Int(H * 0.55));
-fog_low = Sprite(fog_image);
-fog_low.SetPosition(Math.Int(-W * 0.3), Math.Int(H * 0.45), 5);
+glow = Sprite();
+sigil = Sprite();
+ring = Sprite();
+seep = Sprite();
+fog_low = Sprite();
+fog_high = Sprite();
+// Hidden until the refresh callback fades them in.
+glow.SetOpacity(0);
+sigil.SetOpacity(0);
+ring.SetOpacity(0);
+seep.SetOpacity(0);
 fog_low.SetOpacity(0);
-fog_high = Sprite(fog_image);
-fog_high.SetPosition(Math.Int(-W * 0.3), Math.Int(H * 0.32), 4);
 fog_high.SetOpacity(0);
-fog_step = 4;
+
+// Scale and place everything for the current window size. It runs again
+// whenever the size changes: when the real GPU driver replaces the
+// firmware framebuffer mid-splash, the canvas changes under the script.
+fun layout() {
+  global.W = Window.GetWidth();
+  global.H = Window.GetHeight();
+  global.unit = Math.Min(W, H);
+
+  // Sigil and its glow share one padded canvas, so they scale together.
+  global.sigil_size = Math.Int(unit * 0.34);
+  global.sigil_x = Math.Int(W / 2 - sigil_size / 2);
+  global.sigil_y = Math.Int(H * 0.44 - sigil_size / 2);
+  glow.SetImage(glow_raw.Scale(sigil_size, sigil_size));
+  glow.SetPosition(sigil_x, sigil_y, 9);
+  sigil.SetImage(sigil_raw.Scale(sigil_size, sigil_size));
+  sigil.SetPosition(sigil_x, sigil_y, 10);
+
+  // Ink ring: pre-rendered frames, centred on the sigil. Between frames
+  // the next segment (seep-i: ink from frame i to i + 1, no track) fades
+  // in over the current frame, so the ink seeps instead of stepping.
+  ring_size = Math.Int(sigil_size * 1.08);
+  for (i = 0; i < ring_frames; i++)
+    global.ring_image[i] = ring_raw[i].Scale(ring_size, ring_size);
+  for (i = 0; i < ring_frames - 1; i++)
+    global.seep_image[i] = seep_raw[i].Scale(ring_size, ring_size);
+  ring_x = Math.Int(W / 2 - ring_size / 2);
+  ring_y = Math.Int(sigil_y + sigil_size / 2 - ring_size / 2);
+  ring.SetImage(ring_image[frame]);
+  ring.SetPosition(ring_x, ring_y, 8);
+  seep.SetImage(seep_image[frame]);
+  seep.SetPosition(ring_x, ring_y, 8);
+
+  // Two fog banks drifting against each other along the floor. Every move
+  // repaints most of the screen in software, so they step together on
+  // every fog_step-th tick rather than on alternating ticks.
+  fog_image = fog_raw.Scale(Math.Int(W * 1.6), Math.Int(H * 0.55));
+  fog_low.SetImage(fog_image);
+  fog_low.SetY(Math.Int(H * 0.45));
+  fog_low.SetZ(5);
+  fog_high.SetImage(fog_image);
+  fog_high.SetY(Math.Int(H * 0.32));
+  fog_high.SetZ(4);
+
+  global.prompt_y = Math.Int(sigil_y + sigil_size + unit * 0.06);
+  global.bullet_size = Math.Max(Math.Int(unit * 0.014), 8);
+  global.bullet_image = bullet_raw.Scale(bullet_size, bullet_size);
+}
 
 global.tick = 0;
 global.progress = 0;
@@ -62,9 +89,23 @@ global.frame = 0;
 global.prompting = 0;
 global.now = 0;
 global.last = 0;
+fog_step = 4;
+
+// Shutdown and reboot report no progress, so the ink drains on the
+// script's own clock instead; it never empties, so a slow stop job
+// still reads as work in progress rather than a frozen screen.
+mode = Plymouth.GetMode();
+global.draining = (mode == "shutdown" || mode == "reboot");
+if (draining) {
+  global.shown = 1;
+  global.frame = ring_frames - 2;
+}
+layout();
 
 fun refresh_callback() {
   global.tick = tick + 1;
+  if (Window.GetWidth() != W || Window.GetHeight() != H)
+    layout();
   fade = Math.Min(tick / 120, 1);
   breath = Math.Sin(tick / 45);
 
@@ -89,7 +130,10 @@ fun refresh_callback() {
   // closes before the splash quits.
   dt = Math.Clamp(now - last, 0, 0.25);
   global.last = now;
-  global.shown = shown + Math.Clamp((target - shown) * 4 * dt, 0, 0.6 * dt);
+  if (draining)
+    global.shown = 1 / (1 + tick / 900);
+  else
+    global.shown = shown + Math.Clamp((target - shown) * 4 * dt, 0, 0.6 * dt);
   position = Math.Clamp(shown, 0, 1) * (ring_frames - 1);
   current = Math.Min(Math.Int(position), ring_frames - 2);
   if (current != frame) {
@@ -112,14 +156,10 @@ Plymouth.SetBootProgressFunction(boot_progress_callback);
 
 // ── Prompts ─────────────────────────────────────────────────
 // The theme's label sits above the real prompt text, never instead of it.
-prompt_y = Math.Int(sigil_y + sigil_size + unit * 0.06);
-
+// prompt_y and the bullet image come from layout().
 label_sprite = Sprite();
 prompt_sprite = Sprite();
 entry_sprite = Sprite();
-bullet_image = Image("bullet.png");
-bullet_size = Math.Max(Math.Int(unit * 0.014), 8);
-bullet_image = bullet_image.Scale(bullet_size, bullet_size);
 max_bullets = 32;
 
 fun place_centered(sprite, image, y) {
@@ -152,7 +192,9 @@ fun display_password_callback(prompt, bullets) {
   for (i = 0; i < max_bullets; i++) {
     // Function-level assignments are local in Plymouth script.
     if (!bullet_sprite[i])
-      global.bullet_sprite[i] = Sprite(bullet_image);
+      global.bullet_sprite[i] = Sprite();
+    // Set on every call: layout() rescales the image if the display changes.
+    bullet_sprite[i].SetImage(bullet_image);
     if (i < count) {
       bullet_sprite[i].SetPosition(Math.Int(W / 2 - row / 2 + i * (bullet_size + gap)), y, 20);
       bullet_sprite[i].SetOpacity(1);

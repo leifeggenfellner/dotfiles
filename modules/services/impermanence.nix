@@ -29,11 +29,15 @@ _: {
           "/var/lib/docker"
           "/var/lib/NetworkManager"
           "/var/lib/nixos"
+          # Plymouth's boot-duration: the progress estimate for the next boot.
+          "/var/lib/plymouth"
           "/var/lib/systemd/coredump"
           "/var/log"
 
           "/usr/systemd-placeholder"
         ];
+        # A stable machine-id keeps one journal across boots (`journalctl -b -1`).
+        files = [ "/etc/machine-id" ];
         users.leif = {
           directories = [
             "Documents"

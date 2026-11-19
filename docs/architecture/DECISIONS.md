@@ -780,6 +780,14 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   (or the typed answer); messages (fsck, notices) sit at the bottom in
   `fg.muted`. Themes without `integration.boot` keep the host's splash
   (`hardware-base` sets `nixos-bgrt` with `mkDefault`).
+- Layout and modes (amended 2026-11-19 after the first real boot): the
+  script lays out again whenever the window size changes, since a GPU
+  driver that loads mid-splash replaces the firmware framebuffer under it.
+  Hosts should still load their KMS driver in the initrd (shitbox: `i915`)
+  so the splash never changes display. Shutdown and reboot get no progress
+  from Plymouth, so there the ring starts full and drains on the script's
+  clock without ever emptying. Progress comes from
+  `/var/lib/plymouth/boot-duration`, which impermanent hosts persist.
 - Console: `console.colors` comes from `palette.legacy` for every rice theme
   (`_console-palette.nix`): 0 crust (background), 1–6 red/green/yellow/blue/
   mauve/teal, 7 subtext1 (default foreground), 8 overlay0, 9–14 the normal

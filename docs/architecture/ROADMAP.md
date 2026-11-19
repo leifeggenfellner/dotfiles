@@ -797,8 +797,14 @@ gray fog and its TTYs speak in parchment and umber.
   bullet per typed character, and unlocks with the typed passphrase; the
   console shows all 16 colours on the LOTM background; `rice-lint`,
   `nix flake check`, shitbox and stickytop builds.
-- Pending: a real boot on shitbox (stickytop has rice disabled, so it is
-  unchanged).
+- Real boot on shitbox (2026-11-19) showed three faults, now fixed: the
+  logo jumped up-left when `i915` loaded in stage 2 and replaced simpledrm
+  (now loaded in the initrd, and the script lays out again on resize); the
+  ring never finished because `boot-duration` lived on the wiped root (now
+  persisted); and the shutdown splash looked frozen (the ring now drains).
+  `/etc/machine-id` is persisted too, so `journalctl -b -1` reaches the
+  previous shutdown.
+- Pending: a second real boot and shutdown on shitbox with these fixes.
 
 ## Phase 32 — Workspace moods (Above the Gray Fog) ✅
 
