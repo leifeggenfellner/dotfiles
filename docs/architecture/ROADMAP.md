@@ -1131,8 +1131,23 @@ Concretized as D-061.
   and was recorded in `launcher.history`. Headless typing needs one
   `wtype` call for text and keys: each new virtual keyboard drops its
   first key.
-- Next: polkit authentication as a themed shell surface (replacing
-  `polkit-gnome`).
+
+## Phase 49 — Polkit prompt: A Seal of Authority ✅
+
+Concretized as D-062.
+
+- ✅ `services/polkit/PolkitState` (Quickshell `PolkitAgent`) and
+  `modules/polkit/PolkitPrompt`: real message, identity, action id and
+  PAM prompt under `widgets.polkit.settings` copy; retry feedback, shake,
+  Esc cancels.
+- ✅ Manifest validation for `widgets.polkit.settings` (closed keys,
+  strings, `sound` names a theme sound) with must-fail cases.
+- ✅ `polkit-gnome` stays defined but no longer autostarts on rice hosts.
+- Verified: `rice-lint`, manifest validation, shitbox build; headless
+  shell in the live session (polkit-gnome stopped for the run): a real
+  `CheckAuthorization` showed the prompt, a wrong password reached PAM
+  and showed the retry line, Escape cancelled and polkitd denied.
+- Pending: first use on the real desktop after a re-login.
 
 ## Later surfaces (slot in after Phase 6, order by appetite)
 
