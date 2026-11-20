@@ -25,6 +25,9 @@ import "../../services/monitor"
 // "rail" is flush to the top edge, with a nine-sliced body, a
 // recessed plaque behind each region and an end cap at each side.
 // A cap that stands in for a widget (power) hides that glance.
+// In the rail, settings.inset keeps the caps and plaques that far off
+// the rail's top and sides so its border shows, and settings.plaquePad
+// is the room inside each plaque around its region (D-071).
 
 PanelWindow {
     id: bar
@@ -37,6 +40,8 @@ PanelWindow {
     readonly property var frame: rail ? (settings.frame ?? ({})) : ({})
     readonly property var caps: rail ? (settings.caps ?? ({})) : ({})
     readonly property int outerMargin: rail ? 0 : Theme.metrics.bar.margin
+    readonly property int inset: rail ? (settings.inset ?? 0) : 0
+    readonly property int plaquePad: settings.plaquePad ?? Theme.metrics.space.sm
     readonly property var capWidgets: [caps.start, caps.end].filter(c => c && c.action === "power").map(() => "power")
 
     function regionModel(region) {
@@ -176,11 +181,23 @@ PanelWindow {
             }
         }
 
+        // Inside the frame's border: the inset on three sides, and the
+        // bottom rule kept clear of contents.
+        Item {
+            id: area
+            anchors.fill: parent
+            anchors.topMargin: bar.inset
+            anchors.leftMargin: bar.inset
+            anchors.rightMargin: bar.inset
+            anchors.bottomMargin: bar.rail ? bar.inset + Theme.metrics.space.xs : 0
+        }
+
         RailCap {
             id: startCap
             visible: bar.rail && bar.caps.start !== undefined
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: area.left
+            anchors.verticalCenter: area.verticalCenter
+            plateSize: area.height
             spec: bar.caps.start ?? ({})
             glow: bar.settings.glow ?? ({})
         }
@@ -188,18 +205,17 @@ PanelWindow {
         RailCap {
             id: endCap
             visible: bar.rail && bar.caps.end !== undefined
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: area.right
+            anchors.verticalCenter: area.verticalCenter
+            plateSize: area.height
             spec: bar.caps.end ?? ({})
             glow: bar.settings.glow ?? ({})
         }
 
         Item {
-            anchors.fill: parent
+            anchors.fill: area
             anchors.leftMargin: startCap.visible ? startCap.width + Theme.metrics.space.md : Theme.metrics.space.lg
             anchors.rightMargin: endCap.visible ? endCap.width + Theme.metrics.space.md : Theme.metrics.space.lg
-            // Keep the rail's bottom rule clear of contents.
-            anchors.bottomMargin: bar.rail ? Theme.metrics.space.xs : 0
 
             // Startup reveal (D-022): the frame above is present and
             // interactive immediately; only the contents fade in.
@@ -214,22 +230,25 @@ PanelWindow {
                 visible: bar.rail && target.width > 0
                 target: leftRow
                 piece: bar.frame.plaque ?? null
+                pad: bar.plaquePad
             }
             RailPlaque {
                 visible: bar.rail && target.width > 0
                 target: centerRow
                 piece: bar.frame.plaque ?? null
+                pad: bar.plaquePad
             }
             RailPlaque {
                 visible: bar.rail && target.width > 0
                 target: rightRow
                 piece: bar.frame.plaque ?? null
+                pad: bar.plaquePad
             }
 
             Row {
                 id: leftRow
                 anchors.left: parent.left
-                anchors.leftMargin: bar.rail ? Theme.metrics.space.sm : 0
+                anchors.leftMargin: bar.rail ? bar.plaquePad : 0
                 anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 spacing: Theme.metrics.bar.spacing
@@ -253,7 +272,7 @@ PanelWindow {
             Row {
                 id: rightRow
                 anchors.right: parent.right
-                anchors.rightMargin: bar.rail ? Theme.metrics.space.sm : 0
+                anchors.rightMargin: bar.rail ? bar.plaquePad : 0
                 anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 spacing: Theme.metrics.bar.spacing

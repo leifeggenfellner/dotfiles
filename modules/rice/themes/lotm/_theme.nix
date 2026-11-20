@@ -110,8 +110,9 @@ in
       };
       bar = {
         # The Brass Rail (D-063) is flush to the edge, so margin only
-        # spaces toasts and popouts below it.
-        height = 44;
+        # spaces toasts and popouts below it. 56 gives the plaques and
+        # caps room inside the rail's border (D-071).
+        height = 56;
         margin = 8;
         spacing = 12;
         opacity = 0.88;
@@ -329,8 +330,11 @@ in
       # the power seal closes the far end.
       bar.settings = {
         style = "rail";
+        # Room inside the rail's border, and inside each plaque (D-071).
+        inset = 5;
+        plaquePad = 12;
         frame = {
-          body = { src = "bar/rail.svg"; slice = [ 24 0 24 0 ]; };
+          body = { src = "bar/rail.svg"; slice = [ 24 1 24 10 ]; };
           plaque = { src = "bar/plaque.svg"; slice = [ 8 8 8 8 ]; };
           # Popouts hang from the rail as hinged plates (D-070).
           popout = { src = "bar/popout.svg"; slice = [ 22 16 22 18 ]; };

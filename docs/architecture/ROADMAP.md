@@ -1287,3 +1287,14 @@ Concretized as D-070. Completes #92 (`docs/design/bar-brass-rail.md`).
 - Verified headless (swing, flush placement, stretched-fade check);
   Cyberpunk's popout is unchanged; `rice-lint`, manifest validation and
   the shitbox build pass.
+
+## Phase 58 — The Brass Rail: breathing room ✅
+
+Concretized as D-071. Follow-up to #92 after live use.
+
+- ✅ `widgets.bar.settings.inset` and `plaquePad`, with three must-fail
+  cases.
+- ✅ LoTM: a 56 px rail, inset 5, plaque padding 12, and a rail slice
+  that keeps the rule's size.
+- Verified headless (LoTM render; Cyberpunk's bar unchanged);
+  `rice-lint`, manifest validation and the shitbox build pass.

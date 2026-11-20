@@ -28,7 +28,8 @@ Item {
             return ShellState.activePopout === "power";
         return false;
     }
-    readonly property int plateSize: Theme.metrics.bar.height - Theme.metrics.space.xs
+    // Set by the bar to fit its inset; the default fills the rail.
+    property int plateSize: Theme.metrics.bar.height - Theme.metrics.space.xs
 
     implicitWidth: Theme.metrics.bar.height + Theme.metrics.space.sm
     implicitHeight: Theme.metrics.bar.height

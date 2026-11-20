@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="44" viewBox="0 0 96 44">
-  <!-- Brass Rail body (D-063). Nine-sliced [24 0 24 0]; the middle
-       48 px repeats, so its ticks run the full width like a ruler. -->
+  <!-- Brass Rail body (D-063). Nine-sliced [24 1 24 10]; the middle
+       48 px repeats, so its ticks run the full width like a ruler, and
+       the bottom 10 px (ticks and rule) keep their size at any height
+       (D-071). -->
   <defs>
     <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#2a211a"/>

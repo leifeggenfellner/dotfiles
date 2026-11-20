@@ -1684,6 +1684,30 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   floating cards on a brass rail, and reduce-motion users lost every
   ceremonial moment to a jump.
 
+### D-071 — Breathing room on the rail: inset and plaque padding
+
+- Date: 2026-11-20 · Status: active · Extends D-063 · Brief:
+  `docs/design/bar-brass-rail.md` (#92, after live use)
+- The user's call after seeing the rail live: the caps touched the screen
+  edges, and the bezels and icons pressed against the plaques' bevels.
+- New `widgets.bar.settings` keys, rail only, closed and validated:
+  - `inset` (int, 0–16): keeps the caps and plaques that far off the
+    rail's top and sides, so the rail's border shows. The bottom keeps
+    the same inset plus `space.xs` above the rule. The caps size to fit
+    (`RailCap.plateSize` is now settable).
+  - `plaquePad` (int, 0–24, default `space.sm`): the room between a
+    plaque's bevel and its region. Plaques fill the height inside the
+    inset, so the vertical room is whatever the content leaves.
+- LoTM:
+  - `metrics.bar.height` goes from 44 to 56, with `inset = 5` and
+    `plaquePad = 12`.
+  - The rail body's slice becomes `[24 1 24 10]`, so the ticks and rule
+    along the bottom keep their size at any height.
+- The floating style is unchanged; Cyberpunk's bar renders the same as
+  before.
+- Why: the brass frame is the look, and it only reads when the border and
+  bevels have space around them.
+
 ---
 
 ## Legacy imports

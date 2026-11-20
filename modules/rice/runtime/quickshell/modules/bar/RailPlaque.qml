@@ -14,13 +14,14 @@ Item {
     // widgets.bar.settings.frame.plaque, or null
     property var piece: null
 
-    readonly property int pad: Theme.metrics.space.sm
+    // Room between the plaque's bevel and its region (D-071).
+    property int pad: Theme.metrics.space.sm
     readonly property var slice: piece ? piece.slice : [0, 0, 0, 0]
 
     x: target.x - pad
     width: target.width + pad * 2
     anchors.verticalCenter: parent.verticalCenter
-    height: parent.height - Theme.metrics.space.xs
+    height: parent.height
 
     BorderImage {
         visible: plaque.piece !== null

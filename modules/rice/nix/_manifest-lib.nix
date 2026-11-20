@@ -389,7 +389,11 @@ let
           else fail "${at}.glow.${key} must be a colour token ref, got ${builtins.toJSON v}";
       in
       [
-        (checkClosed at [ "style" "frame" "caps" "glow" ] s)
+        (checkClosed at [ "style" "frame" "caps" "glow" "inset" "plaquePad" ] s)
+        (if !(s ? inset) || (builtins.isInt s.inset && s.inset >= 0 && s.inset <= 16) then true
+        else fail "${at}.inset must be an int from 0 to 16")
+        (if !(s ? plaquePad) || (builtins.isInt s.plaquePad && s.plaquePad >= 0 && s.plaquePad <= 24) then true
+        else fail "${at}.plaquePad must be an int from 0 to 24")
         (if builtins.elem (s.style or "floating") [ "floating" "rail" ] then true
         else fail "${at}.style must be floating or rail")
       ]

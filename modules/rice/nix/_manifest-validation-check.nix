@@ -257,6 +257,10 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "caps" "end" "plate" ] "bar/missing.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "caps" "middle" ] { action = "power"; } lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "glow" "hover" ] "#ffaa00" lotm))
+    # Rail inset and plaque padding (D-071).
+    (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "inset" ] (-1) lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "inset" ] "4" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "plaquePad" ] 40 lotm))
     # Hinged popout plate (D-070).
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "frame" "popout" "src" ] "bar/missing.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "frame" "popout" "hinge" ] true lotm))
