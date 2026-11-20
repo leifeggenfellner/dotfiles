@@ -35,46 +35,78 @@ Keep the current screen: the Fool sigil, the glow, the fog and the
 
 ## 2. Ascent to Sefirah Castle: the boot animation
 
-After the passphrase is accepted, the camera rises through the grey fog until
-Sefirah Castle comes into view above it, an ancient stone castle floating on
-the fog.
+After the passphrase is accepted, you rise through the grey fog to Sefirah
+Castle: the ancient palace above the boundless fog, with a vast dome on
+towering stone pillars, where the Tarot Club meets.
 
-- **Plymouth part:** the sigil and prompt fade out. Three or four fog banks
-  slide down past the viewer at different speeds (parallax), which reads as
-  rising. The castle silhouette comes down into frame from the top and
-  settles in the upper third with a faint glow behind it.
+- **The rise, in Plymouth:** the sigil and prompt fade out. The grey fog
+  parts into a slow vortex, with fog banks sliding down past the viewer at
+  different speeds (parallax), which reads as rising. Crimson stars hang in
+  the fog, the points that tie the castle to people in the world. At the
+  vortex's end the palace appears: a pale silhouette of towers and a central
+  spire, lit from within.
+- **Arrival, the last frame:** the palace hall seen down its length. Two
+  rows of stone pillars run toward the dome, with fog pooling on the floor.
+  The long bronze table sits in the middle, ten high-backed chairs on each
+  side, and the seat at the head is empty. Each chair back glows faintly
+  crimson with the outline of a strange constellation. Far behind the
+  table, at the end of the hall, there is a faint hint of the door of light.
+  It is only a pale glow, never the cocoons.
 - **Constraint:** Plymouth's script renderer repaints in software. Moving
-  fog already stretches its ticks, so the ascent uses few, pre-scaled
-  layers that move in steps. Layers are generated at rebuild time, like
-  today's fog and ring.
+  fog already stretches its ticks, so the rise uses a few pre-scaled layers
+  that move in steps. The arrival is a still frame, and only the chair
+  constellations "breathe" in opacity. Every layer is generated at rebuild
+  time, like today's fog and ring.
 - **Timing:** after unlock only a few seconds of boot remain, and how many
-  varies. The ascent is driven by boot progress after unlock, rescaled to
-  0–1, so it always arrives at the castle before Plymouth quits. On a fast
-  boot it arrives quickly; it never stops halfway.
+  varies. The rise is driven by boot progress after unlock, rescaled to
+  0–1, so it always reaches the hall before Plymouth quits. On a fast boot
+  it arrives quickly, and it never stops halfway.
 - **Hand-off to the shell:** greetd logs straight into Hyprland, and the
   session awakening (D-053) opens veiled in fog. With this phase, the
-  awakening's first frame is the same castle-in-fog view as the splash's last
-  frame. The fog then lifts onto the desktop, so boot reads as one continuous
-  ascent.
+  awakening's first frame is the same hall as the splash's last frame. The
+  fog then rises and the hall dissolves into the desktop, as if you take
+  the seat at the head of the table. Boot reads as one continuous ascent.
 - **Theme data:** `integration.boot` gains an optional `ascent = { landmark;
-  layers?; }`. `landmark` is the castle SVG. The fog layers default to
-  generated fog. Themes without `ascent` keep the static splash. This needs
-  closed-key validation with must-fail cases.
-- **Art:** a castle silhouette in a lithograph or engraving style: towers,
-  arched windows, and the long hall where the Tarot Club meets, lit from
-  within in `accent.primary`. It is drawn as a single SVG in the repo and
-  recoloured at build, like the sigil.
+  hall?; }`. `landmark` is the palace silhouette SVG and `hall` is the
+  arrival scene. The fog defaults to generated fog. Themes without `ascent`
+  keep the static splash. This needs closed-key validation with must-fail
+  cases.
+- **Art:** original SVGs in an engraving style, recoloured at build like
+  the sigil. The palette is the fog's grey, pale stone, bronze for the
+  table, and crimson only for the stars and the constellations. The
+  reference images are for mood only; nothing is traced or copied.
 
 ## 3. Chanis Gate: the lockscreen
 
-Locking closes Chanis Gate, the sealed gate under Saint Selena Cathedral that
-the Nighthawks guard. The video background is replaced by a drawn scene.
+Locking closes Chanis Gate. It is named for Archbishop Chanis, who founded
+the modern Nighthawks, and it stands under the central Evernight cathedral
+of every major city. Behind it lie the sealed artifacts, the Keepers and
+the core seal. The video background is replaced by a drawn scene.
 
-- **At rest:** the screen shows the gate's two heavy black iron leaves, set
-  in a stone arch. They carry the Evernight emblem (the crimson moon and
-  stars) in engraved gilt. Candle sconces stand on each side. The passphrase
-  field sits at the seal where the leaves meet. The clock and user name are
-  carved into the lintel.
+- **At rest:** you look up at the gate from the crypt floor, the way the
+  Nighthawks see it.
+  - **The gate:** a black iron split gate, heavy, cold and domineering,
+    "like a giant guarding in the darkness." Its two leaves carry the seven
+    sacred emblems, engraved and filled with dull gilt, with gothic pointed
+    panels below them.
+  - **The setting:** a pointed stone arch thick with carved tracery, under
+    a ribbed vault that disappears into the dark overhead.
+  - **Palette:** cold iron and stone in deep verdigris and teal shadow,
+    taken from the theme's fog and sunken tokens. Gilt appears only in the
+    emblems and the seal, and the warm candle light is the only warmth.
+  - **Interface:** the passphrase field sits at the seal where the leaves
+    meet. The clock and user name are carved into the lintel. Candle
+    sconces stand on each side.
+- **Strongest at night:** the gate's power grows after dark. Using the
+  local time (and the sky service's sunset where it knows it), the scene
+  turns colder and darker in the evening. The emblems take on a faint
+  glow, and the candles are guttered low by night. Nothing animates for
+  this; the scene simply picks a day or a night set of layers when the lock
+  opens.
+- **Prayers keep it closed:** the gate siphons a little of the
+  worshippers' spirituality to keep its seals. The passphrase is your
+  prayer: each typed character lights one of the seven emblems in turn,
+  and a wrong passphrase drains them all at once.
 - **Motion budget:** candle flames flicker. Moonlight sweeps slowly across
   the leaves, about once a minute. These are the only things that move.
   - Everything stops after about 30 s of no input, then resumes on input.
@@ -83,7 +115,8 @@ the Nighthawks guard. The video background is replaced by a drawn scene.
 - **Unlock:** the seal turns, the bars draw back, and the leaves swing
   inward and open (about 600 ms on `Motion`). The session is released as
   they part. If unlock takes too long, the session is released anyway.
-- **Wrong passphrase:** the seal flares red and the bars rattle once.
+- **Wrong passphrase:** the emblems go dark, the seal flares red, and the
+  bars rattle once.
 - **Cost:** a handful of static images plus two small animated items at low
   frame rates. There is no video decoder per monitor, and no work at all once
   it goes idle. Today the video keeps decoding on all three monitors for the
