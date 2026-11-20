@@ -16,6 +16,11 @@ import "../../services/hypr"
 // the ambient governor off it does not turn: the cards take their new
 // places at once and the drum cross-fades.
 //
+// With `carousel.capture` set, each visible card shows its workspace
+// in miniature from single-frame window captures (D-068). Geometry is
+// re-read when the carousel opens and when windows come or go; a card
+// that leaves view drops its captures, and closing drops them all.
+//
 // Click a card to switch to it; scroll or ←/→ to turn; Enter switches
 // to the front card; Esc closes. Only a deliberate open (reason
 // "keys") takes the keyboard; opened by the pointer it gets focus when
@@ -33,6 +38,7 @@ PanelWindow {
     readonly property bool open: ShellState.carouselScreen === carousel.screen.name
     readonly property int frontIndex: Math.max(0, items.findIndex(i => i.id === ShellState.carouselWorkspace))
     readonly property bool turning: Motion.enabled && ShellState.ambientActive
+    readonly property bool captures: (style.capture ?? null) !== null
 
     readonly property int cardWidth: 320
     readonly property int cardHeight: 200
@@ -53,6 +59,16 @@ PanelWindow {
     }
 
     visible: open || drum.opacity > 0.01
+
+    Component.onCompleted: if (captures)
+        HyprState.refreshWindows()
+
+    Connections {
+        target: carousel.captures ? HyprState : null
+        function onWorkspaceWindowsChanged() {
+            HyprState.refreshWindows();
+        }
+    }
 
     WlrLayershell.namespace: "rice-carousel"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -176,6 +192,7 @@ PanelWindow {
                         entry: modelData
                         windows: HyprState.workspaceWindows[modelData.id] ?? 0
                         apps: windows > 0 ? HyprState.workspaceApps(modelData.id) : []
+                        layout: carousel.captures && visible && windows > 0 ? HyprState.workspaceLayout(modelData.id) : null
                         style: carousel.style
                         front: distance < 0.5
 

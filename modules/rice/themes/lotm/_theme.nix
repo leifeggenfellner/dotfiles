@@ -752,6 +752,8 @@ in
           card = { src = "bar/card.svg"; slice = [ 24 24 24 24 ]; };
           nameplate = { src = "bar/nameplate.svg"; slice = [ 14 8 14 8 ]; };
           copy = { none = "Unclaimed"; one = "1 window"; many = "{n} windows"; };
+          # Window captures (D-068), washed to sepia in the brass gold.
+          capture = { tint = "accent.primary"; strength = 0.4; };
         };
       };
     };

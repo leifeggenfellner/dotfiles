@@ -283,6 +283,11 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "card" ] "bar/card.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "copy" "few" ] "{n} windows" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "copy" "many" ] 3 lotm))
+    # Carousel captures (D-068).
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "capture" "live" ] true lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "capture" "tint" ] "#704214" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "capture" "strength" ] 1.5 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "capture" ] true lotm))
     # Browser new-tab page (D-060).
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "title" ] 42 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "epigraphs" ] "widgets.epigraph.settings.missing" lotm))

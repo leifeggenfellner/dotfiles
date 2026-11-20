@@ -1244,3 +1244,17 @@ Concretized as D-067. Part of #92 (`docs/design/bar-brass-rail.md`).
 - Not yet seen on Hyprland: hover hit-testing on the strip, real
   scrolling, Esc and clicks (headless sway gave no pointer), and real
   app icons.
+
+## Phase 55 — The Brass Rail, phase 4c: captures on the cards ✅
+
+Concretized as D-068. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ Each visible card shows its workspace in miniature, from one-frame
+  window captures placed by Hyprland's geometry and tinted by the theme.
+- ✅ The fallback chain is capture, then app icons, then the sigil alone.
+- ✅ `HyprState.refreshWindows()` and `workspaceLayout(id)`.
+- ✅ `carousel.capture` validation with four must-fail cases; LoTM tints
+  in the brass gold.
+- Verified: `rice-lint`, manifest validation and the shitbox build pass.
+  A carousel-only harness on the live Hyprland session showed real
+  captures of windows on inactive workspaces.

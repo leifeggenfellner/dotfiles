@@ -1,18 +1,24 @@
 import QtQuick
 import QtQuick.Effects
+import Quickshell.Wayland
 import "../../core"
 import "../../services/apps"
 
 // ── CarouselCard ──────────────────────────────────────────────
 // One card plate on the carousel drum (D-067). In front, the
-// workspace's sigil with a glow in its colour; behind it, the app
-// icons of its windows, or an ink fog in its colour when it has none
-// (captures replace the icons in phase 4c); along the bottom, a
-// nameplate with the workspace label and its window count.
+// workspace's sigil with a glow in its colour; behind it, a miniature
+// of the workspace built from one capture per window (D-068), tinted
+// and dimmed. Until a capture arrives, or without `layout`, the app
+// icons of its windows stand in; with no windows, an ink fog in its
+// colour. Along the bottom, a nameplate with the workspace label and
+// its window count.
 //
+// Captures are single frames (`live: false`), taken when the card is
+// built: a hidden window's frame is the last one it drew (D-066).
 //   entry    a widgets.workspaces.settings.items entry
 //   windows  its window count (HyprState.workspaceWindows)
 //   apps     app ids of its windows (HyprState.workspaceApps)
+//   layout   HyprState.workspaceLayout(id), or null for no captures
 //   style    widgets.workspaces.settings.carousel
 //   front    the card the drum faces
 
@@ -22,6 +28,7 @@ Item {
     required property var entry
     required property int windows
     required property var apps
+    property var layout: null
     property var style: ({})
     property bool front: false
 
@@ -36,6 +43,7 @@ Item {
         return (copy.many ?? "{n} windows").replace("{n}", windows);
     }
     readonly property int inset: Theme.metrics.space.md
+    readonly property var capture: style.capture ?? ({})
 
     component Plate: Item {
         id: plate
@@ -94,9 +102,66 @@ Item {
             }
         }
 
-        // Occupied: its windows' app icons, sitting back.
+        // Occupied: the workspace in miniature, fitted to the face.
+        Item {
+            id: miniature
+
+            readonly property var layout: card.windows > 0 ? card.layout : null
+            readonly property real k: layout ? Math.min(face.width / layout.width, face.height / layout.height) : 0
+            property int captured: 0
+            readonly property bool shown: captured > 0
+
+            anchors.centerIn: parent
+            width: layout ? layout.width * k : 0
+            height: layout ? layout.height * k : 0
+            visible: shown
+
+            layer.enabled: shown
+            layer.effect: MultiEffect {
+                saturation: -0.5
+                colorization: card.capture.strength ?? 0.4
+                colorizationColor: Effects.colorRef(card.capture.tint ?? "accent.primary")
+                brightness: -0.1
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: Theme.metrics.radius.small
+                color: Theme.colors.bg.sunken
+                border.width: 1
+                border.color: Theme.colors.bg.surface1
+            }
+
+            // Windows stack among themselves (z may be negative), above
+            // the backdrop.
+            Item {
+                anchors.fill: parent
+
+                Repeater {
+                    model: miniature.layout ? miniature.layout.windows : []
+
+                    delegate: ScreencopyView {
+                        required property var modelData
+
+                        x: modelData.x * miniature.k
+                        y: modelData.y * miniature.k
+                        z: modelData.z
+                        width: modelData.width * miniature.k
+                        height: modelData.height * miniature.k
+                        captureSource: modelData.source
+                        live: false
+
+                        onHasContentChanged: miniature.captured += hasContent ? 1 : -1
+                        Component.onDestruction: if (hasContent)
+                            miniature.captured--
+                    }
+                }
+            }
+        }
+
+        // Until a capture arrives: its windows' app icons, sitting back.
         Row {
-            visible: card.windows > 0
+            visible: card.windows > 0 && !miniature.shown
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             spacing: Theme.metrics.space.sm
@@ -141,7 +206,7 @@ Item {
             readonly property int size: Math.min(72, face.height - 28)
 
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
+            y: miniature.shown ? (face.height - size) / 2 : face.height - size
             width: size
             height: size
 

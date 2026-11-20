@@ -15,10 +15,14 @@ import Quickshell.Wayland
 //             anyFullscreen, monitorsRevision,
 //             workspaceWindows ({ id: window count }, only workspaces
 //             that exist), urgentWorkspaces ({ id: true }),
-//             workspaceApps(id) (app ids of its windows, in order)
+//             workspaceApps(id) (app ids of its windows, in order),
+//             workspaceLayout(id) (its windows placed on its monitor,
+//             for a miniature; null when unknown)
 //   events:   workspaceSwitched(screenName, id) — a screen that already
 //             showed a workspace moved to another (not the first report)
-//   commands: switchWorkspace(id), moveFocusedWindow(id)
+//   commands: switchWorkspace(id), moveFocusedWindow(id),
+//             refreshWindows() (re-reads window geometry; Hyprland only
+//             pushes it on request)
 //
 // Focused output is exposed by NAME (matches ShellScreen.name);
 // HyprlandMonitor.screen is not reliable on this Quickshell version.
@@ -63,6 +67,47 @@ Item {
         });
         if (known)
             hypr.workspaceSwitched(screenName, workspaceId);
+    }
+
+    function refreshWindows() {
+        Hyprland.refreshMonitors();
+        Hyprland.refreshToplevels();
+    }
+
+    // { width, height, windows: [{ source, x, y, width, height, z }] } in
+    // the monitor's logical pixels, `source` being the Wayland toplevel
+    // (for ScreencopyView) and a higher z drawn on top. Geometry comes
+    // from the last refreshWindows(); Hyprland reports it in global
+    // layout coordinates, so the monitor's position is taken off.
+    function workspaceLayout(id) {
+        const ws = Hyprland.workspaces.values.find(w => w.id === id);
+        const mon = ws?.monitor ?? null;
+        if (!mon || mon.width <= 0 || mon.height <= 0)
+            return null;
+        const scale = mon.scale > 0 ? mon.scale : 1;
+        const turned = (mon.lastIpcObject?.transform ?? 0) % 2 === 1;
+        const width = (turned ? mon.height : mon.width) / scale;
+        const height = (turned ? mon.width : mon.height) / scale;
+        const windows = [];
+        for (const t of ws.toplevels.values) {
+            const ipc = t.lastIpcObject ?? {};
+            if (!t.wayland || !ipc.at || !ipc.size || ipc.hidden)
+                continue;
+            windows.push({
+                source: t.wayland,
+                x: ipc.at[0] - mon.x,
+                y: ipc.at[1] - mon.y,
+                width: ipc.size[0],
+                height: ipc.size[1],
+                // focusHistoryID 0 is the most recently focused.
+                z: -(ipc.focusHistoryID ?? 0)
+            });
+        }
+        return {
+            width: width,
+            height: height,
+            windows: windows
+        };
     }
 
     // Wayland app ids, falling back to Hyprland's class until the

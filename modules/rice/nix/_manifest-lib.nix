@@ -308,7 +308,8 @@ let
     )
     ++ lib.optionals ((theme.widgets.workspaces.settings.carousel or null) != null) (
       # Workspace carousel (D-067): nine-sliced card and nameplate pieces
-      # under assets/, and the window-count copy ({n} is the count).
+      # under assets/, the window-count copy ({n} is the count) and, from
+      # D-068, window captures.
       let
         at = "widgets.workspaces.settings.carousel";
         s = theme.widgets.workspaces.settings.carousel;
@@ -323,13 +324,25 @@ let
             else true
           );
       in
-      [ (checkClosed at [ "card" "nameplate" "copy" ] s) ]
+      [ (checkClosed at [ "card" "nameplate" "copy" "capture" ] s) ]
       ++ lib.optional (s ? card) (piece "card" s.card)
       ++ lib.optional (s ? nameplate) (piece "nameplate" s.nameplate)
       ++ lib.optionals (s ? copy) (
         [ (checkClosed "${at}.copy" [ "none" "one" "many" ] s.copy) ]
         ++ lib.mapAttrsToList (k: v: if builtins.isString v then true else fail "${at}.copy.${k} must be a string") s.copy
       )
+      # Window captures (D-068): present turns them on; the tint is a
+      # colour token ref and strength how far it colours them.
+      ++ lib.optionals (s ? capture) [
+        (if builtins.isAttrs s.capture then checkClosed "${at}.capture" [ "tint" "strength" ] s.capture
+        else fail "${at}.capture must be { tint?; strength?; }")
+        (if !(s.capture ? tint) || (builtins.isString s.capture.tint
+          && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" s.capture.tint != null) then true
+        else fail "${at}.capture.tint must be a colour token ref")
+        (if !(s.capture ? strength) || ((builtins.isFloat s.capture.strength || builtins.isInt s.capture.strength)
+          && s.capture.strength >= 0 && s.capture.strength <= 1) then true
+        else fail "${at}.capture.strength must be a number from 0 to 1")
+      ]
     )
     ++ lib.optionals ((theme.widgets.clock.settings or null) != null) (
       let

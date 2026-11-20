@@ -1,6 +1,6 @@
 # The Brass Rail: taskbar redesign brief
 
-Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, the phase 4a capture spike as D-066, and the phase 4b drum as D-067. Tracked in issue #92. When a phase lands, its decision goes into
+Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, the phase 4a capture spike as D-066, the phase 4b drum as D-067, and the phase 4c captures as D-068. Tracked in issue #92. When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 
 ## Why
@@ -230,7 +230,7 @@ Each phase ships on its own and gets its own D-number.
 4. **Workspace carousel.**
    - 4a: capture spike.
    - 4b: drum and cards with the icon fallback (D-067).
-   - 4c: captures (no shell-side cache; see D-066).
+   - 4c: captures (no shell-side cache; see D-066), landed as D-068.
 5. **Hinged-plate popouts and polish.** Frames, swing motion, and a
    reduced-motion pass.
 

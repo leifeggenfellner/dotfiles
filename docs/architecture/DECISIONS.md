@@ -1567,6 +1567,42 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the brief's signature moment. Workspaces had names and sigils
   but nothing showed what was on them before you went there.
 
+### D-068 — Carousel cards show their workspace, captured
+
+- Date: 2026-11-20 · Status: active · Extends D-066, D-067 · Brief:
+  `docs/design/bar-brass-rail.md` (#92, phase 4c)
+- With `widgets.workspaces.settings.carousel.capture = { tint?; strength?;
+  }` (closed, validated), each visible card shows its workspace in
+  miniature behind the sigil:
+  - Each window is a `ScreencopyView` with `live: false`: one frame, never
+    a stream.
+  - Windows are placed by Hyprland's geometry on the workspace's monitor,
+    the most recently focused on top.
+  - The miniature is washed with the `tint` token at `strength` (default
+    `accent.primary` at 0.4), desaturated by half and slightly dimmed.
+  - The sigil moves to the middle of the miniature.
+- Fallback chain, as D-066 set it: the capture, then app icons until a
+  frame arrives (or with no `capture`), then the sigil alone. A workspace
+  with no windows still shows its ink fog.
+- `HyprState`:
+  - `refreshWindows()` re-reads monitor and window geometry. The
+    carousel calls it when it opens and whenever window counts change.
+  - `workspaceLayout(id)` gives the windows in the monitor's logical
+    pixels, with the monitor offset taken off and scale and rotation
+    accounted for.
+- Memory: only cards in view hold captures (each a full-size buffer), and
+  closing the carousel unloads its surface and releases them all.
+- LoTM: `capture = { tint = "accent.primary"; strength = 0.4; }`, a
+  sepia wash in the brass gold.
+- Verified on the live Hyprland session with a harness that ran only the
+  carousel from a scratch copy, so the user's shell was untouched. Zen,
+  Slack with Vesktop, and two terminals on inactive workspaces all
+  showed real content.
+- Gotcha: a negative `z` puts an item below its siblings, so a window
+  stack with negative z needs its own container above the backdrop.
+- Why: the brief's card face. The sigil says which workspace it is; the
+  capture shows what is on it.
+
 ---
 
 ## Legacy imports
