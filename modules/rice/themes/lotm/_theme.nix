@@ -747,6 +747,12 @@ in
           needle = "bar/needle.svg";
           urgent = "accent.tertiary";
         };
+        # Workspace carousel (D-067): tarot plates on a brass drum.
+        carousel = {
+          card = { src = "bar/card.svg"; slice = [ 24 24 24 24 ]; };
+          nameplate = { src = "bar/nameplate.svg"; slice = [ 14 8 14 8 ]; };
+          copy = { none = "Unclaimed"; one = "1 window"; many = "{n} windows"; };
+        };
       };
     };
 

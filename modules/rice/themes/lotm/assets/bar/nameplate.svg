@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="32" viewBox="0 0 64 32">
+  <!-- Carousel nameplate (D-067). Nine-sliced [14 8 14 8]: a dark iron
+       plate in a brass bevel, held by a rivet at each end, so parchment
+       lettering stays legible on it. -->
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0705"/>
+      <stop offset="1" stop-color="#18110a"/>
+    </linearGradient>
+    <radialGradient id="rivet" cx="0.35" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#f0cf7e"/>
+      <stop offset="0.6" stop-color="#b8892f"/>
+      <stop offset="1" stop-color="#5e4318"/>
+    </radialGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="63" height="31" rx="4" fill="url(#plate)" stroke="#7a5a22"/>
+  <path d="M1.5 27 Q1.5 30.5 5 30.5 H59 Q62.5 30.5 62.5 27 V5" fill="none" stroke="#c79a3a" stroke-opacity="0.8"/>
+  <circle cx="7" cy="16" r="2.2" fill="url(#rivet)"/>
+  <circle cx="57" cy="16" r="2.2" fill="url(#rivet)"/>
+</svg>

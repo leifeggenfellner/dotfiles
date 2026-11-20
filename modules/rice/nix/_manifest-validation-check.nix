@@ -276,6 +276,13 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "plate" ] "bar/missing.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "needle" ] 3 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "urgent" ] "#8a3b3b" lotm))
+    # Workspace carousel (D-067).
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "tilt" ] 35 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "card" "src" ] "bar/missing.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "nameplate" "slice" ] [ 8 8 8 ] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "card" ] "bar/card.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "copy" "few" ] "{n} windows" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "carousel" "copy" "many" ] 3 lotm))
     # Browser new-tab page (D-060).
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "title" ] 42 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "epigraphs" ] "widgets.epigraph.settings.missing" lotm))

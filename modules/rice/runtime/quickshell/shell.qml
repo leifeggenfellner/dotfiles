@@ -21,6 +21,7 @@ import "./modules/awakening"
 import "./modules/dailyAccent"
 import "./modules/newtab"
 import "./modules/polkit"
+import "./modules/workspaceCarousel"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -61,6 +62,8 @@ ShellRoot {
     DailyAccentController {}
 
     NewtabFeed {}
+
+    CarouselController {}
 
     Variants {
         model: Quickshell.screens
@@ -134,6 +137,17 @@ ShellRoot {
             requested: ShellState.activePopout.length > 0
             sourceComponent: BarPopout {
                 modelData: popoutLoader.modelData
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        SurfaceLoader {
+            id: carouselLoader
+            requested: ShellState.carouselScreen === modelData.name
+            sourceComponent: WorkspaceCarousel {
+                modelData: carouselLoader.modelData
             }
         }
     }

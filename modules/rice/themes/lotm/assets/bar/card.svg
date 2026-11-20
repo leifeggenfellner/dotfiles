@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="96" height="96" viewBox="0 0 96 96">
+  <!-- Carousel card plate (D-067). Nine-sliced [24 24 24 24]: a tarot
+       plate in dark umber inside a double brass rule, with an engraved
+       lozenge and quarter arc in each corner. Edges are straight runs so
+       they stretch cleanly. -->
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c140c"/>
+      <stop offset="1" stop-color="#100b06"/>
+    </linearGradient>
+    <g id="corner" fill="none" stroke="#c79a3a">
+      <path d="M8 22 A14 14 0 0 1 22 8" stroke-opacity="0.7"/>
+      <path d="M12 8 L14.5 10.5 L12 13 L9.5 10.5 Z" transform="translate(-1.5 -1.5)" fill="#c79a3a" stroke="none"/>
+    </g>
+  </defs>
+  <rect x="1" y="1" width="94" height="94" rx="6" fill="url(#body)" fill-opacity="0.97"/>
+  <rect x="1.5" y="1.5" width="93" height="93" rx="5.5" fill="none" stroke="#7a5a22" stroke-width="1.5"/>
+  <rect x="5.5" y="5.5" width="85" height="85" rx="3" fill="none" stroke="#c79a3a" stroke-opacity="0.85"/>
+  <path d="M6.5 89.5 H89.5 V6.5" fill="none" stroke="#e8c06a" stroke-opacity="0.25"/>
+  <use xlink:href="#corner"/>
+  <use xlink:href="#corner" transform="translate(96 0) scale(-1 1)"/>
+  <use xlink:href="#corner" transform="translate(0 96) scale(1 -1)"/>
+  <use xlink:href="#corner" transform="translate(96 96) scale(-1 -1)"/>
+</svg>

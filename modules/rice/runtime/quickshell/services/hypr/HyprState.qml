@@ -14,7 +14,10 @@ import Quickshell.Wayland
 //             activeWorkspaceNames ({ screenName: workspace name }),
 //             anyFullscreen, monitorsRevision,
 //             workspaceWindows ({ id: window count }, only workspaces
-//             that exist), urgentWorkspaces ({ id: true })
+//             that exist), urgentWorkspaces ({ id: true }),
+//             workspaceApps(id) (app ids of its windows, in order)
+//   events:   workspaceSwitched(screenName, id) — a screen that already
+//             showed a workspace moved to another (not the first report)
 //   commands: switchWorkspace(id), moveFocusedWindow(id)
 //
 // Focused output is exposed by NAME (matches ShellScreen.name);
@@ -45,6 +48,8 @@ Item {
     property var workspaceWindows: ({})
     property var urgentWorkspaces: ({})
 
+    signal workspaceSwitched(string screenName, int workspaceId)
+
     function activeWorkspaceForScreen(screenName) {
         return hypr._activeWorkspaces[screenName] ?? Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1;
     }
@@ -52,9 +57,21 @@ Item {
     function _setActiveWorkspace(screenName, workspaceId) {
         if (!screenName || hypr._activeWorkspaces[screenName] === workspaceId)
             return;
+        const known = screenName in hypr._activeWorkspaces;
         hypr._activeWorkspaces = Object.assign({}, hypr._activeWorkspaces, {
             [screenName]: workspaceId
         });
+        if (known)
+            hypr.workspaceSwitched(screenName, workspaceId);
+    }
+
+    // Wayland app ids, falling back to Hyprland's class until the
+    // toplevel's Wayland handle binds.
+    function workspaceApps(id) {
+        const ws = Hyprland.workspaces.values.find(w => w.id === id);
+        if (!ws)
+            return [];
+        return ws.toplevels.values.map(t => t.wayland?.appId ?? t.lastIpcObject?.class ?? "").filter(a => a.length > 0);
     }
 
     function _setActiveWorkspaceName(screenName, name) {

@@ -10,7 +10,8 @@ import "../../utils"
 // to DesktopEntries' model details.
 //
 //   state:    available, apps, error
-//   commands: search(query, limit, boosts?), findApp(match), rowForApp(app), launch(app)
+//   commands: search(query, limit, boosts?), findApp(match), rowForApp(app), launch(app),
+//             iconFor(appId) (an image url for a window's app id, or "")
 
 Item {
     id: appsState
@@ -91,6 +92,14 @@ Item {
         }
         result.sort((a, b) => String(a.name).localeCompare(String(b.name)));
         return result;
+    }
+
+    function iconFor(appId) {
+        if (!appId)
+            return "";
+        const entry = DesktopEntries.heuristicLookup(appId);
+        const raw = Quickshell.iconPath(entry && entry.icon ? entry.icon : appId, true);
+        return raw && raw.startsWith("/") ? "file://" + raw : (raw ?? "");
     }
 
     function _fields(app) {

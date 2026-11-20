@@ -1220,3 +1220,27 @@ Concretized as D-066. Part of #92 (`docs/design/bar-brass-rail.md`).
   and full-resolution buffers.
 - Verified on the live Hyprland session with a throwaway Quickshell
   config (not in the repo). Nothing in the runtime changed.
+
+## Phase 54 — The Brass Rail, phase 4b: the carousel drum ✅
+
+Concretized as D-067. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ `modules/workspaceCarousel`: a controller, a surface per screen and
+  the card.
+- ✅ Opens on a switch, on hover and on scroll, or deliberately over IPC.
+  Click, Enter or ←/→ to choose or turn, and Esc to close.
+- ✅ The drum turns on `instrumentSettle` and cross-fades under reduced
+  motion or the governor.
+- ✅ Cards show the sigil, app icons or an ink fog, and a nameplate.
+- ✅ `widgets.workspaces.settings.carousel` validation with six must-fail
+  cases; LoTM card and nameplate SVGs.
+- Verified:
+  - `rice-lint`, manifest validation and the shitbox build pass.
+  - Headless sway with faked window state (scratch copy only) showed the
+    drum, the turn and the anchoring.
+  - The controller's open, follow, dismiss and choose paths passed over
+    test-only IPC.
+  - Cyberpunk is pixel-identical, and its carousel stays off.
+- Not yet seen on Hyprland: hover hit-testing on the strip, real
+  scrolling, Esc and clicks (headless sway gave no pointer), and real
+  app icons.

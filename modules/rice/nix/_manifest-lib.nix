@@ -306,6 +306,31 @@ let
         && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" s.urgent != null))
         (fail "${at}.urgent must be a colour token ref")
     )
+    ++ lib.optionals ((theme.widgets.workspaces.settings.carousel or null) != null) (
+      # Workspace carousel (D-067): nine-sliced card and nameplate pieces
+      # under assets/, and the window-count copy ({n} is the count).
+      let
+        at = "widgets.workspaces.settings.carousel";
+        s = theme.widgets.workspaces.settings.carousel;
+        piece = key: p:
+          if !(builtins.isAttrs p) then fail "${at}.${key} must be { src; slice; }"
+          else builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
+            if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
+            then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"
+            else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
+              && lib.all (n: builtins.isInt n && n >= 0) p.slice)
+            then fail "${at}.${key}.slice must be four non-negative ints [left top right bottom]"
+            else true
+          );
+      in
+      [ (checkClosed at [ "card" "nameplate" "copy" ] s) ]
+      ++ lib.optional (s ? card) (piece "card" s.card)
+      ++ lib.optional (s ? nameplate) (piece "nameplate" s.nameplate)
+      ++ lib.optionals (s ? copy) (
+        [ (checkClosed "${at}.copy" [ "none" "one" "many" ] s.copy) ]
+        ++ lib.mapAttrsToList (k: v: if builtins.isString v then true else fail "${at}.copy.${k} must be a string") s.copy
+      )
+    )
     ++ lib.optionals ((theme.widgets.clock.settings or null) != null) (
       let
         at = "widgets.clock.settings";

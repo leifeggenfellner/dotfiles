@@ -1508,6 +1508,65 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   not be captured. They can, and the held frame is already the freshest
   one that exists.
 
+### D-067 — The workspace carousel: a drum of card plates
+
+- Date: 2026-11-20 · Status: active · Extends D-065, D-066 · Brief:
+  `docs/design/bar-brass-rail.md` (#92, phase 4b)
+- New module `modules/workspaceCarousel`:
+  - `CarouselController` decides when the carousel opens, turns and
+    closes. ShellState carries its fields (`carouselScreen`,
+    `carouselWorkspace`, `carouselReason`, `carouselSerial`,
+    `carouselAnchor`, `carouselPointer`, `carouselDrumHovered`).
+  - `WorkspaceCarousel` is one surface per screen.
+  - `CarouselCard` draws each card.
+- It is on only when a theme sets `widgets.workspaces.settings.carousel =
+  { card?; nameplate?; copy?; }` (closed, validated). Card and nameplate
+  are `{ src; slice; }` pieces under `assets/`; `copy` is `{ none; one;
+  many }` with `{n}` for the count. Without it nothing changes, so
+  Cyberpunk's strip is pixel-identical.
+- Triggers. Every opening has a reason:
+  - **switch:** a workspace switch on a screen shows the carousel turned
+    to the new card. It closes 900 ms later unless the pointer is on the
+    strip or the drum. Only workspaces with a card show it.
+  - **hover:** resting on the strip for 350 ms opens it, and it follows
+    the bezel under the pointer. It closes 300 ms after the pointer is
+    on neither the strip nor the drum.
+  - **scroll:** scrolling over the strip or the drum turns it without
+    switching. It closes like hover.
+  - **keys:** a deliberate open over IPC (`carousel open` / `toggle`,
+    ready for a keybind). It stays until Esc, Enter or a click, and is
+    the only reason that takes the keyboard. Opened by the pointer, the
+    carousel gets focus only when clicked; a switch never takes it.
+  - **Choosing:** clicking a card switches to it and closes the
+    carousel; the switch that follows does not reopen it. ←/→ turn it,
+    Enter switches to the front card.
+- Drum layout:
+  - The front card is 320×200 and sits under the workspace strip, kept
+    on screen.
+  - Two neighbours on each side sit 35° apart on a drum of radius 340.
+    Each step away is smaller (−16% scale) and dimmer. Further cards are
+    hidden.
+  - The drum turns on `Motion.instrumentSettle`. With motion reduced or
+    the ambient governor off, the cards take their new places at once
+    and cross-fade.
+- Card face:
+  - The sigil, large, with a glow in the workspace colour.
+  - Behind it, the app icons of its windows (up to 6, then +N),
+    desaturated. With no windows, an ink fog in its colour.
+  - Along the bottom, a nameplate with the label in the display face in
+    small caps, and the window count.
+  - Captures replace the icons in phase 4c (D-066).
+- Service additions:
+  - `HyprState.workspaceSwitched(screenName, id)`, which skips each
+    screen's first report.
+  - `HyprState.workspaceApps(id)`.
+  - `AppsState.iconFor(appId)`.
+- LoTM: a tarot plate in umber inside a double brass rule, an iron
+  nameplate between two rivets, and the copy "Unclaimed", "1 window",
+  "{n} windows".
+- Why: the brief's signature moment. Workspaces had names and sigils
+  but nothing showed what was on them before you went there.
+
 ---
 
 ## Legacy imports
