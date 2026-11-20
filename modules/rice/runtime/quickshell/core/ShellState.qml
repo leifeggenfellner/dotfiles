@@ -181,42 +181,27 @@ Item {
     function toggleNotifications() {
         notificationsOpen = !notificationsOpen;
     }
-    // ── Workspace carousel (D-067) ───────────────────────────
-    // The screen it shows on ("" = closed), the workspace its front
-    // card faces, why it opened ("switch" | "hover" | "scroll") and a
-    // serial bumped on every turn so the controller restarts its
-    // dismissal. carouselAnchor is the screen x it centres under,
-    // published by the workspaces glance on that screen.
-    // carouselPointer is the bar strip under the pointer: { screen,
-    // workspace } (workspace 0 between bezels), or null.
+    // ── Workspace carousel (D-067, D-069) ────────────────────
+    // The full-screen workspace overview: the screen it shows on
+    // ("" = closed) and the workspace its front card faces. Written
+    // by modules/workspaceCarousel; the surface only reads it.
     property string carouselScreen: ""
     property int carouselWorkspace: 0
-    property string carouselReason: ""
-    property int carouselSerial: 0
-    property real carouselAnchor: -1
-    property var carouselPointer: null
-    property bool carouselDrumHovered: false
 
-    function showCarousel(screenName, workspaceId, reason) {
+    function showCarousel(screenName, workspaceId) {
         if (!screenName)
             return;
+        launcherOpen = false;
+        dashboardOpen = false;
+        switcherOpen = false;
+        wallpapersOpen = false;
+        satchelOpen = false;
+        activePopout = "";
         carouselScreen = screenName;
         carouselWorkspace = workspaceId;
-        carouselReason = reason;
-        carouselSerial++;
     }
     function hideCarousel() {
         carouselScreen = "";
-        carouselReason = "";
-        carouselDrumHovered = false;
-    }
-    function setCarouselPointer(screenName, workspaceId) {
-        const next = screenName ? {
-            screen: screenName,
-            workspace: workspaceId
-        } : null;
-        if (JSON.stringify(next) !== JSON.stringify(carouselPointer))
-            carouselPointer = next;
     }
 
     function showOsd(kind) {

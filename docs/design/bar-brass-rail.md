@@ -1,6 +1,6 @@
 # The Brass Rail: taskbar redesign brief
 
-Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, the phase 4a capture spike as D-066, the phase 4b drum as D-067, and the phase 4c captures as D-068. Tracked in issue #92. When a phase lands, its decision goes into
+Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, the phase 4a capture spike as D-066, the phase 4b drum as D-067, the phase 4c captures as D-068, and the full-screen carousel as D-069. Tracked in issue #92. When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 
 ## Why
@@ -101,20 +101,20 @@ sci-fi.
 
 ### 4. The workspace carousel
 
-This is the signature moment. It is a preview drum of tarot-card plates, shown
-under the workspace plaque.
+This is the signature moment. It is a preview drum of tarot-card plates over
+the whole screen (D-069). It first shipped as a 320×200 drop-down under the
+plaque (D-067), which was too small to read a capture.
 
-- **Triggers:**
-  - Switching workspace by keybind shows it, turns it to the new card, and
-    dismisses it after about 900 ms idle.
-  - Hovering the plaque for 350 ms shows it, and it follows the hovered
-    bezel.
-  - Scrolling turns it.
-  - Clicking a card switches to that workspace.
-  - Esc or moving the pointer away dismisses it.
-- **Layout:** the centre card is large, about 320×200. The two neighbours on
-  each side are rotated about 35° on a shared drum axis, scaled down, and
-  dimmed. Cards further out are hidden.
+- **Opening:**
+  - It opens only on purpose: Super+Tab, on the focused screen, facing that
+    screen's workspace. Workspace switches, hover and scroll on the strip no
+    longer show it.
+  - ←/→, Tab or scrolling turn it, and a digit faces that workspace.
+  - Enter or clicking a card switches to that workspace.
+  - Esc, Super+Tab again, or clicking outside the cards closes it.
+- **Layout:** the front card is about half the screen wide, shaped like the
+  screen. The two neighbours on each side are rotated about 35° on a shared
+  drum axis, scaled down, and dimmed. Cards further out are hidden.
 - **Card face:**
   - Behind: a dimmed live capture of that workspace (a sepia/umber tint at
     about 40%).
@@ -135,10 +135,8 @@ under the workspace plaque.
 - **Fallback chain:** capture, then app icons, then sigil only. Any one
   missing still leaves a complete card.
 - **Reduced motion and the governor:** no drum rotation. Cards cross-fade in
-  place and the auto-dismiss still applies. With captures disabled, the
-  carousel uses the icon fallback.
-- **Multi-monitor:** it shows on the screen whose bar was used, or the
-  focused screen for keybind switches. Only that monitor's workspaces turn.
+  place. With captures disabled, the carousel uses the icon fallback.
+- **Multi-monitor:** it shows on the focused screen.
 
 ### 5. Chronometer (centre)
 

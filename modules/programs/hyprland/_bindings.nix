@@ -52,6 +52,7 @@ let
       (mkBind (key mainAlt "T") (exec (riceIpc "shell" "toggleSwitcher")))
       (mkBind (key mainShift "W") (exec (riceIpc "shell" "toggleSwitcher")))
       (mkBind (key main "W") (exec (riceIpc "shell" "toggleWallpapers")))
+      (mkBind (key main "Tab") (exec (riceIpc "carousel" "toggle")))
       (mkBind (key mainAlt "W") (exec (riceIpc "wallpapers" "next")))
       (mkBind (key main "V") (exec (riceIpc "shell" "toggleSatchel")))
       (mkBind (key main "N") (exec (riceIpc "notifications" "toggleCenter")))

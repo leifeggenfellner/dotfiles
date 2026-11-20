@@ -6,25 +6,23 @@ import "../../core"
 import "../../services/hypr"
 
 // ── WorkspaceCarousel ─────────────────────────────────────────
-// The workspace carousel (D-067): card plates on a drum under the
-// workspace strip. The front card is large; two neighbours on each
-// side turn away on the drum's axis, smaller and dimmer; the rest are
-// hidden. It draws ShellState's carousel fields; CarouselController
-// decides them.
-//
-// The drum turns on Motion.instrumentSettle. With motion reduced or
-// the ambient governor off it does not turn: the cards take their new
-// places at once and the drum cross-fades.
+// The full-screen workspace carousel (D-069): card plates on a drum
+// over a dimmed screen. The front card is about half the screen wide;
+// two neighbours on each side turn away on the drum's axis, smaller
+// and dimmer; the rest are hidden. It draws ShellState's carousel
+// fields; CarouselController writes them.
 //
 // With `carousel.capture` set, each visible card shows its workspace
 // in miniature from single-frame window captures (D-068). Geometry is
 // re-read when the carousel opens and when windows come or go; a card
 // that leaves view drops its captures, and closing drops them all.
 //
-// Click a card to switch to it; scroll or ←/→ to turn; Enter switches
-// to the front card; Esc closes. Only a deliberate open (reason
-// "keys") takes the keyboard; opened by the pointer it gets focus when
-// clicked, and a workspace switch never takes it.
+// The drum turns on Motion.instrumentSettle. With motion reduced or
+// the ambient governor off it does not turn: the cards take their new
+// places at once and cross-fade.
+//
+// ←/→, Tab or the wheel turn it; a digit faces that workspace; Enter
+// or a click on a card goes there; Esc or a click outside closes.
 
 PanelWindow {
     id: carousel
@@ -40,25 +38,39 @@ PanelWindow {
     readonly property bool turning: Motion.enabled && ShellState.ambientActive
     readonly property bool captures: (style.capture ?? null) !== null
 
-    readonly property int cardWidth: 320
-    readonly property int cardHeight: 200
-    // Drum radius and the angle between neighbouring cards.
-    readonly property real radius: 340
+    // The front card fills about half the screen; the drum's radius
+    // and the card chrome scale with it.
+    readonly property real aspect: width > 0 && height > 0 ? width / height : 16 / 10
+    readonly property real cardWidth: Math.min(width * 0.5, height * 0.58 * aspect)
+    readonly property real unit: Math.max(1, Math.min(2.2, cardWidth / 320 * 0.6))
+    readonly property real radius: cardWidth * 1.05
     readonly property real step: 35
     readonly property int reach: 2
 
     function turnTo(index) {
         const i = Math.max(0, Math.min(items.length - 1, index));
-        ShellState.showCarousel(carousel.screen.name, items[i].id, ShellState.carouselReason || "scroll");
+        ShellState.showCarousel(carousel.screen.name, items[i].id);
     }
 
     function choose(index) {
-        const id = items[index].id;
-        ShellState.showCarousel(carousel.screen.name, id, "chosen");
-        HyprState.switchWorkspace(id);
+        HyprState.switchWorkspace(items[index].id);
+        ShellState.hideCarousel();
     }
 
-    visible: open || drum.opacity > 0.01
+    visible: open || backdrop.opacity > 0.01
+
+    WlrLayershell.namespace: "rice-carousel"
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+    exclusionMode: ExclusionMode.Ignore
+    anchors {
+        top: true
+        bottom: true
+        left: true
+        right: true
+    }
+    color: "transparent"
 
     Component.onCompleted: if (captures)
         HyprState.refreshWindows()
@@ -70,24 +82,23 @@ PanelWindow {
         }
     }
 
-    WlrLayershell.namespace: "rice-carousel"
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: {
-        if (!open || ShellState.carouselReason === "switch")
-            return WlrKeyboardFocus.None;
-        return ShellState.carouselReason === "keys" ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
-    }
+    Rectangle {
+        id: backdrop
 
-    exclusionMode: ExclusionMode.Ignore
-    anchors {
-        top: true
-        left: true
-        right: true
-    }
-    implicitHeight: Theme.metrics.bar.height + Theme.metrics.space.md + cardHeight + Theme.metrics.space.lg * 2
-    color: "transparent"
-    mask: Region {
-        item: drum
+        anchors.fill: parent
+        color: Theme.colors.bg.base
+        opacity: carousel.open ? 0.88 : 0
+
+        Behavior on opacity {
+            MotionAnim {
+                spec: carousel.open ? Motion.panelOpen : Motion.panelClose
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: ShellState.hideCarousel()
+        }
     }
 
     FocusScope {
@@ -97,22 +108,29 @@ PanelWindow {
         Keys.onEscapePressed: ShellState.hideCarousel()
         Keys.onLeftPressed: carousel.turnTo(carousel.frontIndex - 1)
         Keys.onRightPressed: carousel.turnTo(carousel.frontIndex + 1)
+        Keys.onTabPressed: carousel.turnTo(carousel.frontIndex + 1)
+        Keys.onBacktabPressed: carousel.turnTo(carousel.frontIndex - 1)
         Keys.onReturnPressed: carousel.choose(carousel.frontIndex)
+        Keys.onEnterPressed: carousel.choose(carousel.frontIndex)
+        Keys.onPressed: event => {
+            const at = carousel.items.findIndex(i => String(i.id) === event.text);
+            if (at >= 0) {
+                carousel.turnTo(at);
+                event.accepted = true;
+            }
+        }
 
         Item {
             id: drum
 
             // The card the drum faces, as a fractional index while it turns.
             property real position: carousel.frontIndex
-            readonly property real anchorX: ShellState.carouselAnchor >= 0 ? ShellState.carouselAnchor : carousel.width / 2
 
-            width: 2 * carousel.radius * Math.sin(carousel.reach * carousel.step * Math.PI / 180) + carousel.cardWidth
-            height: carousel.cardHeight + Theme.metrics.space.lg * 2
-            // The front card stays under the strip and on screen; the
-            // neighbours may run off the edge.
-            x: Math.max(carousel.cardWidth / 2 + Theme.metrics.space.md, Math.min(carousel.width - carousel.cardWidth / 2 - Theme.metrics.space.md, anchorX)) - width / 2
-            y: Theme.metrics.bar.height + Theme.metrics.space.md + (carousel.open ? 0 : -Theme.metrics.space.md)
+            anchors.centerIn: parent
+            width: parent.width
+            height: repeater.count > 0 && repeater.itemAt(0) ? repeater.itemAt(0).implicitHeight : 0
             opacity: carousel.open ? 1 : 0
+            scale: carousel.open ? 1 : 0.96
 
             Behavior on position {
                 enabled: carousel.turning
@@ -125,7 +143,7 @@ PanelWindow {
                     spec: carousel.open ? Motion.panelOpen : Motion.panelClose
                 }
             }
-            Behavior on y {
+            Behavior on scale {
                 MotionAnim {
                     spec: carousel.open ? Motion.panelOpen : Motion.panelClose
                 }
@@ -154,10 +172,6 @@ PanelWindow {
                 }
             }
 
-            HoverHandler {
-                onHoveredChanged: ShellState.carouselDrumHovered = hovered
-            }
-
             WheelHandler {
                 property real pending: 0
 
@@ -177,6 +191,8 @@ PanelWindow {
                 anchors.fill: parent
 
                 Repeater {
+                    id: repeater
+
                     model: carousel.items
 
                     delegate: CarouselCard {
@@ -195,11 +211,12 @@ PanelWindow {
                         layout: carousel.captures && visible && windows > 0 ? HyprState.workspaceLayout(modelData.id) : null
                         style: carousel.style
                         front: distance < 0.5
+                        unit: carousel.unit
+                        aspect: carousel.aspect
 
                         width: carousel.cardWidth
-                        height: carousel.cardHeight
+                        height: implicitHeight
                         x: drum.width / 2 + carousel.radius * Math.sin(angle * Math.PI / 180) - width / 2
-                        y: Theme.metrics.space.lg
                         z: 10 - distance
                         visible: distance < carousel.reach + 0.5
                         scale: 1 - 0.16 * Math.min(distance, carousel.reach)

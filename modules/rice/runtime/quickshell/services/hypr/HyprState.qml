@@ -69,9 +69,29 @@ Item {
             hypr.workspaceSwitched(screenName, workspaceId);
     }
 
+    // Quickshell 0.3.2 loses workspaces when refreshToplevels() lands
+    // before its own first workspace load (seen: only a placeholder -1
+    // left), so a refresh asked for in the first moments waits for it.
+    property bool _settled: false
+    property bool _refreshPending: false
+
     function refreshWindows() {
+        if (!hypr._settled) {
+            hypr._refreshPending = true;
+            return;
+        }
         Hyprland.refreshMonitors();
         Hyprland.refreshToplevels();
+    }
+
+    Timer {
+        interval: 1500
+        running: true
+        onTriggered: {
+            hypr._settled = true;
+            if (hypr._refreshPending)
+                hypr.refreshWindows();
+        }
     }
 
     // { width, height, windows: [{ source, x, y, width, height, z }] } in

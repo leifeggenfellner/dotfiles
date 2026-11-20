@@ -1510,7 +1510,8 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-067 — The workspace carousel: a drum of card plates
 
-- Date: 2026-11-20 · Status: active · Extends D-065, D-066 · Brief:
+- Date: 2026-11-20 · Status: partly superseded by D-069 (triggers,
+  placement and size) · Extends D-065, D-066 · Brief:
   `docs/design/bar-brass-rail.md` (#92, phase 4b)
 - New module `modules/workspaceCarousel`:
   - `CarouselController` decides when the carousel opens, turns and
@@ -1602,6 +1603,40 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   stack with negative z needs its own container above the backdrop.
 - Why: the brief's card face. The sigil says which workspace it is; the
   capture shows what is on it.
+
+### D-069 — The carousel takes the whole screen, opened on purpose
+
+- Date: 2026-11-20 · Status: active · Supersedes part of D-067 (triggers,
+  placement and size) · Extends D-068 · Brief:
+  `docs/design/bar-brass-rail.md` (#92)
+- The user's call after seeing D-067 live: the 320×200 drop-down was too
+  small to read a capture.
+- Now a full-screen overlay on the focused screen, over a dimmed backdrop:
+  - The front card is about half the screen wide and shaped like the
+    screen.
+  - The drum's radius and the card chrome scale with it
+    (`CarouselCard.unit`, `aspect`).
+- Opening: only on purpose, with Super+Tab (`carousel toggle`), facing the
+  focused screen's workspace.
+  - D-067's switch, hover and scroll triggers are gone. A workspace switch
+    just switches, and the bezel needle is its feedback. The strip and
+    glance are back to D-065.
+  - A switch made while it is open turns it to the new card.
+- Inside it:
+  - ←/→, Tab or the wheel turn it, and a digit faces that workspace.
+  - Enter or a click on a card goes there.
+  - Esc, Super+Tab again, or a click outside closes it.
+  - It holds the keyboard while open.
+- `ShellState` keeps only `carouselScreen` and `carouselWorkspace`, and
+  opening it closes the other centre-stage surfaces.
+- `HyprState.refreshWindows()` waits until 1.5 s after the service
+  starts. In Quickshell 0.3.2, `refreshToplevels()` called before the
+  first workspace load leaves only a placeholder workspace (−1). This was
+  reproduced every time in a harness and fixed by the wait.
+- Verified on the live Hyprland session with a carousel-only harness
+  (the counts were right and captures readable at full size), plus
+  `rice-lint`, manifest validation and the shitbox build.
+- Why: the captures are the point of the carousel, and they need room.
 
 ---
 

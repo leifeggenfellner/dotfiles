@@ -7,9 +7,6 @@ import "../core"
 // window and urgent state, and a needle under the row sweeps to the
 // active one on Motion.instrumentSettle. `windows` and `urgent` are
 // { id: count } / { id: true } maps from the caller.
-// With `probe` (D-067) the strip reports the bezel under the pointer
-// (hoveredWorkspace: -1 outside, 0 between bezels) and wheel turns
-// as whole steps, for the workspace carousel.
 
 Item {
     id: root
@@ -21,44 +18,15 @@ Item {
     // { plate?; activePlate?; needle?; urgent? } or null
     property var bezel: null
     property color urgentColor: Theme.colors.state.danger
-    property bool probe: false
 
     signal workspaceActivated(int workspaceId)
     signal moveRequested(int workspaceId)
-    signal scrolled(int steps)
 
     readonly property int activeIndex: items.findIndex(i => i.id === activeWorkspace)
     readonly property string needle: bezel ? (bezel.needle ?? "") : ""
-    readonly property int hoveredWorkspace: {
-        if (!hover.hovered)
-            return -1;
-        const slot = row.childAt(hover.point.position.x, hover.point.position.y);
-        return slot && slot.modelData ? slot.modelData.id : 0;
-    }
 
     implicitWidth: row.width
     implicitHeight: row.height
-
-    HoverHandler {
-        id: hover
-        enabled: root.probe
-    }
-
-    // Touchpads send many small deltas; a step is one wheel notch.
-    WheelHandler {
-        property real pending: 0
-
-        enabled: root.probe
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        onWheel: event => {
-            pending += event.angleDelta.y || event.angleDelta.x;
-            const steps = Math.trunc(pending / 120);
-            if (steps !== 0) {
-                pending -= steps * 120;
-                root.scrolled(-steps);
-            }
-        }
-    }
 
     Row {
         id: row

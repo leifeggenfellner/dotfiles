@@ -5,7 +5,7 @@ import "../../core"
 import "../../services/apps"
 
 // ── CarouselCard ──────────────────────────────────────────────
-// One card plate on the carousel drum (D-067). In front, the
+// One card plate on the carousel drum (D-067, D-069). In front, the
 // workspace's sigil with a glow in its colour; behind it, a miniature
 // of the workspace built from one capture per window (D-068), tinted
 // and dimmed. Until a capture arrives, or without `layout`, the app
@@ -21,6 +21,9 @@ import "../../services/apps"
 //   layout   HyprState.workspaceLayout(id), or null for no captures
 //   style    widgets.workspaces.settings.carousel
 //   front    the card the drum faces
+//   unit     scale for the card's chrome (inset, nameplate, type,
+//            icons), 1 at the original 320 px card
+//   aspect   the face's width/height; implicitHeight follows width
 
 Item {
     id: card
@@ -31,6 +34,8 @@ Item {
     property var layout: null
     property var style: ({})
     property bool front: false
+    property real unit: 1
+    property real aspect: 16 / 10
 
     readonly property color tint: entry.color ?? Theme.colors.accent.primary
     readonly property var copy: style.copy ?? ({})
@@ -42,7 +47,9 @@ Item {
             return copy.one ?? "1 window";
         return (copy.many ?? "{n} windows").replace("{n}", windows);
     }
-    readonly property int inset: Theme.metrics.space.md
+    readonly property int inset: Math.round(Theme.metrics.space.md * unit)
+
+    implicitHeight: (width - 2 * inset) / aspect + 2 * inset + nameplate.height + nameplate.anchors.margins
     readonly property var capture: style.capture ?? ({})
 
     component Plate: Item {
@@ -164,7 +171,7 @@ Item {
             visible: card.windows > 0 && !miniature.shown
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: Theme.metrics.space.sm
+            spacing: Theme.metrics.space.sm * card.unit
             opacity: 0.7
 
             layer.enabled: visible
@@ -178,11 +185,11 @@ Item {
                 delegate: Image {
                     required property string modelData
 
-                    width: 22
-                    height: 22
+                    width: Math.round(22 * card.unit)
+                    height: width
                     source: AppsState.iconFor(modelData)
-                    sourceSize.width: 44
-                    sourceSize.height: 44
+                    sourceSize.width: width * 2
+                    sourceSize.height: height * 2
                     smooth: true
                 }
             }
@@ -193,7 +200,7 @@ Item {
                 text: "+" + (card.apps.length - card.maxIcons)
                 color: Theme.colors.fg.muted
                 font.family: Theme.typography.families.mono
-                font.pointSize: Theme.typography.sizes.small
+                font.pointSize: Theme.typography.sizes.small * card.unit
             }
         }
 
@@ -203,7 +210,7 @@ Item {
 
             readonly property string spec: card.entry.icon ?? ""
             readonly property bool isFile: Theme.iconIsFile(spec)
-            readonly property int size: Math.min(72, face.height - 28)
+            readonly property int size: Math.min(72 * card.unit, face.height * 0.5)
 
             anchors.horizontalCenter: parent.horizontalCenter
             y: miniature.shown ? (face.height - size) / 2 : face.height - size
@@ -249,7 +256,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: card.inset / 2
-        height: 46
+        height: Math.round(46 * card.unit)
 
         Rectangle {
             visible: !card.style.nameplate
@@ -272,9 +279,9 @@ Item {
                 text: card.entry.label ?? String(card.entry.id)
                 color: Theme.colors.fg.primary
                 font.family: Theme.typography.families.display
-                font.pointSize: Theme.typography.sizes.body
+                font.pointSize: Theme.typography.sizes.body * card.unit
                 font.capitalization: Font.SmallCaps
-                font.letterSpacing: 1
+                font.letterSpacing: card.unit
             }
 
             Text {
@@ -282,7 +289,7 @@ Item {
                 text: card.countText
                 color: Theme.colors.fg.muted
                 font.family: Theme.typography.families.sans
-                font.pointSize: Theme.typography.sizes.small
+                font.pointSize: Theme.typography.sizes.small * card.unit
             }
         }
     }

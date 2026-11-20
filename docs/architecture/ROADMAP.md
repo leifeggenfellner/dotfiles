@@ -1258,3 +1258,17 @@ Concretized as D-068. Part of #92 (`docs/design/bar-brass-rail.md`).
 - Verified: `rice-lint`, manifest validation and the shitbox build pass.
   A carousel-only harness on the live Hyprland session showed real
   captures of windows on inactive workspaces.
+
+## Phase 56 — The Brass Rail: the carousel goes full screen ✅
+
+Concretized as D-069. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ Full-screen overlay on the focused screen; the front card is about
+  half the screen wide.
+- ✅ Opened only with Super+Tab. The drop-down's switch, hover and scroll
+  triggers are removed.
+- ✅ Keys: ←/→, Tab, digits, Enter and Esc.
+- ✅ `HyprState.refreshWindows()` waits for Quickshell's first workspace
+  load.
+- Verified live with a carousel-only harness; `rice-lint`, manifest
+  validation and the shitbox build pass.
