@@ -271,6 +271,11 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "tray" "settings" "maxInline" ] 0 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "tray" "settings" "tone" ] "grayscale" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "tray" "settings" "allow" ] [ "steam" ] lotm))
+    # Sigil bezels (D-065).
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "glow" ] true lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "plate" ] "bar/missing.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "needle" ] 3 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "workspaces" "settings" "bezel" "urgent" ] "#8a3b3b" lotm))
     # Browser new-tab page (D-060).
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "title" ] 42 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "epigraphs" ] "widgets.epigraph.settings.missing" lotm))

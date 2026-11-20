@@ -119,7 +119,8 @@ in
       workspaces = {
         slotSize = 30;
         ringExpansion = 4;
-        iconSize = 24;
+        # The sigil sits inside a 30 px bezel (D-065).
+        iconSize = 20;
         iconSourceSize = 48;
       };
       dashboard = {
@@ -728,15 +729,25 @@ in
         ];
       };
 
-      workspaces.settings.items = [
-        (workspace 1 "fool")
-        (workspace 2 "door")
-        (workspace 3 "white_tower")
-        (workspace 4 "visionary")
-        (workspace 5 "darkness")
-        (workspace 6 "sun")
-        (workspace 7 "error")
-      ];
+      workspaces.settings = {
+        items = [
+          (workspace 1 "fool")
+          (workspace 2 "door")
+          (workspace 3 "white_tower")
+          (workspace 4 "visionary")
+          (workspace 5 "darkness")
+          (workspace 6 "sun")
+          (workspace 7 "error")
+        ];
+        # Sigil bezels (D-065): aged brass, polished when active, a gauge
+        # needle below, and a ritual-crimson rim for urgent windows.
+        bezel = {
+          plate = "bar/bezel.svg";
+          activePlate = "bar/bezel-active.svg";
+          needle = "bar/needle.svg";
+          urgent = "accent.tertiary";
+        };
+      };
     };
 
   plugins = [

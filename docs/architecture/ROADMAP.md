@@ -1192,3 +1192,18 @@ Concretized as D-064. Part of #92 (`docs/design/bar-brass-rail.md`).
   sway: instruments, a 92% charging vial, the hatch with three toned
   icons and +1 and its popout, the phonograph with an mpv track playing
   and gone when idle; Cyberpunk unchanged.
+
+## Phase 52 — The Brass Rail, phase 3: sigil bezels and needle ✅
+
+Concretized as D-065. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ `HyprState.workspaceWindows`, `urgentWorkspaces`, `moveFocusedWindow`.
+- ✅ Bezel mode in `WorkspaceItem` / `WorkspaceStrip`: empty, occupied,
+  active and urgent states, plus the needle sweep.
+- ✅ Middle click moves the focused window, in every theme.
+- ✅ `widgets.workspaces.settings.bezel` validation with must-fail cases;
+  LoTM bezel, polished bezel and needle SVGs.
+- Verified: `rice-lint`, manifest validation, shitbox build; headless
+  sway with faked window and urgent state (scratch copy only) showed all
+  four states and the needle; Cyberpunk's strip is pixel-identical.
+  Not yet seen on Hyprland: live counts, urgent clearing, the sweep.

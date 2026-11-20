@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
+  <!-- Gauge needle (D-065): points up at the active bezel. -->
+  <path d="M6 0.8L9.6 10.2H2.4Z" fill="#e8c76f" stroke="#7a5a22" stroke-width="0.8" stroke-linejoin="round"/>
+  <circle cx="6" cy="10" r="1.6" fill="#c79a3a" stroke="#7a5a22" stroke-width="0.6"/>
+</svg>

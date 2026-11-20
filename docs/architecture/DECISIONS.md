@@ -1451,6 +1451,32 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the bar's right side read like a phone status bar; the instruments
   carry the same readings in the world's own objects.
 
+### D-065 — Workspace sigils in bezels, with a needle
+
+- Date: 2026-11-20 · Status: active · Extends D-063 · Brief:
+  `docs/design/bar-brass-rail.md` (#92, phase 3)
+- `HyprState` now tracks `workspaceWindows` (`{ id: window count }`) and
+  `urgentWorkspaces` from Quickshell's Hyprland workspaces, and gains
+  `moveFocusedWindow(id)`, which uses the same dispatcher as Super+Shift+N.
+- `widgets.workspaces.settings.bezel = { plate?; activePlate?; needle?;
+  urgent?; }` (closed, validated) turns on bezel mode. In bezel mode each
+  icon shows a state:
+  - **Empty:** monochrome at 45%.
+  - **Occupied:** full colour at 80%, with a rivet below the bezel.
+  - **Active:** the polished plate, full colour and a glow in the
+    workspace colour.
+  - **Urgent:** the rim pulses twice in the `urgent` colour token on
+    `Motion.alarm`, then holds until the workspace is visited.
+  A needle under the strip sweeps to the active bezel on
+  `Motion.instrumentSettle`. Without `bezel` the strip is unchanged.
+- In every theme, a middle click on a workspace moves the focused window
+  there.
+- LoTM: aged and polished brass bezels, a brass needle, a ritual-crimson
+  urgent rim, and sigils at 20 px.
+- Not done: scrolling over the strip turns the carousel, which is phase 4.
+- Why: the sigils were the bar's one in-world element, but they did not
+  show which workspaces held windows or needed attention.
+
 ---
 
 ## Legacy imports

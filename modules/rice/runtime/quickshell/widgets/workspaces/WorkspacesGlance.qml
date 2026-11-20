@@ -9,6 +9,9 @@ import "../../core"
 // assetUrl spec (image file / raster output); anything else is a
 // font glyph tinted with the item's color. With empty settings it
 // degrades to a plain numeric readout. Services: hypr (injected).
+// settings.bezel (D-065) sets each sigil in a theme plate with window,
+// active and urgent states and a needle; `bezel.urgent` is a colour
+// token ref for the urgent rim. Middle click moves the focused window.
 
 Item {
     id: root
@@ -19,6 +22,7 @@ Item {
 
     readonly property var items: settings.items ?? []
     readonly property int active: services.hypr ? services.hypr.activeWorkspaceForScreen(screenName) : 1
+    readonly property var bezel: settings.bezel ?? null
 
     implicitWidth: items.length > 0 ? strip.width : fallback.width
     implicitHeight: Theme.metrics.bar.height
@@ -30,7 +34,12 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         items: root.items
         activeWorkspace: root.active
+        windows: root.services.hypr?.workspaceWindows ?? ({})
+        urgent: root.services.hypr?.urgentWorkspaces ?? ({})
+        bezel: root.bezel
+        urgentColor: Effects.colorRef(root.bezel?.urgent ?? "state.danger")
         onWorkspaceActivated: workspaceId => root.services.hypr?.switchWorkspace(workspaceId)
+        onMoveRequested: workspaceId => root.services.hypr?.moveFocusedWindow(workspaceId)
     }
 
     Text {

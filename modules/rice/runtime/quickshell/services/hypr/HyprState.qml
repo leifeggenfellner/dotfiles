@@ -12,8 +12,10 @@ import Quickshell.Wayland
 //   state:    available, focusedScreenName ("" when unknown),
 //             activeWorkspace (id), activeWorkspaceForScreen(name),
 //             activeWorkspaceNames ({ screenName: workspace name }),
-//             anyFullscreen, monitorsRevision
-//   commands: switchWorkspace(id)
+//             anyFullscreen, monitorsRevision,
+//             workspaceWindows ({ id: window count }, only workspaces
+//             that exist), urgentWorkspaces ({ id: true })
+//   commands: switchWorkspace(id), moveFocusedWindow(id)
 //
 // Focused output is exposed by NAME (matches ShellScreen.name);
 // HyprlandMonitor.screen is not reliable on this Quickshell version.
@@ -40,6 +42,8 @@ Item {
     // Named workspaces ("focus") have negative ids, so consumers that
     // key on a workspace by name read this map instead.
     property var activeWorkspaceNames: ({})
+    property var workspaceWindows: ({})
+    property var urgentWorkspaces: ({})
 
     function activeWorkspaceForScreen(screenName) {
         return hypr._activeWorkspaces[screenName] ?? Hyprland.focusedMonitor?.activeWorkspace?.id ?? 1;
@@ -68,6 +72,33 @@ Item {
         if (!Number.isInteger(n))
             return;
         Hyprland.dispatch("hl.dsp.focus({ workspace = " + n + " })");
+    }
+
+    // Same dispatcher as the Super+Shift+N binding.
+    function moveFocusedWindow(id) {
+        const n = Number(id);
+        if (!Number.isInteger(n))
+            return;
+        Hyprland.dispatch("hl.dsp.window.move({ workspace = " + n + " })");
+    }
+
+    function _setWorkspace(id, windows, urgent) {
+        if (hypr.workspaceWindows[id] !== windows) {
+            const w = Object.assign({}, hypr.workspaceWindows);
+            if (windows === undefined)
+                delete w[id];
+            else
+                w[id] = windows;
+            hypr.workspaceWindows = w;
+        }
+        if ((hypr.urgentWorkspaces[id] ?? false) !== urgent) {
+            const u = Object.assign({}, hypr.urgentWorkspaces);
+            if (urgent)
+                u[id] = true;
+            else
+                delete u[id];
+            hypr.urgentWorkspaces = u;
+        }
     }
 
     function _recountFullscreen() {
@@ -112,6 +143,29 @@ Item {
                 hypr.monitorsRevision++;
             }
             Component.onDestruction: Qt.callLater(() => hypr.monitorsRevision++)
+        }
+    }
+
+    Instantiator {
+        model: Hyprland.workspaces
+
+        delegate: QtObject {
+            required property var modelData
+            readonly property int workspaceId: modelData.id
+            readonly property int windows: modelData.toplevels.values.length
+            readonly property bool urgent: modelData.urgent
+
+            onWindowsChanged: hypr._setWorkspace(workspaceId, windows, urgent)
+            onUrgentChanged: hypr._setWorkspace(workspaceId, windows, urgent)
+            Component.onCompleted: hypr._setWorkspace(workspaceId, windows, urgent)
+            Component.onDestruction: {
+                const id = workspaceId;
+                // Deferred, and skipped if Hyprland recreated the id.
+                Qt.callLater(() => {
+                    if (!Hyprland.workspaces.values.some(w => w.id === id))
+                        hypr._setWorkspace(id, undefined, false);
+                });
+            }
         }
     }
 }

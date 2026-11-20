@@ -197,7 +197,8 @@ and exposes it exclusively through the `Theme` facade.
    `widgets.clock.settings.layout` (`stacked` | `inline`). D-064 adds
    settings for `system`, `media`, `monitor-profile` and the opt-in
    `tray` hatch, and the icon names `wifi-0`…`wifi-3`, `battery-ink` and
-   `battery-ink-low`, used when the theme names them.
+   `battery-ink-low`, used when the theme names them. D-065 adds
+   `widgets.workspaces.settings.bezel`.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

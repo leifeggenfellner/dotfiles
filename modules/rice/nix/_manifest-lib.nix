@@ -290,6 +290,22 @@ let
       ++ lib.optional (s ? tone && !(builtins.elem s.tone [ "none" "sepia" ])) (fail "${at}.tone must be none or sepia")
       ++ lib.optional (s ? title && !builtins.isString s.title) (fail "${at}.title must be a string")
     )
+    ++ lib.optionals ((theme.widgets.workspaces.settings.bezel or null) != null) (
+      # Sigil bezels (D-065): plates and needle are files under assets/;
+      # the urgent rim is a colour token ref (L-005).
+      let
+        at = "widgets.workspaces.settings.bezel";
+        s = theme.widgets.workspaces.settings.bezel;
+        asset = key:
+          if builtins.isString s.${key} && builtins.pathExists (themeDir + "/assets/${s.${key}}") then true
+          else fail "${at}.${key} must name a file under assets/, got ${builtins.toJSON s.${key}}";
+      in
+      [ (checkClosed at [ "plate" "activePlate" "needle" "urgent" ] s) ]
+      ++ map asset (lib.intersectLists [ "plate" "activePlate" "needle" ] (lib.attrNames s))
+      ++ lib.optional (s ? urgent && !(builtins.isString s.urgent
+        && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" s.urgent != null))
+        (fail "${at}.urgent must be a colour token ref")
+    )
     ++ lib.optionals ((theme.widgets.clock.settings or null) != null) (
       let
         at = "widgets.clock.settings";

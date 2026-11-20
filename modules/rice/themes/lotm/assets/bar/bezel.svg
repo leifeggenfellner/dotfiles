@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <!-- Workspace bezel, aged brass (D-065). The sigil sits in the well, drawn by the runtime. -->
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c79a3a"/>
+      <stop offset="0.55" stop-color="#7a5a22"/>
+      <stop offset="1" stop-color="#4a3714"/>
+    </linearGradient>
+    <radialGradient id="well" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#151009"/>
+      <stop offset="1" stop-color="#070503"/>
+    </radialGradient>
+  </defs>
+  <circle cx="15" cy="15" r="14.2" fill="url(#rim)"/>
+  <circle cx="15" cy="15" r="11.6" fill="url(#well)" stroke="#4a3714" stroke-width="0.8"/>
+  
+</svg>
