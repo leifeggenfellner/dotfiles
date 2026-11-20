@@ -232,6 +232,68 @@ let
       ++ lib.optional (s ? sound && !((theme.assets.sounds or { }) ? ${s.sound}))
         (fail "${at}.sound must name a sound in assets.sounds")
     )
+    ++ lib.optionals ((theme.widgets.clock.settings or null) != null) (
+      let
+        at = "widgets.clock.settings";
+        s = theme.widgets.clock.settings;
+      in
+      [
+        (checkClosed at [ "showDate" "layout" ] s)
+        (if builtins.isBool (s.showDate or true) then true else fail "${at}.showDate must be a bool")
+        (if builtins.elem (s.layout or "stacked") [ "stacked" "inline" ] then true
+        else fail "${at}.layout must be stacked or inline")
+      ]
+    )
+    ++ lib.optionals ((theme.widgets.bar.settings or null) != null) (
+      # Bar frame (D-063): the style, nine-sliced frame pieces and end
+      # caps. Pieces are files under assets/; actions are the runtime's
+      # closed set; glow colours are token refs (L-005).
+      let
+        at = "widgets.bar.settings";
+        s = theme.widgets.bar.settings;
+        asset = key: v:
+          if builtins.isString v && builtins.pathExists (themeDir + "/assets/${v}") then true
+          else fail "${key} must name a file under assets/, got ${builtins.toJSON v}";
+        piece = key: p:
+          builtins.seq (checkClosed "${at}.frame.${key}" [ "src" "slice" ] p) (
+            if !(builtins.seq (asset "${at}.frame.${key}.src" (p.src or null)) true) then false
+            else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
+              && lib.all (n: builtins.isInt n && n >= 0) p.slice)
+            then fail "${at}.frame.${key}.slice must be four non-negative ints [left top right bottom]"
+            else true
+          );
+        cap = key: c:
+          builtins.seq (checkClosed "${at}.caps.${key}" [ "action" "plate" "emblem" "turn" ] c) (
+            if !(builtins.elem (c.action or null) [ "launcher" "dashboard" "power" ])
+            then fail "${at}.caps.${key}.action must be one of launcher, dashboard, power"
+            else if c ? plate && !(builtins.seq (asset "${at}.caps.${key}.plate" c.plate) true) then false
+            else if c ? emblem && !builtins.isString c.emblem then fail "${at}.caps.${key}.emblem must be a string"
+            else if c ? turn && !(builtins.isInt c.turn && c.turn >= -90 && c.turn <= 90)
+            then fail "${at}.caps.${key}.turn must be an int from -90 to 90"
+            else true
+          );
+        ref = key: v:
+          if builtins.isString v && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" v != null then true
+          else fail "${at}.glow.${key} must be a colour token ref, got ${builtins.toJSON v}";
+      in
+      [
+        (checkClosed at [ "style" "frame" "caps" "glow" ] s)
+        (if builtins.elem (s.style or "floating") [ "floating" "rail" ] then true
+        else fail "${at}.style must be floating or rail")
+      ]
+      ++ lib.optionals (s ? frame) (
+        [ (checkClosed "${at}.frame" [ "body" "plaque" ] s.frame) ]
+        ++ lib.mapAttrsToList piece s.frame
+      )
+      ++ lib.optionals (s ? caps) (
+        [ (checkClosed "${at}.caps" [ "start" "end" ] s.caps) ]
+        ++ lib.mapAttrsToList cap s.caps
+      )
+      ++ lib.optionals (s ? glow) (
+        [ (checkClosed "${at}.glow" [ "rest" "hover" ] s.glow) ]
+        ++ lib.mapAttrsToList ref s.glow
+      )
+    )
     ++ map
       (plugin: checkClosed "plugins entry"
         [ "id" "source" "entry" "region" "priority" "services" "layout" "unloadWhenClosed" ]

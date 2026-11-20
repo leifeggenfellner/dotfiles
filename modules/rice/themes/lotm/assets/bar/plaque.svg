@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Recessed plaque (D-063). Nine-sliced [8 8 8 8]: an inset well
+       with a brass bevel, lit from above, so the lower lip catches light. -->
+  <defs>
+    <linearGradient id="well" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070503"/>
+      <stop offset="0.3" stop-color="#0e0a06"/>
+      <stop offset="1" stop-color="#151009"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="3.5" fill="url(#well)" stroke="#7a5a22"/>
+  <path d="M1.5 27.5 Q1.5 30.5 4.5 30.5 H27.5 Q30.5 30.5 30.5 27.5 V4.5" fill="none" stroke="#c79a3a" stroke-opacity="0.85"/>
+  <rect x="2" y="1.5" width="28" height="2.5" rx="1.2" fill="#000" fill-opacity="0.4"/>
+</svg>

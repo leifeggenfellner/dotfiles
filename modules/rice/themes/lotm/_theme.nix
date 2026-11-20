@@ -109,7 +109,9 @@ in
         lg = 16;
       };
       bar = {
-        height = 56;
+        # The Brass Rail (D-063) is flush to the edge, so margin only
+        # spaces toasts and popouts below it.
+        height = 44;
         margin = 8;
         spacing = 12;
         opacity = 0.88;
@@ -304,6 +306,24 @@ in
         };
         maxResults = 16;
       };
+
+      # The Brass Rail (D-063): a brass instrument rail flush to the top
+      # edge. The start cog with the Fool in its hub opens the launcher;
+      # the power seal closes the far end.
+      bar.settings = {
+        style = "rail";
+        frame = {
+          body = { src = "bar/rail.svg"; slice = [ 24 0 24 0 ]; };
+          plaque = { src = "bar/plaque.svg"; slice = [ 8 8 8 8 ]; };
+        };
+        caps = {
+          start = { action = "launcher"; plate = "bar/cog.svg"; emblem = "pathways_png/fool.png"; turn = 30; };
+          end = { action = "power"; plate = "bar/seal.svg"; emblem = "power"; };
+        };
+        glow = { rest = "accent.primary"; hover = "state.warn"; };
+      };
+
+      clock.settings.layout = "inline";
 
       # Polkit prompt (D-062): a privileged act needs a higher seal. The
       # real request, identity and action id are always shown beneath.

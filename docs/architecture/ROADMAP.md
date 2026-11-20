@@ -1156,3 +1156,21 @@ The ambient effects tier landed as Phase 13 (D-021).
 ## Deferred / future
 
 No deferred items currently tracked.
+
+## Phase 50 — The Brass Rail, phase 1: rail frame and end caps ✅
+
+Concretized as D-063. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ `widgets.bar.settings`: `style` (`floating` | `rail`), nine-sliced
+  `frame.body` / `frame.plaque`, `caps.start` / `caps.end` and `glow`,
+  with closed-key validation and must-fail cases.
+- ✅ `modules/bar/RailCap` (notch turn on `Motion.instrumentSettle`,
+  hover glow) and `modules/bar/RailPlaque`; a `power` cap replaces the
+  power glance.
+- ✅ The floating inset moved inside the bar window, so a theme can
+  change the style live.
+- ✅ `widgets.clock.settings.layout` (`stacked` | `inline`).
+- ✅ LoTM: rail, plaque, cog and seal SVGs in `assets/bar/`; height 44.
+- Verified: `rice-lint`, manifest validation, shitbox build; headless sway at rest, with the
+  launcher open (cog turned) and with the power popout open from the
+  seal; Cyberpunk keeps its floating bar and stacked clock.

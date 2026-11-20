@@ -3,7 +3,9 @@ import Quickshell
 import "../../core"
 
 // ── ClockGlance ───────────────────────────────────────────────
-// Time + optional date. settings: { showDate: bool }.
+// Time + optional date. settings: { showDate: bool; layout:
+// "stacked" | "inline" } — inline puts the date beside the time for
+// shallow bars (the rail, D-063).
 // No services; SystemClock is Quickshell-native (no timers here).
 
 Item {
@@ -13,6 +15,7 @@ Item {
     property var settings: ({})
 
     readonly property bool showDate: settings.showDate ?? true
+    readonly property bool stacked: (settings.layout ?? "stacked") === "stacked"
 
     implicitWidth: column.width
     implicitHeight: Theme.metrics.bar.height
@@ -22,13 +25,15 @@ Item {
         precision: SystemClock.Minutes
     }
 
-    Column {
+    Grid {
         id: column
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 0
+        columns: root.stacked ? 1 : 2
+        columnSpacing: Theme.metrics.space.sm
+        horizontalItemAlignment: Grid.AlignHCenter
+        verticalItemAlignment: Grid.AlignVCenter
 
         Text {
-            anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "HH:mm")
             color: Theme.colors.fg.primary
             font.family: Theme.typography.families.display
@@ -36,7 +41,6 @@ Item {
         }
         Text {
             visible: root.showDate
-            anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDateTime(clock.date, "ddd d MMM")
             color: Theme.colors.fg.subtle
             font.family: Theme.typography.families.sans

@@ -1384,6 +1384,33 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   session) but stays defined for recovery.
 - Why: privileged prompts were the last plain GTK dialog in the session.
 
+### D-063 — The bar can be a flush rail with end caps
+
+- Date: 2026-11-20 · Status: active · Extends D-006, D-023, L-011 ·
+  Brief: `docs/design/bar-brass-rail.md` (#92, phase 1)
+- `widgets.bar.settings` (closed keys, validated) picks the bar's frame:
+  `style = "floating"` (default, the rounded rect) or `"rail"`, flush to
+  the top edge. The rail draws `frame.body` nine-sliced across the
+  window (its middle repeats, so ticks run like a ruler) and
+  `frame.plaque` behind each region, each `{ src; slice = [l t r b]; }`
+  under assets/. Without pieces it draws the same shape from tokens.
+- `caps.start` / `caps.end` (`{ action; plate?; emblem?; turn?; }`) are
+  end caps bound to `launcher`, `dashboard` or `power`. The plate turns
+  `turn` degrees (default 30, `Motion.instrumentSettle`) while that
+  surface is open and back when it closes; it never spins. `glow` names
+  token refs for the hub light at rest and on hover. A `power` cap takes
+  the place of the power glance, whose popout it opens.
+- The floating inset is drawn inside the bar window, with an input mask,
+  instead of as layer-shell margins: margins committed before the
+  manifest arrived were never re-applied.
+- `widgets.clock.settings.layout = "inline"` puts the date beside the
+  time for shallow bars; `"stacked"` stays the default.
+- LoTM: the Brass Rail at 44 px; a brass cog with the Fool in its hub
+  opens the launcher, a scalloped seal holds power. Cyberpunk is
+  unchanged.
+- Why: the floating pill read as a generic rice; the rail makes the bar
+  an instrument without any per-theme code in the runtime.
+
 ---
 
 ## Legacy imports

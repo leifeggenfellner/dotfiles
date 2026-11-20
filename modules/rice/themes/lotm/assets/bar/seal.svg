@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
+  <!-- Power seal (D-063): a scalloped brass plate with two rivets; the
+       hub well takes the theme emblem. -->
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8c76f"/>
+      <stop offset="0.5" stop-color="#c79a3a"/>
+      <stop offset="1" stop-color="#7a5a22"/>
+    </linearGradient>
+    <radialGradient id="hub" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#151009"/>
+      <stop offset="1" stop-color="#070503"/>
+    </radialGradient>
+  </defs>
+  <circle cx="22.00" cy="3.80" r="3.1" fill="url(#brass)"/><circle cx="28.96" cy="5.19" r="3.1" fill="url(#brass)"/><circle cx="34.87" cy="9.13" r="3.1" fill="url(#brass)"/><circle cx="38.81" cy="15.04" r="3.1" fill="url(#brass)"/><circle cx="40.20" cy="22.00" r="3.1" fill="url(#brass)"/><circle cx="38.81" cy="28.96" r="3.1" fill="url(#brass)"/><circle cx="34.87" cy="34.87" r="3.1" fill="url(#brass)"/><circle cx="28.96" cy="38.81" r="3.1" fill="url(#brass)"/><circle cx="22.00" cy="40.20" r="3.1" fill="url(#brass)"/><circle cx="15.04" cy="38.81" r="3.1" fill="url(#brass)"/><circle cx="9.13" cy="34.87" r="3.1" fill="url(#brass)"/><circle cx="5.19" cy="28.96" r="3.1" fill="url(#brass)"/><circle cx="3.80" cy="22.00" r="3.1" fill="url(#brass)"/><circle cx="5.19" cy="15.04" r="3.1" fill="url(#brass)"/><circle cx="9.13" cy="9.13" r="3.1" fill="url(#brass)"/><circle cx="15.04" cy="5.19" r="3.1" fill="url(#brass)"/>
+  <circle cx="22" cy="22" r="18.2" fill="url(#brass)" stroke="#7a5a22" stroke-width="0.8"/>
+  <circle cx="22" cy="22" r="14.5" fill="none" stroke="#7a5a22" stroke-width="1"/>
+  <circle cx="22" cy="22" r="11" fill="url(#hub)" stroke="#e8c76f" stroke-width="1.2"/>
+  <circle cx="22" cy="8.6" r="1.6" fill="#e8c76f" stroke="#7a5a22" stroke-width="0.6"/>
+  <circle cx="22" cy="35.4" r="1.6" fill="#e8c76f" stroke="#7a5a22" stroke-width="0.6"/>
+</svg>

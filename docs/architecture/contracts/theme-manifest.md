@@ -191,7 +191,10 @@ and exposes it exclusively through the `Theme` facade.
    the fastfetch card and the Hyprland adapter): `{ record; catalog; }`, where
    `record` is `extras.<ns>.<key>` and catalog entries may carry `accent`
    (`#rrggbb`, replacing `accent.primary` on their day) and `sigil` (an
-   assets-relative `.svg`).
+   assets-relative `.svg`). D-063 adds the `bar` id (read by
+   `modules/bar/TopBar`): `{ style; frame?; caps?; glow?; }` picks the
+   floating or rail frame, its nine-sliced pieces and its end caps; and
+   `widgets.clock.settings.layout` (`stacked` | `inline`).
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.
