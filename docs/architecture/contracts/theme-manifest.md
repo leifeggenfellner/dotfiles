@@ -67,6 +67,7 @@ and exposes it exclusively through the `Theme` facade.
         workspaces = "slidefadevert 15%"; # slide | slidevert | fade | slidefade[vert] N%
         layers     = "fade";      #   slide | fade | popin N%
         borderSweep = "once";     #   (D-049) gradient turns once on focus; never loops
+        borderFade = "off";       #   (D-073) border colour snaps on focus instead of fading
       };
     };
     chrome = {                    # OPTIONAL (D-049): Hyprland window chrome; colour TOKEN REFS (L-005)

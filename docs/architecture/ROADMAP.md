@@ -1312,5 +1312,16 @@ surfaces.
   and an umber shadow.
 - Verified: the switch test, manifest validation, the shitbox build, and a
   live apply with a screenshot.
+
+## Phase 60 — Solid gilt on focus ✅
+
+Concretized as D-073, at the user's request: no colour animation on window
+borders.
+
+- ✅ `tokens.motion.compositor.borderFade = "off"` disables the `border`
+  fade; the adapter restores the baseline leaf for other themes.
+- ✅ LoTM: a single solid gilt stop on focus, no sweep.
+- Verified: the switch test, manifest validation, the shitbox build, and a
+  live apply.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

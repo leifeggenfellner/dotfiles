@@ -18,7 +18,7 @@ let
     tokens = {
       colors = { accent.primary = "#c79a3a"; bg.elevated = "#2a211a"; bg.sunken = "#0e0a06"; state.warn = "#d9a441"; };
       typography.families.display = "Cinzel";
-      motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; borderSweep = "once"; }; };
+      motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; borderSweep = "once"; borderFade = "off"; }; };
       chrome = {
         border = { active = [ "state.warn" "accent.primary" ]; inactive = [ "bg.elevated" "bg.sunken" ]; angle = 45; width = 3; };
         rounding = 0;
@@ -191,6 +191,15 @@ pkgs.runCommand "rice-theme-switch"
     grep -q 'hl.config({ general = { border_size = 2 }, decoration = { rounding = 16, shadow = { enabled = true, range = 4, render_power = 3, color = "rgba(1a1a1aee)", offset = "0 0" } } })' "$RICE_TEST_LOG"
     grep -q 'inactive_border = "rgb(141b2b)"' "$RICE_TEST_LOG"
     ! grep -q 'rounding = 0' "$RICE_TEST_LOG"
+
+    echo "case: solid focus border, no colour fade (D-073)"
+    : > "$RICE_TEST_LOG"
+    "$switch" lotm
+    grep -q 'hl.animation({ leaf = "border", enabled = false })' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
+    "$switch" cyberpunk
+    grep -q 'leaf = "border", enabled = true, speed = 10, bezier = "liner"' "$RICE_TEST_LOG"
+    ! grep -q 'leaf = "border", enabled = false' "$RICE_TEST_LOG"
 
     echo "case: theme cursor applies live, base cursor without one (D-048)"
     grep -q '^hypr setcursor capitaine-cursors-white 16$' "$RICE_TEST_LOG"

@@ -17,6 +17,7 @@ let
     layersIn = "layersIn";
     layersOut = "layersOut";
     borderangle = "borderangle";
+    border = "border";
   };
   baselineFor = source:
     lib.findFirst (a: a.leaf == source) (throw "baseline animation '${source}' missing") baseline.animation;
@@ -170,11 +171,12 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       ([.tokens.motion.easings | .standard, .enter, .exit] | all(type == "string")) and
       ((.tokens.motion.compositor // {}) as $c |
         ($c | type == "object") and
-        ($c | keys - ["windowsIn", "windowsOut", "workspaces", "layers", "borderSweep"] | length == 0) and
+        ($c | keys - ["windowsIn", "windowsOut", "workspaces", "layers", "borderSweep", "borderFade"] | length == 0) and
         ([$c.windowsIn, $c.windowsOut] | all(. == null or style("(slide|gnomed|popin( [0-9]{1,2}%)?)"))) and
         ($c.workspaces | . == null or style("(slide|slidevert|fade|slidefade( [0-9]{1,2}%)?|slidefadevert( [0-9]{1,2}%)?)")) and
         ($c.layers | . == null or style("(slide|fade|popin( [0-9]{1,2}%)?)")) and
-        ($c.borderSweep | . == null or . == "once")) and
+        ($c.borderSweep | . == null or . == "once") and
+        ($c.borderFade | . == null or . == "off")) and
       ((.tokens.chrome // {}) as $ch |
         ($ch | type == "object") and
         ($ch | keys - ["border", "groupbar", "rounding", "shadow"] | length == 0) and
@@ -244,6 +246,7 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
             + anim("layersOut"; $m.durations.fast; "exit"; $m.compositor.layers)
             + (if $m.compositor.borderSweep == null then "" else
                 anim("borderangle"; $m.durations.slow * 2; "standard"; $m.compositor.borderSweep) end)
+            + (if $m.compositor.borderFade == "off" then "hl.animation({ leaf = \"border\", enabled = false })\n" else "" end)
           end)
       else "" end)
   ' --arg baseline ${lib.escapeShellArg baselineLua} --arg chrome ${lib.escapeShellArg chromeLua} --arg shape ${lib.escapeShellArg shapeLua} \

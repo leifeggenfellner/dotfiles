@@ -647,6 +647,8 @@ let
     layers = "(slide|fade|popin( [0-9]{1,2}%)?)";
     # Gradient sweep on focus change (D-049); never "loop" (L-007).
     borderSweep = "once";
+    # Border colour changes snap instead of fading (D-073).
+    borderFade = "off";
   };
 
   # Window chrome (D-049): border gradient and group-bar colours, all

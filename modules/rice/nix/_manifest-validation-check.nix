@@ -234,6 +234,9 @@ let
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" "power" ] 9 lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "glow" ] { } lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderSweep" ] "loop" lotm))
+    # Solid focus border (D-073).
+    (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] "slow" lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] false lotm))
     # Daily accent (D-054).
     (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "record" ] "tarotDraw.daily" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "catalog" ] "widgets.tarotDraw.settings.missing" lotm))

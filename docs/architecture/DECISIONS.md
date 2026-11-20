@@ -1751,6 +1751,23 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: brass and iron are cut square; the rounded corners were the last
   piece of the generic look on the windows themselves.
 
+### D-073 — Solid gilt on focus: no border sweep or colour fade
+
+- Date: 2026-11-20 · Status: active · Amends D-049 and D-072 for LoTM
+- The user's call: the focused window gets one solid colour, with no
+  colour animation on the border.
+- `tokens.motion.compositor.borderFade = "off"` (the only value) turns
+  off Hyprland's `border` animation, so focus changes snap. The adapter
+  now restores the `border` leaf from the baseline on every apply, so a
+  theme without it (Cyberpunk) keeps the generated fade.
+- LoTM: `chrome.border.active = [ "accent.primary" ]`, a single stop, so
+  the frame is solid gilt; `borderSweep` is dropped; `borderFade = "off"`.
+  The unfocused dark-iron gradient and the group-bar cards stay.
+- Tests: the switch test asserts the leaf is disabled for LoTM and
+  restored for Cyberpunk; two must-fail cases (`"slow"`, `false`).
+- Why: a moving glint and a cross-fade read as modern UI; brass doesn't
+  shimmer when you look at it.
+
 ---
 
 ## Legacy imports
