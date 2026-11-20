@@ -102,24 +102,50 @@ idle veil and DPMS, a view of Utopia fades in on every screen. Any input
 dismisses it at once. It never locks and never holds input.
 
 - **Scene:** Utopia, the marionette town Klein built on an uninhabited
-  island at the edge of the Berserk Sea, as part of his Sequence 1 ritual.
-  It is about 5,000 people, every one of them a marionette. The view is
-  from the sea at dusk turning to night: a small Victorian harbour town
-  climbing a hill, a church spire and clock tower, gas lamps along the
-  quay, and the dark sea in front.
-- **The uncanny part:** the town is too orderly. Lamps light one after
-  another in perfect sequence, and a few distant silhouettes walk the
-  same routes on a fixed rhythm. Now and then, faint threads catch the
-  moonlight above the rooftops (spirit-world strings) and fade again. It
-  should be calm and slightly wrong, never horror.
-- **Not shown:** its destruction by Zaratul and the storm. The screensaver
-  is the town as it was meant to be.
-- **Motion:** slow swell on the sea and drifting sea mist, the lamp
-  sequence, the walkers, and the occasional thread glint. The gas lamps
-  flicker. It
-  runs at a low, fixed tick (around 10 fps for movement; the flicker is a
-  cheap opacity animation) under the ambient governor. It stops when DPMS
-  turns off.
+  island off the safe lanes of the Berserk Sea, for his Sequence 1 ritual.
+  All of its roughly 5,000 people are marionettes. The view is from the
+  hill above the town at dusk turning to night, as a layered engraving:
+  - **Foreground:** stone-and-timber rooftops, never more than four storeys,
+    in the Desi Bay style, with chimneys and wet slate.
+  - **Centre:** the town square and Saint Arianna Cathedral beside it,
+    the town's only church (Evernight). Its rose window is lit in
+    `accent.primary`, the strongest light in the scene.
+  - **Middle distance:** Utopia Station and the railway running out of
+    town past the plantations.
+  - **Far distance:** the harbour three kilometres off, with two docks,
+    the warehouses and a lighthouse, then the open sea.
+- **Weather:** Utopia rains often, because it sits in the unsafe waters.
+  The scene uses the shell's live sky conditions (D-046): drizzle or a
+  rain shower when it rains outside, low cloud when it is overcast, and a
+  clear moon otherwise. A distant storm flash out at sea is the most it
+  ever gets; there is no lightning over the town.
+- **Life, on a schedule:** the town is a little too orderly.
+  - **Lamps:** they light street by street in a perfect sequence.
+  - **Train:** now and then a steam train crosses the viaduct with a
+    plume of steam, always on time.
+  - **Lighthouse:** its beam sweeps the sea at an even beat.
+  - **Musical tour:** on rest days (weekends), a small procession of
+    lanterns moves from the square to the cathedral. Its tune, a faint
+    lyre and violin, goes through the sound governor (D-057) and is muted
+    by default.
+- **The uncanny part:** now and then faint threads catch the moonlight
+  above the rooftops and fade again. These are the marionette strings,
+  never explained. It should feel calm and slightly wrong, never horror.
+- **An entry that moves:** like the Peach Blossom Spring, the town is never
+  found the same way twice. Each time the Vigil appears, the view is
+  offset a little (parallax origin and the moon's position), so the
+  framing never quite repeats.
+- **Not shown:** its destruction by Zaratul, Adam and the Lord of Storms.
+  The screensaver is the town as Klein made it.
+- **Motion:** slow drift of the mist and rain, the lamp sequence, the
+  train, the lighthouse beam and the occasional thread glint. Movement
+  runs at a low, fixed tick (around 10 fps); the lamp flicker is a cheap
+  opacity animation. All of it is under the ambient governor, and it
+  stops when DPMS turns off.
+- **Art:** about six SVG layers (sky, sea and harbour, railway, cathedral
+  and square, foreground roofs, rain), authored in the repo and recoloured
+  from tokens at build. Lamps, windows and the beam are small sprites
+  placed from coordinates the art exports.
 - **Mechanics:** `service.hypridle` gains a `screensaver` listener that fires
   before `idleWarning`. The shell shows the scene through IPC
   (`ambient screensaver on|off`), the same way the idle hint works today. The
