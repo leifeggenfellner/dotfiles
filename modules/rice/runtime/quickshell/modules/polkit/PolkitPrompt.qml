@@ -151,10 +151,16 @@ PanelWindow {
         anchors.centerIn: parent
         width: 520
         height: content.implicitHeight + Theme.metrics.space.lg * 2
-        radius: Theme.metrics.radius.large
-        color: Theme.colors.bg.mantle
-        border.width: 1
+        radius: panelPlate.shown ? 0 : Theme.metrics.radius.large
+        color: panelPlate.shown ? "transparent" : Theme.colors.bg.mantle
+        border.width: panelPlate.shown ? 0 : 1
         border.color: prompt.errorText.length > 0 ? Theme.colors.state.danger : Theme.colors.bg.surface1
+
+        PlateFrame {
+            id: panelPlate
+            role: "panel"
+            rule: prompt.errorText.length > 0 ? Theme.colors.state.danger : Theme.colors.accent.primary
+        }
 
         opacity: prompt.open ? 1 : 0
         scale: prompt.open ? 1 : 0.96

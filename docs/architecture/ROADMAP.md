@@ -1394,5 +1394,14 @@ Concretized as D-080; completes phase 62.
 - ✅ The shell overlay stands down while the plugin runs.
 - Verified: the switch test, lint, the shitbox build, and a nested
   Hyprland end to end.
+
+## Phase 68 — The shell's panels wear the window frame ✅
+
+Concretized as D-081.
+
+- ✅ `plates.panel = "window"`: gilt border and corner pieces on the
+  launcher, dashboard, notification centre, switcher, wallpaper picker,
+  satchel and polkit prompt.
+- Verified: headless shots, checks and build.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

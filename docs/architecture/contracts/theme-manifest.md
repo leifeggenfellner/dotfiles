@@ -209,9 +209,12 @@ and exposes it exclusively through the `Theme` facade.
    D-068 adds `carousel.capture = { tint?; strength?; }`, which turns on
    window captures on the cards. D-076 adds the `plates` id
    (read by `components/PlateFrame`): `{ panel?; toast?; }`, each a
-   nine-sliced `{ src; slice; }` under assets/. `panel` sits behind the
-   launcher, dashboard and notification centre, `toast` behind toasts
-   (not letters); a surface keeps its rounded fill without one. D-074 adds the `ornaments` id (read by
+   nine-sliced `{ src; slice; }` under assets/ or, from D-081, `"window"`:
+   the window frame (`tokens.chrome.border.width` in the accent, with the
+   `ornaments` corners). `panel` sits behind the launcher, dashboard,
+   notification centre, theme switcher, wallpaper picker, satchel and
+   polkit prompt, `toast` behind toasts (not letters); a surface keeps
+   its rounded fill without one. D-074 adds the `ornaments` id (read by
    `modules/windowOrnaments`): `{ corner; size?; reach?; inactive?; }`
    draws `corner` (an `.svg` under assets/, the top-left piece, mirrored
    for the others) at each window frame's corners; `size` is 16..96 px

@@ -260,10 +260,15 @@ PanelWindow {
             anchors.centerIn: parent
             width: 660
             height: Math.min(620, header.height + listFrame.height + status.height + Theme.metrics.space.lg * 3)
-            radius: Theme.metrics.radius.large
-            color: Theme.colors.bg.mantle
-            border.width: 1
+            radius: panelPlate.shown ? 0 : Theme.metrics.radius.large
+            color: panelPlate.shown ? "transparent" : Theme.colors.bg.mantle
+            border.width: panelPlate.shown ? 0 : 1
             border.color: Theme.colors.bg.surface1
+
+            PlateFrame {
+                id: panelPlate
+                role: "panel"
+            }
             clip: true
 
             opacity: satchel.open ? 1 : 0

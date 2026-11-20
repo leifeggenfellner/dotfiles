@@ -1845,7 +1845,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-076 — Brass-framed shell surfaces
 
-- Date: 2026-11-20 · Status: active · Extends D-070, D-072
+- Date: 2026-11-20 · Status: active (panel plate replaced by the window frame, D-081) · Extends D-070, D-072
 - The third step toward Victorian chrome, as the user chose ("Brass-framed
   plates"): the big shell surfaces get square, nine-sliced brass plates
   like the rail popouts.
@@ -1960,6 +1960,28 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   returns on the next reload); dropping the `plugins` line removes it
   from the config.
 - Why: the compositor knows where every window is on every frame.
+
+### D-081 — The shell's panels wear the window frame
+
+- Date: 2026-11-20 · Status: active · Amends D-076
+- The user's call: the launcher and the other shell panels should have
+  the same border and corner pieces as the windows.
+- `widgets.plates.settings.<role>` may be `"window"`. `PlateFrame` then
+  draws the window frame: a `bg.mantle` fill inside a
+  `tokens.chrome.border.width` border in `accent.primary`, with the
+  `widgets.ornaments` corner piece in each corner, placed as the plugin
+  places them (the frame's outer corner at the piece's `(reach, reach)`).
+  The border sits `reach` inside the surface, so panels that clip keep
+  their corners whole. A surface may set `rule` for an alert colour.
+- `PlateFrame` now also frames the theme switcher, wallpaper picker,
+  satchel and polkit prompt, as well as the launcher, dashboard and
+  notification centre. Do-not-disturb turns the centre's border amber;
+  a polkit error turns the prompt's red.
+- LoTM: `plates.panel = "window"`; `bar/panel.svg` is removed. Toasts keep
+  the riveted plate, since 48 px corners crowd a single line.
+- Verified: headless shots of the launcher, dashboard, switcher and
+  notification centre in the frame; checks and build.
+- Why: one frame for everything that opens over the desktop.
 
 ---
 

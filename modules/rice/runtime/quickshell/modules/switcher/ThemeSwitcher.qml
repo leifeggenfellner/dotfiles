@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../../core"
+import "../../components"
 import "../../services/hypr"
 import "../../services/rice"
 
@@ -120,10 +121,15 @@ PanelWindow {
             anchors.centerIn: parent
             width: row.width + Theme.metrics.space.lg * 2
             height: title.height + row.height + status.height + Theme.metrics.space.lg * 3
-            radius: Theme.metrics.radius.large
-            color: Theme.colors.bg.mantle
-            border.width: 1
+            radius: panelPlate.shown ? 0 : Theme.metrics.radius.large
+            color: panelPlate.shown ? "transparent" : Theme.colors.bg.mantle
+            border.width: panelPlate.shown ? 0 : 1
             border.color: Theme.colors.bg.surface1
+
+            PlateFrame {
+                id: panelPlate
+                role: "panel"
+            }
 
             opacity: switcher.open ? 1 : 0
             scale: switcher.open ? 1 : 0.94

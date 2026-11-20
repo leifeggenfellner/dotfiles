@@ -346,13 +346,14 @@ let
     )
     ++ lib.optionals ((theme.widgets.plates.settings or null) != null) (
       # Surface plates (D-076): nine-sliced pieces under assets/ behind
-      # the launcher, dashboard and notification centre (`panel`) and
-      # behind toasts (`toast`).
+      # the shell's panels (`panel`) and toasts (`toast`), or "window"
+      # for the window frame: chrome border and ornaments corners (D-081).
       let
         at = "widgets.plates.settings";
         s = theme.widgets.plates.settings;
         piece = key: p:
-          if !(builtins.isAttrs p) then fail "${at}.${key} must be { src; slice; }"
+          if p == "window" then true
+          else if !(builtins.isAttrs p) then fail "${at}.${key} must be { src; slice; } or \"window\""
           else builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
             if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
             then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"

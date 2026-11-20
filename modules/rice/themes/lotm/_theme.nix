@@ -403,11 +403,11 @@ in
         };
       };
 
-      # Surface plates (D-076): the launcher, dashboard and notification
-      # centre sit on a square umber plate in a double brass rule with a
-      # boss in each corner; toasts on a small riveted plate.
+      # Surface plates (D-076): the shell's panels wear the window frame
+      # (D-081), gilt border and corner brackets; toasts sit on a small
+      # riveted plate.
       plates.settings = {
-        panel = { src = "bar/panel.svg"; slice = [ 18 18 18 18 ]; };
+        panel = "window";
         toast = { src = "bar/toast.svg"; slice = [ 10 10 10 10 ]; };
       };
 

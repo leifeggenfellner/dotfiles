@@ -74,11 +74,13 @@ PanelWindow {
         PlateFrame {
             id: panelPlate
             role: "panel"
+            rule: ShellState.doNotDisturb ? Theme.colors.state.warn : Theme.colors.accent.primary
         }
 
-        // On a plate, do-not-disturb shows as a rule inside the brass.
+        // On a nine-sliced plate, do-not-disturb shows as a rule inside
+        // the brass; the window frame turns its own border amber.
         Rectangle {
-            visible: panelPlate.shown && ShellState.doNotDisturb
+            visible: panelPlate.piece !== null && ShellState.doNotDisturb
             anchors.fill: parent
             anchors.margins: 10
             color: "transparent"
