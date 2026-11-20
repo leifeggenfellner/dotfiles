@@ -165,7 +165,7 @@ Item {
         width: 4
         height: 4
         radius: 2
-        color: Theme.colors.accent.frame
+        color: Theme.colors.accent.primary
     }
 
     MouseArea {

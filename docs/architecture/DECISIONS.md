@@ -1073,7 +1073,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-054 — The daily record may lend the day an accent
 
-- Date: 2026-11-17 · Status: active (window chrome excluded by D-078) · Extends D-042, D-047, D-051
+- Date: 2026-11-17 · Status: active (narrowed to the terminal greeting by D-079) · Extends D-042, D-047, D-051
 - `widgets.dailyAccent.settings = { record; catalog; }` opts a theme in:
   `record` is a prefs path `extras.<ns>.<key>` holding a daily record
   `{ date, id?, index? }` (D-042), `catalog` a theme list it resolves
@@ -1889,7 +1889,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-078 — The frame stays gold: the daily accent leaves the chrome
 
-- Date: 2026-11-20 · Status: active · Amends D-054
+- Date: 2026-11-20 · Status: active (runtime helpers removed by D-079) · Amends D-054
 - The user's call, after the day's draw (The Moon, `#dd7a6e`) turned the
   window borders red: borders, bezels, corner pieces and the rail keep
   the theme's gold and never follow the daily accent.
@@ -1908,6 +1908,27 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   in the Hyprland chunk, from prefs or from `RICE_DAILY_ACCENT`.
 - Why: the brass is the machine and should not change; the day's colour
   belongs to what the machine shows.
+
+### D-079 — The day's card colours only the terminal greeting
+
+- Date: 2026-11-20 · Status: active · Supersedes the shell and HyprFM parts
+  of D-054, and D-078's `accent.frame` / `tokenColor`
+- The user's call: text and chrome in a different colour from the brass
+  looked wrong; only the terminal greeting should follow the day's card.
+- The shell no longer has a daily accent: `modules/dailyAccent` and
+  `ShellState.dailyAccent` are gone, and `Theme.colors.accent.primary` is
+  always the theme's own. D-078's frame-only helpers are removed again;
+  the rail uses `accent.primary` as before.
+- HyprFM (`rice-hyprfm-theme`) and the Hyprland adapter (D-078) ignore
+  it; `RICE_DAILY_ACCENT` is no longer read anywhere.
+- Kept: `widgets.dailyAccent.settings` and its validation, the shared jq
+  resolver (`nix/_daily-lib.nix`), `rice-query daily`, the
+  `rice-terminal` greeting in the day's accent, and the fastfetch card
+  variant per accented card.
+- Tests: the HyprFM check asserts the theme accent with a daily record
+  and an override present.
+- Why: the brass is one colour; the day's draw is a greeting, not a
+  repaint.
 
 ---
 

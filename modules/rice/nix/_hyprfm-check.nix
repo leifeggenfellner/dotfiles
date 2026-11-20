@@ -1,6 +1,5 @@
 # HyprFM colours (D-055): rice-hyprfm-theme maps a theme's colour tokens
-# onto HyprFM's keys, takes the daily accent (D-054) like the Hyprland
-# adapter, derives a 16-colour terminal palette from palette.legacy only
+# onto HyprFM's keys (never the daily accent, D-079), derives a 16-colour terminal palette from palette.legacy only
 # when it is complete, recolours Adwaita's folders into a "rice" icon
 # theme, and writes nothing where HyprFM is not set up.
 { pkgs }:
@@ -70,22 +69,18 @@ pkgs.runCommand "rice-hyprfm"
     grep -A1 '^palette' "$theme" | grep -q '"#3e3121"'
     grep -q '"#cb7e70"' "$theme"
 
-    # Daily accent: from prefs, then the shell's override.
+    # The daily accent stays in the terminal greeting (D-079).
     printf '{"extras":{"tarotDraw":{"daily":{"date":"%s","id":"moon"}}}}' "$(date +%F)" > "$XDG_STATE_HOME/rice/prefs.json"
-    $run --active
-    grep -qx 'accent = "#dd7a6e"' "$theme"
-    RICE_DAILY_ACCENT=none $run --active
-    grep -qx 'accent = "#c79a3a"' "$theme"
     RICE_DAILY_ACCENT='#8899ee' $run --active
-    grep -qx 'accent = "#8899ee"' "$theme"
+    grep -qx 'accent = "#c79a3a"' "$theme"
 
-    # The "rice" icon theme: Adwaita's folders in the day's accent, by role.
+    # The "rice" icon theme: Adwaita's folders in the accent, by role.
     icons="$HOME/.local/share/icons/rice"
     grep -qx 'Inherits=Adwaita,hicolor' "$icons/index.theme"
     test "$(ls "$icons/scalable/places" | wc -l)" = "$(ls ${pkgs.adwaita-icon-theme}/share/icons/Adwaita/scalable/places/{folder,folder-*,user-home,user-desktop,user-bookmarks}.svg | wc -l)"
-    grep -q 'fill="#8899ee"' "$icons/scalable/places/folder.svg"         # front
-    grep -q 'stop-color="#7786d1"' "$icons/scalable/places/folder.svg"   # rim: darkened 12%
-    grep -q 'fill="#616eab"' "$icons/scalable/places/folder.svg"         # back: darkened 28%
+    grep -q 'fill="#c79a3a"' "$icons/scalable/places/folder.svg"         # front
+    grep -q 'stop-color="#af8733"' "$icons/scalable/places/folder.svg"   # rim: darkened 12%
+    grep -q 'fill="#8f6e29"' "$icons/scalable/places/folder.svg"         # back: darkened 28%
     ! grep -qiE '#(62a0ea|438de6|a4caee|afd4ff|c0d5ea)' "$icons"/scalable/places/*.svg
     test -z "$(find "$icons" -name '.rice.*' -print -quit)"
 

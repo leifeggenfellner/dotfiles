@@ -86,7 +86,7 @@ Item {
             radius: width / 2
             color: Theme.colors.bg.sunken
             border.width: 2
-            border.color: Theme.colors.accent.frame
+            border.color: Theme.colors.accent.primary
         }
     }
 
@@ -96,8 +96,7 @@ Item {
         width: cap.plateSize * 0.46
         height: width
         radius: width / 2
-        // Chrome: the theme's own colours, not the day's (D-078).
-        color: Theme.tokenColor(mouse.containsMouse ? (cap.glow.hover ?? "state.warn") : (cap.glow.rest ?? "accent.primary"))
+        color: Effects.colorRef(mouse.containsMouse ? (cap.glow.hover ?? "state.warn") : (cap.glow.rest ?? "accent.primary"))
         opacity: mouse.containsMouse ? 0.42 : 0.16
 
         Behavior on opacity {
@@ -129,7 +128,7 @@ Item {
         visible: cap.emblem.length > 0 && !Theme.iconIsFile(cap.emblem)
         anchors.centerIn: parent
         name: visible ? cap.emblem : "unknown"
-        color: mouse.containsMouse ? Theme.colors.accent.frame : Theme.colors.fg.muted
+        color: mouse.containsMouse ? Theme.colors.accent.primary : Theme.colors.fg.muted
     }
 
     MouseArea {

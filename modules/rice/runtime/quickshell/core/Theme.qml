@@ -27,11 +27,9 @@ QtObject {
             readonly property color subtle: theme._t.colors.fg.subtle
         }
         readonly property QtObject accent: QtObject {
-            // The day's accent (D-054) when the theme has one.
-            readonly property color primary: ShellState.dailyAccent.length > 0 ? ShellState.dailyAccent : theme._t.colors.accent.primary
-            // The theme's own accent, never the day's: for frames and
-            // chrome (D-078).
-            readonly property color frame: theme._t.colors.accent.primary
+            // Always the theme's own: the daily accent stays in the
+            // terminal greeting (D-079).
+            readonly property color primary: theme._t.colors.accent.primary
             readonly property color secondary: theme._t.colors.accent.secondary
             readonly property color tertiary: theme._t.colors.accent.tertiary
         }
@@ -218,15 +216,6 @@ QtObject {
     }
 
     // Per-widget manifest config (contracts/widget-contract.md).
-    // A colour token ref ("accent.primary") resolved against the theme's
-    // own palette, ignoring the daily accent (D-078). For chrome whose
-    // colours come from theme data. Unknown refs give fg.subtle.
-    function tokenColor(ref) {
-        const parts = (typeof ref === "string" ? ref : "").split(".");
-        const c = (theme._t.colors[parts[0]] ?? {})[parts[1]];
-        return c !== undefined ? c : theme._t.colors.fg.subtle;
-    }
-
     function widgetConfig(widgetId) {
         return ManifestLoader.manifest.widgets[widgetId] ?? ({});
     }

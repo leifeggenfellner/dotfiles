@@ -1375,5 +1375,13 @@ reached the window borders.
 - ✅ The Hyprland adapter ignores the daily accent.
 - ✅ `Theme.colors.accent.frame` and `Theme.tokenColor` for rail chrome.
 - Verified: the switch test, checks, the shitbox build, and a live apply.
+
+## Phase 66 — The day's card stays in the terminal ✅
+
+Concretized as D-079: only the terminal greeting takes the daily accent.
+
+- ✅ Removed from the shell (`modules/dailyAccent`) and HyprFM.
+- Verified: the HyprFM, switch, query and lint checks and the shitbox
+  build.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

@@ -177,7 +177,7 @@ PanelWindow {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 height: 2
-                color: Theme.colors.accent.frame
+                color: Theme.colors.accent.primary
             }
         }
 

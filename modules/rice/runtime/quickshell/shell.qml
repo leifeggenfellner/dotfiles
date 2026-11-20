@@ -18,7 +18,6 @@ import "./modules/inspector"
 import "./modules/mood"
 import "./modules/sky"
 import "./modules/awakening"
-import "./modules/dailyAccent"
 import "./modules/newtab"
 import "./modules/polkit"
 import "./modules/workspaceCarousel"
@@ -59,8 +58,6 @@ ShellRoot {
     OsdController {}
 
     AwakeningController {}
-
-    DailyAccentController {}
 
     NewtabFeed {}
 

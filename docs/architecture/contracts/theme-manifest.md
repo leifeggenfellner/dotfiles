@@ -188,8 +188,8 @@ and exposes it exclusively through the `Theme` facade.
    the `awakening` id (read by `modules/awakening/AwakeningController`):
    `{ title; subtitle?; hold?; lift?; sound?; }` opts the theme into the
    once-per-login fog-lift. D-054 adds the `dailyAccent` id (read by
-   `modules/dailyAccent/DailyAccentController`, `rice-query`, `rice-terminal`
-   and the fastfetch card; from D-078 never the Hyprland adapter): `{ record; catalog; }`, where
+   `rice-query`, `rice-terminal` and the fastfetch card; from D-079 only
+   the terminal greeting follows it): `{ record; catalog; }`, where
    `record` is `extras.<ns>.<key>` and catalog entries may carry `accent`
    (`#rrggbb`, replacing `accent.primary` on their day) and `sigil` (an
    assets-relative `.svg`). D-063 adds the `bar` id (read by

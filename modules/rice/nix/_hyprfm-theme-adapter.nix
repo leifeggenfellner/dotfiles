@@ -6,7 +6,6 @@
 { pkgs }:
 let
   activeManifestLib = import ./_active-manifest-lib.nix { inherit pkgs; };
-  dailyLib = import ./_daily-lib.nix;
 
   # Adwaita's folder-shaped places icons, recoloured at run time. They
   # share one set of blues; trash, network and server icons keep theirs.
@@ -22,7 +21,6 @@ pkgs.writeShellScriptBin "rice-hyprfm-theme" ''
   index="''${RICE_INDEX:-$HOME/.config/rice/themes.json}"
   state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/rice"
   pointer="$state_dir/active"
-  prefs="$state_dir/prefs.json"
   config_dir="''${XDG_CONFIG_HOME:-$HOME/.config}/hyprfm"
   # Where HyprFM's icon watcher looks (it does not read XDG_DATA_HOME).
   icon_dir="$HOME/.local/share/icons/rice"
@@ -63,29 +61,19 @@ pkgs.writeShellScriptBin "rice-hyprfm-theme" ''
   manifest="$(canonical_store_file "theme manifest" "$manifest")"
   [ "$print" = 1 ] || [ -d "$config_dir" ] || exit 0
 
-  # Daily accent (D-054), resolved as rice-hyprland-theme does:
-  # RICE_DAILY_ACCENT=#rrggbb|none overrides the record in prefs.json.
-  daily="''${RICE_DAILY_ACCENT:-}"
-  prefs_source=/dev/null
-  [ ! -r "$prefs" ] || prefs_source="$prefs"
-
   # Token roles onto HyprFM's colour keys. The 16-colour terminal palette
   # comes from palette.legacy, laid out like the console palette (D-044)
   # but with a surface for black; brights lighten their normal colour.
   # Folder icons take the accent by role: Adwaita's pale front becomes it
   # (pale reads washed out on a dark theme), the rim and back darken it,
   # and the glints mix it toward white.
-  mapped="$("$jq" -ec --arg daily "$daily" --arg today "$(${pkgs.coreutils}/bin/date +%F)" \
-    --rawfile prefs_raw "$prefs_source" '
-    ${dailyLib}
+  mapped="$("$jq" -ec '
     def color: type == "string" and test("^#[0-9a-fA-F]{6}$");
     def byte: ascii_downcase | explode | map(if . >= 97 then . - 87 else . - 48 end) | .[0] * 16 + .[1];
     def hex2: [(. / 16 | floor), (. % 16)] | map("0123456789abcdef"[.:. + 1]) | join("");
     def channels(f): ltrimstr("#") as $h | "#" + ([0, 2, 4] | map($h[.:. + 2] | byte | f | floor | hex2) | join(""));
     def lighten($p): channels(. + (255 - .) * $p / 100);
     def darken($p): channels(. * (100 - $p) / 100);
-    (if $daily == "none" then . elif $daily != "" then .tokens.colors.accent.primary = $daily
-     elif .widgets.dailyAccent == null then . else with_daily_accent(try ($prefs_raw | fromjson) catch {}; $today) end) |
     .tokens.colors as $c |
     [
       ["base", $c.bg.base], ["mantle", $c.bg.mantle // $c.bg.base], ["crust", $c.bg.sunken],
