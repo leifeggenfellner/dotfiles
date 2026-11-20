@@ -1174,3 +1174,21 @@ Concretized as D-063. Part of #92 (`docs/design/bar-brass-rail.md`).
 - Verified: `rice-lint`, manifest validation, shitbox build; headless sway at rest, with the
   launcher open (cog turned) and with the power popout open from the
   seal; Cyberpunk keeps its floating bar and stacked clock.
+
+## Phase 51 — The Brass Rail, phase 2: instruments and tray hatch ✅
+
+Concretized as D-064. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ `Theme.hasIcon`; signal-strength icon steps; `components/GaugeIcon`
+  for the vial; low and critical battery thresholds (`Motion.alarm`).
+- ✅ Media `hideIdle` and `disc` (`Motion.revolution`, governor-gated);
+  monitor `showLabel`; zero-width glances take no bar slot.
+- ✅ Opt-in `tray` hatch widget; `components/TrayGrid` shared with the
+  system popout (`showTray`).
+- ✅ Closed-key validation for system, media, monitor-profile and tray
+  settings, with must-fail cases.
+- ✅ LoTM instrument family in `assets/instruments/`.
+- Verified: `rice-lint`, manifest validation, shitbox build; headless
+  sway: instruments, a 92% charging vial, the hatch with three toned
+  icons and +1 and its popout, the phonograph with an mpv track playing
+  and gone when idle; Cyberpunk unchanged.

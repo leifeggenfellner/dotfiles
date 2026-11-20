@@ -1,3 +1,5 @@
 Icon 1.0 Icon.qml
 WorkspaceItem 1.0 WorkspaceItem.qml
 WorkspaceStrip 1.0 WorkspaceStrip.qml
+TrayGrid 1.0 TrayGrid.qml
+GaugeIcon 1.0 GaugeIcon.qml

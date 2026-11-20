@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Aether antenna, no signal (D-064) -->
+  <g fill="none" stroke="#c79a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 10v11M8.5 21h7M12 16.5l-3 4.5M12 16.5l3 4.5"/>
+    <circle cx="12" cy="8" r="1.7" fill="#7a5a22" stroke="none"/>
+    <path d="M15.5 3.5l5 5M20.5 3.5l-5 5" stroke="#b54834"/>
+  </g>
+</svg>

@@ -15,6 +15,8 @@ import QtQuick
 //   cardFlip    — small card reveal/selection turn
 //   ritualAssemble — infrequent radial/delegate assembly motion
 //   instrumentSettle — a brass part turning to a new reading (D-063)
+//   alarm       — one beat of a critical warning pulse (D-064)
+//   revolution  — one linear turn of a playing disc (D-064)
 //   stateChange — small state reactions (hover, value changes)
 //   awaken      — one-shot startup reveal of surface contents
 //
@@ -60,6 +62,16 @@ QtObject {
     readonly property QtObject instrumentSettle: QtObject {
         readonly property int duration: motion.enabled ? Theme.motion.durations.ceremonial : 0
         readonly property int easing: Theme.motion.easings.emphasis
+    }
+
+    readonly property QtObject alarm: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.slow : 0
+        readonly property int easing: Theme.motion.easings.standard
+    }
+
+    readonly property QtObject revolution: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.ceremonial * 4 : 0
+        readonly property int easing: Easing.Linear
     }
 
     readonly property QtObject stateChange: QtObject {

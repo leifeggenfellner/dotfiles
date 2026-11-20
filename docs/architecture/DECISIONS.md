@@ -553,7 +553,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-036 — Tray menus remain app-native
 
-- Date: 2026-07-09 · Status: active
+- Date: 2026-07-09 · Status: active (tray placement amended by D-064)
 - System tray items live in the system popout, never directly in the bar (L-009).
   Phase 28 exposes native StatusNotifier menus through Quickshell's tray item
   `display()` path instead of rendering DBus menu entries with custom QML.
@@ -1411,6 +1411,46 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the floating pill read as a generic rice; the rail makes the bar
   an instrument without any per-theme code in the runtime.
 
+### D-064 — Instruments on the rail, and an opt-in tray hatch
+
+- Date: 2026-11-20 · Status: active · Extends D-016, D-063 ·
+  Amends L-009, D-036 (tray placement only) · Brief:
+  `docs/design/bar-brass-rail.md` (#92, phase 2)
+- Icons stay semantic names in `assets.icons`; `Theme.hasIcon(name)` lets
+  a glance prefer a finer variant the theme names. The system glance uses
+  `wifi-0`…`wifi-3` for signal strength (else `wifi`). A theme with
+  `battery-ink` gets a vial gauge: `components/GaugeIcon` draws the ink
+  below the charge line under the `battery` glass, and `battery-ink-low`
+  replaces it at `lowBattery`.
+- `widgets.system.settings`: `bluetooth` (show the icon while the adapter
+  is on), `batteryGauge = { full; empty; }`, `lowBattery` (default 0.2),
+  `criticalBattery` (default 0; below it the battery pulses on
+  `Motion.alarm`, the only flashing in the bar besides urgent
+  workspaces), `showTray`.
+- `widgets.media.settings`: `hideIdle` collapses the glance with no track;
+  `disc` keeps the `music` icon and turns it on `Motion.revolution` while
+  playing, only while the ambient governor runs.
+  `widgets.monitor-profile.settings.showLabel = false` leaves the icon
+  alone; the profile name stays in the popout. A glance whose width is 0
+  takes no slot in the bar row.
+- The `tray` widget (off by default) is the hatch: the first `maxInline`
+  (1–6) icons on the bar, a count of the rest, `tone = "sepia"` muting
+  app colours until hover, gone when the tray is empty; its popout holds
+  every item with app-native menus (`components/TrayGrid`, shared with
+  the system popout). L-009 and D-036 kept tray icons out of the bar to
+  avoid unbounded chrome; the hatch is bounded and opt-in, and a theme
+  that enables it sets `system.settings.showTray = false` so the tray
+  lives in one place.
+- All new keys are closed and validated, with must-fail cases.
+- LoTM: hand-drawn instruments in `assets/instruments/` (antenna, conduit,
+  speaking horn and its stopper, vial glass, ink and bubbles, tuning fork,
+  lens, phonograph disc), drawn in-repo so there is no licence question.
+  Cyberpunk is unchanged.
+- Not done: the title marquee and the lens tooltip; the title elides and
+  the profile name is in the popout.
+- Why: the bar's right side read like a phone status bar; the instruments
+  carry the same readings in the world's own objects.
+
 ---
 
 ## Legacy imports
@@ -1430,6 +1470,7 @@ All remain active unless marked otherwise.
 - **L-008** Hyprland config stays Nix-generated. Lua is an optional behavior layer
   only, never a config replacement.
 - **L-009** System cluster replaces a standalone systray; tray items are allowlisted.
+  (Amended by D-064: a theme may opt into the bounded tray hatch.)
 - **L-010** Widgets expose the descriptor contract and never import services
   (mechanism defined by D-009).
 - **L-011** Clock keeps digits alongside the dial. Default bar height 56px,

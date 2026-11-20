@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Phonograph disc (D-064); turns while a track plays. -->
+  <circle cx="12" cy="12" r="10" fill="#151009" stroke="#c79a3a" stroke-width="2"/>
+  <circle cx="12" cy="12" r="7" fill="none" stroke="#7a5a22" stroke-width="1"/>
+  <circle cx="12" cy="12" r="5" fill="none" stroke="#7a5a22" stroke-width="1"/>
+  <circle cx="12" cy="12" r="3" fill="#8a3b3b"/>
+  <circle cx="12" cy="10" r="0.9" fill="#e8c76f"/>
+  <circle cx="12" cy="12" r="0.8" fill="#151009"/>
+</svg>

@@ -232,7 +232,7 @@ in
       settings = "icons/sigil_settings.svg";
       logout = "icons/sigil_logout.svg";
       messenger = "icons/sigil_messenger.svg";
-      monitor = "icons/sigil_eye.svg";
+      monitor = "instruments/lens.svg";
       moon = "icons/sigil_moon.svg";
       moon-new = "icons/sigil_moon.svg";
       moon-waxing-crescent = "icons/sigil_moon.svg";
@@ -245,6 +245,22 @@ in
       power = "icons/sigil_power.svg";
       reboot = "icons/sigil_reboot.svg";
       weather = "icons/sigil_weather.svg";
+      # The rail's instruments (D-064): engraved brass line art.
+      wifi = "instruments/antenna-3.svg";
+      wifi-0 = "instruments/antenna-0.svg";
+      wifi-1 = "instruments/antenna-1.svg";
+      wifi-2 = "instruments/antenna-2.svg";
+      wifi-3 = "instruments/antenna-3.svg";
+      wifi-off = "instruments/antenna-off.svg";
+      ethernet = "instruments/conduit.svg";
+      volume = "instruments/horn.svg";
+      volume-muted = "instruments/horn-stoppered.svg";
+      bluetooth = "instruments/fork.svg";
+      battery = "instruments/vial.svg";
+      battery-charging = "instruments/vial-charging.svg";
+      battery-ink = "instruments/vial-ink.svg";
+      battery-ink-low = "instruments/vial-ink-low.svg";
+      music = "instruments/disc.svg";
     };
     sounds = {
       notification = "sounds/sealed-letter.wav";
@@ -324,6 +340,22 @@ in
       };
 
       clock.settings.layout = "inline";
+
+      # Instruments (D-064). The vial's ink runs from 0.21 (full) to
+      # 0.79 (empty) of the icon's height; it turns rust at 15% and pulses at 5%.
+      system.settings = {
+        bluetooth = true;
+        showTray = false;
+        batteryGauge = { full = 0.21; empty = 0.79; };
+        lowBattery = 0.15;
+        criticalBattery = 0.05;
+      };
+      media.settings = { hideIdle = true; disc = true; };
+      "monitor-profile".settings.showLabel = false;
+      tray = {
+        enabled = true;
+        settings = { maxInline = 3; tone = "sepia"; title = "The Hatch"; };
+      };
 
       # Polkit prompt (D-062): a privileged act needs a higher seal. The
       # real request, identity and action id are always shown beneath.

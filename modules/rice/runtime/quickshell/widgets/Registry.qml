@@ -11,6 +11,7 @@ import "./epigraph" as Epigraph
 import "./divination" as Divination
 import "./session" as Session
 import "./monitor" as Monitor
+import "./tray" as Tray
 
 // ── Registry ──────────────────────────────────────────────────
 // The widget registry: built-in descriptors ∪ theme plugins.
@@ -82,6 +83,14 @@ Item {
         id: monitorPopout
         Monitor.MonitorProfilePopout {}
     }
+    Component {
+        id: trayGlance
+        Tray.TrayHatchGlance {}
+    }
+    Component {
+        id: trayPopout
+        Tray.TrayHatchPopout {}
+    }
 
     readonly property list<QtObject> builtins: [
         WidgetDescriptor {
@@ -104,6 +113,17 @@ Item {
             services: ["network", "audio", "bluetooth", "power", "tray"]
             glance: systemGlance
             popout: systemPopout
+        },
+        // The tray hatch (D-064) is opt-in: by default the tray lives
+        // in the system popout (L-009).
+        WidgetDescriptor {
+            widgetId: "tray"
+            enabled: false
+            region: "right"
+            priority: -5
+            services: ["tray"]
+            glance: trayGlance
+            popout: trayPopout
         },
         WidgetDescriptor {
             widgetId: "media"

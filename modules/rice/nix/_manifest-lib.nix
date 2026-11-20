@@ -232,6 +232,64 @@ let
       ++ lib.optional (s ? sound && !((theme.assets.sounds or { }) ? ${s.sound}))
         (fail "${at}.sound must name a sound in assets.sounds")
     )
+    ++ lib.optionals ((theme.widgets.system.settings or null) != null) (
+      # Instruments (D-064): the system glance's thresholds and gauge.
+      let
+        at = "widgets.system.settings";
+        s = theme.widgets.system.settings;
+        fraction = key: v:
+          if (builtins.isFloat v || builtins.isInt v) && v >= 0 && v <= 1 then true
+          else fail "${at}.${key} must be a number from 0 to 1";
+        bool = key: v: if builtins.isBool v then true else fail "${at}.${key} must be a bool";
+      in
+      [ (checkClosed at [ "bluetooth" "showTray" "batteryGauge" "lowBattery" "criticalBattery" ] s) ]
+      ++ lib.optional (s ? bluetooth) (bool "bluetooth" s.bluetooth)
+      ++ lib.optional (s ? showTray) (bool "showTray" s.showTray)
+      ++ lib.optional (s ? lowBattery) (fraction "lowBattery" s.lowBattery)
+      ++ lib.optional (s ? criticalBattery) (fraction "criticalBattery" s.criticalBattery)
+      ++ lib.optionals (s ? batteryGauge) [
+        (checkClosed "${at}.batteryGauge" [ "full" "empty" ] s.batteryGauge)
+        (fraction "batteryGauge.full" (s.batteryGauge.full or 0))
+        (fraction "batteryGauge.empty" (s.batteryGauge.empty or 1))
+        (if (s.batteryGauge.full or 0) < (s.batteryGauge.empty or 1) then true
+        else fail "${at}.batteryGauge.full must sit above empty")
+      ]
+    )
+    ++ lib.optionals ((theme.widgets.media.settings or null) != null) (
+      let
+        at = "widgets.media.settings";
+        s = theme.widgets.media.settings;
+      in
+      [ (checkClosed at [ "idleTitle" "title" "maxTitleWidth" "hideIdle" "disc" ] s) ]
+      ++ lib.optional (s ? idleTitle && !builtins.isString s.idleTitle) (fail "${at}.idleTitle must be a string")
+      ++ lib.optional (s ? title && !builtins.isString s.title) (fail "${at}.title must be a string")
+      ++ lib.optional (s ? maxTitleWidth && !(builtins.isInt s.maxTitleWidth && s.maxTitleWidth > 0))
+        (fail "${at}.maxTitleWidth must be a positive int")
+      ++ lib.optional (s ? hideIdle && !builtins.isBool s.hideIdle) (fail "${at}.hideIdle must be a bool")
+      ++ lib.optional (s ? disc && !builtins.isBool s.disc) (fail "${at}.disc must be a bool")
+    )
+    ++ lib.optionals ((theme.widgets."monitor-profile".settings or null) != null) (
+      let
+        at = "widgets.monitor-profile.settings";
+        s = theme.widgets."monitor-profile".settings;
+      in
+      [ (checkClosed at [ "maxLabelWidth" "showLabel" ] s) ]
+      ++ lib.optional (s ? showLabel && !builtins.isBool s.showLabel) (fail "${at}.showLabel must be a bool")
+      ++ lib.optional (s ? maxLabelWidth && !(builtins.isInt s.maxLabelWidth && s.maxLabelWidth > 0))
+        (fail "${at}.maxLabelWidth must be a positive int")
+    )
+    ++ lib.optionals ((theme.widgets.tray.settings or null) != null) (
+      # Tray hatch (D-064): how many icons ride the bar, and their tone.
+      let
+        at = "widgets.tray.settings";
+        s = theme.widgets.tray.settings;
+      in
+      [ (checkClosed at [ "maxInline" "tone" "title" ] s) ]
+      ++ lib.optional (s ? maxInline && !(builtins.isInt s.maxInline && s.maxInline >= 1 && s.maxInline <= 6))
+        (fail "${at}.maxInline must be an int from 1 to 6")
+      ++ lib.optional (s ? tone && !(builtins.elem s.tone [ "none" "sepia" ])) (fail "${at}.tone must be none or sepia")
+      ++ lib.optional (s ? title && !builtins.isString s.title) (fail "${at}.title must be a string")
+    )
     ++ lib.optionals ((theme.widgets.clock.settings or null) != null) (
       let
         at = "widgets.clock.settings";

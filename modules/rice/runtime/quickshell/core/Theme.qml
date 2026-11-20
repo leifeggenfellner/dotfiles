@@ -171,6 +171,11 @@ QtObject {
         const v = ManifestLoader.icons[name];
         return v !== undefined ? v : ManifestLoader.icons["unknown"];
     }
+    // True when the theme or the defaults name this icon, so a
+    // caller can prefer a finer variant (wifi-2) over the base (wifi).
+    function hasIcon(name) {
+        return ManifestLoader.icons[name] !== undefined;
+    }
     function iconIsFile(value) {
         return typeof value === "string" && value.indexOf("/") !== -1;
     }

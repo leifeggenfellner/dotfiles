@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Aether antenna, 2 of 3 arcs (D-064) -->
+  <g fill="none" stroke="#c79a3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 10v11M8.5 21h7M12 16.5l-3 4.5M12 16.5l3 4.5"/>
+    <circle cx="12" cy="8" r="1.7" fill="#e8c76f" stroke="none"/>
+    <path d="M9.45 5.45 A3.6 3.6 0 0 0 9.45 10.55"/>
+    <path d="M14.55 5.45 A3.6 3.6 0 0 1 14.55 10.55"/>
+    <path d="M7.62 3.62 A6.2 6.2 0 0 0 7.62 12.38"/>
+    <path d="M16.38 3.62 A6.2 6.2 0 0 1 16.38 12.38"/>
+  </g>
+</svg>

@@ -3,6 +3,8 @@ import "../../core"
 import "../../components"
 
 // Compact monitor-control status. Services: monitorControl, hypr (injected).
+// settings: maxLabelWidth; showLabel = false leaves the icon alone and
+// the profile name to the popout (D-064).
 
 Item {
     id: root
@@ -44,8 +46,9 @@ Item {
         }
 
         Text {
+            visible: root.settings.showLabel ?? true
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(implicitWidth, settings.maxLabelWidth ?? 120)
+            width: Math.min(implicitWidth, root.settings.maxLabelWidth ?? 120)
             text: root.label
             color: root.monitorControl?.available ? Theme.colors.fg.muted : Theme.colors.fg.subtle
             elide: Text.ElideRight

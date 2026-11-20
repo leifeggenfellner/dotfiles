@@ -259,6 +259,18 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "glow" "hover" ] "#ffaa00" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "clock" "settings" "layout" ] "row" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "clock" "settings" "format" ] "HH:mm" lotm))
+    # Instruments and tray hatch (D-064).
+    (evaluates "lotm" (setAtPath [ "widgets" "system" "settings" "wifiStyle" ] "mast" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "system" "settings" "lowBattery" ] 15 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "system" "settings" "bluetooth" ] "on" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "system" "settings" "batteryGauge" ] { full = 0.9; empty = 0.1; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "system" "settings" "batteryGauge" "left" ] 0.1 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "media" "settings" "marquee" ] true lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "media" "settings" "hideIdle" ] "yes" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "monitor-profile" "settings" "showLabel" ] 0 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "tray" "settings" "maxInline" ] 0 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "tray" "settings" "tone" ] "grayscale" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "tray" "settings" "allow" ] [ "steam" ] lotm))
     # Browser new-tab page (D-060).
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "title" ] 42 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "newtab" "settings" "epigraphs" ] "widgets.epigraph.settings.missing" lotm))

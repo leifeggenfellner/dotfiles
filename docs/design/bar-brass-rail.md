@@ -1,6 +1,6 @@
 # The Brass Rail: taskbar redesign brief
 
-Status: **in progress**. Phase 1 landed as D-063. Tracked in issue #92. When a phase lands, its decision goes into
+Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064. Tracked in issue #92. When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 
 ## Why

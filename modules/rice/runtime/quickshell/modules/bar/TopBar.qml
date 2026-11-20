@@ -92,6 +92,9 @@ PanelWindow {
 
             required property var modelData
 
+            // A glance with nothing to show (width 0) takes no slot,
+            // so the row closes up around it (D-064).
+            visible: implicitWidth > 0
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: glanceLoader.item ? glanceLoader.item.implicitWidth : 0
             implicitHeight: glanceLoader.item ? glanceLoader.item.implicitHeight : 0

@@ -5,9 +5,9 @@ import "../../components"
 // ── SystemClusterPopout ───────────────────────────────────────
 // Controls behind the system glance: volume, wifi, bluetooth, tray.
 // Services: network, audio, bluetooth, tray (injected).
-// Tray lives here, not in the bar (L-009); left click activates,
-// right click opens the app-native menu. Secured new networks expand
-// an inline password prompt.
+// The tray lives here unless the theme turns on the tray hatch
+// (settings.showTray = false, D-064); menus stay app-native (D-036).
+// Secured new networks expand an inline password prompt.
 
 Column {
     id: root
@@ -22,21 +22,6 @@ Column {
 
     width: 340
     spacing: Theme.metrics.space.md
-
-    function trayMenuPosition(itemNode) {
-        const p = itemNode.mapToItem(null, itemNode.width, itemNode.height);
-        return {
-            x: Math.round(p.x),
-            y: Math.round(p.y)
-        };
-    }
-
-    function openTrayMenu(item, itemNode) {
-        if (!root.tray || !item || !item.hasMenu)
-            return false;
-        const pos = trayMenuPosition(itemNode);
-        return root.tray.displayMenu(item.id, itemNode.Window.window, pos.x, pos.y);
-    }
 
     // Popout content is created fresh on every open — drop stale
     // errors/prompts from previous interactions.
@@ -327,9 +312,9 @@ Column {
         }
     }
 
-    // ── Tray (L-009: popout only, never bar icons) ────────────
+    // ── Tray (L-009; a theme with the tray hatch hides it here) ──
     Column {
-        visible: root.tray !== null && root.tray.items.length > 0
+        visible: (root.settings.showTray ?? true) && root.tray !== null && root.tray.items.length > 0
         width: parent.width
         spacing: Theme.metrics.space.xs
 
@@ -337,62 +322,9 @@ Column {
             text: "Tray"
         }
 
-        Flow {
+        TrayGrid {
             width: parent.width
-            spacing: Theme.metrics.space.sm
-
-            Repeater {
-                model: root.tray ? root.tray.items : []
-
-                Rectangle {
-                    id: trayItem
-
-                    required property var modelData
-                    readonly property bool hasMenu: modelData.hasMenu === true
-                    readonly property bool onlyMenu: modelData.onlyMenu === true
-
-                    width: 36
-                    height: 36
-                    radius: Theme.metrics.radius.small
-                    color: trayMouse.containsMouse ? Theme.colors.bg.elevated : "transparent"
-                    border.width: hasMenu && trayMouse.containsMouse ? 1 : 0
-                    border.color: Theme.colors.accent.primary
-
-                    Image {
-                        anchors.centerIn: parent
-                        width: 22
-                        height: 22
-                        source: trayItem.modelData.icon
-                        sourceSize.width: 44
-                        sourceSize.height: 44
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                    }
-
-                    MouseArea {
-                        id: trayMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-                        onClicked: mouse => {
-                            if (mouse.button === Qt.RightButton) {
-                                if (!root.openTrayMenu(trayItem.modelData, trayItem))
-                                    root.tray.secondaryActivate(trayItem.modelData.id);
-                                return;
-                            }
-                            if (mouse.button === Qt.MiddleButton) {
-                                root.tray.secondaryActivate(trayItem.modelData.id);
-                                return;
-                            }
-                            if (trayItem.onlyMenu)
-                                root.openTrayMenu(trayItem.modelData, trayItem);
-                            else
-                                root.tray.activate(trayItem.modelData.id);
-                        }
-                        onPressAndHold: root.openTrayMenu(trayItem.modelData, trayItem)
-                    }
-                }
-            }
+            tray: root.tray
         }
     }
 }

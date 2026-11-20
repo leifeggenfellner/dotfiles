@@ -194,7 +194,10 @@ and exposes it exclusively through the `Theme` facade.
    assets-relative `.svg`). D-063 adds the `bar` id (read by
    `modules/bar/TopBar`): `{ style; frame?; caps?; glow?; }` picks the
    floating or rail frame, its nine-sliced pieces and its end caps; and
-   `widgets.clock.settings.layout` (`stacked` | `inline`).
+   `widgets.clock.settings.layout` (`stacked` | `inline`). D-064 adds
+   settings for `system`, `media`, `monitor-profile` and the opt-in
+   `tray` hatch, and the icon names `wifi-0`…`wifi-3`, `battery-ink` and
+   `battery-ink-low`, used when the theme names them.
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

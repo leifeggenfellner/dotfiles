@@ -4,6 +4,10 @@ import "../../components"
 
 // ── MediaGlance ──────────────────────────────────────────────
 // Compact MPRIS status for the bar. Services: mpris (injected).
+// settings (D-064):
+//   hideIdle  collapse to nothing while no track is loaded
+//   disc      keep the `music` icon and turn it while playing, only
+//             while the ambient governor runs (never on battery)
 
 Item {
     id: root
@@ -15,8 +19,12 @@ Item {
     readonly property var track: mpris ? mpris.nowPlaying : null
     readonly property string idleTitle: settings.idleTitle ?? "Gramophone"
     readonly property int maxTitleWidth: settings.maxTitleWidth ?? 170
+    readonly property bool hidden: (settings.hideIdle ?? false) && track === null
+    readonly property bool disc: settings.disc ?? false
+    readonly property bool playing: track !== null && track.isPlaying
 
-    implicitWidth: row.width
+    visible: !hidden
+    implicitWidth: hidden ? 0 : row.width
     implicitHeight: Theme.metrics.bar.height
 
     Row {
@@ -27,8 +35,17 @@ Item {
         Icon {
             id: stateIcon
             anchors.verticalCenter: parent.verticalCenter
-            name: root.track && root.track.isPlaying ? "pause" : "music"
+            name: root.playing && !root.disc ? "pause" : "music"
             color: root.track ? Theme.colors.accent.primary : Theme.colors.fg.subtle
+
+            RotationAnimator on rotation {
+                running: root.disc && root.playing && ShellState.ambientActive && Motion.enabled
+                from: 0
+                to: 360
+                loops: Animation.Infinite
+                duration: Motion.revolution.duration
+                easing.type: Motion.revolution.easing
+            }
 
             MouseArea {
                 anchors.fill: parent
