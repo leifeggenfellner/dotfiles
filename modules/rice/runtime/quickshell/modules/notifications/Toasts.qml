@@ -107,11 +107,28 @@ PanelWindow {
 
                 width: stack.width
                 height: content.height + Theme.metrics.space.md * 2
-                radius: Theme.metrics.radius.medium
-                color: card.model.urgency === 2 || card.letter ? Theme.colors.bg.elevated : Theme.colors.bg.mantle
-                border.width: 1
+                radius: plate.active ? 0 : Theme.metrics.radius.medium
+                color: plate.active ? "transparent" : (card.model.urgency === 2 || card.letter ? Theme.colors.bg.elevated : Theme.colors.bg.mantle)
+                border.width: plate.active ? 0 : 1
                 border.color: card.model.urgency === 2 ? Theme.colors.state.danger
                     : (card.letter ? Qt.rgba(Theme.colors.accent.primary.r, Theme.colors.accent.primary.g, Theme.colors.accent.primary.b, 0.55) : Theme.colors.bg.surface1)
+
+                // Letters keep their envelope; other toasts may sit on the
+                // theme's toast plate (D-076), urgent ones with a red rule.
+                PlateFrame {
+                    id: plate
+                    role: "toast"
+                    visible: shown && !card.letter
+                    readonly property bool active: shown && !card.letter
+                }
+                Rectangle {
+                    visible: plate.active && card.model.urgency === 2
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    color: "transparent"
+                    border.width: 1
+                    border.color: Theme.colors.state.danger
+                }
 
                 opacity: 0
                 // A letter is delivered: it slides in from the screen

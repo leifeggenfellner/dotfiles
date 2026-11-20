@@ -237,6 +237,11 @@ let
     # Solid focus border (D-073).
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] "slow" lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] false lotm))
+    # Surface plates (D-076).
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "popout" ] { src = "bar/panel.svg"; slice = [ 1 1 1 1 ]; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "panel" "src" ] "bar/missing.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" "slice" ] [ 10 10 10 ] lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" ] "bar/toast.svg" lotm))
     # Window ornaments (D-074).
     (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "corner" ] "chrome/missing.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "corner" ] "bar/rail.png" lotm))

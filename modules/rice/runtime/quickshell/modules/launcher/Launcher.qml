@@ -385,11 +385,16 @@ PanelWindow {
             anchors.centerIn: parent
             width: 720 + Theme.metrics.space.lg * 2
             height: header.height + body.height + status.height + Theme.metrics.space.lg * 3
-            radius: Theme.metrics.radius.large
-            color: Theme.colors.bg.mantle
-            border.width: 1
+            radius: panelPlate.shown ? 0 : Theme.metrics.radius.large
+            color: panelPlate.shown ? "transparent" : Theme.colors.bg.mantle
+            border.width: panelPlate.shown ? 0 : 1
             border.color: Theme.colors.bg.surface1
             clip: true
+
+            PlateFrame {
+                id: panelPlate
+                role: "panel"
+            }
 
             opacity: launcher.open ? 1 : 0
             scale: launcher.open ? 1 : 0.96

@@ -344,6 +344,27 @@ let
         else fail "${at}.capture.strength must be a number from 0 to 1")
       ]
     )
+    ++ lib.optionals ((theme.widgets.plates.settings or null) != null) (
+      # Surface plates (D-076): nine-sliced pieces under assets/ behind
+      # the launcher, dashboard and notification centre (`panel`) and
+      # behind toasts (`toast`).
+      let
+        at = "widgets.plates.settings";
+        s = theme.widgets.plates.settings;
+        piece = key: p:
+          if !(builtins.isAttrs p) then fail "${at}.${key} must be { src; slice; }"
+          else builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
+            if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
+            then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"
+            else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
+              && lib.all (n: builtins.isInt n && n >= 0) p.slice)
+            then fail "${at}.${key}.slice must be four non-negative ints [left top right bottom]"
+            else true
+          );
+      in
+      [ (checkClosed at [ "panel" "toast" ] s) ]
+      ++ lib.mapAttrsToList piece s
+    )
     ++ lib.optionals ((theme.widgets.ornaments.settings or null) != null) (
       # Window ornaments (D-074): the top-left corner art (an .svg under
       # assets/, mirrored by the shell), its size, how far the frame's

@@ -403,6 +403,14 @@ in
         };
       };
 
+      # Surface plates (D-076): the launcher, dashboard and notification
+      # centre sit on a square umber plate in a double brass rule with a
+      # boss in each corner; toasts on a small riveted plate.
+      plates.settings = {
+        panel = { src = "bar/panel.svg"; slice = [ 18 18 18 18 ]; };
+        toast = { src = "bar/toast.svg"; slice = [ 10 10 10 10 ]; };
+      };
+
       # Window ornaments (D-074): a gilt corner bracket on every window
       # frame, a diamond boss with a leaf between two scrolls, dimmed on
       # unfocused windows.

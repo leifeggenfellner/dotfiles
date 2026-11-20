@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../../core"
+import "../../components"
 import "../../components/effects"
 import "../../widgets"
 import "../../services/hypr"
@@ -120,11 +121,16 @@ PanelWindow {
             anchors.centerIn: parent
             width: Math.min(availableWidth, maxPanelWidth)
             height: Math.min(availableHeight, Math.max(minimumHeight, comfortableHeight, contentDrivenHeight))
-            radius: Theme.metrics.radius.large
-            color: Theme.colors.bg.mantle
-            border.width: 1
+            radius: panelPlate.shown ? 0 : Theme.metrics.radius.large
+            color: panelPlate.shown ? "transparent" : Theme.colors.bg.mantle
+            border.width: panelPlate.shown ? 0 : 1
             border.color: Theme.colors.bg.surface1
             clip: true
+
+            PlateFrame {
+                id: panelPlate
+                role: "panel"
+            }
 
             opacity: dashboard.open ? 0.96 : 0
             scale: dashboard.open ? 1 : 0.96

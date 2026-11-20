@@ -1347,5 +1347,16 @@ loaded by any config yet.
 - Next, after a day on the live session: load at login, set options from
   the theme at runtime only when loaded, render PNGs at build, and stand
   the shell overlay down while the plugin runs.
+
+## Phase 63 — Brass-framed shell surfaces ✅
+
+Concretized as D-076. Third of three steps toward Victorian window chrome.
+
+- ✅ `widgets.plates.settings` and `components/PlateFrame`.
+- ✅ LoTM: panel plates on the launcher, dashboard and notification
+  centre; riveted toast plates.
+- Follow-up: the dashboard logs `setMeasuredHeight is not a function` on
+  close (present before this phase).
+- Verified: headless shots with and without the plates, checks and build.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

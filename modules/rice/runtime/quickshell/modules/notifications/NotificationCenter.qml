@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 import "../../core"
+import "../../components"
 import "../../services/notifications"
 import "../../services/prefs"
 
@@ -65,10 +66,25 @@ PanelWindow {
 
         width: parent.width
         height: parent.height
-        radius: Theme.metrics.radius.large
-        color: Theme.colors.bg.mantle
-        border.width: 1
+        radius: panelPlate.shown ? 0 : Theme.metrics.radius.large
+        color: panelPlate.shown ? "transparent" : Theme.colors.bg.mantle
+        border.width: panelPlate.shown ? 0 : 1
         border.color: ShellState.doNotDisturb ? Theme.colors.state.warn : Theme.colors.bg.surface1
+
+        PlateFrame {
+            id: panelPlate
+            role: "panel"
+        }
+
+        // On a plate, do-not-disturb shows as a rule inside the brass.
+        Rectangle {
+            visible: panelPlate.shown && ShellState.doNotDisturb
+            anchors.fill: parent
+            anchors.margins: 10
+            color: "transparent"
+            border.width: 1
+            border.color: Theme.colors.state.warn
+        }
 
         x: center.open ? 0 : Theme.metrics.space.lg * 2
         opacity: center.open ? 0.96 : 0

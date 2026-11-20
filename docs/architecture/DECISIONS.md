@@ -1843,6 +1843,32 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the shell overlay cannot follow drags and window animations; the
   compositor can.
 
+### D-076 — Brass-framed shell surfaces
+
+- Date: 2026-11-20 · Status: active · Extends D-070, D-072
+- The third step toward Victorian chrome, as the user chose ("Brass-framed
+  plates"): the big shell surfaces get square, nine-sliced brass plates
+  like the rail popouts.
+- `widgets.plates.settings = { panel?; toast?; }`, each `{ src; slice; }`
+  under assets/, validated with closed keys and four must-fail cases.
+- `components/PlateFrame` (role `panel` or `toast`) draws the piece as the
+  first child of a surface's frame. While it is shown, the surface turns
+  its own radius, fill and border off; without theme data nothing
+  changes. Used by the launcher, dashboard and notification centre
+  (`panel`) and by toasts (`toast`, not letters, which keep their
+  envelope).
+- State that lived in the old border moves inside the plate: an urgent
+  toast gets a `state.danger` rule, and do-not-disturb gets a
+  `state.warn` rule inside the centre's plate.
+- LoTM: `bar/panel.svg` [18 18 18 18], a square umber plate in a double
+  brass rule with a diamond boss and gilt leaf in each corner, all inside
+  the surfaces' 16 px content margin; `bar/toast.svg` [10 10 10 10], a
+  small riveted plate inside the toasts' 12 px margin. No layout changed.
+- Verified: headless shots of all four surfaces with the plates, and the
+  launcher's rounded panel unchanged without them.
+- Why: the rounded glass panels were the last generic surfaces; brass
+  plates match the rail, the popouts and the window frames.
+
 ---
 
 ## Legacy imports

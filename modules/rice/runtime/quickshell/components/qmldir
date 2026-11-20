@@ -4,3 +4,4 @@ WorkspaceStrip 1.0 WorkspaceStrip.qml
 TrayGrid 1.0 TrayGrid.qml
 GaugeIcon 1.0 GaugeIcon.qml
 FadeIn 1.0 FadeIn.qml
+PlateFrame 1.0 PlateFrame.qml
