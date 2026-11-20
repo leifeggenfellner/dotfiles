@@ -29,9 +29,10 @@ let
     widgets = {
       tarotDraw.settings.cards = [{ id = "fool"; } { id = "moon"; accent = "#dd7a6e"; }];
       dailyAccent.settings = { record = "extras.tarotDraw.daily"; catalog = "widgets.tarotDraw.settings.cards"; };
+      ornaments.settings = { corner = "chrome/corner.svg"; size = 40; reach = 5; inactive = 0.5; };
     };
     integration.cursor = { name = "fixture-quill"; size = 24; };
-    assets.wallpapers = [ lotmWallpaper ];
+    assets = { root = "/fixture-assets"; wallpapers = [ lotmWallpaper ]; };
   });
   invalidManifest = pkgs.writeText "invalid-manifest.json" ''{"meta":{"name":"invalid","schemaVersion":2}}'';
   index = pkgs.writeText "rice-themes.json" (builtins.toJSON {
@@ -51,6 +52,11 @@ let
   });
   hyprctlMock = pkgs.writeShellScript "rice-hyprctl-mock" ''
     echo "hypr $*" >> "$RICE_TEST_LOG"
+    # Loaded plugins, as `hyprctl -j plugin list` prints them.
+    if [ "$*" = "-j plugin list" ]; then
+      printf '%s\n' "''${RICE_PLUGINS:-[]}"
+      exit 0
+    fi
     if [ -n "''${RICE_BLOCK_HYPR_MATCH:-}" ] && [[ "$*" == *"$RICE_BLOCK_HYPR_MATCH"* ]]; then
       touch "$RICE_BLOCK_ENTERED"
       while [ ! -e "$RICE_BLOCK_RELEASE" ]; do ${pkgs.coreutils}/bin/sleep 0.01; done
@@ -201,6 +207,19 @@ pkgs.runCommand "rice-theme-switch"
     grep -q 'leaf = "border", enabled = true, speed = 10, bezier = "liner"' "$RICE_TEST_LOG"
     ! grep -q 'leaf = "border", enabled = false' "$RICE_TEST_LOG"
 
+    echo "case: ornaments plugin options only while it is loaded (D-080)"
+    : > "$RICE_TEST_LOG"
+    "$switch" lotm
+    ! grep -q 'rice_ornaments' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
+    RICE_PLUGINS='[{"name":"rice_ornaments"}]' "$RICE_HYPRLAND_THEME" --active
+    grep -q 'plugin = { rice_ornaments = { corner = "/fixture-assets/chrome/corner.svg", size = 40, reach = 5, inactive = 0.5 } }' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
+    "$switch" cyberpunk
+    : > "$RICE_TEST_LOG"
+    RICE_PLUGINS='[{"name":"rice_ornaments"}]' "$RICE_HYPRLAND_THEME" --active
+    grep -q 'rice_ornaments = { corner = "", size = 48' "$RICE_TEST_LOG"
+
     echo "case: theme cursor applies live, base cursor without one (D-048)"
     grep -q '^hypr setcursor capitaine-cursors-white 16$' "$RICE_TEST_LOG"
     : > "$RICE_TEST_LOG"
@@ -261,7 +280,7 @@ pkgs.runCommand "rice-theme-switch"
     expect_failure "$switch" lotm
     test "$(cat "$XDG_STATE_HOME/rice/active")" = cyberpunk
     grep '^hypr eval ' "$RICE_TEST_LOG" | tail -n 1 | grep -q 'rgb(00e5ff)'
-    grep '^hypr ' "$RICE_TEST_LOG" | tail -n 1 | grep -q 'setcursor capitaine-cursors-white'
+    grep '^hypr ' "$RICE_TEST_LOG" | grep -v ' plugin list$' | tail -n 1 | grep -q 'setcursor capitaine-cursors-white'
     grep -q 'rollback completed' "$TMPDIR/stderr"
 
     echo "case: failed visual compensation recovery command"

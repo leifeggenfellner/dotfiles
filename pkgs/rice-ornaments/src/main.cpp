@@ -31,7 +31,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
         throw std::runtime_error("[rice_ornaments] version mismatch");
     }
 
-    vars.corner   = makeShared<Config::Values::CStringValue>("plugin:rice_ornaments:corner", "Directory with tl/tr/bl/br.png corner pieces", "");
+    vars.corner   = makeShared<Config::Values::CStringValue>("plugin:rice_ornaments:corner", "Top-left corner piece (SVG or PNG), mirrored for the others", "");
     vars.size     = makeShared<Config::Values::CIntValue>("plugin:rice_ornaments:size", "Corner piece size in px", 48, Config::Values::SIntValueOptions{.min = 8, .max = 256});
     vars.reach    = makeShared<Config::Values::CIntValue>("plugin:rice_ornaments:reach", "Frame corner offset inside the piece", 6, Config::Values::SIntValueOptions{.min = 0, .max = 128});
     vars.inactive = makeShared<Config::Values::CFloatValue>("plugin:rice_ornaments:inactive", "Opacity on unfocused windows", 0.55, Config::Values::SFloatValueOptions{.min = 0.0, .max = 1.0});

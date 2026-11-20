@@ -1,4 +1,4 @@
-_: {
+{ inputs, ... }: {
   flake.homeModules.programs-hyprland =
     { lib
     , pkgs
@@ -107,6 +107,10 @@ _: {
           package = null;
           portalPackage = null;
           systemd.enable = false;
+          # Window ornaments drawn per frame by the compositor (D-080). It
+          # draws nothing until rice-hyprland-theme sets its options, so the
+          # config never carries plugin keys (they fail without the plugin).
+          plugins = lib.optional riceEnabled inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.rice-ornaments;
           settings = lib.mkMerge [
             (import ./hyprland/_settings.nix { inherit style colors; })
             (import ./hyprland/_startup.nix { inherit lib monitorControlEnabled riceEnabled style; })

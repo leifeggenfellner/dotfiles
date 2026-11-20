@@ -16,6 +16,7 @@ shared_module(meson.project_name(),
     dependency('wayland-server'),
     dependency('xkbcommon'),
     dependency('cairo'),
+    dependency('hyprgraphics'),
   ],
   install: true,
 )

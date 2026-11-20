@@ -8,7 +8,8 @@
 inline HANDLE PHANDLE = nullptr;
 
 // plugin:rice_ornaments:*
-//   corner    directory holding tl.png tr.png bl.png br.png ("" = off)
+//   corner    the top-left corner piece, an SVG (or PNG) file; it is
+//             mirrored for the other three ("" = off)
 //   size      drawn size of each corner piece, logical px
 //   reach     how far the frame's outer corner sits from the piece's
 //             outer edge (the piece's own (reach, reach) point)

@@ -1805,7 +1805,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-075 — Window ornaments from a Hyprland plugin (spike)
 
-- Date: 2026-11-20 · Status: spike, not wired in · Extends D-074
+- Date: 2026-11-20 · Status: wired in by D-080 · Extends D-074
 - The user asked to make the ornaments follow every frame. Only the
   compositor knows where a window is on each frame, so this is a plugin:
   `pkgs/rice-ornaments` (`rice_ornaments`, about 250 lines of C++, after
@@ -1929,6 +1929,37 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   and an override present.
 - Why: the brass is one colour; the day's draw is a greeting, not a
   repaint.
+
+### D-080 — The ornaments plugin is wired in; the shell overlay is the fallback
+
+- Date: 2026-11-20 · Status: active · Completes D-075 · Extends D-074
+- The user's call: integrate the plugin fully.
+- Loading: with rice enabled, `wayland.windowManager.hyprland.plugins`
+  lists `packages.rice-ornaments`, so the generated config starts with
+  `hl.plugin.load(...)`. The config never sets plugin options.
+- Options: `rice-hyprland-theme` asks `hyprctl -j plugin list` after
+  applying a theme; only when `rice_ornaments` is loaded does it
+  `hyprctl eval` `plugin.rice_ornaments = { corner; size; reach;
+  inactive }` from `widgets.ornaments.settings` (corner = assets root +
+  path), or `corner = ""` (off) for a theme without them. Never fatal.
+  It runs at start, on every `config.reloaded` (a reload resets plugin
+  options to defaults; the plugin's own init reloads the config too) and
+  on every switch.
+- The plugin now takes the theme's corner SVG directly: it renders it at
+  twice `size` through hyprgraphics and mirrors it with cairo for the
+  other three corners, so no PNGs are built.
+- The shell overlay (D-074) stands down while the plugin is loaded:
+  `OrnamentController` asks the same question at start and on each
+  `configreloaded` event. If the plugin is missing (a broken build, an
+  unload), the overlay draws again.
+- Tests: the switch test mocks the plugin list and asserts the options
+  appear only when the plugin is loaded, `corner = ""` on Cyberpunk, and
+  nothing without the plugin. End to end in a nested Hyprland: config
+  load, the built adapter with the built LoTM manifest, corners drawn.
+- Recovery: `hyprctl plugin unload <path>` removes it live (the overlay
+  returns on the next reload); dropping the `plugins` line removes it
+  from the config.
+- Why: the compositor knows where every window is on every frame.
 
 ---
 

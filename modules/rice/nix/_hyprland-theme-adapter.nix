@@ -273,4 +273,20 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
   if ! out="$("$hyprctl" setcursor $cursor 2>&1)"; then
     fail "Hyprland rejected the cursor: $out"
   fi
+
+  # Window ornaments drawn by the rice_ornaments plugin (D-080): the
+  # theme's widgets.ornaments, or off. Only while the plugin is loaded:
+  # its keys without it are a config error that drops Hyprland into
+  # emergency mode. Never fatal; the shell overlay stands in without it.
+  if "$hyprctl" -j plugin list 2>/dev/null \
+    | "$jq" -e 'type == "array" and any(.[]; .name == "rice_ornaments")' >/dev/null 2>&1; then
+    ornaments="$("$jq" -r '
+      (.widgets.ornaments.settings // null) as $o |
+      (if $o == null or (.assets.root | type) != "string" then { corner: "", size: 48, reach: 6, inactive: 0.55 }
+       else { corner: (.assets.root + "/" + $o.corner), size: ($o.size // 48), reach: ($o.reach // 6), inactive: ($o.inactive // 0.55) } end) |
+      "hl.config({ plugin = { rice_ornaments = { corner = \(.corner | tojson), size = \(.size), reach = \(.reach), inactive = \(.inactive) } } })"
+    ' "$manifest")"
+    "$hyprctl" eval "$ornaments" >/dev/null 2>&1 \
+      || echo "rice-hyprland-theme: the ornaments plugin rejected its options" >&2
+  fi
 ''

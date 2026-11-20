@@ -31,8 +31,9 @@ Keep the current screen: the Fool sigil, the glow, the fog and the
   instead.
 - **Cost:** this is lighter than today. There are no ring or seep frame
   swaps, and the build renders one ring image instead of 119.
-- **Shutdown and reboot:** the ring is static there too. (Open question: should
-  shutdown play the ascent in reverse?)
+- **Shutdown and reboot:** the ring is static there too until the ascent
+  lands; then shutdown and reboot play the ascent in reverse (decided): the
+  hall dissolves into fog and the view sinks back to the sigil.
 
 ## 2. Ascent to Sefirah Castle: the boot animation
 
@@ -131,8 +132,8 @@ the core seal. The video background is replaced by a drawn scene.
   (`lockscreen/lotm/Main.qml`). The video background slot becomes the gate
   scene; the password, user and session logic stay. Cyberpunk and the
   default variant are untouched. `klein_loen.mp4` is no longer used by
-  default, so its 17 MB can leave the theme. (Open question: keep it as an
-  opt-in?)
+  default. It stays in the theme as an opt-in (decided), selectable with
+  `RICE_LOCK_VIDEO` as today.
 
 ## 4. Vigil: the screensaver (optional)
 
@@ -212,8 +213,5 @@ dismisses it at once. It never locks and never holds input.
 
 ## Open decisions
 
-- Shutdown: a static full ring, or the ascent in reverse (a descent into the
-  fog)?
-- Whether `klein_loen.mp4` stays as an opt-in lock background or is removed.
 - Screensaver delay. The proposal is 10 minutes, well before the one-hour
   DPMS timeout.

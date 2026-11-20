@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cairo/cairo.h>
+#include <hyprgraphics/image/Image.hpp>
 
 #include <hyprland/src/Compositor.hpp>
 #include <hyprland/src/desktop/state/FocusState.hpp>
@@ -15,30 +16,43 @@
 
 using namespace Render::GL;
 
-// The four pieces, loaded on first draw (a GL context is current then)
-// and again whenever `corner` names another directory.
+// The four pieces, rendered on first draw (a GL context is current then)
+// and again whenever `corner` or `size` changes: the corner art at twice
+// its drawn size, mirrored for the other three corners.
 namespace {
-    std::string                       loadedDir;
+    std::string                         loadedPath;
+    int                                 loadedSize = 0;
     std::array<SP<Render::ITexture>, 4> textures;
 
     bool ensureTextures() {
-        const std::string dir = vars.corner->value();
-        if (dir.empty())
+        const std::string path = vars.corner->value();
+        const int         px   = sc<int>(vars.size->value()) * 2;
+        if (path.empty())
             return false;
-        if (dir == loadedDir)
+        if (path == loadedPath && px == loadedSize)
             return textures[0] != nullptr;
 
-        loadedDir = dir;
-        const std::array<const char*, 4> names = {"tl.png", "tr.png", "bl.png", "br.png"};
+        loadedPath = path;
+        loadedSize = px;
+        textures   = {};
+
+        Hyprgraphics::CImage image(path, Vector2D{sc<double>(px), sc<double>(px)});
+        if (!image.success())
+            return false;
+        const auto SOURCE = image.cairoSurface();
+        const auto SIZE   = SOURCE->size();
+
+        // tl, tr, bl, br: scale (x, y) = (1, 1), (-1, 1), (1, -1), (-1, -1).
+        const std::array<std::pair<double, double>, 4> FLIPS = {{{1, 1}, {-1, 1}, {1, -1}, {-1, -1}}};
         for (size_t i = 0; i < 4; ++i) {
-            textures[i]       = nullptr;
-            const auto path   = dir + "/" + names[i];
-            const auto SURFACE = cairo_image_surface_create_from_png(path.c_str());
-            if (cairo_surface_status(SURFACE) != CAIRO_STATUS_SUCCESS) {
-                cairo_surface_destroy(SURFACE);
-                textures = {};
-                return false;
-            }
+            const auto SURFACE = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, px, px);
+            const auto CR      = cairo_create(SURFACE);
+            cairo_translate(CR, FLIPS[i].first < 0 ? px : 0, FLIPS[i].second < 0 ? px : 0);
+            cairo_scale(CR, FLIPS[i].first * px / SIZE.x, FLIPS[i].second * px / SIZE.y);
+            cairo_set_source_surface(CR, SOURCE->cairo(), 0, 0);
+            cairo_paint(CR);
+            cairo_destroy(CR);
+            cairo_surface_flush(SURFACE);
             textures[i] = g_pHyprRenderer->createTexture(SURFACE);
             cairo_surface_destroy(SURFACE);
         }

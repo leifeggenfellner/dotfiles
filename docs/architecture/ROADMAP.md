@@ -1383,5 +1383,16 @@ Concretized as D-079: only the terminal greeting takes the daily accent.
 - ✅ Removed from the shell (`modules/dailyAccent`) and HyprFM.
 - Verified: the HyprFM, switch, query and lint checks and the shitbox
   build.
+
+## Phase 67 — The ornaments plugin, wired in ✅
+
+Concretized as D-080; completes phase 62.
+
+- ✅ Loaded by the generated config; options set at runtime by
+  `rice-hyprland-theme` only while loaded; the corner SVG rendered and
+  mirrored by the plugin.
+- ✅ The shell overlay stands down while the plugin runs.
+- Verified: the switch test, lint, the shitbox build, and a nested
+  Hyprland end to end.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.
