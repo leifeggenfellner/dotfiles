@@ -237,12 +237,18 @@ let
     # Solid focus border (D-073).
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] "slow" lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] false lotm))
-    # Surface plates (D-076).
-    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "popout" ] { src = "bar/toast.svg"; slice = [ 1 1 1 1 ]; } lotm))
-    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" "src" ] "bar/missing.svg" lotm))
-    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" "slice" ] [ 10 10 10 ] lotm))
-    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" ] "bar/toast.svg" lotm))
+    # Surface plates (D-076, D-081).
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "popout" ] "window" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" ] { src = "bar/missing.svg"; slice = [ 1 1 1 1 ]; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" ] { src = "bar/rail.svg"; slice = [ 10 10 10 ]; } lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" ] "bar/rail.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "panel" ] "door" lotm))
+    # Toast ceremony (D-082).
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "ceremony" "wax" ] "#8a3b3b" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "ceremony" "seal" ] "pathways/missing.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "ceremony" "hand" ] "" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "ceremony" "smoke" ] true lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "correspondence" "settings" "ceremony" ] "letter" lotm))
     # Window ornaments (D-074).
     (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "corner" ] "chrome/missing.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "corner" ] "bar/rail.png" lotm))

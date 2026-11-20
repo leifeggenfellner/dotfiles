@@ -21,6 +21,8 @@ Item {
     required property string role
     // The window frame's border colour; a surface may raise an alert.
     property color rule: Theme.colors.accent.primary
+    // The window frame's fill.
+    property color fill: Theme.colors.bg.mantle
 
     readonly property var setting: (Theme.widgetConfig("plates").settings ?? ({}))[role] ?? null
     readonly property bool framed: setting === "window"
@@ -49,7 +51,7 @@ Item {
         visible: plate.framed
         anchors.fill: parent
         anchors.margins: plate.reach
-        color: Theme.colors.bg.mantle
+        color: plate.fill
         border.width: Theme.frameWidth
         border.color: plate.rule
     }

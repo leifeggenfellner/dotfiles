@@ -5,3 +5,4 @@ ParticleField 1.0 ParticleField.qml
 RainLayer 1.0 RainLayer.qml
 ShaderSurface 1.0 ShaderSurface.qml
 VignetteLayer 1.0 VignetteLayer.qml
+BurnEffect 1.0 BurnEffect.qml

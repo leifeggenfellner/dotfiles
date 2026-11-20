@@ -1983,6 +1983,45 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   notification centre in the frame; checks and build.
 - Why: one frame for everything that opens over the desktop.
 
+### D-082 — Toasts are letters: sealed, opened on parchment, burnt away
+
+- Date: 2026-11-20 · Status: active · Extends D-056, D-081
+- The user's call: toasts should feel impressive, "like a letter with a
+  red seal being opened and then burning up when going away", on
+  parchment in a Victorian hand, in the full window frame.
+- `widgets.correspondence.settings.ceremony = { paper?; ink?; wax?;
+  ember?; seal?; hand?; print?; }` opts a theme in, validated with closed
+  keys and five must-fail cases. With it, every toast is a letter:
+  - Arrival: a sealed envelope fills the window frame (the paper aged
+    and warmed toward the wax), its flap closed with a wax seal pressed
+    with `seal`. It is held a moment, the flap lifts, the envelope falls
+    away, and the message lies on `paper` (darkening toward its foot and
+    edges), each step at the ceremonial pace (`Motion.ritualAssemble`).
+  - The letter: the app name in the display face's small caps, the
+    persona's label beside it, the summary in `hand` (up to two lines),
+    the body in `print` italic, all in `ink`; the broken seal beside it.
+    Urgent letters keep a red seal and a red frame.
+  - Departure: on expiry or a click, the letter burns away from its
+    bottom edge along a ragged front, charring ahead of an ember line in
+    `ember`: `components/effects/BurnEffect`, a layer effect with a new
+    `burn.frag` (compiled with the other shaders). Without the compiled
+    shader (dev runs) or with motion reduced, it fades on `Motion.fade`.
+    Toasts used to vanish at once; every toast now leaves through
+    `leave()`.
+  - Letters stay 7.5 s (urgent 8 s, others 5 s).
+- `plates.toast` may be `"window"` (D-081); `PlateFrame` gains `fill`.
+  Persona letters without a ceremony keep their small envelope card.
+- LoTM: `paper = fg.primary` (parchment), `ink = bg.sunken`, `wax =
+  accent.tertiary` (ritual crimson), `ember = state.warn`, the Fool's
+  sigil in the wax, Pinyon Script for the hand and IM FELL English for the
+  print (both in the installed Google Fonts); toasts wear the window
+  frame. `bar/toast.svg` is removed.
+- Verified: headless shots with the compiled shader of the sealed
+  envelope, the opening, the letter and four frames of the burn; plain
+  toasts unchanged without a ceremony; checks and build.
+- Why: a notification is correspondence in this world; it should arrive
+  like a letter and leave no trace.
+
 ---
 
 ## Legacy imports

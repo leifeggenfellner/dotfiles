@@ -403,12 +403,11 @@ in
         };
       };
 
-      # Surface plates (D-076): the shell's panels wear the window frame
-      # (D-081), gilt border and corner brackets; toasts sit on a small
-      # riveted plate.
+      # Surface plates (D-076): the shell's panels and toasts wear the
+      # window frame (D-081, D-082), gilt border and corner brackets.
       plates.settings = {
         panel = "window";
-        toast = { src = "bar/toast.svg"; slice = [ 10 10 10 10 ]; };
+        toast = "window";
       };
 
       # Window ornaments (D-074): a gilt corner bracket on every window
@@ -484,6 +483,18 @@ in
       };
 
       correspondence.settings = {
+        # Every toast is a letter (D-082): an aged envelope sealed in
+        # crimson wax with the Fool's sigil, opened onto parchment in a
+        # copperplate hand, and burnt away when it is done.
+        ceremony = {
+          paper = "fg.primary";
+          ink = "bg.sunken";
+          wax = "accent.tertiary";
+          ember = "state.warn";
+          seal = "pathways/fool.svg";
+          hand = "Pinyon Script";
+          print = "IM FELL English";
+        };
         title = "Correspondence";
         clearLabel = "burn";
         quietLabel = "sealed";

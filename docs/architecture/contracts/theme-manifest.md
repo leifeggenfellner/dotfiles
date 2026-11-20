@@ -211,7 +211,12 @@ and exposes it exclusively through the `Theme` facade.
    (read by `components/PlateFrame`): `{ panel?; toast?; }`, each a
    nine-sliced `{ src; slice; }` under assets/ or, from D-081, `"window"`:
    the window frame (`tokens.chrome.border.width` in the accent, with the
-   `ornaments` corners). `panel` sits behind the launcher, dashboard,
+   `ornaments` corners). D-082 adds
+   `widgets.correspondence.settings.ceremony = { paper?; ink?; wax?;
+   ember?; seal?; hand?; print?; }` (read by `modules/notifications/Toasts`):
+   colour token refs, an `.svg` under assets/ pressed into the wax, and
+   the font families of a toast's summary and body; present, every toast
+   is a sealed letter that opens onto paper and burns away. `panel` sits behind the launcher, dashboard,
    notification centre, theme switcher, wallpaper picker, satchel and
    polkit prompt, `toast` behind toasts (not letters); a surface keeps
    its rounded fill without one. D-074 adds the `ornaments` id (read by

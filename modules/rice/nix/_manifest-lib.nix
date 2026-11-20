@@ -171,6 +171,30 @@ let
       if builtins.isList personas then lib.imap0 personaCheck personas
       else [ (fail "widgets.correspondence.settings.personas must be a list") ]
     )
+    ++ lib.optionals ((theme.widgets.correspondence.settings.ceremony or null) != null) (
+      # Toast ceremony (D-082): every toast a letter on paper, sealed in
+      # wax and burnt away. Colours are token refs, `seal` an .svg under
+      # assets/, `hand` and `print` font family names.
+      let
+        at = "widgets.correspondence.settings.ceremony";
+        s = theme.widgets.correspondence.settings.ceremony;
+        colourKeys = [ "paper" "ink" "wax" "ember" ];
+      in
+      if !(builtins.isAttrs s) then [ (fail "${at} must be an attrset") ]
+      else
+        [ (checkClosed at (colourKeys ++ [ "seal" "hand" "print" ]) s) ]
+        ++ map
+          (k: if !(s ? ${k}) || isTokenRef s.${k} then true else fail "${at}.${k} must be a colour token ref")
+          colourKeys
+        ++ [
+          (if !(s ? seal) || (builtins.isString s.seal && lib.hasSuffix ".svg" s.seal
+            && builtins.pathExists (themeDir + "/assets/${s.seal}")) then true
+          else fail "${at}.seal must name an .svg under assets/")
+        ]
+        ++ map
+          (k: if !(s ? ${k}) || (builtins.isString s.${k} && s.${k} != "") then true else fail "${at}.${k} must be a font family name")
+          [ "hand" "print" ]
+    )
     ++ lib.optionals ((theme.widgets.soundscape.settings or null) != null) (
       # Sound bed (D-058): looped layers keyed on sky conditions or a
       # workspace mood; every sound must be one of the theme's.

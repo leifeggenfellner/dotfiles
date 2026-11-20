@@ -1403,5 +1403,15 @@ Concretized as D-081.
   launcher, dashboard, notification centre, switcher, wallpaper picker,
   satchel and polkit prompt.
 - Verified: headless shots, checks and build.
+
+## Phase 69 — Toasts are letters ✅
+
+Concretized as D-082.
+
+- ✅ `correspondence.settings.ceremony`: sealed envelope, opening,
+  parchment in a copperplate hand, burnt away by `BurnEffect`.
+- ✅ Toasts wear the window frame.
+- Ideas: rising sparks over the burn; a burn sound cue.
+- Verified: headless sequence with the compiled shader, checks and build.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.
