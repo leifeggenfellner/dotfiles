@@ -1411,7 +1411,7 @@ Concretized as D-082.
 - ✅ `correspondence.settings.ceremony`: sealed envelope, opening,
   parchment in a copperplate hand, burnt away by `BurnEffect`.
 - ✅ Toasts wear the window frame.
-- Ideas: rising sparks over the burn; a burn sound cue.
+- ✅ Sparks and the `letter-burn` cue (D-083).
 - Verified: headless sequence with the compiled shader, checks and build.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

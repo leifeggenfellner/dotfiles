@@ -2022,6 +2022,27 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: a notification is correspondence in this world; it should arrive
   like a letter and leave no trace.
 
+### D-083 — Burning letters throw sparks and crackle
+
+- Date: 2026-11-20 · Status: active · Extends D-082, D-057
+- The user's call: add sparks and a burn sound to the burning toasts.
+- Sparks: while a letter burns, a spark is thrown every 40 ms from a
+  random point along the burn front (its height follows `burn.frag`'s
+  rise term). Each is a hot core in a soft `ember` halo that rises 36–92
+  px, drifts sideways, shrinks and cools over 0.65–1.15 s, then removes
+  itself. They live in a layer above the letters, so they outlive the
+  paper; the toast window keeps 72 px of headroom above the stack
+  (input masked to the letters) and stays up until the last spark is out.
+- Sound: a new cue, `letter-burn`, plays as a letter catches (muted by
+  default like every cue, and per-cue silenceable). LoTM's is rendered
+  from `assets/sounds/src/letter-burn.sh`: a soft brown-noise roar as the
+  paper takes, a bright hiss, and sparse crackles, dying out over 1.7 s.
+- The burn itself now takes 2 s (three times the ceremonial duration,
+  at least 2 s), so the front can be watched climbing.
+- Verified: headless frames of the burn with sparks rising and lingering
+  past the letter; checks and build.
+- Why: fire should leave something in the air.
+
 ---
 
 ## Legacy imports

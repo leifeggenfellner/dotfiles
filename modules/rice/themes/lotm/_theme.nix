@@ -282,6 +282,7 @@ in
       workspace = "sounds/workspace.wav";
       satchel-seal = "sounds/satchel-seal.wav";
       tarot-flip = "sounds/tarot-flip.wav";
+      letter-burn = "sounds/letter-burn.wav";
       # Sound bed loops (D-058).
       bed-rain = "sounds/bed-rain.ogg";
       bed-crackle = "sounds/bed-crackle.ogg";

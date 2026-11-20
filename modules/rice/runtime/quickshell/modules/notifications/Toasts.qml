@@ -23,7 +23,8 @@ import "../../services/notifications"
 // is a letter. It arrives as a sealed envelope filling its frame, the
 // flap lifts, the envelope falls away and the message lies on paper,
 // written in the theme's hand; when it goes, it burns away from the
-// bottom edge (BurnEffect), or fades without the shader or with motion
+// bottom edge (BurnEffect) with sparks rising off the ember line and
+// the `letter-burn` cue, or fades without the shader or with motion
 // reduced. `{ paper; ink; wax; ember; seal?; hand?; print? }`: colour
 // token refs, an .svg pressed into the wax, and the font families of
 // the summary and the body.
@@ -34,7 +35,8 @@ PanelWindow {
     required property var modelData
     screen: modelData
 
-    visible: toastModel.count > 0
+    // Kept up while the last letter's sparks are still in the air.
+    visible: toastModel.count > 0 || sparkLayer.children.length > 0
 
     WlrLayershell.namespace: "rice-toasts"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -45,13 +47,20 @@ PanelWindow {
         right: true
     }
     margins {
-        top: Theme.metrics.bar.height + Theme.metrics.bar.margin * 2
+        top: Theme.metrics.bar.height + Theme.metrics.bar.margin * 2 - headroom
         right: Theme.metrics.bar.margin
     }
 
+    // Room above the stack for sparks off the top letter; input stays
+    // on the letters.
+    readonly property int headroom: ceremonial ? 72 : 0
+
     implicitWidth: ceremonial ? 380 : 340
-    implicitHeight: stack.height
+    implicitHeight: stack.height + headroom
     color: "transparent"
+    mask: Region {
+        item: stack
+    }
 
     readonly property var correspondence: Theme.widgetConfig("correspondence").settings ?? ({})
     readonly property var personas: correspondence.personas ?? []
@@ -121,6 +130,7 @@ PanelWindow {
 
     Column {
         id: stack
+        y: toasts.headroom
         width: parent.width
         spacing: Theme.metrics.space.sm
 
@@ -260,10 +270,34 @@ PanelWindow {
                     if (card.leaving)
                         return;
                     card.leaving = true;
-                    if (toasts.ceremonial && burnProbe.ready && Motion.enabled)
+                    if (toasts.ceremonial && burnProbe.ready && Motion.enabled) {
+                        Sound.play("letter-burn");
                         burning.start();
-                    else
+                    } else {
                         fading.start();
+                    }
+                }
+
+                // Where the burn front crosses the paper now (card
+                // pixels), after burn.frag: its rise term dominates the
+                // noise, which averages about 0.16.
+                readonly property real frontY: {
+                    const front = card.burn * 1.15 - 0.05;
+                    return card.height * Math.max(0, Math.min(1, 1 - (front - 0.16) / 0.6));
+                }
+
+                // Sparks rise off the ember line while it climbs.
+                Timer {
+                    interval: 40
+                    repeat: true
+                    running: burning.running && card.burn > 0.04 && card.frontY > 0
+                    onTriggered: {
+                        const at = card.mapToItem(sparkLayer, Math.random() * card.width, card.frontY);
+                        spark.createObject(sparkLayer, {
+                            x: at.x,
+                            y: at.y
+                        });
+                    }
                 }
 
                 layer.enabled: card.leaving && toasts.ceremonial && burnProbe.ready
@@ -279,7 +313,7 @@ PanelWindow {
                         target: card
                         property: "burn"
                         to: 1
-                        duration: Math.max(1400, Motion.ritualAssemble.duration * 2.4)
+                        duration: Math.max(2000, Motion.ritualAssemble.duration * 3)
                         easing.type: Easing.InOutSine
                     }
                     ScriptAction {
@@ -533,6 +567,80 @@ PanelWindow {
                         NotificationState.dismiss(card.model.nid);
                         card.leave();
                     }
+                }
+            }
+        }
+    }
+
+    // Above the letters, so sparks outlive the paper they leave.
+    Item {
+        id: sparkLayer
+        anchors.fill: parent
+    }
+
+    // One spark: a hot core in a soft halo that drifts up, scatters and
+    // cools to nothing, then removes itself.
+    Component {
+        id: spark
+
+        Item {
+            id: ember
+
+            readonly property real rise: 36 + Math.random() * 56
+            readonly property real drift: (Math.random() - 0.5) * 30
+            readonly property int life: 650 + Math.random() * 500
+            readonly property real dot: 1.6 + Math.random() * 1.8
+
+            width: 1
+            height: 1
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: ember.dot * 5
+                height: width
+                radius: width / 2
+                color: toasts.ember
+                opacity: 0.22
+            }
+            Rectangle {
+                anchors.centerIn: parent
+                width: ember.dot * 2
+                height: width
+                radius: width / 2
+                color: Qt.lighter(toasts.ember, 1.4)
+            }
+
+            ParallelAnimation {
+                running: true
+                onFinished: ember.destroy()
+                NumberAnimation {
+                    target: ember
+                    property: "y"
+                    to: ember.y - ember.rise
+                    duration: ember.life
+                    easing.type: Easing.OutQuad
+                }
+                NumberAnimation {
+                    target: ember
+                    property: "x"
+                    to: ember.x + ember.drift
+                    duration: ember.life
+                    easing.type: Easing.InOutSine
+                }
+                NumberAnimation {
+                    target: ember
+                    property: "opacity"
+                    from: 1
+                    to: 0
+                    duration: ember.life
+                    easing.type: Easing.InQuad
+                }
+                NumberAnimation {
+                    target: ember
+                    property: "scale"
+                    from: 1
+                    to: 0.35
+                    duration: ember.life
                 }
             }
         }
