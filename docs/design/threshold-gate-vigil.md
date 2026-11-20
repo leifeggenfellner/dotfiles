@@ -15,7 +15,7 @@ This brief makes them one journey through places in the world:
 1. **Threshold:** you prove who you are at the passphrase prompt.
 2. **Ascent:** you rise through the grey fog to Sefirah Castle.
 3. **Gate:** while you are away, Chanis Gate is closed.
-4. **Vigil:** while the machine idles, a city keeps watch.
+4. **Vigil:** while the machine idles, Utopia keeps its rhythm.
 
 Every scene is drawn from layered SVG art that is generated or authored in
 the repo and composited cheaply. No video and no fan art.
@@ -101,13 +101,22 @@ A new, non-locking screensaver. After a configurable idle time, before the
 idle veil and DPMS, a city scene fades in on every screen. Any input
 dismisses it at once. It never locks and never holds input.
 
-- **Scene:** a Victorian city at dusk or night, seen from a rooftop: layered
-  rooftops, chimneys, a clock tower and gas lamps, with fog moving through
-  the streets and the moon overhead.
-  - **Open:** which city is "Klein's paradise city"? I could not place the
-    name. Backlund, Tingen, or something from later in the story?
-- **Motion:** slow parallax drift of the fog and the farthest skyline. A few
-  windows light up and go dark over minutes, and the gas lamps flicker. It
+- **Scene:** Utopia, the marionette town Klein built on an uninhabited
+  island at the edge of the Berserk Sea, as part of his Sequence 1 ritual.
+  It is about 5,000 people, every one of them a marionette. The view is
+  from the sea at dusk turning to night: a small Victorian harbour town
+  climbing a hill, a church spire and clock tower, gas lamps along the
+  quay, and the dark sea in front.
+- **The uncanny part:** the town is too orderly. Lamps light one after
+  another in perfect sequence, and a few distant silhouettes walk the
+  same routes on a fixed rhythm. Now and then, faint threads catch the
+  moonlight above the rooftops (spirit-world strings) and fade again. It
+  should be calm and slightly wrong, never horror.
+- **Not shown:** its destruction by Zaratul and the storm. The screensaver
+  is the town as it was meant to be.
+- **Motion:** slow swell on the sea and drifting sea mist, the lamp
+  sequence, the walkers, and the occasional thread glint. The gas lamps
+  flicker. It
   runs at a low, fixed tick (around 10 fps for movement; the flicker is a
   cheap opacity animation) under the ambient governor. It stops when DPMS
   turns off.
@@ -123,7 +132,7 @@ dismisses it at once. It never locks and never holds input.
    Art first, then motion.
 3. **Ascent to Sefirah Castle.** The Plymouth layers, then the awakening
    hand-off. Extends D-044 and D-053.
-4. **Vigil screensaver.** After the city is settled.
+4. **Vigil screensaver.** Utopia.
 
 ## Constraints
 
@@ -140,7 +149,6 @@ dismisses it at once. It never locks and never holds input.
 
 - Shutdown: a static full ring, or the ascent in reverse (a descent into the
   fog)?
-- Which city the Vigil shows.
 - Whether `klein_loen.mp4` stays as an opt-in lock background or is removed.
 - Screensaver delay. The proposal is 10 minutes, well before the one-hour
   DPMS timeout.
