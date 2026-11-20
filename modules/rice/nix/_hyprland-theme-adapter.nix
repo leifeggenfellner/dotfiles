@@ -2,7 +2,6 @@
 let
   inherit (pkgs) lib;
   activeManifestLib = import ./_active-manifest-lib.nix { inherit pkgs; };
-  dailyLib = import ./_daily-lib.nix;
 
   # Leaves a theme's compositor motion may override (D-047), and the
   # baseline leaf each one inherits from in the generated config.
@@ -111,13 +110,8 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
     reduce="$("$jq" -r '.motion.reduce == true' "$prefs" 2>/dev/null || echo false)"
   fi
 
-  # Daily accent (D-054): today's widgets.dailyAccent entry stands in for
-  # accent.primary, borders and gradient refs included. Unreadable prefs
-  # mean none. RICE_DAILY_ACCENT=#rrggbb|none overrides it (the shell
-  # passes what it resolved, before prefs.json is necessarily written).
-  daily="''${RICE_DAILY_ACCENT:-}"
-  prefs_source=/dev/null
-  [ ! -r "$prefs" ] || prefs_source="$prefs"
+  # The daily accent (D-054) never reaches the window chrome: borders,
+  # group bars and the shadow keep the theme's own colours (D-078).
 
   # The closed mapping (D-039, amended by D-047): border colours (and,
   # from D-072, border width, corner rounding and the window shadow), the
@@ -144,7 +138,6 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       "InElastic": [0.36, 0, 0.66, -0.56], "OutElastic": [0.34, 1.56, 0.64, 1],
       "InBounce": [0.36, 0, 0.66, -0.56], "OutBounce": [0.34, 1.56, 0.64, 1]
     }[.] // [0.33, 1, 0.68, 1];
-    ${dailyLib}
     def ref($colors): . as $r | $colors | getpath($r | split(".")) |
       if color then . else error("colour ref \($r) does not resolve") end;
     def refs: type == "array" and length >= 1 and length <= 4 and all(type == "string" and test("^(bg|fg|accent|state)\\.[a-zA-Z0-9]+$"));
@@ -156,10 +149,6 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       "hl.animation({ leaf = \"\($leaf)\", enabled = true, speed = \($ms | speed), bezier = \"rice_\($curve)\""
       + (if $style == null then "" else ", style = \"\($style)\"" end) + " })\n";
 
-    (if $daily == "none" then .
-     elif $daily != "" then .tokens.colors.accent.primary = $daily
-     elif .widgets.dailyAccent == null then .
-     else with_daily_accent(try ($prefs_raw | fromjson) catch {}; $today) end) |
     select(
       .meta.schemaVersion == 2 and
       (.meta.name | type == "string") and
@@ -250,7 +239,6 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
           end)
       else "" end)
   ' --arg baseline ${lib.escapeShellArg baselineLua} --arg chrome ${lib.escapeShellArg chromeLua} --arg shape ${lib.escapeShellArg shapeLua} \
-    --arg daily "$daily" --rawfile prefs_raw "$prefs_source" --arg today "$(${pkgs.coreutils}/bin/date +%F)" \
     "$manifest")" || fail "manifest does not provide valid normalized Hyprland visual tokens: $manifest"
 
   # Cursor (D-048): the theme's, or the base style's. setcursor reports

@@ -1366,5 +1366,14 @@ Concretized as D-077; phase 1 of `docs/design/threshold-gate-vigil.md`.
 - ✅ One full ring image; no progress, seep or drain in the script.
 - Verified: the `rice-boot` check and the shitbox build. Seen for real on
   the next boot.
+
+## Phase 65 — The frame stays gold ✅
+
+Concretized as D-078, at the user's request after a red daily accent
+reached the window borders.
+
+- ✅ The Hyprland adapter ignores the daily accent.
+- ✅ `Theme.colors.accent.frame` and `Theme.tokenColor` for rail chrome.
+- Verified: the switch test, checks, the shitbox build, and a live apply.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

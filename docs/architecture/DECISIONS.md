@@ -1073,7 +1073,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-054 — The daily record may lend the day an accent
 
-- Date: 2026-11-17 · Status: active · Extends D-042, D-047, D-051
+- Date: 2026-11-17 · Status: active (window chrome excluded by D-078) · Extends D-042, D-047, D-051
 - `widgets.dailyAccent.settings = { record; catalog; }` opts a theme in:
   `record` is a prefs path `extras.<ns>.<key>` holding a daily record
   `{ date, id?, index? }` (D-042), `catalog` a theme list it resolves
@@ -1886,6 +1886,28 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - The `rice-boot` check now expects `ring.png`.
 - Why: a filling ring reads as a loading bar; a closed ring reads as a
   seal, which is what the Threshold is.
+
+### D-078 — The frame stays gold: the daily accent leaves the chrome
+
+- Date: 2026-11-20 · Status: active · Amends D-054
+- The user's call, after the day's draw (The Moon, `#dd7a6e`) turned the
+  window borders red: borders, bezels, corner pieces and the rail keep
+  the theme's gold and never follow the daily accent.
+- The Hyprland adapter no longer reads the daily accent at all: borders,
+  group bars and the shadow resolve against the theme's own palette, and
+  `RICE_DAILY_ACCENT` is ignored there. `DailyAccentController` stops
+  re-running it when the day changes; HyprFM still takes the day's accent.
+- Runtime: `Theme.colors.accent.frame` is the theme's own accent, and
+  `Theme.tokenColor(ref)` resolves a colour ref against the theme's
+  palette without the day's accent. The rail caps (outline, candle glow,
+  hover glyph), the floating bar's rule and the workspace rivet use them.
+  The SVG art (bezels, plates, corners) was never tinted.
+- Content still follows the day: glances, text accents and anything else
+  reading `accent.primary`.
+- Tests: the D-054 switch case now asserts the daily colour never appears
+  in the Hyprland chunk, from prefs or from `RICE_DAILY_ACCENT`.
+- Why: the brass is the machine and should not change; the day's colour
+  belongs to what the machine shows.
 
 ---
 

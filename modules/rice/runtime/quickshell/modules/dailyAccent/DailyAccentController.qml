@@ -68,8 +68,8 @@ Item {
             return;
         const theme = Theme.activeName;
         if (_settled && theme === _theme && accent !== _applied) {
+            // HyprFM takes the day's accent; window chrome never does (D-078).
             const env = "RICE_DAILY_ACCENT=" + (accent.length > 0 ? accent : "none");
-            Quickshell.execDetached(["env", env, "rice-hyprland-theme", "--active"]);
             Quickshell.execDetached(["env", env, "rice-hyprfm-theme", "--active"]);
         }
         _settled = true;

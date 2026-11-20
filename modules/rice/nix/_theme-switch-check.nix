@@ -222,33 +222,15 @@ pkgs.runCommand "rice-theme-switch"
     ! grep -q 'hl.animation' "$RICE_TEST_LOG"
     rm "$XDG_STATE_HOME/rice/prefs.json"
 
-    echo "case: daily accent (D-054) tints borders and gradient refs"
+    echo "case: the daily accent never recolours window chrome (D-078)"
     printf '{"extras":{"tarotDraw":{"daily":{"date":"%s","id":"moon"}}}}' "$(date +%F)" > "$XDG_STATE_HOME/rice/prefs.json"
     : > "$RICE_TEST_LOG"
     "$switch" lotm
-    grep -q 'active_border = { colors = { "rgb(d9a441)", "rgb(dd7a6e)" }, angle = 45 }' "$RICE_TEST_LOG"
-    grep -q 'groupbar = { col = { active = { colors = { "rgb(dd7a6e)" }, angle = 90 } }' "$RICE_TEST_LOG"
-    # The shell's value wins over prefs.json; "none" restores the theme's.
-    : > "$RICE_TEST_LOG"
-    RICE_DAILY_ACCENT=none "$RICE_HYPRLAND_THEME" --active
-    grep -q '"rgb(c79a3a)" }, angle = 45' "$RICE_TEST_LOG"
+    grep -q 'active_border = { colors = { "rgb(d9a441)", "rgb(c79a3a)" }, angle = 45 }' "$RICE_TEST_LOG"
+    ! grep -q 'dd7a6e' "$RICE_TEST_LOG"
     : > "$RICE_TEST_LOG"
     RICE_DAILY_ACCENT='#6fb2d6' "$RICE_HYPRLAND_THEME" --active
-    grep -q '"rgb(6fb2d6)" }, angle = 45' "$RICE_TEST_LOG"
-    expect_failure env RICE_DAILY_ACCENT=gold "$RICE_HYPRLAND_THEME" --active
-    # Entries without an accent, stale records and unreadable prefs keep it.
-    for prefs in '{"extras":{"tarotDraw":{"daily":{"date":"'"$(date +%F)"'","id":"fool"}}}}' \
-        '{"extras":{"tarotDraw":{"daily":{"date":"2000-01-01","id":"moon"}}}}' garbage; do
-      printf '%s' "$prefs" > "$XDG_STATE_HOME/rice/prefs.json"
-      : > "$RICE_TEST_LOG"
-      "$RICE_HYPRLAND_THEME" --active
-      grep -q '"rgb(c79a3a)" }, angle = 45' "$RICE_TEST_LOG"
-    done
-    # Themes without a daily accent never read it.
-    printf '{"extras":{"tarotDraw":{"daily":{"date":"%s","id":"moon"}}}}' "$(date +%F)" > "$XDG_STATE_HOME/rice/prefs.json"
-    : > "$RICE_TEST_LOG"
-    "$switch" cyberpunk
-    grep -q 'active_border = "rgb(00e5ff)"' "$RICE_TEST_LOG"
+    ! grep -q '6fb2d6' "$RICE_TEST_LOG"
     rm "$XDG_STATE_HOME/rice/prefs.json"
 
     echo "case: HyprFM colours (D-055) follow a switch but never block it"
