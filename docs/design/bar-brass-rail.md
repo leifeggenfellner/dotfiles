@@ -1,6 +1,6 @@
 # The Brass Rail: taskbar redesign brief
 
-Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065. Tracked in issue #92. When a phase lands, its decision goes into
+Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, and the phase 4a capture spike as D-066. Tracked in issue #92. When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 
 ## Why
@@ -128,11 +128,12 @@ under the workspace plaque.
   - Never stream; the hardware is an Intel iGPU on battery.
   - Captures are composited into a workspace-shaped miniature using the
     toplevels' `lastIpcObject` geometry.
-  - **Feasibility spike (Phase 4a):** confirm that Hyprland exports frames for
-    windows on *inactive* workspaces. If it doesn't, cache the last capture
-    taken while each workspace was visible, and fall back to app icons.
-- **Fallback chain:** live capture, then cached capture, then app icons, then
-  sigil only. Any one missing still leaves a complete card.
+  - **Feasibility spike (Phase 4a, D-066):** Hyprland does give frames for
+    windows on inactive workspaces. Each is the last frame the window drew
+    while visible, so the compositor already holds the cache and the shell
+    keeps none.
+- **Fallback chain:** capture, then app icons, then sigil only. Any one
+  missing still leaves a complete card.
 - **Reduced motion and the governor:** no drum rotation. Cards cross-fade in
   place and the auto-dismiss still applies. With captures disabled, the
   carousel uses the icon fallback.
@@ -229,7 +230,7 @@ Each phase ships on its own and gets its own D-number.
 4. **Workspace carousel.**
    - 4a: capture spike.
    - 4b: drum and cards with the icon fallback.
-   - 4c: live and cached captures.
+   - 4c: captures (no shell-side cache; see D-066).
 5. **Hinged-plate popouts and polish.** Frames, swing motion, and a
    reduced-motion pass.
 

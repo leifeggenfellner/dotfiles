@@ -1477,6 +1477,37 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the sigils were the bar's one in-world element, but they did not
   show which workspaces held windows or needed attention.
 
+### D-066 — Window captures come from the compositor's held frame
+
+- Date: 2026-11-20 · Status: active · Extends D-065 · Brief:
+  `docs/design/bar-brass-rail.md` (#92, phase 4a spike)
+- Spike, run on shitbox (Hyprland 0.56.0, Quickshell 0.3.2). Hyprland
+  offers `hyprland_toplevel_export_v1` and
+  `ext_foreign_toplevel_image_capture_source_v1`.
+- `ScreencopyView { live: false; captureSource: HyprlandToplevel.wayland }`
+  gets a real frame for every window, including windows on inactive
+  workspaces. Five windows arrived about 41 ms after the shell started.
+- A hidden window's frame is the last one it drew while visible. Hidden
+  clients get no frame callbacks, so they stop drawing. A clock terminal
+  moved to workspace 9 and captured twice, 3 s apart, read the same time
+  both times: the moment it left view. `captureFrame()` gives the same
+  frame again.
+- Consequence for phase 4c: the compositor already is the cache. The shell
+  keeps no capture cache of its own. The card's fallback chain becomes
+  capture, then app icons, then sigil only.
+- Rules for the carousel:
+  - Capture once per open and never stream (`live: false`).
+  - Call `Hyprland.refreshToplevels()` on open. Until then a toplevel's
+    `workspace` and `lastIpcObject` are empty.
+  - `lastIpcObject.at` is in global layout coordinates. Subtract the
+    monitor's position before placing a window in the miniature.
+  - `sourceSize` is the full window size, whatever `constraintSize` says.
+    Each capture holds a full-resolution buffer (about 8 MB for a
+    1902×1110 window), so release the views when the carousel closes.
+- Why: the brief planned a shell-side cache in case inactive windows could
+  not be captured. They can, and the held frame is already the freshest
+  one that exists.
+
 ---
 
 ## Legacy imports

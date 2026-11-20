@@ -1207,3 +1207,16 @@ Concretized as D-065. Part of #92 (`docs/design/bar-brass-rail.md`).
   sway with faked window and urgent state (scratch copy only) showed all
   four states and the needle; Cyberpunk's strip is pixel-identical.
   Not yet seen on Hyprland: live counts, urgent clearing, the sweep.
+
+## Phase 53 — The Brass Rail, phase 4a: capture spike ✅
+
+Concretized as D-066. Part of #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ Windows on inactive workspaces can be captured with `ScreencopyView`
+  (`live: false`).
+- ✅ A hidden window's frame is the last one it drew while visible, so the
+  compositor already holds the cache. Phase 4c drops the shell-side cache.
+- ✅ Gotchas recorded: `refreshToplevels()` on open, global coordinates,
+  and full-resolution buffers.
+- Verified on the live Hyprland session with a throwaway Quickshell
+  config (not in the repo). Nothing in the runtime changed.
