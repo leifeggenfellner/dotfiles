@@ -122,6 +122,11 @@ the core seal. The video background is replaced by a drawn scene.
   frame rates. There is no video decoder per monitor, and no work at all once
   it goes idle. Today the video keeps decoding on all three monitors for the
   whole time the screen is locked.
+- **Art draft:** `modules/rice/themes/lotm/assets/lockscreen/gate/scene.svg`
+  (not wired in yet). The vault, the arch bands, the iron leaves, the seven
+  emblems in a crown over the gate, the seal at the seam, and two candle
+  sconces. Each emblem and the seal is its own group, so the shell can
+  light them one by one.
 - **Where it lives:** this is a rework of the LoTM lock variant
   (`lockscreen/lotm/Main.qml`). The video background slot becomes the gate
   scene; the password, user and session logic stay. Cyberpunk and the
