@@ -1803,6 +1803,46 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the user asked for ornament on the frames, "nothing too modern";
   square gilt alone read as plain.
 
+### D-075 — Window ornaments from a Hyprland plugin (spike)
+
+- Date: 2026-11-20 · Status: spike, not wired in · Extends D-074
+- The user asked to make the ornaments follow every frame. Only the
+  compositor knows where a window is on each frame, so this is a plugin:
+  `pkgs/rice-ornaments` (`rice_ornaments`, about 250 lines of C++, after
+  the official borders-plus-plus).
+  - Each window gets a decoration on the "over" layer with absolute
+    positioning, so it reserves no space. It queues its own render-pass
+    element and draws four textures (`tl/tr/bl/br.png`) at the frame's
+    corners. The frame comes from the window's animated position plus the
+    workspace and floating offsets of that frame, expanded by the border.
+  - Fullscreen and undecorated windows (border size 0) get nothing.
+    Unfocused windows draw at `inactive`.
+  - Options: `plugin:rice_ornaments:{corner,size,reach,inactive}`, where
+    `corner` is the directory holding the four PNGs; the others mean what
+    they do in D-074.
+- Built with `mkHyprlandPlugin` against `inputs.hyprland`, exposed as
+  `packages.rice-ornaments`. The `rice-ornaments-plugin` flake check
+  builds it, so a Hyprland bump that breaks the plugin API fails the
+  check before it reaches a rebuild. The plugin compares its build hash
+  with the running Hyprland's and refuses to load on a mismatch.
+- Tested in a nested Hyprland (Hyprland running in a window, never the
+  live session): it loads from `hl.plugin.load`, draws on three
+  terminals, tracks a window swap mid-animation at fractional positions,
+  follows focus (bright on focus, dim elsewhere), scales on a HiDPI
+  output, and unloads cleanly with the windows intact.
+- Hazard found: a config that sets `plugin.rice_ornaments.*` when the
+  plugin is not loaded is a Lua config error, and Hyprland drops into
+  emergency mode with no keybinds. So plugin options must never be
+  written into the generated config unconditionally. The integration has
+  to set them at runtime (`hyprctl eval`) and only after confirming the
+  plugin is loaded, with the shell overlay (D-074) as the fallback.
+- Not yet decided (the user's call after living with it): loading it at
+  login, the adapter setting the options from `widgets.ornaments`, PNGs
+  rendered at build from the theme's SVG, and the shell overlay standing
+  down while the plugin is loaded.
+- Why: the shell overlay cannot follow drags and window animations; the
+  compositor can.
+
 ---
 
 ## Legacy imports

@@ -1,6 +1,6 @@
 { config, lib, ... }:
 {
-  perSystem = { pkgs, system, ... }: {
+  perSystem = { pkgs, system, self', ... }: {
     # Mechanical contract enforcement for the rice runtime (D-015).
     # Fails the flake check on layer-import violations or theme literals.
     checks = {
@@ -23,6 +23,10 @@
 
       rice-boot =
         import ../rice/nix/_boot-check.nix { inherit pkgs; };
+
+      # The ornaments plugin still compiles against the pinned Hyprland
+      # (D-075); a Hyprland bump that changes its API fails here first.
+      rice-ornaments-plugin = self'.packages.rice-ornaments;
 
       # The quickshell-runtime skill's API reference matches the pinned
       # Quickshell; after a nixpkgs bump, `nix run .#quickshell-api-ref`.

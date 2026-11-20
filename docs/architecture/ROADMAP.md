@@ -1336,5 +1336,16 @@ chrome; brass-framed shell surfaces come next.
 - Open: drag-moves trail by up to a second; a Hyprland plugin is the only
   way to track them frame by frame.
 - Verified: the checks, the shitbox build, and a live run.
+
+## Phase 62 — Ornaments from a Hyprland plugin (spike)
+
+D-075. The plugin exists and passed a nested-Hyprland test; it is not
+loaded by any config yet.
+
+- ✅ `pkgs/rice-ornaments` and the `rice-ornaments-plugin` check.
+- ✅ Nested test: draws, tracks motion per frame, follows focus, unloads.
+- Next, after a day on the live session: load at login, set options from
+  the theme at runtime only when loaded, render PNGs at build, and stand
+  the shell overlay down while the plugin runs.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

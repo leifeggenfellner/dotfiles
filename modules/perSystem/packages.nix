@@ -1,7 +1,12 @@
-_: {
-  perSystem = { pkgs, ... }: {
+{ inputs, ... }: {
+  perSystem = { pkgs, system, ... }: {
     packages = {
       repl = pkgs.callPackage ./../../pkgs/repl { };
+
+      # Window corner ornaments drawn by Hyprland itself (D-075).
+      rice-ornaments = pkgs.callPackage ./../../pkgs/rice-ornaments {
+        hyprland = inputs.hyprland.packages.${system}.hyprland;
+      };
 
       # Regenerates the quickshell-runtime skill's API reference from the
       # pinned Quickshell; the `quickshell-api-ref` check fails until it runs.
