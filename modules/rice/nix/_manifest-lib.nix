@@ -650,7 +650,9 @@ let
   };
 
   # Window chrome (D-049): border gradient and group-bar colours, all
-  # colour token refs (L-005). The adapter re-checks the same shapes.
+  # colour token refs (L-005); D-072 adds the inactive gradient, border
+  # width, corner rounding and a drop shadow. The adapter re-checks the
+  # same shapes.
   chromeChecks = lib.optionals (tokens ? chrome) (
     let
       c = tokens.chrome;
@@ -661,13 +663,35 @@ let
         if isTokenRef v then true
         else fail "${path} must be a colour token ref like \"fg.primary\" (L-005), got ${builtins.toJSON v}";
     in
-    [ (checkClosed "tokens.chrome" [ "border" "groupbar" ] c) ]
+    [ (checkClosed "tokens.chrome" [ "border" "groupbar" "rounding" "shadow" ] c) ]
     ++ lib.optionals (c ? border) [
-      (checkClosed "tokens.chrome.border" [ "active" "angle" ] c.border)
+      (checkClosed "tokens.chrome.border" [ "active" "inactive" "angle" "width" ] c.border)
       (gradient "tokens.chrome.border.active" (c.border.active or null))
       (if builtins.isInt (c.border.angle or 0) && (c.border.angle or 0) >= 0 && (c.border.angle or 0) < 360 then true
       else fail "tokens.chrome.border.angle must be an integer in 0..359")
+      (if !(c.border ? width) || (builtins.isInt c.border.width && c.border.width >= 1 && c.border.width <= 8) then true
+      else fail "tokens.chrome.border.width must be an integer in 1..8")
     ]
+    ++ lib.optional (c ? border.inactive) (gradient "tokens.chrome.border.inactive" c.border.inactive)
+    ++ lib.optional (c ? rounding && !(builtins.isInt c.rounding && c.rounding >= 0 && c.rounding <= 32))
+      (fail "tokens.chrome.rounding must be an integer in 0..32")
+    ++ lib.optionals (c ? shadow) (
+      let
+        sh = c.shadow;
+        int = key: lo: hi:
+          if !(sh ? ${key}) || (builtins.isInt sh.${key} && sh.${key} >= lo && sh.${key} <= hi) then true
+          else fail "tokens.chrome.shadow.${key} must be an integer in ${toString lo}..${toString hi}";
+      in
+      [
+        (checkClosed "tokens.chrome.shadow" [ "color" "range" "power" "offset" ] sh)
+        (int "range" 0 64)
+        (int "power" 1 4)
+        (if !(sh ? offset) || (builtins.isList sh.offset && builtins.length sh.offset == 2
+          && lib.all (n: builtins.isInt n && n >= -32 && n <= 32) sh.offset) then true
+        else fail "tokens.chrome.shadow.offset must be two integers in -32..32 [x y]")
+      ]
+      ++ lib.optional (sh ? color) (ref "tokens.chrome.shadow.color" sh.color)
+    )
     ++ lib.optionals (c ? groupbar) (
       let g = c.groupbar; in
       [

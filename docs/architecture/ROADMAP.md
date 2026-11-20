@@ -1298,3 +1298,19 @@ Concretized as D-071. Follow-up to #92 after live use.
   that keeps the rule's size.
 - Verified headless (LoTM render; Cyberpunk's bar unchanged);
   `rice-lint`, manifest validation and the shitbox build pass.
+
+## Phase 59 — Square gilt windows ✅
+
+Concretized as D-072. First of three steps toward Victorian window chrome:
+square frames, then shell-drawn corner ornaments, then brass-framed shell
+surfaces.
+
+- ✅ `tokens.chrome` gains `border.inactive`, `border.width`, `rounding` and
+  `shadow`, and the adapter restores the baseline shape before applying
+  them.
+- ✅ LoTM: square corners, a 3 px gilt border, dark iron when unfocused,
+  and an umber shadow.
+- Verified: the switch test, manifest validation, the shitbox build, and a
+  live apply with a screenshot.
+- Next: corner ornaments (prototype), then brass-framed launcher,
+  dashboard and notifications.

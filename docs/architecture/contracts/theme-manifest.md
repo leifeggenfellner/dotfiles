@@ -247,8 +247,11 @@ window/workspace/layer styles with speeds and curves derived from
 active border into a gradient and sets group-bar colours, text colours and
 font; every apply first restores the group-bar baseline from
 `programs/hyprland/_chrome.nix`, so a theme without it shows the generated
-config's group bar. Rounding and gaps are not
-mapped; they stay with the generated Hyprland config. After the Lua chunk the
+config's group bar. D-072 adds `border.inactive` (a gradient), `border.width`
+(1..8), `rounding` (0..32) and `shadow = { color?; range?; power?; offset?; }`;
+every apply first restores the generated config's border width, rounding and
+shadow, so a theme without them keeps that shape. Gaps are not mapped; they
+stay with the generated Hyprland config. After the Lua chunk the
 adapter runs `hyprctl setcursor` with `integration.cursor` (D-048), or the base
 style's cursor for a theme without one; a theme cursor that is not installed in
 an icon directory fails the adapter before any IPC. Adding another live

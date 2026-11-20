@@ -40,6 +40,15 @@ let
   # Themes without `integration.cursor` get the base style's cursor
   # (what the generated config shows before any rice theme, D-048).
   baseStyle = import ../../themes/_style.nix;
+
+  # Window shape every apply starts from (D-072): the generated config's
+  # rounding, border width and shadow, so a theme without
+  # `tokens.chrome.rounding`, `border.width` or `shadow` restores them.
+  shadow = (import ../../programs/hyprland/_chrome.nix).shadow;
+  shapeLua = "hl.config({ general = { border_size = ${toString baseStyle.border_width} }, "
+    + "decoration = { rounding = ${toString baseStyle.rounding}, shadow = { enabled = ${lib.boolToString shadow.enabled}, "
+    + "range = ${toString shadow.range}, render_power = ${toString shadow.render_power}, "
+    + "color = ${builtins.toJSON shadow.color}, offset = ${builtins.toJSON shadow.offset} } } })\n";
 in
 pkgs.writeShellScriptBin "rice-hyprland-theme" ''
   set -euo pipefail
@@ -109,7 +118,8 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
   prefs_source=/dev/null
   [ ! -r "$prefs" ] || prefs_source="$prefs"
 
-  # The closed mapping (D-039, amended by D-047): border colours, the
+  # The closed mapping (D-039, amended by D-047): border colours (and,
+  # from D-072, border width, corner rounding and the window shadow), the
   # global animation switch, and optional compositor motion whose
   # speeds and curves derive from the theme's motion tokens. Emitted as
   # one Lua chunk for `hyprctl eval` (Hyprland's Lua config has no
@@ -138,6 +148,7 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
       if color then . else error("colour ref \($r) does not resolve") end;
     def refs: type == "array" and length >= 1 and length <= 4 and all(type == "string" and test("^(bg|fg|accent|state)\\.[a-zA-Z0-9]+$"));
     def rgb: "\"rgb(" + ltrimstr("#") + ")\"";
+    def int($lo; $hi): type == "number" and floor == . and . >= $lo and . <= $hi;
     def gradient($colors; $angle): "{ colors = { " + (map(ref($colors) | rgb) | join(", ")) + " }, angle = \($angle) }";
     def curve($name): "hl.curve(\"rice_\($name)\", { type = \"bezier\", points = { {\(.[0]), \(.[1])}, {\(.[2]), \(.[3])} } })\n";
     def anim($leaf; $ms; $curve; $style):
@@ -166,9 +177,16 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
         ($c.borderSweep | . == null or . == "once")) and
       ((.tokens.chrome // {}) as $ch |
         ($ch | type == "object") and
-        ($ch | keys - ["border", "groupbar"] | length == 0) and
-        ($ch.border | . == null or ((keys - ["active", "angle"] | length == 0) and (.active | refs) and
-          (.angle | . == null or (type == "number" and floor == . and . >= 0 and . < 360)))) and
+        ($ch | keys - ["border", "groupbar", "rounding", "shadow"] | length == 0) and
+        ($ch.border | . == null or ((keys - ["active", "inactive", "angle", "width"] | length == 0) and (.active | refs) and
+          (.inactive | . == null or refs) and
+          (.angle | . == null or (type == "number" and floor == . and . >= 0 and . < 360)) and
+          (.width | . == null or int(1; 8)))) and
+        ($ch.rounding | . == null or int(0; 32)) and
+        ($ch.shadow | . == null or ((keys - ["color", "range", "power", "offset"] | length == 0) and
+          (.color | . == null or ([.] | refs)) and (.range | . == null or int(0; 64)) and
+          (.power | . == null or int(1; 4)) and
+          (.offset | . == null or (type == "array" and length == 2 and all(int(-32; 32)))))) and
         ($ch.groupbar | . == null or ((keys - ["active", "inactive", "text", "textInactive", "font"] | length == 0) and
           (.active | . == null or refs) and (.inactive | . == null or refs) and
           ([.text, .textInactive] | all(. == null or ([.] | refs))) and
@@ -182,10 +200,23 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
     (.tokens.chrome // {}) as $ch |
     (if $ch.border == null then "\"rgb(\($active))\""
      else ($ch.border.active | gradient($colors; $ch.border.angle // 0)) end) as $activeBorder |
-    "hl.config({ general = { col = { active_border = \($activeBorder), inactive_border = \"rgb(\($inactive))\" } }, "
-    + "group = { col = { border_active = \($activeBorder), border_inactive = \"rgb(\($inactive))\" } }, "
+    (if $ch.border.inactive == null then "\"rgb(\($inactive))\""
+     else ($ch.border.inactive | gradient($colors; $ch.border.angle // 0)) end) as $inactiveBorder |
+    "hl.config({ general = { col = { active_border = \($activeBorder), inactive_border = \($inactiveBorder) } }, "
+    + "group = { col = { border_active = \($activeBorder), border_inactive = \($inactiveBorder) } }, "
     + "animations = { enabled = \($animate) } })\n"
     + $chrome
+    + $shape
+    + ([ (if $ch.border.width == null then empty else "general = { border_size = \($ch.border.width) }" end),
+         ([ (if $ch.rounding == null then empty else "rounding = \($ch.rounding)" end),
+            ($ch.shadow // null | if . == null then empty else
+              [ (if .color == null then empty else "color = \"rgba(" + (.color | ref($colors) | ltrimstr("#")) + "dd)\"" end),
+                (if .range == null then empty else "range = \(.range)" end),
+                (if .power == null then empty else "render_power = \(.power)" end),
+                (if .offset == null then empty else "offset = \"\(.offset[0]) \(.offset[1])\"" end)
+              ] | "shadow = { enabled = true" + (map(", " + .) | join("")) + " }" end)
+          ] | select(length > 0) | "decoration = { " + join(", ") + " }")
+       ] | if length == 0 then "" else "hl.config({ " + join(", ") + " })\n" end)
     + (if $ch.groupbar == null then "" else
         ($ch.groupbar as $g |
           [ ([ (if $g.active == null then empty else "active = \($g.active | gradient($colors; 90))" end),
@@ -215,7 +246,7 @@ pkgs.writeShellScriptBin "rice-hyprland-theme" ''
                 anim("borderangle"; $m.durations.slow * 2; "standard"; $m.compositor.borderSweep) end)
           end)
       else "" end)
-  ' --arg baseline ${lib.escapeShellArg baselineLua} --arg chrome ${lib.escapeShellArg chromeLua} \
+  ' --arg baseline ${lib.escapeShellArg baselineLua} --arg chrome ${lib.escapeShellArg chromeLua} --arg shape ${lib.escapeShellArg shapeLua} \
     --arg daily "$daily" --rawfile prefs_raw "$prefs_source" --arg today "$(${pkgs.coreutils}/bin/date +%F)" \
     "$manifest")" || fail "manifest does not provide valid normalized Hyprland visual tokens: $manifest"
 

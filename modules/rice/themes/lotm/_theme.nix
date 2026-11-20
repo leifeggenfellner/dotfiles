@@ -143,8 +143,14 @@ in
     chrome = {
       border = {
         active = [ "state.warn" "accent.primary" "bg.surface2" "accent.primary" ];
+        # Square gilt frames (D-072): dark iron when unfocused, 3 px.
+        inactive = [ "bg.surface2" "bg.sunken" ];
         angle = 45;
+        width = 3;
       };
+      rounding = 0;
+      # An umber drop shadow, lit from the upper left like the rail.
+      shadow = { color = "bg.sunken"; range = 18; power = 2; offset = [ 3 5 ]; };
       groupbar = {
         active = [ "state.warn" "accent.primary" ];
         inactive = [ "bg.surface1" "bg.elevated" ];

@@ -24,6 +24,7 @@ in
     };
     decoration = {
       inherit (style) rounding;
+      inherit (chrome) shadow;
       blur = {
         enabled = true;
         size = style.blurSize;

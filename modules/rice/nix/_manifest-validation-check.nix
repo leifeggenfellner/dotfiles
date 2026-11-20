@@ -224,7 +224,15 @@ let
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "angle" ] 400 lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "groupbar" "font" ] "Cinzel" lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "chrome" "groupbar" "text" ] [ "fg.primary" ] lotm))
-    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" ] { } lotm))
+    # Square gilt windows (D-072).
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "rounding" ] 40 lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "width" ] 0 lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "border" "inactive" ] [ "#2a211a" ] lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" "blur" ] 4 lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" "color" ] "#000000" lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" "offset" ] [ 3 ] lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "shadow" "power" ] 9 lotm))
+    (evaluates "lotm" (setAtPath [ "tokens" "chrome" "glow" ] { } lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderSweep" ] "loop" lotm))
     # Daily accent (D-054).
     (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "record" ] "tarotDraw.daily" lotm))

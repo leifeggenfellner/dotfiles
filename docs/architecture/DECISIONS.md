@@ -871,7 +871,8 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-047 — The Hyprland adapter speaks Lua and carries theme window motion
 
-- Date: 2026-11-16 · Status: active (extended by D-048, D-049) · Amends D-039
+- Date: 2026-11-16 · Status: active (extended by D-048, D-049; rounding
+  mapped by D-072) · Amends D-039
 - Transport: Hyprland 0.56's Lua config has no `keyword` request, so the
   D-039 adapter had silently applied nothing since the Lua migration.
   `rice-hyprland-theme` now emits one Lua chunk for `hyprctl eval`, which
@@ -1707,6 +1708,48 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   before.
 - Why: the brass frame is the look, and it only reads when the border and
   bevels have space around them.
+
+### D-072 — Square gilt windows: the theme shapes the window frame
+
+- Date: 2026-11-20 · Status: active · Extends D-049 · Supersedes the part of
+  D-047 that kept rounding out of the theme mapping
+- The user's call: rounded corners do not fit the Victorian rice. They
+  chose native square gilt frames over plugins. Ornaments come next
+  (shell-drawn, to be prototyped), and brass-framed shell surfaces after
+  that.
+- `tokens.chrome` grows, all optional and validated by `mkThemeManifest`
+  and by the adapter:
+  - `border.inactive`: a gradient of 1–4 colour token refs.
+  - `border.width`: 1..8.
+  - `rounding`: 0..32.
+  - `shadow = { color?; range?; power?; offset?; }`, where `color` is a
+    token ref, `range` is 0..64, `power` is 1..4, and `offset` is
+    `[x y]` with each value in −32..32.
+- The adapter emits these after a baseline chunk that restores the
+  generated config's shape, so switching to a theme without them gives
+  back its rounding, border width and shadow:
+  - `general.border_size` and `decoration.rounding` come from the base
+    style.
+  - `decoration.shadow` holds Hyprland's defaults, now explicit in
+    `programs/hyprland/_chrome.nix` and set by the generated config.
+  - The shadow colour is the token at alpha `dd`.
+- Gaps stay with the generated config.
+- LoTM:
+  - Rounding 0 and a 3 px border.
+  - The active gilt gradient as before.
+  - Inactive windows in dark iron (`bg.surface2` to `bg.sunken`).
+  - An umber shadow (`bg.sunken`, range 18, power 2, offset 3 5).
+- Tests:
+  - The switch test asserts LoTM's chunk, and the baseline coming back
+    on Cyberpunk.
+  - Seven must-fail cases were added.
+  - An old case that used `chrome.shadow` as an unknown key now uses
+    `chrome.glow`.
+- Verified live: the generated chunk was applied to the running Hyprland
+  (`hyprctl eval` accepted it; options read back as rounding 0, border
+  3, shadow 18 at 3 5), and a screenshot showed square frames.
+- Why: brass and iron are cut square; the rounded corners were the last
+  piece of the generic look on the windows themselves.
 
 ---
 

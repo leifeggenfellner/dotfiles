@@ -20,7 +20,9 @@ let
       typography.families.display = "Cinzel";
       motion = fixtureMotion // { compositor = { windowsIn = "popin 85%"; windowsOut = "popin 90%"; workspaces = "slidefadevert 12%"; layers = "fade"; borderSweep = "once"; }; };
       chrome = {
-        border = { active = [ "state.warn" "accent.primary" ]; angle = 45; };
+        border = { active = [ "state.warn" "accent.primary" ]; inactive = [ "bg.elevated" "bg.sunken" ]; angle = 45; width = 3; };
+        rounding = 0;
+        shadow = { color = "bg.sunken"; range = 18; power = 2; offset = [ 3 5 ]; };
         groupbar = { active = [ "accent.primary" ]; text = "bg.sunken"; font = "display"; };
       };
     };
@@ -179,7 +181,16 @@ pkgs.runCommand "rice-theme-switch"
     grep -q 'border_active = { colors = { "rgb(d9a441)", "rgb(c79a3a)" }, angle = 45 }' "$RICE_TEST_LOG"
     grep -q 'groupbar = { col = { active = { colors = { "rgb(c79a3a)" }, angle = 90 } }, text_color = "rgb(0e0a06)", font_family = "Cinzel" }' "$RICE_TEST_LOG"
     grep -q 'leaf = "borderangle", enabled = true, speed = 8, bezier = "rice_standard", style = "once"' "$RICE_TEST_LOG"
+
+    echo "case: square gilt windows (D-072)"
+    grep -q 'inactive_border = { colors = { "rgb(2a211a)", "rgb(0e0a06)" }, angle = 45 }' "$RICE_TEST_LOG"
+    grep -q 'hl.config({ general = { border_size = 3 }, decoration = { rounding = 0, shadow = { enabled = true, color = "rgba(0e0a06dd)", range = 18, render_power = 2, offset = "3 5" } } })' "$RICE_TEST_LOG"
+    : > "$RICE_TEST_LOG"
     "$switch" cyberpunk
+    # The generated config's shape comes back.
+    grep -q 'hl.config({ general = { border_size = 2 }, decoration = { rounding = 16, shadow = { enabled = true, range = 4, render_power = 3, color = "rgba(1a1a1aee)", offset = "0 0" } } })' "$RICE_TEST_LOG"
+    grep -q 'inactive_border = "rgb(141b2b)"' "$RICE_TEST_LOG"
+    ! grep -q 'rounding = 0' "$RICE_TEST_LOG"
 
     echo "case: theme cursor applies live, base cursor without one (D-048)"
     grep -q '^hypr setcursor capitaine-cursors-white 16$' "$RICE_TEST_LOG"
