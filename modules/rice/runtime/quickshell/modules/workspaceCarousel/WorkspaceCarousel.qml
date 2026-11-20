@@ -19,7 +19,8 @@ import "../../services/hypr"
 //
 // The drum turns on Motion.instrumentSettle. With motion reduced or
 // the ambient governor off it does not turn: the cards take their new
-// places at once and cross-fade.
+// places at once and fade in on Motion.fade, which, like the opening
+// fade, survives reduce-motion (D-070).
 //
 // ←/→, Tab or the wheel turn it; a digit faces that workspace; Enter
 // or a click on a card goes there; Esc or a click outside closes.
@@ -91,7 +92,7 @@ PanelWindow {
 
         Behavior on opacity {
             MotionAnim {
-                spec: carousel.open ? Motion.panelOpen : Motion.panelClose
+                spec: Motion.calm(carousel.open ? Motion.panelOpen : Motion.panelClose)
             }
         }
 
@@ -140,7 +141,7 @@ PanelWindow {
             }
             Behavior on opacity {
                 MotionAnim {
-                    spec: carousel.open ? Motion.panelOpen : Motion.panelClose
+                    spec: Motion.calm(carousel.open ? Motion.panelOpen : Motion.panelClose)
                 }
             }
             Behavior on scale {
@@ -161,7 +162,7 @@ PanelWindow {
                     target: cards
                     property: "opacity"
                     to: 1
-                    spec: Motion.stateChange
+                    spec: Motion.fade
                 }
             }
             Connections {

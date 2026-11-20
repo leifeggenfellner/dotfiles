@@ -193,7 +193,8 @@ and exposes it exclusively through the `Theme` facade.
    (`#rrggbb`, replacing `accent.primary` on their day) and `sigil` (an
    assets-relative `.svg`). D-063 adds the `bar` id (read by
    `modules/bar/TopBar`): `{ style; frame?; caps?; glow?; }` picks the
-   floating or rail frame, its nine-sliced pieces and its end caps; and
+   floating or rail frame, its nine-sliced pieces (`body`, `plaque`, and
+   from D-070 `popout`, the hinged popout plate) and its end caps; and
    `widgets.clock.settings.layout` (`stacked` | `inline`). D-064 adds
    settings for `system`, `media`, `monitor-profile` and the opt-in
    `tray` hatch, and the icon names `wifi-0`…`wifi-3`, `battery-ink` and

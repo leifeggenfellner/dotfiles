@@ -65,7 +65,17 @@ Item {
     }
 
     // The needle points up at the active bezel from below the row.
+    // Under reduce-motion it fades in at the new bezel (D-070).
+    onActiveIndexChanged: needleFade.play()
+
+    FadeIn {
+        id: needleFade
+        target: needleImage
+    }
+
     Image {
+        id: needleImage
+
         readonly property Item target: root.activeIndex >= 0 && root.activeIndex < repeater.count ? repeater.itemAt(root.activeIndex) : null
 
         visible: root.needle.length > 0 && target !== null

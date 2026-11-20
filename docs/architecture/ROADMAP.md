@@ -1272,3 +1272,18 @@ Concretized as D-069. Part of #92 (`docs/design/bar-brass-rail.md`).
   load.
 - Verified live with a carousel-only harness; `rice-lint`, manifest
   validation and the shitbox build pass.
+
+## Phase 57 — The Brass Rail, phase 5: hinged plates and reduce-motion ✅
+
+Concretized as D-070. Completes #92 (`docs/design/bar-brass-rail.md`).
+
+- ✅ Rail-style popouts hang flush from the rail and swing down from a
+  hinge (`hingeSwing` with a 2° overshoot, then `hingeSettle`).
+- ✅ `widgets.bar.settings.frame.popout` with two must-fail cases; LoTM
+  hinged plate SVG.
+- ✅ `Motion.fade`, `Motion.calm()` and `components/FadeIn`: the cog,
+  needle, carousel and plates fade instead of jumping under
+  reduce-motion.
+- Verified headless (swing, flush placement, stretched-fade check);
+  Cyberpunk's popout is unchanged; `rice-lint`, manifest validation and
+  the shitbox build pass.

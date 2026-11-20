@@ -292,7 +292,7 @@ wallpapers } }`, store paths). The mutable pointer `$XDG_STATE_HOME/rice/active`
 
 ### D-022 — Motion v2: manifest easings honored, ceremonial, reduce-motion
 
-- Date: 2026-07-07 · Status: active
+- Date: 2026-07-07 · Status: active · Narrowed by D-070 (the rail's turning and sweeping moments fade under reduce-motion)
 - The manifest's named easing curves (`tokens.motion.easings`, declared in the
   contract since v1 but silently ignored — Theme hardcoded enums) are now
   resolved by `Theme` from curve-name strings, warn-and-default (OutCubic) on
@@ -1637,6 +1637,52 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   (the counts were right and captures readable at full size), plus
   `rice-lint`, manifest validation and the shitbox build.
 - Why: the captures are the point of the carousel, and they need room.
+
+### D-070 — Hinged-plate popouts, and reduce-motion fades instead of jumps
+
+- Date: 2026-11-20 · Status: active · Narrows D-022 · Extends D-063 ·
+  Brief: `docs/design/bar-brass-rail.md` (#92, phase 5, the last)
+- Under the rail bar style, every bar popout is a hinged plate. That
+  covers system, media, power, monitor and the tray hatch.
+  - **Placement:** it hangs flush from the rail. The popout window already
+    starts below the bar's exclusive zone, so the plate sits at its top.
+  - **Frame:** `widgets.bar.settings.frame.popout = { src; slice; }`
+    (validated), or a token plate with small corners without one.
+  - **Opening:** it swings down about its top edge from edge-on (−90°) on
+    `Motion.hingeSwing` (base duration, enter curve), overshoots by 2°,
+    and settles flat on `Motion.hingeSettle`.
+  - **Closing:** it swings back up on `panelClose`.
+  - **Content:** unchanged. The floating style (Cyberpunk) is unchanged.
+- Reduce-motion: D-022 made every animation instant. For the rail's
+  moments that turn or sweep, the brief asked for a fade instead of a
+  jump.
+  - **New spec `Motion.fade`:** the fast duration and standard curve. It
+    keeps its duration under reduce-motion and is 0 only when the theme
+    turns motion off.
+  - **`Motion.calm(spec)`:** gives `spec` while motion is on and `fade`
+    otherwise, for the opacity half of a moment.
+  - **`components/FadeIn`:** fades its target back in on `fade` when a
+    reading changes under reduce-motion.
+  - **Covered:** the cog notch and the needle fade in at their new
+    position. The carousel opens and closes with a fade, and turns with a
+    fade under reduce-motion or the governor. A hinged plate fades in
+    rather than swinging.
+  - Everything else keeps D-022's instant behaviour, including small
+    state changes and the urgent and critical pulses, which do not run
+    under reduce-motion.
+- LoTM: a dark umber plate in a brass rule, hung from a brass hinge leaf
+  with a barrel in each top corner and a rivet in each bottom corner.
+- Verified headless:
+  - The swing (mid-swing and settled frames).
+  - The plate sitting flush under the rail.
+  - The reduce-motion fades of the plate and the cog, observed with the
+    fade stretched in a scratch copy.
+  - Cyberpunk's popout matches the committed runtime apart from live
+    Bluetooth order.
+  - `rice-lint`, manifest validation and the shitbox build pass.
+- Why: the brief's last phase. The popouts were the last rounded,
+  floating cards on a brass rail, and reduce-motion users lost every
+  ceremonial moment to a jump.
 
 ---
 

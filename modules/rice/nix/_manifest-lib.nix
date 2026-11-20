@@ -394,7 +394,7 @@ let
         else fail "${at}.style must be floating or rail")
       ]
       ++ lib.optionals (s ? frame) (
-        [ (checkClosed "${at}.frame" [ "body" "plaque" ] s.frame) ]
+        [ (checkClosed "${at}.frame" [ "body" "plaque" "popout" ] s.frame) ]
         ++ lib.mapAttrsToList piece s.frame
       )
       ++ lib.optionals (s ? caps) (

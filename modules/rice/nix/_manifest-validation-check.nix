@@ -257,6 +257,9 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "caps" "end" "plate" ] "bar/missing.svg" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "caps" "middle" ] { action = "power"; } lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "glow" "hover" ] "#ffaa00" lotm))
+    # Hinged popout plate (D-070).
+    (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "frame" "popout" "src" ] "bar/missing.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "bar" "settings" "frame" "popout" "hinge" ] true lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "clock" "settings" "layout" ] "row" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "clock" "settings" "format" ] "HH:mm" lotm))
     # Instruments and tray hatch (D-064).

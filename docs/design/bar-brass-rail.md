@@ -1,6 +1,6 @@
 # The Brass Rail: taskbar redesign brief
 
-Status: **in progress**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, the phase 4a capture spike as D-066, the phase 4b drum as D-067, the phase 4c captures as D-068, and the full-screen carousel as D-069. Tracked in issue #92. When a phase lands, its decision goes into
+Status: **done**. Phase 1 landed as D-063, phase 2 as D-064, phase 3 as D-065, the phase 4a capture spike as D-066, the phase 4b drum as D-067, the phase 4c captures as D-068, the full-screen carousel as D-069, and phase 5, the hinged plates and reduced-motion pass, as D-070. Tracked in issue #92. When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 
 ## Why
@@ -183,6 +183,8 @@ family: line art, brass on umber, 1.5 px strokes at 18 px.
   rounded cards. The motion is a short swing-down: the enter curve, with a
   2° overshoot settling flat.
 - **Content:** unchanged. This is a frame and motion change only.
+- **Landed (D-070):** this covers every popout in the rail style, the tray
+  hatch included, framed by `widgets.bar.settings.frame.popout`.
 
 ## Motion budget
 

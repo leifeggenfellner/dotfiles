@@ -332,6 +332,8 @@ in
         frame = {
           body = { src = "bar/rail.svg"; slice = [ 24 0 24 0 ]; };
           plaque = { src = "bar/plaque.svg"; slice = [ 8 8 8 8 ]; };
+          # Popouts hang from the rail as hinged plates (D-070).
+          popout = { src = "bar/popout.svg"; slice = [ 22 16 22 18 ]; };
         };
         caps = {
           start = { action = "launcher"; plate = "bar/cog.svg"; emblem = "pathways_png/fool.png"; turn = 30; };

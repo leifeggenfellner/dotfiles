@@ -56,6 +56,18 @@ Item {
             }
         }
 
+        // Under reduce-motion the notch fades in instead of turning.
+        FadeIn {
+            id: notchFade
+            target: face
+        }
+        Connections {
+            target: cap
+            function onEngagedChanged() {
+                notchFade.play();
+            }
+        }
+
         Image {
             visible: cap.plate.length > 0
             anchors.fill: parent

@@ -19,10 +19,19 @@ import QtQuick
 //   revolution  — one linear turn of a playing disc (D-064)
 //   stateChange — small state reactions (hover, value changes)
 //   awaken      — one-shot startup reveal of surface contents
+//   fade        — a cross-fade that survives reduce-motion (D-070)
+//   hingeSwing / hingeSettle — a plate swinging down from its hinge,
+//                 then settling flat from a small overshoot (D-070)
 //
 // enabled folds in the global reduce-motion pref (D-022): the pref
 // lives in PrefsState and is pushed onto ShellState by the modules
 // layer, because core may not import services.
+//
+// Reduce-motion (D-070): moments that turn or sweep (the cog, the
+// needle, the carousel drum, the hinged plates) become a cross-fade
+// rather than a jump. `fade` keeps its duration under reduce-motion and
+// is 0 only when the theme turns motion off; calm(spec) is `spec` while
+// motion is on and `fade` otherwise, for the opacity half of a moment.
 
 QtObject {
     id: motion
@@ -77,6 +86,25 @@ QtObject {
     readonly property QtObject stateChange: QtObject {
         readonly property int duration: motion.enabled ? Theme.motion.durations.fast : 0
         readonly property int easing: Theme.motion.easings.standard
+    }
+
+    readonly property QtObject fade: QtObject {
+        readonly property int duration: Theme.motion.enabled ? Theme.motion.durations.fast : 0
+        readonly property int easing: Theme.motion.easings.standard
+    }
+
+    readonly property QtObject hingeSwing: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.base : 0
+        readonly property int easing: Theme.motion.easings.enter
+    }
+
+    readonly property QtObject hingeSettle: QtObject {
+        readonly property int duration: motion.enabled ? Theme.motion.durations.fast : 0
+        readonly property int easing: Theme.motion.easings.standard
+    }
+
+    function calm(spec) {
+        return motion.enabled ? spec : motion.fade;
     }
 
     readonly property QtObject awaken: QtObject {
