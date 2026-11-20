@@ -98,7 +98,7 @@ the Nighthawks guard. The video background is replaced by a drawn scene.
 ## 4. Vigil: the screensaver (optional)
 
 A new, non-locking screensaver. After a configurable idle time, before the
-idle veil and DPMS, a city scene fades in on every screen. Any input
+idle veil and DPMS, a view of Utopia fades in on every screen. Any input
 dismisses it at once. It never locks and never holds input.
 
 - **Scene:** Utopia, the marionette town Klein built on an uninhabited
