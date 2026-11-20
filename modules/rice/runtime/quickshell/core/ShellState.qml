@@ -203,6 +203,11 @@ Item {
     function hideCarousel() {
         carouselScreen = "";
     }
+    // ── Window ornaments (D-074) ─────────────────────────────
+    // True while windows animate to new places after a compositor
+    // event; the ornaments fade out until they settle. Written by
+    // modules/windowOrnaments/OrnamentController.
+    property bool windowsSettling: false
 
     function showOsd(kind) {
         osdKind = kind === "brightness" ? "brightness" : "volume";

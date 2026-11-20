@@ -237,6 +237,13 @@ let
     # Solid focus border (D-073).
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] "slow" lotm))
     (evaluates "lotm" (setAtPath [ "tokens" "motion" "compositor" "borderFade" ] false lotm))
+    # Window ornaments (D-074).
+    (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "corner" ] "chrome/missing.svg" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "corner" ] "bar/rail.png" lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "size" ] 8 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "reach" ] 30 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "inactive" ] 1.5 lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "ornaments" "settings" "glint" ] true lotm))
     # Daily accent (D-054).
     (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "record" ] "tarotDraw.daily" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "dailyAccent" "settings" "catalog" ] "widgets.tarotDraw.settings.missing" lotm))

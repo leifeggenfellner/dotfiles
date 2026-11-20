@@ -1323,5 +1323,18 @@ borders.
 - ✅ LoTM: a single solid gilt stop on focus, no sweep.
 - Verified: the switch test, manifest validation, the shitbox build, and a
   live apply.
+
+## Phase 61 — Window ornaments ✅
+
+Concretized as D-074. Second of three steps toward Victorian window
+chrome; brass-framed shell surfaces come next.
+
+- ✅ `widgets.ornaments.settings` and `modules/windowOrnaments`: corner
+  art over every window frame, re-read after compositor events, faded
+  while windows settle.
+- ✅ LoTM: a gilt corner bracket, dimmed on unfocused windows.
+- Open: drag-moves trail by up to a second; a Hyprland plugin is the only
+  way to track them frame by frame.
+- Verified: the checks, the shitbox build, and a live run.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

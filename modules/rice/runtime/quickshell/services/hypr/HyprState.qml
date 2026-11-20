@@ -17,7 +17,9 @@ import Quickshell.Wayland
 //             that exist), urgentWorkspaces ({ id: true }),
 //             workspaceApps(id) (app ids of its windows, in order),
 //             workspaceLayout(id) (its windows placed on its monitor,
-//             for a miniature; null when unknown)
+//             for a miniature; null when unknown),
+//             windowFrames(screenName) (the windows of the screen's
+//             active workspace, for chrome drawn over them)
 //   events:   workspaceSwitched(screenName, id) — a screen that already
 //             showed a workspace moved to another (not the first report)
 //   commands: switchWorkspace(id), moveFocusedWindow(id),
@@ -128,6 +130,34 @@ Item {
             height: height,
             windows: windows
         };
+    }
+
+    // [{ x, y, width, height, floating, focused, stack, fullscreen }]
+    // for the windows of the screen's active workspace, in the
+    // screen's logical pixels; a lower `stack` was focused more
+    // recently. Geometry comes from the last refreshWindows().
+    function windowFrames(screenName) {
+        const mon = Hyprland.monitors.values.find(m => m.name === screenName);
+        const ws = mon?.activeWorkspace ?? null;
+        if (!ws)
+            return [];
+        const frames = [];
+        for (const t of ws.toplevels.values) {
+            const ipc = t.lastIpcObject ?? {};
+            if (!ipc.at || !ipc.size || ipc.hidden)
+                continue;
+            frames.push({
+                x: ipc.at[0] - mon.x,
+                y: ipc.at[1] - mon.y,
+                width: ipc.size[0],
+                height: ipc.size[1],
+                floating: ipc.floating ?? false,
+                focused: (ipc.focusHistoryID ?? -1) === 0,
+                stack: ipc.focusHistoryID ?? 0,
+                fullscreen: (ipc.fullscreen ?? 0) > 0
+            });
+        }
+        return frames;
     }
 
     // Wayland app ids, falling back to Hyprland's class until the

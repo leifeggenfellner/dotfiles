@@ -1768,6 +1768,41 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: a moving glint and a cross-fade read as modern UI; brass doesn't
   shimmer when you look at it.
 
+### D-074 — Window ornaments: shell-drawn corner pieces on window frames
+
+- Date: 2026-11-20 · Status: active · Extends D-072
+- The second step toward Victorian window chrome, after square frames.
+  Hyprland cannot decorate a frame without a plugin, so the shell draws
+  the ornaments; the user went ahead with them after the prototype.
+- `widgets.ornaments.settings = { corner; size?; reach?; inactive?; }`
+  opts a theme in, validated with closed keys and six must-fail cases.
+  `corner` is the top-left piece; the shell mirrors it for the others.
+- `modules/windowOrnaments`:
+  - `OrnamentController` (in `shell.qml`) re-reads window geometry, which
+    Hyprland only reports on request. After any event that moves windows
+    (open, close, move, float, fullscreen, workspace or group changes) it
+    raises `ShellState.windowsSettling`, waits 450 ms for the window
+    motion to land (60 ms when motion is reduced), re-reads, and lowers
+    it. Focus changes re-read at once. A 1 s re-read catches drag-moves
+    and resizes, which raise no event.
+  - `WindowOrnaments` (one per screen, Top layer, empty input mask, no
+    keyboard focus) draws the four corners of every window on the
+    screen's active workspace from `HyprState.windowFrames(screen)`. It
+    skips corners covered by a floating window above, draws nothing while
+    the workspace has a fullscreen window, and fades out while windows
+    settle and back in on `Motion.fade`.
+- `Theme.frameWidth` reads `tokens.chrome.border.width` (default 2, the
+  generated config's), so the art lines up with the frame.
+- LoTM: `assets/chrome/corner.svg`, a gilt diamond boss with a rivet, arms
+  along the border and a leaf between two scrolls, 48 px with reach 6,
+  at 0.55 on unfocused windows.
+- Known limits: ornaments trail a drag by up to a second, and the scrolls
+  reach about 10 px over each window's corner.
+- Verified: the checks, the shitbox build, and the working-tree runtime on
+  the live Hyprland (corners on all three monitors, dimmed when unfocused).
+- Why: the user asked for ornament on the frames, "nothing too modern";
+  square gilt alone read as plain.
+
 ---
 
 ## Legacy imports

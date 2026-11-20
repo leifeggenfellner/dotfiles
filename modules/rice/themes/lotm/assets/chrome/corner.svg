@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Window corner ornament (D-074), top-left; the shell mirrors it for
+       the other corners. The frame's outer corner sits at (6, 6), so
+       `reach = 6`: a diamond boss reaches out into the gap, gilt arms run
+       along the 3 px border, and a leaf between two scrolls curls in over
+       the window corner. -->
+  <defs>
+    <linearGradient id="gilt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0cf7e"/>
+      <stop offset="0.5" stop-color="#c79a3a"/>
+      <stop offset="1" stop-color="#6a4c1a"/>
+    </linearGradient>
+    <radialGradient id="rivet" cx="0.35" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#fbe3a0"/>
+      <stop offset="0.6" stop-color="#b8892f"/>
+      <stop offset="1" stop-color="#4a3714"/>
+    </radialGradient>
+  </defs>
+  <g fill="none" stroke="#2a1d0c" stroke-width="2.6" stroke-linecap="round" stroke-opacity="0.7">
+    <path d="M12 10.5 C 21 10.5, 27 12, 26 16.5 C 25 19.5, 21 19, 21.5 16.2"/>
+    <path d="M10.5 12 C 10.5 21, 12 27, 16.5 26 C 19.5 25, 19 21, 16.2 21.5"/>
+  </g>
+  <g fill="none" stroke="url(#gilt)" stroke-width="1.4" stroke-linecap="round">
+    <path d="M12 10.5 C 21 10.5, 27 12, 26 16.5 C 25 19.5, 21 19, 21.5 16.2"/>
+    <path d="M10.5 12 C 10.5 21, 12 27, 16.5 26 C 19.5 25, 19 21, 16.2 21.5"/>
+  </g>
+  <path d="M10 10 C 15.5 10.5, 18.5 13.5, 18 18 C 13.5 18.5, 10.5 15.5, 10 10 Z" fill="url(#gilt)" stroke="#2a1d0c" stroke-width="0.7"/>
+  <path d="M11 11 L 16.5 16.5" stroke="#4a3714" stroke-width="0.6"/>
+  <path d="M6 5 L 44 7 L 44 8 L 6 10 Z" fill="url(#gilt)" stroke="#4a3714" stroke-width="0.5"/>
+  <path d="M5 6 L 7 44 L 8 44 L 10 6 Z" fill="url(#gilt)" stroke="#4a3714" stroke-width="0.5"/>
+  <path d="M7 1 L 13 7 L 7 13 L 1 7 Z" fill="url(#gilt)" stroke="#4a3714" stroke-width="0.7"/>
+  <path d="M7 3.5 L 10.5 7 L 7 10.5 L 3.5 7 Z" fill="none" stroke="#fbe3a0" stroke-opacity="0.5" stroke-width="0.5"/>
+  <circle cx="7" cy="7" r="1.8" fill="url(#rivet)"/>
+  <circle cx="44" cy="7.5" r="1.1" fill="url(#rivet)"/>
+  <circle cx="7.5" cy="44" r="1.1" fill="url(#rivet)"/>
+</svg>

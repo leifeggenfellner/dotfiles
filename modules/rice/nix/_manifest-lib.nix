@@ -344,6 +344,30 @@ let
         else fail "${at}.capture.strength must be a number from 0 to 1")
       ]
     )
+    ++ lib.optionals ((theme.widgets.ornaments.settings or null) != null) (
+      # Window ornaments (D-074): the top-left corner art (an .svg under
+      # assets/, mirrored by the shell), its size, how far the frame's
+      # outer corner sits from the art's top-left, and the opacity on
+      # unfocused windows.
+      let
+        at = "widgets.ornaments.settings";
+        s = theme.widgets.ornaments.settings;
+        size = s.size or 48;
+      in
+      [
+        (checkClosed at [ "corner" "size" "reach" "inactive" ] s)
+        (if builtins.isString (s.corner or null) && lib.hasSuffix ".svg" s.corner
+          && builtins.pathExists (themeDir + "/assets/${s.corner}") then true
+        else fail "${at}.corner must name an .svg under assets/, got ${builtins.toJSON (s.corner or null)}")
+        (if builtins.isInt size && size >= 16 && size <= 96 then true
+        else fail "${at}.size must be an int from 16 to 96")
+        (if !(s ? reach) || (builtins.isInt s.reach && s.reach >= 0 && builtins.isInt size && s.reach * 2 <= size) then true
+        else fail "${at}.reach must be an int from 0 to half of size")
+        (if !(s ? inactive) || ((builtins.isFloat s.inactive || builtins.isInt s.inactive)
+          && s.inactive >= 0 && s.inactive <= 1) then true
+        else fail "${at}.inactive must be a number from 0 to 1")
+      ]
+    )
     ++ lib.optionals ((theme.widgets.clock.settings or null) != null) (
       let
         at = "widgets.clock.settings";

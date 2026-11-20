@@ -403,6 +403,16 @@ in
         };
       };
 
+      # Window ornaments (D-074): a gilt corner bracket on every window
+      # frame, a diamond boss with a leaf between two scrolls, dimmed on
+      # unfocused windows.
+      ornaments.settings = {
+        corner = "chrome/corner.svg";
+        size = 48;
+        reach = 6;
+        inactive = 0.55;
+      };
+
       # Session awakening (D-053): the first shell start of a login opens
       # veiled in gray fog; the Fool's words surface beside the real user
       # and time, then the fog lifts off the desktop.

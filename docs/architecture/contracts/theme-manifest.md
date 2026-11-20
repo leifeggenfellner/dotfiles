@@ -207,7 +207,13 @@ and exposes it exclusively through the `Theme` facade.
    (read by `modules/workspaceCarousel`): nine-sliced card and nameplate
    pieces, and the window-count copy `{ none; one; many }` with `{n}`.
    D-068 adds `carousel.capture = { tint?; strength?; }`, which turns on
-   window captures on the cards.
+   window captures on the cards. D-074 adds the `ornaments` id (read by
+   `modules/windowOrnaments`): `{ corner; size?; reach?; inactive?; }`
+   draws `corner` (an `.svg` under assets/, the top-left piece, mirrored
+   for the others) at each window frame's corners; `size` is 16..96 px
+   (default 48), `reach` how far the frame's outer corner sits from the
+   art's top-left (0..size/2, default 6), and `inactive` its opacity on
+   unfocused windows (0..1, default 0.55).
 2. **Assets by role (D-011).** The runtime resolves assets via `Theme.assets`;
    a missing optional role falls back to `modules/rice/shared/` or degrades to
    nothing gracefully. File paths in the manifest are Nix store paths after build.

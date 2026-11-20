@@ -22,6 +22,7 @@ import "./modules/dailyAccent"
 import "./modules/newtab"
 import "./modules/polkit"
 import "./modules/workspaceCarousel"
+import "./modules/windowOrnaments"
 
 // ── shell ─────────────────────────────────────────────────────
 // Pure compositor: instantiates one of each surface per screen.
@@ -64,6 +65,10 @@ ShellRoot {
     NewtabFeed {}
 
     CarouselController {}
+
+    OrnamentController {
+        id: ornaments
+    }
 
     Variants {
         model: Quickshell.screens
@@ -121,6 +126,17 @@ ShellRoot {
             requested: ShellState.awakening !== null
             sourceComponent: AwakeningOverlay {
                 modelData: awakeningLoader.modelData
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        SurfaceLoader {
+            id: ornamentsLoader
+            requested: ornaments.enabled
+            sourceComponent: WindowOrnaments {
+                modelData: ornamentsLoader.modelData
             }
         }
     }

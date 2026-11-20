@@ -60,6 +60,11 @@ QtObject {
         }
     }
 
+    // Window border width the compositor draws (tokens.chrome, D-072);
+    // 2 is the generated config's. Chrome drawn over windows (D-074)
+    // lines up with it.
+    readonly property int frameWidth: theme._t.chrome?.border?.width ?? 2
+
     readonly property QtObject metrics: QtObject {
         readonly property QtObject radius: QtObject {
             readonly property int small: theme._t.metrics.radius.small
