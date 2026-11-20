@@ -1,35 +1,29 @@
 // Rice boot splash (D-044). Generated per theme by _plymouth-theme.nix:
 // Placeholders are replaced with theme colours (as "r, g, b" floats) and copy.
-// A sigil fades in through drifting fog, an ink ring fills with boot
-// progress (and drains while the machine shuts down or reboots), and
-// passphrase/question prompts are drawn under the sigil.
+// A sigil fades in through drifting fog inside a full ink ring (drawn
+// whole from the first frame, D-077), and passphrase/question prompts
+// are drawn under the sigil.
 
 Window.SetBackgroundTopColor(@bgTop@);
 Window.SetBackgroundBottomColor(@bgBottom@);
 
 font = "@font@";
-ring_frames = @ringFrames@;
 
 sigil_raw = Image("sigil.png");
 glow_raw = Image("glow.png");
 fog_raw = Image("fog.png");
 bullet_raw = Image("bullet.png");
-for (i = 0; i < ring_frames; i++)
-  ring_raw[i] = Image("ring-" + i + ".png");
-for (i = 0; i < ring_frames - 1; i++)
-  seep_raw[i] = Image("seep-" + i + ".png");
+ring_raw = Image("ring.png");
 
 glow = Sprite();
 sigil = Sprite();
 ring = Sprite();
-seep = Sprite();
 fog_low = Sprite();
 fog_high = Sprite();
 // Hidden until the refresh callback fades them in.
 glow.SetOpacity(0);
 sigil.SetOpacity(0);
 ring.SetOpacity(0);
-seep.SetOpacity(0);
 fog_low.SetOpacity(0);
 fog_high.SetOpacity(0);
 
@@ -50,20 +44,10 @@ fun layout() {
   sigil.SetImage(sigil_raw.Scale(sigil_size, sigil_size));
   sigil.SetPosition(sigil_x, sigil_y, 10);
 
-  // Ink ring: pre-rendered frames, centred on the sigil. Between frames
-  // the next segment (seep-i: ink from frame i to i + 1, no track) fades
-  // in over the current frame, so the ink seeps instead of stepping.
+  // Ink ring, full, centred on the sigil.
   ring_size = Math.Int(sigil_size * 1.08);
-  for (i = 0; i < ring_frames; i++)
-    global.ring_image[i] = ring_raw[i].Scale(ring_size, ring_size);
-  for (i = 0; i < ring_frames - 1; i++)
-    global.seep_image[i] = seep_raw[i].Scale(ring_size, ring_size);
-  ring_x = Math.Int(W / 2 - ring_size / 2);
-  ring_y = Math.Int(sigil_y + sigil_size / 2 - ring_size / 2);
-  ring.SetImage(ring_image[frame]);
-  ring.SetPosition(ring_x, ring_y, 8);
-  seep.SetImage(seep_image[frame]);
-  seep.SetPosition(ring_x, ring_y, 8);
+  ring.SetImage(ring_raw.Scale(ring_size, ring_size));
+  ring.SetPosition(Math.Int(W / 2 - ring_size / 2), Math.Int(sigil_y + sigil_size / 2 - ring_size / 2), 8);
 
   // Two fog banks drifting against each other along the floor. Every move
   // repaints most of the screen in software, so they step together on
@@ -82,24 +66,8 @@ fun layout() {
 }
 
 global.tick = 0;
-global.progress = 0;
-global.target = 0;
-global.shown = 0;
-global.frame = 0;
 global.prompting = 0;
-global.now = 0;
-global.last = 0;
 fog_step = 4;
-
-// Shutdown and reboot report no progress, so the ink drains on the
-// script's own clock instead; it never empties, so a slow stop job
-// still reads as work in progress rather than a frozen screen.
-mode = Plymouth.GetMode();
-global.draining = (mode == "shutdown" || mode == "reboot");
-if (draining) {
-  global.shown = 1;
-  global.frame = ring_frames - 2;
-}
 layout();
 
 fun refresh_callback() {
@@ -119,40 +87,9 @@ fun refresh_callback() {
     fog_high.SetOpacity(fade * 0.28);
   }
 
-  // Progress is a time estimate from the last boot, which includes the
-  // passphrase wait, so it leaps to nearly full on unlock and only a few
-  // seconds of boot remain; hold the ink while the Threshold asks.
-  if (!prompting)
-    global.target = progress;
-  // Seep toward the target by wall-clock time, not ticks: software
-  // repaints of the fog stretch ticks well past the nominal refresh rate.
-  // Capped at 0.6 ring/s with an eased tail, a full ring takes ~2 s and
-  // closes before the splash quits.
-  dt = Math.Clamp(now - last, 0, 0.25);
-  global.last = now;
-  if (draining)
-    global.shown = 1 / (1 + tick / 900);
-  else
-    global.shown = shown + Math.Clamp((target - shown) * 4 * dt, 0, 0.6 * dt);
-  position = Math.Clamp(shown, 0, 1) * (ring_frames - 1);
-  current = Math.Min(Math.Int(position), ring_frames - 2);
-  if (current != frame) {
-    global.frame = current;
-    ring.SetImage(ring_image[current]);
-    seep.SetImage(seep_image[current]);
-  }
   ring.SetOpacity(fade * 0.9);
-  seep.SetOpacity(fade * 0.9 * (position - current));
 }
 Plymouth.SetRefreshFunction(refresh_callback);
-
-// `duration` is seconds since the splash started: the script's clock.
-fun boot_progress_callback(duration, value) {
-  global.now = duration;
-  if (value > progress)
-    global.progress = value;
-}
-Plymouth.SetBootProgressFunction(boot_progress_callback);
 
 // ── Prompts ─────────────────────────────────────────────────
 // The theme's label sits above the real prompt text, never instead of it.

@@ -52,7 +52,7 @@ pkgs.runCommand "rice-boot"
       name="$(basename "$dir")"
       grep -qx "ScriptFile=$dir/$name.script" "$dir/$name.plymouth"
       ! grep -n '@[A-Za-z]*@' "$dir/$name.script"
-      for image in sigil glow fog bullet ring-0 ring-59; do
+      for image in sigil glow fog bullet ring; do
         test -s "$dir/$image.png"
       done
     done

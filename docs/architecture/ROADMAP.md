@@ -1358,5 +1358,13 @@ Concretized as D-076. Third of three steps toward Victorian window chrome.
 - Follow-up: the dashboard logs `setMeasuredHeight is not a function` on
   close (present before this phase).
 - Verified: headless shots with and without the plates, checks and build.
+
+## Phase 64 — The boot ring is drawn full ✅
+
+Concretized as D-077; phase 1 of `docs/design/threshold-gate-vigil.md`.
+
+- ✅ One full ring image; no progress, seep or drain in the script.
+- Verified: the `rice-boot` check and the shitbox build. Seen for real on
+  the next boot.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

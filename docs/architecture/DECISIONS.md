@@ -759,7 +759,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-044 — Boot splash and console palette are rebuild-time theme surfaces
 
-- Date: 2026-11-13 · Status: active
+- Date: 2026-11-13 · Status: active (ring progress replaced by D-077)
 - NixOS module `rice-boot` (`modules/rice/nix/boot.nix`) dresses what runs
   before the desktop from the **configured** `rice.theme`. Each
   specialisation re-evaluates it, so every boot entry carries its own splash
@@ -1868,6 +1868,24 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   launcher's rounded panel unchanged without them.
 - Why: the rounded glass panels were the last generic surfaces; brass
   plates match the rail, the popouts and the window frames.
+
+### D-077 — The boot ring is drawn full
+
+- Date: 2026-11-20 · Status: active · Amends D-044
+- The user's call: keep the passphrase screen, but drop the ring
+  animation and show the ring full from the start. Phase 1 of the
+  Threshold, Gate and Vigil brief (`docs/design/threshold-gate-vigil.md`).
+- The splash renders one full ink ring (`ring.png`, the same bleed and
+  ink passes as before) instead of 60 frames plus 59 seep segments, and
+  the script drops boot progress, the seep and the shutdown drain. The
+  ring fades in with the sigil and stays full on boot, shutdown and
+  reboot.
+- Boot progress is unused for now; the planned ascent (phase 3 of the
+  brief) will drive it, so impermanent hosts keep persisting
+  `/var/lib/plymouth`.
+- The `rice-boot` check now expects `ring.png`.
+- Why: a filling ring reads as a loading bar; a closed ring reads as a
+  seal, which is what the Threshold is.
 
 ---
 

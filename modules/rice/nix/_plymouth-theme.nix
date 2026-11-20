@@ -3,7 +3,7 @@
 #   sigil        single-colour SVG, recoloured to accent.primary
 #   promptLabel  copy shown above the real passphrase/question prompt
 #   font         optional TTF for prompt text (boot.plymouth.font)
-# Fog, the ink-ring progress frames, and the bullet glyph are generated
+# Fog, the full ink ring (D-077), and the bullet glyph are generated
 # here, so a theme only supplies the sigil. Output follows the Plymouth
 # theme layout: share/plymouth/themes/<name>/.
 { pkgs, lib }:
@@ -20,7 +20,6 @@ let
   # Plymouth script string literal.
   scriptString = s: lib.replaceStrings [ "\\" "\"" "\n" ] [ "\\\\" "\\\"" " " ] s;
 
-  ringFrames = 60;
   accent = colors.accent.primary;
 
   script = pkgs.replaceVars ./_plymouth-theme.script {
@@ -31,20 +30,12 @@ let
     mutedColor = rgb colors.fg.muted;
     promptLabel = scriptString (boot.promptLabel or "");
     font = scriptString (theme.tokens.typography.families.display or "Sans");
-    ringFrames = toString ringFrames;
   };
 
-  # Ink ring frame: a faint plain track, then the filled arc twice — a
-  # blurred, wider pass that reads as ink soaking into paper and a crisp
-  # pass on top — both roughened by a gentle turbulence displacement.
-  # `ring <length>` draws the arc from the top; `ring <length> <start>`
-  # draws only the segment after <start>, without the track, for the
-  # seep sprite the script fades in between frames.
-  ringSvg = ''
-    ring() {
-      local length="$1" start="''${2:-}" track=""
-      [ -n "$start" ] || track='<circle cx="200" cy="200" r="168" stroke-width="2" stroke-opacity="0.16"/>'
-      cat <<EOF
+  # Ink ring, full: a blurred, wider pass that reads as ink soaking into
+  # paper and a crisp pass on top, both roughened by a gentle turbulence
+  # displacement.
+  ringSvg = pkgs.writeText "ring.svg" ''
     <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
       <defs>
         <filter id="ink" x="-15%" y="-15%" width="130%" height="130%">
@@ -57,16 +48,11 @@ let
           <feDisplacementMap in="soft" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
         </filter>
       </defs>
-      <g transform="rotate(-90 200 200)" fill="none" stroke="${accent}">
-        $track
-        <circle cx="200" cy="200" r="168" stroke-width="12" stroke-opacity="0.35" stroke-linecap="round"
-                stroke-dasharray="$length 2000" stroke-dashoffset="-''${start:-0}" filter="url(#bleed)"/>
-        <circle cx="200" cy="200" r="168" stroke-width="5" stroke-linecap="round"
-                stroke-dasharray="$length 2000" stroke-dashoffset="-''${start:-0}" filter="url(#ink)"/>
+      <g fill="none" stroke="${accent}">
+        <circle cx="200" cy="200" r="168" stroke-width="12" stroke-opacity="0.35" filter="url(#bleed)"/>
+        <circle cx="200" cy="200" r="168" stroke-width="5" filter="url(#ink)"/>
       </g>
     </svg>
-    EOF
-    }
   '';
 in
 pkgs.runCommand "plymouth-theme-${name}"
@@ -96,17 +82,7 @@ pkgs.runCommand "plymouth-theme-${name}"
 
   magick -size 32x32 xc:none -fill '${accent}' -draw 'polygon 16,2 30,16 16,30 2,16' "$dir/bullet.png"
 
-  ${ringSvg}
-  arc() { awk -v i="$1" 'BEGIN { printf "%.2f", 2 * 3.14159265 * 168 * i / ${toString (ringFrames - 1)} }'; }
-  for i in $(seq 0 ${toString (ringFrames - 1)}); do
-    ring "$(arc "$i")" > ring.svg
-    resvg ring.svg "$dir/ring-$i.png"
-  done
-  for i in $(seq 0 ${toString (ringFrames - 2)}); do
-    start=$(arc "$i")
-    ring "$(awk -v a="$start" -v b="$(arc $((i + 1)))" 'BEGIN { printf "%.2f", b - a }')" "$start" > seep.svg
-    resvg seep.svg "$dir/seep-$i.png"
-  done
+  resvg ${ringSvg} "$dir/ring.png"
 
   cp ${script} "$dir/${name}.script"
   cat > "$dir/${name}.plymouth" <<EOF

@@ -1,7 +1,8 @@
 # Threshold, Gate and Vigil: boot, lock and screensaver brief
 
-Status: **draft**, for review. Nothing here is decided until a phase lands
-with its own D-number in `docs/architecture/DECISIONS.md`.
+Status: **in progress**. Phase 1 (static ring) landed as D-077. The rest is a
+draft until each phase lands with its own D-number in
+`docs/architecture/DECISIONS.md`.
 
 ## Why
 
