@@ -32,7 +32,15 @@ Item {
         signal loginSucceeded
         property string hostName: "preview"
 
+        // RICE_LOCK_PREVIEW_ACCEPT=<word> lets that word "succeed", so a
+        // theme's unlock can be watched; nothing is ever unlocked here.
         function login(user, password, sessionIndex) {
+            const accept = Quickshell.env("RICE_LOCK_PREVIEW_ACCEPT") || "";
+            if (accept.length > 0 && password === accept) {
+                console.warn("Lock preview: accepted the preview word");
+                loginSucceeded();
+                return;
+            }
             console.warn("Lock preview: login suppressed for", user, "session", sessionIndex);
             loginFailed();
         }

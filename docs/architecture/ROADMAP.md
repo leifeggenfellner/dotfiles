@@ -1413,5 +1413,16 @@ Concretized as D-082.
 - ✅ Toasts wear the window frame.
 - ✅ Sparks and the `letter-burn` cue (D-083).
 - Verified: headless sequence with the compiled shader, checks and build.
+
+## Phase 70 — The lock is Chanis Gate ✅
+
+Concretized as D-084; phase 2 of `docs/design/threshold-gate-vigil.md`.
+
+- ✅ The painted gate with flickering candles, moonlight, medallions lit
+  per character, a red refusal and an opening on success.
+- ✅ The lock host holds the session lock for the theme's unlock.
+- Next: the ascent to Sefirah Castle (phase 3), and its reverse on
+  shutdown.
+- Verified: headless preview frames, lint and build.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

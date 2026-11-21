@@ -2043,6 +2043,48 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   past the letter; checks and build.
 - Why: fire should leave something in the air.
 
+### D-084 — The lock is Chanis Gate
+
+- Date: 2026-11-21 · Status: active · Extends D-037 · Phase 2 of the
+  Threshold, Gate and Vigil brief
+- The LoTM lock variant's backdrop is a painted scene, not a video: the
+  user generated `lockscreen/lotm/gate/base.png` (2912×1632, Midjourney,
+  from prompts in this session), the black iron gate under the cathedral
+  with the seven medallions. `RICE_LOTM_LOCK_SCENE=video` brings back the
+  theme's video, which stays in the theme as an opt-in.
+- `lockscreen/lotm/GateScene.qml` brings the still to life. Every
+  position is in the image's own pixels (measured at 1456×816), so it
+  holds at any size; wide screens crop to cover, tall ones fit the
+  whole image over a blurred, dimmed copy.
+  - Candle light flickers on both sconces; a faint moonlight band
+    crosses the gate once a minute. Both pause after 30 s without input
+    or pointer movement.
+  - One medallion lights per typed character (outer pairs first, the
+    moon last) as a halo that leaves the emblem readable.
+  - A refused passphrase drains the medallions, flares the lock plate
+    red and rattles the leaves; the message reads "THE GATE HOLDS".
+  - On success every medallion blazes, the interface fades, and the two
+    leaves (the still, masked to each half of the arch) swing inward on
+    their hinges onto warm light, then the scene fades to black.
+  - 20:00–06:00 the crypt is graded colder and darker, the candles lower
+    and the medallions faintly alive; the opening light is not graded.
+- Main.qml: in gate mode the name and passphrase sit centred under the
+  lock plate ("SPEAK THE WORD"); the clock and power row keep their
+  places. It exposes `unlockDuration` (1.3 s).
+- Runtime: `ThemeLock` keeps the loaded theme item and, after a
+  successful login, holds the session lock for the theme's
+  `unlockDuration` (at most 1.5 s, at least the old 60 ms) before
+  releasing it, so the gate opens while the session is still locked.
+  The preview host accepts `RICE_LOCK_PREVIEW_ACCEPT=<word>` as a success
+  so an unlock can be watched; nothing is unlocked there.
+- Cost: one image and a few small animated items, idle after 30 s,
+  where the video decoded on every output for the whole lock.
+- Verified: headless preview runs (a FloatingWindow copy of the preview
+  host): the scene at rest, lit medallions, the denial, and four frames
+  of the opening; lint and build. The real lock is seen on next lock.
+- Why: the user wanted the lock to be the Gate, hyperreal or painted, and
+  cheaper than a video.
+
 ---
 
 ## Legacy imports

@@ -18,6 +18,8 @@ Item {
     readonly property var sessionModel: shim.sessionModel
     readonly property var config: shim.config
     readonly property var lockState: sharedLockState
+    // The theme instance on the primary output, once loaded.
+    property var themeItem: null
 
     // SDDM provides `keyboard`; Quickshell does not. This stub keeps the
     // lockscreen UI quiet without adding an SDDM runtime dependency.
@@ -135,6 +137,11 @@ Item {
                 Quickshell.execDetached(["rice-sound-play", sound]);
             }
 
+            // A theme may hold the lock a moment for its own unlock
+            // (D-084): `unlockDuration` ms on the loaded theme, at most
+            // 1.5 s, while the session stays locked.
+            const hold = root.themeItem ? (root.themeItem.unlockDuration ?? 0) : 0;
+            quitTimer.interval = Math.max(60, Math.min(1500, Number(hold) || 0));
             quitTimer.start();
         }
 
@@ -172,6 +179,7 @@ Item {
             source: root.themePath.length > 0 ? "file://" + root.themePath + "/Main.qml" : ""
             onLoaded: {
                 root.themeReady = true;
+                root.themeItem = item;
                 item.forceActiveFocus();
             }
             onStatusChanged: {
