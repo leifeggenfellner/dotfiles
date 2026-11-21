@@ -1467,4 +1467,12 @@ Concretized as D-089; phase 2 of `docs/design/control-centre.md`.
 - ✅ Discovery while the page is open; "My devices" and "Nearby".
 - ✅ Pair (trust and connect after), cancel, forget, per-row failures.
 - Verified: checks, headless discovery on real BlueZ; pairing untested.
-- Next: phase 3, sound (devices, app streams, microphone, levels).
+
+## Phase 76 — The control centre: sound ✅
+
+Concretized as D-090; phase 3 of `docs/design/control-centre.md`.
+
+- ✅ Output and input devices, app volumes, the microphone.
+- ✅ Live levels while the page is open.
+- Verified: checks, headless with a silent test stream.
+- Next: phase 4, power profiles, brightness and do-not-disturb.

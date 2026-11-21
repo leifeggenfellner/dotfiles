@@ -5,7 +5,10 @@ import "../core"
 // A level [0..1] with its icon and percentage. Drag, scroll or use
 // ←/→ (5 %) to ask for a new value through `moved(v)`; the fill shows
 // `value` as the service reports it. The icon asks `iconClicked()`
-// (mute); with `hasPage`, a chevron asks `opened()`.
+// (mute); with `hasPage`, a chevron asks `opened()`. Optional:
+// `image` (a URL, e.g. an app icon) in place of the icon, `label`
+// above the track, and `level` [0..1] as a live meter under it
+// (negative hides it).
 
 FocusScope {
     id: root
@@ -15,12 +18,15 @@ FocusScope {
     property bool muted: false
     property bool hasPage: false
     property real step: 0.05
+    property string image: ""
+    property string label: ""
+    property real level: -1
 
     signal moved(real v)
     signal iconClicked
     signal opened
 
-    implicitHeight: 32
+    implicitHeight: label.length > 0 ? 42 : 32
     activeFocusOnTab: true
 
     function nudge(delta) {
@@ -36,13 +42,30 @@ FocusScope {
         border.color: Theme.colors.fg.primary
     }
 
-    Icon {
+    Item {
         id: glyph
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        name: root.icon
-        size: Theme.typography.sizes.icon
-        color: root.muted ? Theme.colors.fg.subtle : (iconMouse.containsMouse ? Theme.colors.accent.primary : Theme.colors.fg.muted)
+        width: Theme.typography.sizes.icon
+        height: width
+
+        Icon {
+            visible: root.image.length === 0
+            anchors.centerIn: parent
+            name: root.icon.length > 0 ? root.icon : "unknown"
+            size: Theme.typography.sizes.icon
+            color: root.muted ? Theme.colors.fg.subtle : (iconMouse.containsMouse ? Theme.colors.accent.primary : Theme.colors.fg.muted)
+        }
+        Image {
+            visible: root.image.length > 0
+            anchors.fill: parent
+            source: root.image
+            sourceSize.width: width * 2
+            sourceSize.height: height * 2
+            fillMode: Image.PreserveAspectFit
+            opacity: root.muted ? 0.4 : 1
+            smooth: true
+        }
 
         MouseArea {
             id: iconMouse
@@ -90,6 +113,19 @@ FocusScope {
         font.pointSize: Theme.typography.sizes.small
     }
 
+    Text {
+        visible: root.label.length > 0
+        anchors.left: track.left
+        anchors.right: track.right
+        anchors.bottom: track.top
+        anchors.bottomMargin: -3
+        text: root.label
+        elide: Text.ElideRight
+        color: root.muted ? Theme.colors.fg.subtle : Theme.colors.fg.muted
+        font.family: Theme.typography.families.sans
+        font.pointSize: Theme.typography.sizes.small
+    }
+
     Item {
         id: track
         anchors.left: glyph.right
@@ -97,7 +133,19 @@ FocusScope {
         anchors.right: readout.left
         anchors.rightMargin: Theme.metrics.space.sm
         anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.label.length > 0 ? 7 : 0
         height: 20
+
+        // The live level, under the fill.
+        Rectangle {
+            visible: root.level >= 0
+            anchors.top: parent.verticalCenter
+            anchors.topMargin: 5
+            width: parent.width * Math.max(0, Math.min(1, root.level))
+            height: 2
+            radius: 1
+            color: root.muted ? Theme.colors.bg.surface2 : Theme.colors.fg.subtle
+        }
 
         Rectangle {
             anchors.verticalCenter: parent.verticalCenter

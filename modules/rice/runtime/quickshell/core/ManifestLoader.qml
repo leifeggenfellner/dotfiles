@@ -187,6 +187,7 @@ Item {
                     "phone": "󰏲",
                     "gamepad": "󰊴",
                     "laptop": "󰌢",
+                    "display": "󰍹",
                     "battery": "󰁹",
                     "battery-charging": "󰂄",
                     "power": "󰐥",

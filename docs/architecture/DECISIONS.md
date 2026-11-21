@@ -2238,6 +2238,39 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   device); its first real use is its test.
 - Why: adding a new device should not need another app.
 
+### D-090 — Sound in the control centre: devices, apps and levels
+
+- Date: 2026-11-21 · Status: active · Phase 3 of
+  `docs/design/control-centre.md` · Extends D-088
+- `AudioState` gains the default input (`micVolume`, `micMuted` and
+  their commands), `sinks[]`, `sources[]` and `streams[]` (apps playing)
+  as live Pipewire nodes, `setDefaultSink`/`setDefaultSource` (through
+  Pipewire's preferred default), per-stream volume and mute, and
+  `levels` — peak monitors for the default input and every stream, run
+  only while `setMetering(true)`. Nodes are sorted by Pipewire's type
+  flags: a node's `properties` (media.class, application.name) arrive
+  only once it is tracked, so filtering on them hid everything untracked.
+  Streams and the default devices are tracked.
+- `ValueSlider` gains `image` (an app icon in place of the glyph),
+  `label` (above the track) and `level` (a live meter under it).
+- Home: the volume slider's chevron opens the Sound page, and a
+  microphone slider sits under it (its icon mutes). The brief's mic tile
+  is dropped as redundant with that slider; phase 4's quiet tile takes
+  the grid's second row.
+- The Sound page: Output (volume, then the device in use; a click lists
+  the others), Input (mic volume with its live level, the device in use
+  and the others), Apps (one slider per stream with the app's icon, name,
+  what it plays and its level; clicking the icon mutes it). Devices on
+  one card drop the words they all share ("Meteor Lake-P HD Audio
+  Controller"), leaving "Speaker" or "HDMI / DisplayPort 2 Output".
+  HDMI outputs use a new default `display` icon (a theme's `monitor` may
+  mean something else; LoTM's is a magnifier).
+- Verified: checks; headless against the real Pipewire with a silent
+  test stream (zeros through pw-cat): devices, the picker, app row with
+  icon and label, the live microphone level.
+- Why: switching to headphones or quieting one app should not need
+  pavucontrol.
+
 ---
 
 ## Legacy imports

@@ -4,16 +4,17 @@ import "../../core"
 import "../../components"
 
 // ── SystemClusterPopout ───────────────────────────────────────
-// The control centre (docs/design/control-centre.md, D-088, D-089): quick
-// toggles and sliders on its home, and drill-in pages for Wi-Fi and
-// Bluetooth. Services: network, audio, bluetooth, tray (injected).
+// The control centre (docs/design/control-centre.md, D-088–D-090):
+// quick toggles and sliders on its home, and drill-in pages for Wi-Fi,
+// Bluetooth and Sound. Services: network, audio, bluetooth, tray (injected).
 // The tray lives on the home unless the theme turns on the tray hatch
 // (settings.showTray = false, D-064); menus stay app-native (D-036).
 //
 // Every state shown is the service's: a row is pending, failed or
 // active because the system says so. Rows come from ScriptModel, so a
 // rescan updates them in place without losing focus. Pages run their
-// scanners (Wi-Fi scan, Bluetooth discovery) only while open.
+// scanners (Wi-Fi scan, Bluetooth discovery, level meters) only while
+// open.
 
 FocusScope {
     id: root
@@ -38,7 +39,8 @@ FocusScope {
         home: homePage
         pages: ({
                 wifi: wifiPage,
-                bluetooth: bluetoothPage
+                bluetooth: bluetoothPage,
+                sound: soundPage
             })
     }
 
@@ -82,6 +84,52 @@ FocusScope {
         if (/computer/.test(kind))
             return "laptop";
         return "bluetooth";
+    }
+
+    function sinkIcon(node) {
+        if (/^bluez/.test(node.name) || /head(phone|set)|buds/i.test(node.description))
+            return "headphones";
+        if (/hdmi|displayport/i.test(node.description + node.name))
+            return "display";
+        return "speaker";
+    }
+
+    function nodeTitle(node) {
+        return node.description || node.nickname || node.name;
+    }
+
+    // Devices on one card share a long name ("Meteor Lake-P HD Audio
+    // Controller …"); drop the words a node shares with every other node
+    // on its card (two or more words in common), so what tells them
+    // apart ("Speaker", "HDMI / DisplayPort 2 Output") stays.
+    function shortName(node, peers) {
+        const words = nodeTitle(node).split(" ");
+        let shared = -1;
+        for (const other of peers) {
+            if (other === node)
+                continue;
+            const theirs = nodeTitle(other).split(" ");
+            let k = 0;
+            while (k < words.length - 1 && k < theirs.length && words[k] === theirs[k])
+                k++;
+            if (k >= 2)
+                shared = shared < 0 ? k : Math.min(shared, k);
+        }
+        return shared >= 2 ? words.slice(shared).join(" ") : nodeTitle(node);
+    }
+
+    // An app's icon from its stream, "" when the icon theme lacks it.
+    function streamImage(node) {
+        const p = node.properties ?? {};
+        const name = p["application.icon-name"] ?? (p["application.process.binary"] ?? "").toLowerCase();
+        return name.length > 0 ? Quickshell.iconPath(name, true) : "";
+    }
+
+    function streamLabel(node) {
+        const p = node.properties ?? {};
+        const app = p["application.name"] ?? node.name;
+        const media = p["media.name"] ?? "";
+        return media.length > 0 && media !== app ? app + " · " + media : app;
     }
 
     component SectionLabel: Text {
@@ -193,8 +241,22 @@ FocusScope {
                     icon: root.audio && root.audio.muted ? "volume-muted" : "volume"
                     value: root.audio ? root.audio.volume : 0
                     muted: root.audio !== null && root.audio.muted
+                    hasPage: true
                     onMoved: v => root.audio.setVolume(v)
                     onIconClicked: root.audio.toggleMuted()
+                    onOpened: stack.open("sound")
+                }
+
+                ValueSlider {
+                    visible: root.audio !== null && root.audio.micAvailable
+                    width: parent.width
+                    icon: root.audio && root.audio.micMuted ? "mic-off" : "mic"
+                    value: root.audio ? root.audio.micVolume : 0
+                    muted: root.audio !== null && root.audio.micMuted
+                    hasPage: true
+                    onMoved: v => root.audio.setMicVolume(v)
+                    onIconClicked: root.audio.toggleMicMuted()
+                    onOpened: stack.open("sound")
                 }
 
                 // The tray (L-009; a theme with the tray hatch hides it here).
@@ -589,6 +651,203 @@ FocusScope {
                                 onAction: btPage.bt.cancelPair(d.address)
                                 onActiveFocusChanged: if (activeFocus)
                                     btPage.keepVisible(nearbyRow)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Sound ─────────────────────────────────────────────────
+    Component {
+        id: soundPage
+
+        FocusScope {
+            id: soundPage_
+            implicitHeight: soundColumn.implicitHeight
+
+            readonly property var audio: root.audio
+            property bool pickSink: false
+            property bool pickSource: false
+
+            // Level meters run only while this page is open.
+            property var heldAudio: null
+            Component.onCompleted: {
+                heldAudio = audio;
+                heldAudio?.setMetering(true);
+            }
+            Component.onDestruction: heldAudio?.setMetering(false)
+
+            function focusFirst() {
+                outputSlider.forceActiveFocus();
+            }
+
+            function keepVisible(item) {
+                const p = item.mapToItem(soundList, 0, 0);
+                if (p.y < soundFlick.contentY)
+                    soundFlick.contentY = p.y;
+                else if (p.y + item.height > soundFlick.contentY + soundFlick.height)
+                    soundFlick.contentY = p.y + item.height - soundFlick.height;
+            }
+
+            function peak(node) {
+                const meter = node && audio ? audio.levels[node.id] : null;
+                return meter ? meter.peak : -1;
+            }
+
+            Column {
+                id: soundColumn
+                width: parent.width
+                spacing: Theme.metrics.space.sm
+
+                PageHeader {
+                    width: parent.width
+                    title: "Sound"
+                    onBack: stack.back()
+                }
+
+                Flickable {
+                    id: soundFlick
+                    width: parent.width
+                    height: Math.min(soundList.implicitHeight, 420)
+                    contentHeight: soundList.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    Column {
+                        id: soundList
+                        width: parent.width
+                        spacing: Theme.metrics.space.xs
+
+                        // ── Output ──
+                        SectionLabel {
+                            text: "Output"
+                        }
+                        ValueSlider {
+                            id: outputSlider
+                            visible: soundPage_.audio !== null && soundPage_.audio.available
+                            width: parent.width
+                            icon: soundPage_.audio && soundPage_.audio.muted ? "volume-muted" : "volume"
+                            value: soundPage_.audio ? soundPage_.audio.volume : 0
+                            muted: soundPage_.audio !== null && soundPage_.audio.muted
+                            onMoved: v => soundPage_.audio.setVolume(v)
+                            onIconClicked: soundPage_.audio.toggleMuted()
+                        }
+                        // The device in use; a click lists the others.
+                        StateRow {
+                            id: sinkPicker
+                            readonly property var current: soundPage_.audio ? soundPage_.audio.sink : null
+                            visible: current !== null && soundPage_.audio.sinks.length > 1
+                            width: soundList.width
+                            icon: current ? root.sinkIcon(current) : "speaker"
+                            title: current ? root.shortName(current, soundPage_.audio.sinks) : ""
+                            subtitle: soundPage_.pickSink ? "Choose an output" : soundPage_.audio.sinks.length + " outputs · change"
+                            onClicked: soundPage_.pickSink = !soundPage_.pickSink
+                            onActiveFocusChanged: if (activeFocus)
+                                soundPage_.keepVisible(sinkPicker)
+                        }
+                        Repeater {
+                            model: ScriptModel {
+                                values: soundPage_.pickSink && soundPage_.audio ? soundPage_.audio.sinks : []
+                            }
+                            StateRow {
+                                id: sinkRow
+                                required property var modelData
+                                x: Theme.metrics.space.md
+                                width: soundList.width - x
+                                icon: root.sinkIcon(modelData)
+                                title: root.shortName(modelData, soundPage_.audio.sinks)
+                                active: soundPage_.audio.sink !== null && soundPage_.audio.sink.id === modelData.id
+                                onClicked: {
+                                    soundPage_.audio.setDefaultSink(modelData.id);
+                                    soundPage_.pickSink = false;
+                                    sinkPicker.forceActiveFocus();
+                                }
+                                onActiveFocusChanged: if (activeFocus)
+                                    soundPage_.keepVisible(sinkRow)
+                            }
+                        }
+
+                        // ── Input ──
+                        SectionLabel {
+                            visible: soundPage_.audio !== null && soundPage_.audio.micAvailable
+                            topPadding: Theme.metrics.space.sm
+                            text: "Input"
+                        }
+                        ValueSlider {
+                            visible: soundPage_.audio !== null && soundPage_.audio.micAvailable
+                            width: parent.width
+                            icon: soundPage_.audio && soundPage_.audio.micMuted ? "mic-off" : "mic"
+                            value: soundPage_.audio ? soundPage_.audio.micVolume : 0
+                            muted: soundPage_.audio !== null && soundPage_.audio.micMuted
+                            level: soundPage_.peak(soundPage_.audio ? soundPage_.audio.source : null)
+                            onMoved: v => soundPage_.audio.setMicVolume(v)
+                            onIconClicked: soundPage_.audio.toggleMicMuted()
+                        }
+                        StateRow {
+                            id: sourcePicker
+                            readonly property var current: soundPage_.audio ? soundPage_.audio.source : null
+                            visible: current !== null && soundPage_.audio.sources.length > 1
+                            width: soundList.width
+                            icon: current && /^bluez/.test(current.name) ? "headphones" : "mic"
+                            title: current ? root.shortName(current, soundPage_.audio.sources) : ""
+                            subtitle: soundPage_.pickSource ? "Choose an input" : soundPage_.audio.sources.length + " inputs · change"
+                            onClicked: soundPage_.pickSource = !soundPage_.pickSource
+                            onActiveFocusChanged: if (activeFocus)
+                                soundPage_.keepVisible(sourcePicker)
+                        }
+                        Repeater {
+                            model: ScriptModel {
+                                values: soundPage_.pickSource && soundPage_.audio ? soundPage_.audio.sources : []
+                            }
+                            StateRow {
+                                id: sourceRow
+                                required property var modelData
+                                x: Theme.metrics.space.md
+                                width: soundList.width - x
+                                icon: /^bluez/.test(modelData.name) ? "headphones" : "mic"
+                                title: root.shortName(modelData, soundPage_.audio.sources)
+                                active: soundPage_.audio.source !== null && soundPage_.audio.source.id === modelData.id
+                                onClicked: {
+                                    soundPage_.audio.setDefaultSource(modelData.id);
+                                    soundPage_.pickSource = false;
+                                    sourcePicker.forceActiveFocus();
+                                }
+                                onActiveFocusChanged: if (activeFocus)
+                                    soundPage_.keepVisible(sourceRow)
+                            }
+                        }
+
+                        // ── Apps ──
+                        SectionLabel {
+                            topPadding: Theme.metrics.space.sm
+                            text: "Apps"
+                        }
+                        Note {
+                            visible: streamRepeater.count === 0
+                            text: "Nothing is playing"
+                        }
+                        Repeater {
+                            id: streamRepeater
+                            model: ScriptModel {
+                                values: soundPage_.audio ? soundPage_.audio.streams : []
+                            }
+                            ValueSlider {
+                                id: streamSlider
+                                required property var modelData
+                                readonly property var n: modelData
+                                width: soundList.width
+                                image: root.streamImage(n)
+                                icon: "music"
+                                label: root.streamLabel(n)
+                                value: n.audio ? n.audio.volume : 0
+                                muted: n.audio ? n.audio.muted : false
+                                level: soundPage_.peak(n)
+                                onMoved: v => soundPage_.audio.setStreamVolume(n.id, v)
+                                onIconClicked: soundPage_.audio.setStreamMuted(n.id, !muted)
+                                onActiveFocusChanged: if (activeFocus)
+                                    soundPage_.keepVisible(streamSlider)
                             }
                         }
                     }
