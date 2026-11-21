@@ -1459,4 +1459,12 @@ Concretized as D-088; phase 1 of `docs/design/control-centre.md`.
 - ✅ Shared controls; the control-centre home, Wi-Fi and Bluetooth pages.
 - ✅ Keyboard navigation through the popout.
 - Verified: checks, headless keyboard run on real NetworkManager/BlueZ.
-- Next: phase 2, Bluetooth discovery and pairing.
+
+## Phase 75 — The control centre: Bluetooth ✅
+
+Concretized as D-089; phase 2 of `docs/design/control-centre.md`.
+
+- ✅ Discovery while the page is open; "My devices" and "Nearby".
+- ✅ Pair (trust and connect after), cancel, forget, per-row failures.
+- Verified: checks, headless discovery on real BlueZ; pairing untested.
+- Next: phase 3, sound (devices, app streams, microphone, levels).

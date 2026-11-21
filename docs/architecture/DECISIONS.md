@@ -2208,6 +2208,36 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: every state on screen is the system's, and the popouts work from
   the keyboard.
 
+### D-089 — Bluetooth discovery and pairing in the control centre
+
+- Date: 2026-11-21 · Status: active · Phase 2 of
+  `docs/design/control-centre.md` · Extends D-088
+- `BluetoothState` gains discovery (`setDiscovering`), `nearby[]`
+  (discovered, unpaired, named devices; BlueZ's address-named ones are
+  hidden), `pair`, `cancelPair`, `forget` and `failures`. BlueZ gives no
+  failure reasons, so the service remembers what it asked for: a pairing
+  that ends unpaired fails as `pair`, a connect that falls back to
+  disconnected fails as `connect`. A successful pairing trusts the device
+  (so it reconnects on its own) and connects it. `devices[]` sorts
+  connected first, then by name; `pending()` includes pairing.
+- PIN and passkey confirmation belong to the session's BlueZ agent
+  (blueman-applet, with the themed GTK dialog from 77295ae5/5a166701);
+  the shell cannot register an agent without DBus.
+- The Bluetooth page: "My devices" (type icon, connected state, battery,
+  connect on click, `⋯` disconnect and forget) above "Nearby" (a spinner
+  while discovering; click pairs; `⋯` cancels a pairing in progress).
+  Discovery runs only while the page is open. Failures read under the
+  row.
+- Pages keep the service they were given at creation, because the
+  injected one can already be gone when the page is torn down: the Wi-Fi
+  scanner and Bluetooth discovery now always stop on close.
+- `audio-card` devices (TVs, monitors, speakers) show the speaker icon.
+- Verified: checks; headless against the real BlueZ: paired list,
+  discovery filling "Nearby" live, discovery stopping when the page
+  closes. Pairing itself was not exercised (it would pair a real nearby
+  device); its first real use is its test.
+- Why: adding a new device should not need another app.
+
 ---
 
 ## Legacy imports

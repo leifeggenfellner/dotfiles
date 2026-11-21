@@ -1,7 +1,7 @@
 # The Control Centre: bar popout rework brief
 
 Status: **in progress**. Directions confirmed with the user on 2026-11-21.
-Phase 1 (kit and Wi-Fi) landed as D-088.
+Phase 1 (kit and Wi-Fi) landed as D-088, phase 2 (Bluetooth) as D-089.
 When a phase lands, its decision goes into
 `docs/architecture/DECISIONS.md` as a new D-number and this brief links to it.
 

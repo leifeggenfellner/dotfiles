@@ -4,7 +4,7 @@ import "../../core"
 import "../../components"
 
 // ── SystemClusterPopout ───────────────────────────────────────
-// The control centre (docs/design/control-centre.md, D-088): quick
+// The control centre (docs/design/control-centre.md, D-088, D-089): quick
 // toggles and sliders on its home, and drill-in pages for Wi-Fi and
 // Bluetooth. Services: network, audio, bluetooth, tray (injected).
 // The tray lives on the home unless the theme turns on the tray hatch
@@ -12,7 +12,8 @@ import "../../components"
 //
 // Every state shown is the service's: a row is pending, failed or
 // active because the system says so. Rows come from ScriptModel, so a
-// rescan updates them in place without losing focus.
+// rescan updates them in place without losing focus. Pages run their
+// scanners (Wi-Fi scan, Bluetooth discovery) only while open.
 
 FocusScope {
     id: root
@@ -66,9 +67,9 @@ FocusScope {
 
     function deviceIcon(device) {
         const kind = device.icon ?? "";
-        if (/head(set|phone)|audio-card|earbud/.test(kind))
+        if (/head(set|phone)|earbud/.test(kind))
             return "headphones";
-        if (/speaker/.test(kind))
+        if (/audio-card|speaker/.test(kind))
             return "speaker";
         if (/keyboard/.test(kind))
             return "keyboard";
@@ -225,9 +226,14 @@ FocusScope {
             readonly property var net: root.net
             readonly property string asking: net ? net.passwordNeededFor : ""
 
-            // The scanner runs only while this page is open.
-            Component.onCompleted: net?.setScanning(true)
-            Component.onDestruction: net?.setScanning(false)
+            // The scanner runs only while this page is open. The service is
+            // held from the start: by teardown the injected one may be gone.
+            property var heldNet: null
+            Component.onCompleted: {
+                heldNet = net;
+                heldNet?.setScanning(true);
+            }
+            Component.onDestruction: heldNet?.setScanning(false)
 
             function focusFirst() {
                 if (prompt.visible)
@@ -407,7 +413,7 @@ FocusScope {
         }
     }
 
-    // ── Bluetooth (paired devices; pairing lands in phase 2) ──
+    // ── Bluetooth ─────────────────────────────────────────────
     Component {
         id: bluetoothPage
 
@@ -416,12 +422,34 @@ FocusScope {
             implicitHeight: btColumn.implicitHeight
 
             readonly property var bt: root.bt
+            readonly property bool powered: bt !== null && bt.powered
+
+            // Discovery runs only while this page is open; it starts again
+            // when the adapter comes on with the page open.
+            property var heldBt: null
+            Component.onCompleted: {
+                heldBt = bt;
+                heldBt?.setDiscovering(true);
+            }
+            Component.onDestruction: heldBt?.setDiscovering(false)
+            onPoweredChanged: if (powered)
+                bt.setDiscovering(true)
 
             function focusFirst() {
-                if (devices.count > 0)
-                    devices.itemAt(0)?.forceActiveFocus();
+                if (paired.count > 0)
+                    paired.itemAt(0)?.forceActiveFocus();
+                else if (found.count > 0)
+                    found.itemAt(0)?.forceActiveFocus();
                 else
                     forceActiveFocus();
+            }
+
+            function keepVisible(row) {
+                const p = row.mapToItem(btList, 0, 0);
+                if (p.y < btFlick.contentY)
+                    btFlick.contentY = p.y;
+                else if (p.y + row.height > btFlick.contentY + btFlick.height)
+                    btFlick.contentY = p.y + row.height - btFlick.height;
             }
 
             Column {
@@ -433,54 +461,135 @@ FocusScope {
                     width: parent.width
                     title: "Bluetooth"
                     hasSwitch: true
-                    checked: btPage.bt !== null && btPage.bt.powered
+                    checked: btPage.powered
                     busy: btPage.bt !== null && btPage.bt.busy
                     onBack: stack.back()
                     onToggled: btPage.bt.setPowered(!btPage.bt.powered)
                 }
 
                 Note {
-                    visible: btPage.bt !== null && !btPage.bt.powered
+                    visible: !btPage.powered
                     text: "Bluetooth is off"
                 }
-                Note {
-                    visible: btPage.bt !== null && btPage.bt.powered && devices.count === 0
-                    text: "No paired devices"
-                }
 
-                Column {
+                Flickable {
+                    id: btFlick
+                    visible: btPage.powered
                     width: parent.width
-                    spacing: 2
+                    height: Math.min(btList.implicitHeight, 380)
+                    contentHeight: btList.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
 
-                    Repeater {
-                        id: devices
-                        model: ScriptModel {
-                            values: btPage.bt && btPage.bt.powered ? btPage.bt.devices : []
+                    Column {
+                        id: btList
+                        width: parent.width
+                        spacing: 2
+
+                        SectionLabel {
+                            visible: paired.count > 0
+                            text: "My devices"
                         }
 
-                        StateRow {
-                            required property var modelData
-                            readonly property var d: modelData
-
-                            width: parent.width
-                            icon: root.deviceIcon(d)
-                            title: d.name
-                            active: d.connected
-                            pending: btPage.bt.pending(d)
-                            subtitle: {
-                                if (btPage.bt.pending(d))
-                                    return d.connected ? "Disconnecting…" : "Connecting…";
-                                const battery = d.batteryAvailable ? " · " + Math.round(d.battery * 100) + "%" : "";
-                                return (d.connected ? "Connected" : "Paired") + battery;
+                        Repeater {
+                            id: paired
+                            model: ScriptModel {
+                                values: btPage.powered ? btPage.bt.devices : []
                             }
-                            actions: d.connected ? [
-                                {
-                                    id: "disconnect",
-                                    label: "Disconnect"
+
+                            StateRow {
+                                id: pairedRow
+                                required property var modelData
+                                readonly property var d: modelData
+                                readonly property bool busy: btPage.bt.pending(d)
+
+                                width: btList.width
+                                icon: root.deviceIcon(d)
+                                title: d.name
+                                active: d.connected
+                                pending: busy
+                                failure: btPage.bt.failures[d.address] === "connect" ? "Couldn't connect. Is it on and in range?" : ""
+                                subtitle: {
+                                    if (busy)
+                                        return d.connected ? "Disconnecting…" : "Connecting…";
+                                    const battery = d.batteryAvailable ? " · " + Math.round(d.battery * 100) + "%" : "";
+                                    return (d.connected ? "Connected" : "Not connected") + battery;
                                 }
-                            ] : []
-                            onClicked: d.connected ? openActions() : btPage.bt.connect(d.address)
-                            onAction: btPage.bt.disconnect(d.address)
+                                actions: d.connected ? [
+                                    {
+                                        id: "disconnect",
+                                        label: "Disconnect"
+                                    },
+                                    {
+                                        id: "forget",
+                                        label: "Forget",
+                                        danger: true
+                                    }
+                                ] : [
+                                    {
+                                        id: "forget",
+                                        label: "Forget",
+                                        danger: true
+                                    }
+                                ]
+                                onClicked: d.connected ? openActions() : btPage.bt.connect(d.address)
+                                onAction: id => id === "forget" ? btPage.bt.forget(d.address) : btPage.bt.disconnect(d.address)
+                                onActiveFocusChanged: if (activeFocus)
+                                    btPage.keepVisible(pairedRow)
+                            }
+                        }
+
+                        Item {
+                            width: parent.width
+                            height: nearbyLabel.implicitHeight + Theme.metrics.space.sm
+
+                            SectionLabel {
+                                id: nearbyLabel
+                                anchors.bottom: parent.bottom
+                                text: "Nearby"
+                            }
+                            Spinner {
+                                visible: btPage.bt !== null && btPage.bt.discovering
+                                anchors.left: nearbyLabel.right
+                                anchors.leftMargin: Theme.metrics.space.sm
+                                anchors.verticalCenter: nearbyLabel.verticalCenter
+                                size: Theme.typography.sizes.small
+                            }
+                        }
+
+                        Note {
+                            visible: found.count === 0
+                            text: btPage.bt && btPage.bt.discovering ? "Looking for devices in pairing mode…" : "No devices found"
+                        }
+
+                        Repeater {
+                            id: found
+                            model: ScriptModel {
+                                values: btPage.powered ? btPage.bt.nearby : []
+                            }
+
+                            StateRow {
+                                id: nearbyRow
+                                required property var modelData
+                                readonly property var d: modelData
+
+                                width: btList.width
+                                icon: root.deviceIcon(d)
+                                title: d.name
+                                pending: d.pairing
+                                subtitle: d.pairing ? "Pairing… confirm on the device if asked" : ""
+                                failure: btPage.bt.failures[d.address] === "pair" ? "Pairing failed. Put it in pairing mode and try again." : ""
+                                actions: d.pairing ? [
+                                    {
+                                        id: "cancel",
+                                        label: "Cancel"
+                                    }
+                                ] : []
+                                onClicked: btPage.bt.pair(d.address)
+                                onAction: btPage.bt.cancelPair(d.address)
+                                onActiveFocusChanged: if (activeFocus)
+                                    btPage.keepVisible(nearbyRow)
+                            }
                         }
                     }
                 }
