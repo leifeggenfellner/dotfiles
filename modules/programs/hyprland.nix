@@ -119,6 +119,19 @@
               quickshell = "${pkgs.quickshell}/bin/quickshell";
             })
             (import ./hyprland/_rules.nix { inherit lib; })
+            {
+              # Built-in panels get their registry mode and scale from the
+              # first frame. Without this Hyprland auto-scales the laptop
+              # (1.5) whenever monitor control can't pick a profile.
+              monitor = lib.mapAttrsToList
+                (_: monitor: {
+                  output = monitor.name;
+                  mode = monitor.resolution;
+                  position = monitor.position;
+                  scale = if monitor.scale == "auto" then "auto" else builtins.fromJSON monitor.scale;
+                })
+                (lib.filterAttrs (_: monitor: monitor.name != "") osConfig.environment.desktop.monitors);
+            }
           ];
         };
 

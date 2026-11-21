@@ -369,9 +369,7 @@ let
       ]
     )
     ++ lib.optionals ((theme.widgets.awakening.settings or null) != null) (
-      # Session awakening (D-053): closed keys; `backdrop` and `climb`
-      # (D-085) are images under assets/: the hall under the fog, and the
-      # tall image the view climbs through before it.
+      # Session awakening (D-053): closed keys.
       let
         at = "widgets.awakening.settings";
         s = theme.widgets.awakening.settings;
@@ -380,7 +378,7 @@ let
           else fail "${at}.${key} must be an int from ${toString lo} to ${toString hi}";
       in
       [
-        (checkClosed at [ "title" "subtitle" "hold" "lift" "sound" "backdrop" "climb" ] s)
+        (checkClosed at [ "title" "subtitle" "hold" "lift" "sound" ] s)
         (if builtins.isString (s.title or null) then true else fail "${at}.title must be a string")
         (if !(s ? subtitle) || builtins.isString s.subtitle then true else fail "${at}.subtitle must be a string")
         (ms "hold" 0 3000)
@@ -388,13 +386,6 @@ let
         (if !(s ? sound) || (builtins.isString s.sound && (theme.assets.sounds or { }) ? ${s.sound})
         then true else fail "${at}.sound must name an entry in assets.sounds")
       ]
-      ++ map
-        (key:
-          if !(s ? ${key}) || (builtins.isString s.${key}
-            && lib.any (x: lib.hasSuffix x (lib.toLower s.${key})) [ ".png" ".jpg" ".jpeg" ".webp" ]
-            && builtins.pathExists (themeDir + "/assets/${s.${key}}")) then true
-          else fail "${at}.${key} must name an image under assets/")
-        [ "backdrop" "climb" ]
     )
     ++ lib.optionals ((theme.widgets.plates.settings or null) != null) (
       # Surface plates (D-076): nine-sliced pieces under assets/ behind

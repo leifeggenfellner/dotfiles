@@ -2,7 +2,8 @@
 
 Status: **in progress**. Phase 1 (static ring) landed as D-077, phase 2
 (Chanis Gate) as D-084, phase 3 (the ascent) as D-085, moved to the login
-reveal by D-086 (Plymouth could not animate it smoothly). Shutdown shows no
+reveal by D-086 (Plymouth could not animate it smoothly), then dropped by
+D-087 (the user did not want it). Shutdown shows no
 splash (D-086), replacing the reversed ascent. The rest is a
 draft until each phase lands with its own D-number in
 `docs/architecture/DECISIONS.md`.

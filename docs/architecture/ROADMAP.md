@@ -1443,5 +1443,12 @@ and shutdown hung on the splash.
 - ✅ The climb is now the login reveal (GPU), the splash is sigil and ring.
 - ✅ Plymouth's shutdown/reboot units masked; the ring is a clean circle.
 - Verified: checks, build, headless login climb.
+
+## Phase 73 — No ascent; the laptop keeps its scale ✅
+
+Concretized as D-087.
+
+- ✅ The login climb and hall removed; the fog lifts onto the desktop.
+- ✅ The built-in panel has a static Hyprland rule from the registry.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

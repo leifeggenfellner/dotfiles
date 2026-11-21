@@ -430,10 +430,6 @@ in
         hold = 2200;
         lift = 3200;
         sound = "lore";
-        # The ascent (D-085): the session opens climbing the gray fog's
-        # vortex to Sefirah Castle, into its hall, and the fog lifts off it.
-        climb = "boot/ascent.png";
-        backdrop = "boot/hall.png";
       };
 
       epigraph.settings = {

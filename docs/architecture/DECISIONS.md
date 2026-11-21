@@ -2087,7 +2087,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-085 — The ascent to Sefirah Castle
 
-- Date: 2026-11-21 · Status: amended by D-086 (the ascent moved to login) · Extends D-044, D-053, D-077 · Phase 3
+- Date: 2026-11-21 · Status: superseded by D-087 (amended by D-086 first) · Extends D-044, D-053, D-077 · Phase 3
   of the Threshold, Gate and Vigil brief
 - The user generated two images in Midjourney from prompts written in this
   session: `assets/boot/ascent.png` (1536×3072), dark fog rising through a
@@ -2125,7 +2125,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-086 — The ascent moves to login; shutdown has no splash
 
-- Date: 2026-11-21 · Status: active · Amends D-085, D-044, D-077
+- Date: 2026-11-21 · Status: active; its login climb removed by D-087 · Amends D-085, D-044, D-077
 - After the first real boot the user reported: the boot images lagged
   badly (no smooth motion), shutdown and reboot hung on the sigil and ring
   until the power button was held, the sigil sat off-centre in a lumpy
@@ -2151,6 +2151,25 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   made it lumpy, so the sigil looked off-centre inside it.
 - Verified: checks and build (the four Plymouth units link to /dev/null);
   the login climb headless, frame by frame, with compiled shaders.
+
+### D-087 — No ascent; the built-in panel keeps its scale
+
+- Date: 2026-11-21 · Status: active · Supersedes D-085, the climb of D-086
+- After living with it the user did not want the climb into Sefirah
+  Castle or the hall under the fog. The awakening returns to its D-053
+  form: the fog with its title lifts straight onto the desktop.
+  `backdrop` and `climb` leave the awakening settings (closed keys:
+  title, subtitle, hold, lift, sound) and the runtime; `assets/boot/`
+  (ascent, hall and the unused hall video) is deleted.
+- The laptop booted at 1.5 scale until "Laptop only" was picked by hand.
+  The home-office monitor stayed connected without its partner, so
+  monitor control found no exact profile, stayed ambiguous and applied
+  nothing, and Hyprland auto-scaled the panel. Hyprland now gets a static
+  rule for every connector-bound monitor in the registry (mode, position,
+  scale), so the panel is right from the first frame whatever monitor
+  control decides; a profile still overrides it.
+- Why: the session should open quickly and at the size the panel is
+  meant for.
 
 ---
 
