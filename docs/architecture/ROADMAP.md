@@ -1424,5 +1424,15 @@ Concretized as D-084; phase 2 of `docs/design/threshold-gate-vigil.md`.
 - Next: the ascent to Sefirah Castle (phase 3), and its reverse on
   shutdown.
 - Verified: headless preview frames, lint and build.
+
+## Phase 71 — The ascent to Sefirah Castle ✅
+
+Concretized as D-085; phase 3 of `docs/design/threshold-gate-vigil.md`.
+
+- ✅ Boot climbs through the vortex into the hall; shutdown descends.
+- ✅ The login fog lifts off the same hall.
+- Open: the hall video at login needs QtMultimedia in the shell (D-057).
+- Verified: checks, build, headless awakening. The splash is seen on the
+  next boot.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

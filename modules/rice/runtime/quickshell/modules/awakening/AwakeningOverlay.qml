@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Wayland
 import QtQuick
+import QtQuick.Effects
 import "../../core"
 import "../../components/effects"
 
@@ -18,7 +19,7 @@ PanelWindow {
     screen: modelData
 
     // The fallback only covers the frame between clearing and unload.
-    readonly property var awakening: ShellState.awakening ?? ({ title: "", subtitle: "", hold: 0, lift: 300 })
+    readonly property var awakening: ShellState.awakening ?? ({ title: "", subtitle: "", hold: 0, lift: 300, backdrop: "" })
     readonly property int hold: awakening.hold
     readonly property int lift: awakening.lift
 
@@ -39,10 +40,21 @@ PanelWindow {
 
     mask: Region {}
 
+    // The veil: the theme's backdrop (the boot splash's last frame,
+    // D-085) or plain sunken colour, lifted away with the fog.
     Rectangle {
         id: veil
         anchors.fill: parent
         color: Theme.colors.bg.sunken
+
+        Image {
+            anchors.fill: parent
+            visible: (overlay.awakening.backdrop ?? "").length > 0
+            source: visible ? overlay.awakening.backdrop : ""
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: false
+            smooth: true
+        }
     }
 
     // Taller than the screen so its lower edge stays offscreen as it rises.
@@ -62,6 +74,17 @@ PanelWindow {
         y: parent.height * 0.42
         spacing: Theme.metrics.space.sm
         opacity: 0
+
+        // Over a backdrop the words need a shadow to read.
+        layer.enabled: (overlay.awakening.backdrop ?? "").length > 0
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: "black"
+            shadowBlur: 0.8
+            shadowOpacity: 0.85
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 1
+        }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter

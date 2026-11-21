@@ -1,7 +1,7 @@
 # Threshold, Gate and Vigil: boot, lock and screensaver brief
 
 Status: **in progress**. Phase 1 (static ring) landed as D-077, phase 2
-(Chanis Gate) as D-084. The rest is a
+(Chanis Gate) as D-084, phase 3 (the ascent) as D-085. The rest is a
 draft until each phase lands with its own D-number in
 `docs/architecture/DECISIONS.md`.
 

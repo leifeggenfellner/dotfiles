@@ -2085,6 +2085,44 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the user wanted the lock to be the Gate, hyperreal or painted, and
   cheaper than a video.
 
+### D-085 — The ascent to Sefirah Castle
+
+- Date: 2026-11-21 · Status: active · Extends D-044, D-053, D-077 · Phase 3
+  of the Threshold, Gate and Vigil brief
+- The user generated two images in Midjourney from prompts written in this
+  session: `assets/boot/ascent.png` (1536×3072), dark fog rising through a
+  glowing vortex to the palace above it, and `assets/boot/hall.png`
+  (2912×1632), the palace hall down its length to the empty seat and the
+  door of light.
+- `integration.boot.ascent = { climb; hall; }` (paths, `.png`/`.jpg`,
+  validated with closed keys and four must-fail cases). The splash
+  builder scales the climb to 1024 px wide and the hall to 1600, and
+  quantizes both to 256 colours with pngquant: about 1.8 MB together, since
+  every generation's initrd lands on the EFI partition (63 MB free on
+  shitbox). `rice-boot` checks both ship.
+- The script (`ascent = 1`): once the passphrase is taken (or, with no
+  prompt, past half of boot progress), the sigil, ring and glow give way
+  and the view climbs the tall image from its foot to its top, the fog
+  banks lifting and thinning, then the hall fades in. Its pace is the
+  further of about 4 s and the remaining boot progress, so it arrives
+  before the splash quits. A wrong passphrase brings the prompt back and
+  resets the climb. Shutdown and reboot run it backwards on the script's
+  clock (about 5 s), from the hall down into the fog and the sigil.
+- Login: `widgets.awakening.settings.backdrop` puts an image under the
+  fog-lift; LoTM's is the hall, so the session opens on the place the
+  splash arrived in and the fog lifts it away. Its words get a shadow over
+  a backdrop. The awakening settings now have closed validation (title,
+  subtitle, hold, lift, sound, backdrop) and four must-fail cases.
+- The user also made a short hall video (`assets/boot/hall.mp4`, fog
+  drifting, camera still). It is not wired in: the shell does not load
+  QtMultimedia (D-057), so playing it would reopen that choice.
+- Verified: checks and build; the awakening on the hall headless with
+  compiled shaders. The splash script could not be run outside a real boot
+  (`plymouthd` stalls in a user namespace), so it is reviewed, not run; the
+  first boot is its test.
+- Why: the passphrase is the threshold; what lies past it should be the
+  place the Tarot Club meets.
+
 ---
 
 ## Legacy imports

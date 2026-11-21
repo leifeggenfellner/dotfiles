@@ -3,6 +3,10 @@
 #   sigil        single-colour SVG, recoloured to accent.primary
 #   promptLabel  copy shown above the real passphrase/question prompt
 #   font         optional TTF for prompt text (boot.plymouth.font)
+#   ascent       optional { climb; hall; } (D-085): a tall image the view
+#                climbs through after the passphrase, and the hall it
+#                arrives in; reversed on shutdown. Scaled down and
+#                quantized here so the initrd stays small.
 # Fog, the full ink ring (D-077), and the bullet glyph are generated
 # here, so a theme only supplies the sigil. Output follows the Plymouth
 # theme layout: share/plymouth/themes/<name>/.
@@ -30,6 +34,7 @@ let
     mutedColor = rgb colors.fg.muted;
     promptLabel = scriptString (boot.promptLabel or "");
     font = scriptString (theme.tokens.typography.families.display or "Sans");
+    ascent = if boot ? ascent then "1" else "0";
   };
 
   # Ink ring, full: a blurred, wider pass that reads as ink soaking into
@@ -57,7 +62,7 @@ let
 in
 pkgs.runCommand "plymouth-theme-${name}"
 {
-  nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick ];
+  nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick pkgs.pngquant ];
   passthru = { inherit name; };
 } ''
   dir="$out/share/plymouth/themes/${name}"
@@ -84,6 +89,14 @@ pkgs.runCommand "plymouth-theme-${name}"
 
   resvg ${ringSvg} "$dir/ring.png"
 
+  ${lib.optionalString (boot ? ascent) ''
+    # Every generation's initrd lands on the EFI partition: scale down and
+    # quantize to 256 colours (dithered fog hides it), ~1.8 MB together.
+    magick ${boot.ascent.climb} -strip -filter Lanczos -resize 1024x climb-full.png
+    magick ${boot.ascent.hall} -strip -filter Lanczos -resize 1600x hall-full.png
+    pngquant --quality 65-90 --speed 1 --output "$dir/climb.png" climb-full.png
+    pngquant --quality 65-90 --speed 1 --output "$dir/hall.png" hall-full.png
+  ''}
   cp ${script} "$dir/${name}.script"
   cat > "$dir/${name}.plymouth" <<EOF
   [Plymouth Theme]

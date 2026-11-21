@@ -11,6 +11,8 @@ import "../../services/prefs"
 //   subtitle  smaller line under it
 //   hold      ms the fog holds before lifting (0–3000, default 900)
 //   lift      ms the fog takes to lift (300–5000, default 2400)
+//   backdrop  an image under the fog, shown until it lifts (D-085):
+//             the place the boot splash arrived in
 //   sound     semantic sound event played as it starts (muted default)
 //
 // Once per session: a marker in $XDG_RUNTIME_DIR keyed by the Hyprland
@@ -65,7 +67,8 @@ Item {
             title: settings.title,
             subtitle: typeof settings.subtitle === "string" ? settings.subtitle : "",
             hold: hold,
-            lift: lift
+            lift: lift,
+            backdrop: typeof settings.backdrop === "string" ? Theme.assetUrl(settings.backdrop) : ""
         };
         done.interval = hold + lift + 400;
         done.restart();
