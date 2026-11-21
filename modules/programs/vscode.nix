@@ -335,6 +335,9 @@
               "workbench.preferredDarkColorTheme" = lib.mkDefault activeVscodeTheme;
               "workbench.preferredLightColorTheme" = "Light Modern";
               "window.autoDetectColorScheme" = false;
+              # Dialogs drawn inside the window in the editor theme, not
+              # as native GTK windows.
+              "window.dialogStyle" = "custom";
 
               # Icon theme
               "workbench.iconTheme" = "catppuccin-mocha";

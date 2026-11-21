@@ -55,7 +55,13 @@ in
             size = s.cursorSize;
           };
           gtk2.configLocation = "${config.xdg.configHome}/gtk-2.0/gtkrc";
+          # Every scheme is dark; without this, GTK dialogs (file pickers,
+          # Electron message boxes) open in light Adwaita.
+          gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
+          gtk4.extraConfig.gtk-application-prefer-dark-theme = true;
         };
+        # The portal's color-scheme, read by GTK4/libadwaita and Electron.
+        dconf.settings."org/gnome/desktop/interface".color-scheme = "prefer-dark";
       };
     themes-colors = colors;
   };

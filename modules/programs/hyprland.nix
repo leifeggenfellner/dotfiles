@@ -127,7 +127,7 @@
                 (_: monitor: {
                   output = monitor.name;
                   mode = monitor.resolution;
-                  position = monitor.position;
+                  inherit (monitor) position;
                   scale = if monitor.scale == "auto" then "auto" else builtins.fromJSON monitor.scale;
                 })
                 (lib.filterAttrs (_: monitor: monitor.name != "") osConfig.environment.desktop.monitors);

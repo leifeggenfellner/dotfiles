@@ -188,7 +188,7 @@ let
           colourKeys
         ++ [
           (if !(s ? seal) || (builtins.isString s.seal && lib.hasSuffix ".svg" s.seal
-            && builtins.pathExists (themeDir + "/assets/${s.seal}")) then true
+          && builtins.pathExists (themeDir + "/assets/${s.seal}")) then true
           else fail "${at}.seal must name an .svg under assets/")
         ]
         ++ map
@@ -326,7 +326,8 @@ let
       in
       [ (checkClosed at [ "plate" "activePlate" "needle" "urgent" ] s) ]
       ++ map asset (lib.intersectLists [ "plate" "activePlate" "needle" ] (lib.attrNames s))
-      ++ lib.optional (s ? urgent && !(builtins.isString s.urgent
+      ++ lib.optional
+        (s ? urgent && !(builtins.isString s.urgent
         && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" s.urgent != null))
         (fail "${at}.urgent must be a colour token ref")
     )
@@ -339,14 +340,15 @@ let
         s = theme.widgets.workspaces.settings.carousel;
         piece = key: p:
           if !(builtins.isAttrs p) then fail "${at}.${key} must be { src; slice; }"
-          else builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
-            if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
-            then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"
-            else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
+          else
+            builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
+              if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
+              then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"
+              else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
               && lib.all (n: builtins.isInt n && n >= 0) p.slice)
-            then fail "${at}.${key}.slice must be four non-negative ints [left top right bottom]"
-            else true
-          );
+              then fail "${at}.${key}.slice must be four non-negative ints [left top right bottom]"
+              else true
+            );
       in
       [ (checkClosed at [ "card" "nameplate" "copy" "capture" ] s) ]
       ++ lib.optional (s ? card) (piece "card" s.card)
@@ -361,10 +363,10 @@ let
         (if builtins.isAttrs s.capture then checkClosed "${at}.capture" [ "tint" "strength" ] s.capture
         else fail "${at}.capture must be { tint?; strength?; }")
         (if !(s.capture ? tint) || (builtins.isString s.capture.tint
-          && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" s.capture.tint != null) then true
+        && builtins.match "(bg|fg|accent|state)[.][a-z0-9]+" s.capture.tint != null) then true
         else fail "${at}.capture.tint must be a colour token ref")
         (if !(s.capture ? strength) || ((builtins.isFloat s.capture.strength || builtins.isInt s.capture.strength)
-          && s.capture.strength >= 0 && s.capture.strength <= 1) then true
+        && s.capture.strength >= 0 && s.capture.strength <= 1) then true
         else fail "${at}.capture.strength must be a number from 0 to 1")
       ]
     )
@@ -397,14 +399,15 @@ let
         piece = key: p:
           if p == "window" then true
           else if !(builtins.isAttrs p) then fail "${at}.${key} must be { src; slice; } or \"window\""
-          else builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
-            if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
-            then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"
-            else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
+          else
+            builtins.seq (checkClosed "${at}.${key}" [ "src" "slice" ] p) (
+              if !(builtins.isString (p.src or null) && builtins.pathExists (themeDir + "/assets/${p.src}"))
+              then fail "${at}.${key}.src must name a file under assets/, got ${builtins.toJSON (p.src or null)}"
+              else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
               && lib.all (n: builtins.isInt n && n >= 0) p.slice)
-            then fail "${at}.${key}.slice must be four non-negative ints [left top right bottom]"
-            else true
-          );
+              then fail "${at}.${key}.slice must be four non-negative ints [left top right bottom]"
+              else true
+            );
       in
       [ (checkClosed at [ "panel" "toast" ] s) ]
       ++ lib.mapAttrsToList piece s
@@ -422,14 +425,14 @@ let
       [
         (checkClosed at [ "corner" "size" "reach" "inactive" ] s)
         (if builtins.isString (s.corner or null) && lib.hasSuffix ".svg" s.corner
-          && builtins.pathExists (themeDir + "/assets/${s.corner}") then true
+        && builtins.pathExists (themeDir + "/assets/${s.corner}") then true
         else fail "${at}.corner must name an .svg under assets/, got ${builtins.toJSON (s.corner or null)}")
         (if builtins.isInt size && size >= 16 && size <= 96 then true
         else fail "${at}.size must be an int from 16 to 96")
         (if !(s ? reach) || (builtins.isInt s.reach && s.reach >= 0 && builtins.isInt size && s.reach * 2 <= size) then true
         else fail "${at}.reach must be an int from 0 to half of size")
         (if !(s ? inactive) || ((builtins.isFloat s.inactive || builtins.isInt s.inactive)
-          && s.inactive >= 0 && s.inactive <= 1) then true
+        && s.inactive >= 0 && s.inactive <= 1) then true
         else fail "${at}.inactive must be a number from 0 to 1")
       ]
     )
@@ -459,7 +462,7 @@ let
           builtins.seq (checkClosed "${at}.frame.${key}" [ "src" "slice" ] p) (
             if !(builtins.seq (asset "${at}.frame.${key}.src" (p.src or null)) true) then false
             else if !(builtins.isList (p.slice or null) && builtins.length p.slice == 4
-              && lib.all (n: builtins.isInt n && n >= 0) p.slice)
+            && lib.all (n: builtins.isInt n && n >= 0) p.slice)
             then fail "${at}.frame.${key}.slice must be four non-negative ints [left top right bottom]"
             else true
           );
@@ -778,7 +781,7 @@ let
         (int "range" 0 64)
         (int "power" 1 4)
         (if !(sh ? offset) || (builtins.isList sh.offset && builtins.length sh.offset == 2
-          && lib.all (n: builtins.isInt n && n >= -32 && n <= 32) sh.offset) then true
+        && lib.all (n: builtins.isInt n && n >= -32 && n <= 32) sh.offset) then true
         else fail "tokens.chrome.shadow.offset must be two integers in -32..32 [x y]")
       ]
       ++ lib.optional (sh ? color) (ref "tokens.chrome.shadow.color" sh.color)

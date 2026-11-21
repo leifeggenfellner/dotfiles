@@ -44,7 +44,7 @@ let
   # Window shape every apply starts from (D-072): the generated config's
   # rounding, border width and shadow, so a theme without
   # `tokens.chrome.rounding`, `border.width` or `shadow` restores them.
-  shadow = (import ../../programs/hyprland/_chrome.nix).shadow;
+  inherit (import ../../programs/hyprland/_chrome.nix) shadow;
   shapeLua = "hl.config({ general = { border_size = ${toString baseStyle.border_width} }, "
     + "decoration = { rounding = ${toString baseStyle.rounding}, shadow = { enabled = ${lib.boolToString shadow.enabled}, "
     + "range = ${toString shadow.range}, render_power = ${toString shadow.render_power}, "
