@@ -78,6 +78,13 @@ _: {
         };
       };
 
+      # No splash on shutdown or reboot: the machine just turns off. With
+      # it, the final stage hung on the splash and needed the power button
+      # (2026-11-21); without it, any hang there shows on the console.
+      systemd.services = lib.genAttrs
+        [ "plymouth-poweroff" "plymouth-reboot" "plymouth-halt" "plymouth-kexec" ]
+        (_: { enable = false; });
+
       hardware = {
         cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
         enableAllFirmware = true;

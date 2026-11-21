@@ -186,9 +186,10 @@ and exposes it exclusively through the `Theme` facade.
    (read by `modules/mood/MoodController`): `workspaces.<name>` gives a named
    workspace an effects list, backdrop, title, DND, and entry sound. D-053 adds
    the `awakening` id (read by `modules/awakening/AwakeningController`):
-   `{ title; subtitle?; hold?; lift?; sound?; backdrop?; }` opts the theme
-   into the once-per-login fog-lift; D-085 adds `backdrop`, an image under
-   assets/ beneath the fog (closed keys from D-085). D-054 adds the `dailyAccent` id (read by
+   `{ title; subtitle?; hold?; lift?; sound?; backdrop?; climb?; }` opts the
+   theme into the once-per-login fog-lift; D-085 adds `backdrop`, an image
+   under assets/ beneath the fog, and D-086 `climb`, a tall image the view
+   climbs before it (closed keys from D-085). D-054 adds the `dailyAccent` id (read by
    `rice-query`, `rice-terminal` and the fastfetch card; from D-079 only
    the terminal greeting follows it): `{ record; catalog; }`, where
    `record` is `extras.<ns>.<key>` and catalog entries may carry `accent`

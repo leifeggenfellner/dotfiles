@@ -242,11 +242,7 @@ let
     (evaluates "lotm" (setAtPath [ "widgets" "awakening" "settings" "backdrop" ] "boot/hall.mp4" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "awakening" "settings" "hold" ] 9000 lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "awakening" "settings" "veil" ] "black" lotm))
-    # Boot ascent (D-085).
-    (evaluates "lotm" (setAtPath [ "integration" "boot" "ascent" "climb" ] ./missing-climb.png lotm))
-    (evaluates "lotm" (setAtPath [ "integration" "boot" "ascent" "fog" ] ../themes/lotm/assets/boot/hall.png lotm))
-    (evaluates "lotm" (setAtPath [ "integration" "boot" "ascent" ] "castle" lotm))
-    (evaluates "lotm" (setAtPath [ "integration" "boot" "ascent" "hall" ] ../themes/lotm/assets/pathways/fool.svg lotm))
+    (evaluates "lotm" (setAtPath [ "widgets" "awakening" "settings" "climb" ] "boot/ascent.svg" lotm))
     # Surface plates (D-076, D-081).
     (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "popout" ] "window" lotm))
     (evaluates "lotm" (setAtPath [ "widgets" "plates" "settings" "toast" ] { src = "bar/missing.svg"; slice = [ 1 1 1 1 ]; } lotm))

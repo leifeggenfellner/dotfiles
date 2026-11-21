@@ -1434,5 +1434,14 @@ Concretized as D-085; phase 3 of `docs/design/threshold-gate-vigil.md`.
 - Open: the hall video at login needs QtMultimedia in the shell (D-057).
 - Verified: checks, build, headless awakening. The splash is seen on the
   next boot.
+
+## Phase 72 — The ascent at login, no shutdown splash ✅
+
+Concretized as D-086, after the first real boot: the Plymouth climb lagged
+and shutdown hung on the splash.
+
+- ✅ The climb is now the login reveal (GPU), the splash is sigil and ring.
+- ✅ Plymouth's shutdown/reboot units masked; the ring is a clean circle.
+- Verified: checks, build, headless login climb.
 - Next: corner ornaments (prototype), then brass-framed launcher,
   dashboard and notifications.

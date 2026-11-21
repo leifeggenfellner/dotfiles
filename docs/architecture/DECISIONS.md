@@ -2087,7 +2087,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-085 — The ascent to Sefirah Castle
 
-- Date: 2026-11-21 · Status: active · Extends D-044, D-053, D-077 · Phase 3
+- Date: 2026-11-21 · Status: amended by D-086 (the ascent moved to login) · Extends D-044, D-053, D-077 · Phase 3
   of the Threshold, Gate and Vigil brief
 - The user generated two images in Midjourney from prompts written in this
   session: `assets/boot/ascent.png` (1536×3072), dark fog rising through a
@@ -2122,6 +2122,35 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   first boot is its test.
 - Why: the passphrase is the threshold; what lies past it should be the
   place the Tarot Club meets.
+
+### D-086 — The ascent moves to login; shutdown has no splash
+
+- Date: 2026-11-21 · Status: active · Amends D-085, D-044, D-077
+- After the first real boot the user reported: the boot images lagged
+  badly (no smooth motion), shutdown and reboot hung on the sigil and ring
+  until the power button was held, the sigil sat off-centre in a lumpy
+  ring, and shutdown need not show anything.
+- The ascent leaves Plymouth. Plymouth draws in software on every output,
+  and a full-screen pan at 2560 px could not be smooth there.
+  `integration.boot.ascent` and the script's climb are removed, so the
+  splash is the sigil, ring, fog and prompt again (≈ 200 kB of images
+  instead of 1.8 MB per initrd).
+- The ascent is now the login reveal, drawn on the GPU: the awakening gains
+  `climb` (an image under assets/). Once both images have loaded (at most
+  1.5 s), the view climbs the tall image from its foot to its top over
+  2.6 s, the `backdrop` hall fades in, and the words, hold and lift follow.
+  LoTM: `climb = "boot/ascent.png"`, `backdrop = "boot/hall.png"`. One more
+  must-fail case for `climb`.
+- No splash on shutdown, reboot, halt or kexec:
+  `plymouth-{poweroff,reboot,halt,kexec}.service` are masked in
+  `hardware-base`. The reboot that hung reached systemd's final stage (the
+  journal ends there) with only the splash on screen; without it the
+  machine just turns off, and any hang there would show on the console.
+- The ring is a clean circle under a soft blur. The turbulence
+  displacement it had pushed the stroke about 1.5 % down and right and
+  made it lumpy, so the sigil looked off-centre inside it.
+- Verified: checks and build (the four Plymouth units link to /dev/null);
+  the login climb headless, frame by frame, with compiled shaders.
 
 ---
 

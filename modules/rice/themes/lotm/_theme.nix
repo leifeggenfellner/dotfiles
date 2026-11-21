@@ -430,7 +430,9 @@ in
         hold = 2200;
         lift = 3200;
         sound = "lore";
-        # The fog lifts off the hall the boot splash rose into (D-085).
+        # The ascent (D-085): the session opens climbing the gray fog's
+        # vortex to Sefirah Castle, into its hall, and the fog lifts off it.
+        climb = "boot/ascent.png";
         backdrop = "boot/hall.png";
       };
 
@@ -843,12 +845,6 @@ in
       sigil = ./assets/pathways/fool.svg;
       promptLabel = "The Threshold asks";
       font = ./lockscreen/lotm/font/Cinzel-Bold.ttf;
-      # The ascent (D-085): up through the gray fog's vortex to Sefirah
-      # Castle, into its hall; reversed on shutdown.
-      ascent = {
-        climb = ./assets/boot/ascent.png;
-        hall = ./assets/boot/hall.png;
-      };
     };
 
     # Terminal tools themed from these tokens (D-051): btop's meters run

@@ -11,8 +11,9 @@ import "../../services/prefs"
 //   subtitle  smaller line under it
 //   hold      ms the fog holds before lifting (0–3000, default 900)
 //   lift      ms the fog takes to lift (300–5000, default 2400)
-//   backdrop  an image under the fog, shown until it lifts (D-085):
-//             the place the boot splash arrived in
+//   backdrop  an image under the fog, shown until it lifts (D-085)
+//   climb     a tall image the view climbs through first, from its foot
+//             to its top, before the backdrop fades in (D-085)
 //   sound     semantic sound event played as it starts (muted default)
 //
 // Once per session: a marker in $XDG_RUNTIME_DIR keyed by the Hyprland
@@ -68,9 +69,13 @@ Item {
             subtitle: typeof settings.subtitle === "string" ? settings.subtitle : "",
             hold: hold,
             lift: lift,
-            backdrop: typeof settings.backdrop === "string" ? Theme.assetUrl(settings.backdrop) : ""
+            backdrop: typeof settings.backdrop === "string" ? Theme.assetUrl(settings.backdrop) : "",
+            climb: typeof settings.climb === "string" ? Theme.assetUrl(settings.climb) : ""
         };
-        done.interval = hold + lift + 400;
+        // The climb and its fade into the backdrop come first, after the
+        // images have loaded (at most 1.5 s).
+        const climbing = typeof settings.climb === "string" ? 1500 + 2600 + 700 : 0;
+        done.interval = climbing + hold + lift + 400;
         done.restart();
         return "played";
     }

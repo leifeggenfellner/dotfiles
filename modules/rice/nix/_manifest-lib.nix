@@ -369,8 +369,9 @@ let
       ]
     )
     ++ lib.optionals ((theme.widgets.awakening.settings or null) != null) (
-      # Session awakening (D-053): closed keys; `backdrop` (D-085) is an
-      # image under assets/ shown beneath the fog.
+      # Session awakening (D-053): closed keys; `backdrop` and `climb`
+      # (D-085) are images under assets/: the hall under the fog, and the
+      # tall image the view climbs through before it.
       let
         at = "widgets.awakening.settings";
         s = theme.widgets.awakening.settings;
@@ -379,18 +380,21 @@ let
           else fail "${at}.${key} must be an int from ${toString lo} to ${toString hi}";
       in
       [
-        (checkClosed at [ "title" "subtitle" "hold" "lift" "sound" "backdrop" ] s)
+        (checkClosed at [ "title" "subtitle" "hold" "lift" "sound" "backdrop" "climb" ] s)
         (if builtins.isString (s.title or null) then true else fail "${at}.title must be a string")
         (if !(s ? subtitle) || builtins.isString s.subtitle then true else fail "${at}.subtitle must be a string")
         (ms "hold" 0 3000)
         (ms "lift" 300 5000)
         (if !(s ? sound) || (builtins.isString s.sound && (theme.assets.sounds or { }) ? ${s.sound})
         then true else fail "${at}.sound must name an entry in assets.sounds")
-        (if !(s ? backdrop) || (builtins.isString s.backdrop
-          && lib.any (x: lib.hasSuffix x (lib.toLower s.backdrop)) [ ".png" ".jpg" ".jpeg" ".webp" ]
-          && builtins.pathExists (themeDir + "/assets/${s.backdrop}")) then true
-        else fail "${at}.backdrop must name an image under assets/")
       ]
+      ++ map
+        (key:
+          if !(s ? ${key}) || (builtins.isString s.${key}
+            && lib.any (x: lib.hasSuffix x (lib.toLower s.${key})) [ ".png" ".jpg" ".jpeg" ".webp" ]
+            && builtins.pathExists (themeDir + "/assets/${s.${key}}")) then true
+          else fail "${at}.${key} must name an image under assets/")
+        [ "backdrop" "climb" ]
     )
     ++ lib.optionals ((theme.widgets.plates.settings or null) != null) (
       # Surface plates (D-076): nine-sliced pieces under assets/ behind
@@ -527,26 +531,12 @@ let
             else true;
         in
         [
-          (checkClosed "integration.boot" [ "sigil" "promptLabel" "font" "ascent" ] boot)
+          (checkClosed "integration.boot" [ "sigil" "promptLabel" "font" ] boot)
           (if boot ? sigil then file "sigil" [ ".svg" ] else fail "integration.boot.sigil is required")
           (if !(boot ? promptLabel) || builtins.isString boot.promptLabel then true
           else fail "integration.boot.promptLabel must be a string")
         ]
         ++ lib.optional (boot ? font) (file "font" [ ".ttf" ".otf" ])
-        # The ascent (D-085): the climb and the hall it ends in.
-        ++ lib.optionals (boot ? ascent) (
-          let
-            a = boot.ascent;
-            image = key:
-              if !(builtins.isPath (a.${key} or null)) then fail "integration.boot.ascent.${key} must be a path"
-              else if !(builtins.pathExists a.${key}) then fail "integration.boot.ascent.${key} does not exist"
-              else if !(lib.any (s: lib.hasSuffix s (lib.toLower (toString a.${key}))) [ ".png" ".jpg" ".jpeg" ])
-              then fail "integration.boot.ascent.${key} must be a .png or .jpg"
-              else true;
-          in
-          if !(builtins.isAttrs a) then [ (fail "integration.boot.ascent must be { climb; hall; }") ]
-          else [ (checkClosed "integration.boot.ascent" [ "climb" "hall" ] a) (image "climb") (image "hall") ]
-        )
       )
       ++ lib.optionals (theme.integration ? gtk) [
         (checkClosed "integration.gtk" [ "theme" "iconTheme" ] theme.integration.gtk)

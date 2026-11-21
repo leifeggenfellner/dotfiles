@@ -55,11 +55,6 @@ pkgs.runCommand "rice-boot"
       for image in sigil glow fog bullet ring; do
         test -s "$dir/$image.png"
       done
-      # A theme with an ascent ships both of its images (D-085).
-      if grep -q '^ascent = 1;' "$dir/$name.script"; then
-        test -s "$dir/climb.png"
-        test -s "$dir/hall.png"
-      fi
     done
   done
   touch $out

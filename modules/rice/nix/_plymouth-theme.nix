@@ -3,10 +3,6 @@
 #   sigil        single-colour SVG, recoloured to accent.primary
 #   promptLabel  copy shown above the real passphrase/question prompt
 #   font         optional TTF for prompt text (boot.plymouth.font)
-#   ascent       optional { climb; hall; } (D-085): a tall image the view
-#                climbs through after the passphrase, and the hall it
-#                arrives in; reversed on shutdown. Scaled down and
-#                quantized here so the initrd stays small.
 # Fog, the full ink ring (D-077), and the bullet glyph are generated
 # here, so a theme only supplies the sigil. Output follows the Plymouth
 # theme layout: share/plymouth/themes/<name>/.
@@ -34,35 +30,28 @@ let
     mutedColor = rgb colors.fg.muted;
     promptLabel = scriptString (boot.promptLabel or "");
     font = scriptString (theme.tokens.typography.families.display or "Sans");
-    ascent = if boot ? ascent then "1" else "0";
   };
 
-  # Ink ring, full: a blurred, wider pass that reads as ink soaking into
-  # paper and a crisp pass on top, both roughened by a gentle turbulence
-  # displacement.
+  # Ink ring, full: a soft, wider pass that reads as ink soaking into
+  # paper under a crisp circle. No displacement: noise pushed the stroke
+  # off-centre and lumpy around the sigil.
   ringSvg = pkgs.writeText "ring.svg" ''
     <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
       <defs>
-        <filter id="ink" x="-15%" y="-15%" width="130%" height="130%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="7" result="noise"/>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
         <filter id="bleed" x="-15%" y="-15%" width="130%" height="130%">
-          <feGaussianBlur stdDeviation="4" result="soft"/>
-          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="noise"/>
-          <feDisplacementMap in="soft" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+          <feGaussianBlur stdDeviation="4"/>
         </filter>
       </defs>
       <g fill="none" stroke="${accent}">
-        <circle cx="200" cy="200" r="168" stroke-width="12" stroke-opacity="0.35" filter="url(#bleed)"/>
-        <circle cx="200" cy="200" r="168" stroke-width="5" filter="url(#ink)"/>
+        <circle cx="200" cy="200" r="168" stroke-width="12" stroke-opacity="0.3" filter="url(#bleed)"/>
+        <circle cx="200" cy="200" r="168" stroke-width="4.5"/>
       </g>
     </svg>
   '';
 in
 pkgs.runCommand "plymouth-theme-${name}"
 {
-  nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick pkgs.pngquant ];
+  nativeBuildInputs = [ pkgs.resvg pkgs.imagemagick ];
   passthru = { inherit name; };
 } ''
   dir="$out/share/plymouth/themes/${name}"
@@ -89,14 +78,6 @@ pkgs.runCommand "plymouth-theme-${name}"
 
   resvg ${ringSvg} "$dir/ring.png"
 
-  ${lib.optionalString (boot ? ascent) ''
-    # Every generation's initrd lands on the EFI partition: scale down and
-    # quantize to 256 colours (dithered fog hides it), ~1.8 MB together.
-    magick ${boot.ascent.climb} -strip -filter Lanczos -resize 1024x climb-full.png
-    magick ${boot.ascent.hall} -strip -filter Lanczos -resize 1600x hall-full.png
-    pngquant --quality 65-90 --speed 1 --output "$dir/climb.png" climb-full.png
-    pngquant --quality 65-90 --speed 1 --output "$dir/hall.png" hall-full.png
-  ''}
   cp ${script} "$dir/${name}.script"
   cat > "$dir/${name}.plymouth" <<EOF
   [Plymouth Theme]
