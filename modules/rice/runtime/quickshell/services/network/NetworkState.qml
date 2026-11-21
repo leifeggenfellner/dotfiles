@@ -1,279 +1,202 @@
 pragma Singleton
 import QtQuick
-import Quickshell.Io
+import QtQml
+import Quickshell.Networking
 
 // ── NetworkState — REAL ───────────────────────────────────────
-// NetworkManager via nmcli. Quickshell has no native NM module and
-// QML has no direct DBus, so this is D-008 tier 3: EVENT-TRIGGERED
-// commands driven by a long-lived `nmcli monitor` stream. The only
-// timer is a 400ms debounce coalescing monitor bursts — no polling.
+// NetworkManager via Quickshell.Networking (D-008 tier 1): no nmcli,
+// no polling. Networks are the live WifiNetwork objects, so a row
+// reading name, signalStrength, security, known, connected, state or
+// stateChanging stays reactive on its own.
 //
-//   state:    available, busy, error, mock, connected, activeType,
-//             activeDevice, ssid, strength [0..1],
-//             networks[] {ssid, strength, secured, active},
-//             passwordNeededFor (ssid whose connect wants secrets)
-//   commands: connect(ssid, password?), disconnect(), rescan(),
-//             clearError()
+//   state:    available, busy, error, mock, connected, activeType
+//             ("wifi" | "ethernet" | ""), activeDevice, ssid,
+//             strength [0..1], connectivity ("full" | "limited" |
+//             "portal" | "none" | "unknown"), wifiAvailable,
+//             wifiEnabled, scanning, wiredPresent, wiredConnected,
+//             wiredName, wiredSpeed (Mb/s),
+//             networks[] (live WifiNetwork; connected, then known,
+//             then by signal), failures { name: reason } where
+//             reason is "secrets" | "auth" | "timeout" | "lost" |
+//             "dropped" | "unknown", passwordNeededFor (a name)
+//   commands: connect(name), connectWithPassword(name, password),
+//             disconnect(name?), forget(name), setWifiEnabled(on),
+//             setScanning(on), rescan(), cancelPassword(), clearError()
+//   helpers:  level(network) [0..1], isSecured(network),
+//             needsPassword(network)
 
 Item {
     id: network
 
     readonly property bool mock: false
-    property bool available: true
-    property bool busy: false
+    readonly property bool available: Networking.backend !== NetworkBackendType.None
     property string error: ""
 
-    property bool connected: false
-    property string activeType: ""
-    property string activeDevice: ""
-    property string ssid: ""
-    property real strength: 0
-    property var networks: []
+    readonly property var devices: Networking.devices ? Networking.devices.values : []
+    readonly property var wifiDevice: devices.find(d => d.type === DeviceType.Wifi) ?? null
+    readonly property var wiredDevice: devices.find(d => d.type === DeviceType.Wired && d.connected) ?? devices.find(d => d.type === DeviceType.Wired) ?? null
+
+    readonly property bool wifiAvailable: wifiDevice !== null && Networking.wifiHardwareEnabled
+    readonly property bool wifiEnabled: Networking.wifiEnabled
+    readonly property bool scanning: wifiDevice !== null && wifiDevice.scannerEnabled
+
+    readonly property var networks: {
+        if (!wifiDevice || !wifiEnabled)
+            return [];
+        const seen = {};
+        return wifiDevice.networks.values.filter(n => {
+            if (n.name.length === 0 || seen[n.name])
+                return false;
+            seen[n.name] = true;
+            return true;
+        }).sort((a, b) => (b.connected - a.connected) || (b.known - a.known) || (level(b) - level(a)));
+    }
+    readonly property var activeWifi: networks.find(n => n.connected) ?? null
+
+    readonly property bool wiredPresent: wiredDevice !== null && (wiredDevice.hasLink ?? false)
+    readonly property bool wiredConnected: wiredDevice !== null && wiredDevice.connected
+    readonly property string wiredName: wiredDevice ? wiredDevice.name : ""
+    readonly property int wiredSpeed: wiredDevice ? (wiredDevice.linkSpeed ?? 0) : 0
+
+    readonly property bool connected: activeWifi !== null || wiredConnected
+    readonly property string activeType: activeWifi !== null ? "wifi" : (wiredConnected ? "ethernet" : "")
+    readonly property string activeDevice: activeWifi !== null ? wifiDevice.name : (wiredConnected ? wiredDevice.name : "")
+    readonly property string ssid: activeWifi !== null ? activeWifi.name : (wiredConnected ? wiredDevice.name : "")
+    readonly property real strength: activeWifi !== null ? level(activeWifi) : (wiredConnected ? 1 : 0)
+    readonly property bool busy: networks.some(n => n.stateChanging)
+
+    readonly property string connectivity: {
+        switch (Networking.connectivity) {
+        case NetworkConnectivity.Full:
+            return "full";
+        case NetworkConnectivity.Limited:
+            return "limited";
+        case NetworkConnectivity.Portal:
+            return "portal";
+        case NetworkConnectivity.None:
+            return "none";
+        default:
+            return "unknown";
+        }
+    }
+
+    property var failures: ({})
     property string passwordNeededFor: ""
-    property string _pendingSsid: ""
-    property bool _monitorDesired: true
-    property bool _shuttingDown: false
-    property int _monitorRetryAttempt: 0
+
+    // ── helpers ───────────────────────────────────────────────
+    function level(n) {
+        const s = n ? n.signalStrength : 0;
+        return Math.max(0, Math.min(1, s > 1 ? s / 100 : s));
+    }
+    function isSecured(n) {
+        return n !== null && n.security !== WifiSecurityType.Open && n.security !== WifiSecurityType.Owe;
+    }
+    function needsPassword(n) {
+        return isSecured(n) && !n.known;
+    }
+
+    function _find(name) {
+        return networks.find(n => n.name === name) ?? null;
+    }
+    function _setFailure(name, reason) {
+        const next = Object.assign({}, failures);
+        if (reason === null)
+            delete next[name];
+        else
+            next[name] = reason;
+        failures = next;
+    }
 
     // ── commands ──────────────────────────────────────────────
-    function connect(target, password) {
-        if (busy)
+    function connect(name) {
+        const n = _find(name);
+        if (!n) {
+            error = "not in range: " + name;
             return;
-        busy = true;
+        }
         error = "";
+        _setFailure(name, null);
+        if (needsPassword(n)) {
+            passwordNeededFor = name;
+            return;
+        }
         passwordNeededFor = "";
-        _pendingSsid = target;
-        actionProc.command = (password && password.length > 0) ? ["nmcli", "device", "wifi", "connect", target, "password", password] : ["nmcli", "device", "wifi", "connect", target];
-        actionProc.running = true;
+        n.connect();
+    }
+
+    function connectWithPassword(name, password) {
+        const n = _find(name);
+        if (!n || !password || password.length === 0)
+            return;
+        error = "";
+        _setFailure(name, null);
+        passwordNeededFor = "";
+        n.connectWithPsk(password);
+    }
+
+    function disconnect(name) {
+        if (name) {
+            const n = _find(name);
+            if (n)
+                n.disconnect();
+        } else if (activeWifi) {
+            activeWifi.disconnect();
+        } else if (wiredConnected) {
+            wiredDevice.disconnect();
+        }
+    }
+
+    function forget(name) {
+        const n = _find(name);
+        if (n)
+            n.forget();
+        _setFailure(name, null);
+    }
+
+    function setWifiEnabled(on) {
+        Networking.wifiEnabled = on;
+    }
+
+    // The scanner costs power; a page turns it on while it is open.
+    function setScanning(on) {
+        if (wifiDevice)
+            wifiDevice.scannerEnabled = on;
+    }
+    function rescan() {
+        setScanning(true);
+    }
+
+    function cancelPassword() {
+        if (passwordNeededFor.length > 0)
+            _setFailure(passwordNeededFor, null);
+        passwordNeededFor = "";
     }
 
     function clearError() {
         error = "";
         passwordNeededFor = "";
+        failures = {};
     }
 
-    function disconnect() {
-        if (busy || activeDevice.length === 0)
-            return;
-        busy = true;
-        error = "";
-        actionProc.command = ["nmcli", "device", "disconnect", activeDevice];
-        actionProc.running = true;
-    }
-
-    function rescan() {
-        wifiProc.rescanMode = "yes";
-        _refresh();
-    }
-
-    // ── nmcli output helpers (-t --escape yes: fields ':'-split,
-    //    literal ':' and '\' escaped with '\') ─────────────────
-    function _splitFields(line) {
-        const fields = [];
-        let cur = "";
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i];
-            if (ch === "\\" && i + 1 < line.length) {
-                cur += line[i + 1];
-                i++;
-            } else if (ch === ":") {
-                fields.push(cur);
-                cur = "";
-            } else {
-                cur += ch;
+    // A failed attempt reports why. Missing secrets (no password yet,
+    // or a wrong one) asks for the password again.
+    Instantiator {
+        model: network.networks
+        delegate: Connections {
+            required property var modelData
+            target: modelData
+            function onConnectionFailed(reason) {
+                const why = {
+                    [ConnectionFailReason.NoSecrets]: "secrets",
+                    [ConnectionFailReason.WifiClientFailed]: "auth",
+                    [ConnectionFailReason.WifiAuthTimeout]: "timeout",
+                    [ConnectionFailReason.WifiNetworkLost]: "lost",
+                    [ConnectionFailReason.WifiClientDisconnected]: "dropped"
+                }[reason] ?? "unknown";
+                network._setFailure(modelData.name, why);
+                if (why === "secrets" && network.isSecured(modelData))
+                    network.passwordNeededFor = modelData.name;
             }
         }
-        fields.push(cur);
-        return fields;
-    }
-
-    function _refresh() {
-        if (!statusProc.running)
-            statusProc.running = true;
-    }
-
-    function _startMonitor() {
-        if (_shuttingDown || !_monitorDesired || monitorProc.running)
-            return;
-        monitorProc.running = true;
-    }
-
-    function _scheduleMonitorRetry() {
-        if (_shuttingDown || !_monitorDesired || monitorRetry.running)
-            return;
-        monitorRetry.interval = Math.min(15000, 1000 * Math.pow(2, _monitorRetryAttempt));
-        _monitorRetryAttempt = Math.min(_monitorRetryAttempt + 1, 4);
-        monitorRetry.restart();
-    }
-
-    // ── device status (which connection is active) ────────────
-    Process {
-        id: statusProc
-        command: ["nmcli", "-t", "--escape", "yes", "-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let found = null;
-                for (const line of text.split("\n")) {
-                    if (line.length === 0)
-                        continue;
-                    const f = network._splitFields(line);
-                    if (f.length < 4)
-                        continue;
-                    const [dev, type, state, conn] = f;
-                    if (state === "connected" && (type === "wifi" || type === "ethernet")) {
-                        found = {
-                            dev,
-                            type,
-                            conn
-                        };
-                        if (type === "wifi")
-                            break; // prefer wifi row for ssid/strength detail
-                    }
-                }
-                if (found) {
-                    network.connected = true;
-                    network.activeType = found.type;
-                    network.activeDevice = found.dev;
-                    if (found.type === "wifi") {
-                        wifiProc.running = true;
-                    } else {
-                        network.ssid = found.conn;
-                        network.strength = 1;
-                    }
-                } else {
-                    network.connected = false;
-                    network.activeType = "";
-                    network.activeDevice = "";
-                    network.ssid = "";
-                    network.strength = 0;
-                }
-            }
-        }
-        onExited: (code, status) => {
-            // 127 = nmcli missing, 8 = NetworkManager not running
-            network.available = (code === 0);
-        }
-    }
-
-    // ── wifi list (active ssid/strength + candidates) ─────────
-    Process {
-        id: wifiProc
-        property string rescanMode: "no"
-        command: ["nmcli", "-t", "--escape", "yes", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "device", "wifi", "list", "--rescan", rescanMode]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                wifiProc.rescanMode = "no";
-                const seen = {};
-                const list = [];
-                for (const line of text.split("\n")) {
-                    if (line.length === 0)
-                        continue;
-                    const f = network._splitFields(line);
-                    if (f.length < 4)
-                        continue;
-                    const active = f[0] === "*";
-                    const name = f[1];
-                    const sig = Math.max(0, Math.min(1, parseInt(f[2], 10) / 100 || 0));
-                    const secured = f[3].length > 0 && f[3] !== "--";
-                    if (name.length === 0)
-                        continue;
-                    if (active) {
-                        network.ssid = name;
-                        network.strength = sig;
-                    }
-                    const prev = seen[name];
-                    if (prev === undefined) {
-                        seen[name] = list.length;
-                        list.push({
-                            ssid: name,
-                            strength: sig,
-                            secured,
-                            active
-                        });
-                    } else if (sig > list[prev].strength || active) {
-                        list[prev] = {
-                            ssid: name,
-                            strength: Math.max(sig, list[prev].strength),
-                            secured,
-                            active: active || list[prev].active
-                        };
-                    }
-                }
-                list.sort((a, b) => (b.active - a.active) || (b.strength - a.strength));
-                network.networks = list;
-            }
-        }
-    }
-
-    // ── connect/disconnect runner ─────────────────────────────
-    Process {
-        id: actionProc
-        stderr: StdioCollector {
-            id: actionErr
-        }
-        onExited: (code, status) => {
-            network.busy = false;
-            if (code !== 0) {
-                const raw = actionErr.text.trim();
-                if (/[Ss]ecrets were required/.test(raw)) {
-                    // Semantic state, not prose: UI offers a password prompt.
-                    network.passwordNeededFor = network._pendingSsid;
-                } else {
-                    // One line, not the nmcli essay.
-                    const errLine = raw.split("\n").find(l => l.startsWith("Error:"));
-                    network.error = (errLine ?? raw.split("\n")[0] ?? "").replace(/^Error:\s*/, "") || ("nmcli failed (exit " + code + ")");
-                }
-            }
-            network._refresh();
-        }
-    }
-
-    // ── event stream: refresh on NetworkManager activity ──────
-    Process {
-        id: monitorProc
-        command: ["nmcli", "monitor"]
-        stdout: SplitParser {
-            onRead: {
-                network.available = true;
-                network._monitorRetryAttempt = 0;
-                debounceTimer.restart();
-            }
-        }
-        onExited: (code, status) => {
-            // NM went away (or nmcli missing); state reflects it.
-            network.available = false;
-            network._scheduleMonitorRetry();
-        }
-    }
-
-    // One monitor process at a time. Repeated failures back off from 1s
-    // to 15s; a real monitor event resets the failure history.
-    Timer {
-        id: monitorRetry
-        repeat: false
-        onTriggered: {
-            network._refresh();
-            network._startMonitor();
-        }
-    }
-
-    // Debounce: coalesces monitor line bursts into one refresh.
-    // Not a poll — it only fires after an actual NM event.
-    Timer {
-        id: debounceTimer
-        interval: 400
-        onTriggered: network._refresh()
-    }
-
-    Component.onCompleted: {
-        _refresh();
-        _startMonitor();
-    }
-    Component.onDestruction: {
-        _shuttingDown = true;
-        _monitorDesired = false;
-        monitorRetry.stop();
-        debounceTimer.stop();
-        monitorProc.running = false;
     }
 }

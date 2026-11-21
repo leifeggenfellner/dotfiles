@@ -2171,6 +2171,43 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Why: the session should open quickly and at the size the panel is
   meant for.
 
+### D-088 — The control centre: shared controls and native Wi-Fi
+
+- Date: 2026-11-21 · Status: active · Phase 1 of
+  `docs/design/control-centre.md` · Migrates NetworkState per D-008
+- The user found the bar popouts hard to use and unreactive, and chose a
+  control centre with drill-in pages, themed tray menus (phase 5), and the
+  full scope (audio devices and apps, Bluetooth pairing, power profiles,
+  brightness and quick toggles), network first.
+- `NetworkState` moves from `nmcli` to `Quickshell.Networking`. Networks
+  are the live NetworkManager objects, so each row's joining, connected
+  and failed states update on their own. New: Wi-Fi switch, scanner on
+  only while the Wi-Fi page is open, forget, PSK connect, connectivity
+  (portal, limited), wired link and speed, and per-network failure
+  reasons (`failures`). The glance's state names are unchanged. A secured
+  network that isn't saved asks for its password before any attempt; a
+  wrong one asks again.
+- Shared controls in `components/` (theme-blind, tokens only):
+  `PageStack`, `PageHeader`, `ToggleTile`, `Toggle`, `ValueSlider`,
+  `StateRow`, `PasswordPrompt`, `Spinner`, `SignalBars`. Rows list through
+  `ScriptModel`, so a rescan updates them in place and keeps focus.
+- The system popout is now the control centre: Wi-Fi and Bluetooth tiles
+  (body toggles, chevron opens the page), the volume slider (drag, wheel,
+  ←/→, icon mutes), the tray when the theme keeps it there. The Wi-Fi page
+  lists every network (scrolls, no cap); the Bluetooth page lists paired
+  devices with type icons, battery and pending states until phase 2.
+- Keyboard: ↑/↓ walk the focus chain, Enter or Space activates, → opens a
+  tile's page or a row's actions, ←/Backspace/Esc goes back, Esc closes.
+  `BarPopout`'s content loader takes focus so keys reach it.
+- Defaults gain icons for the kit (chevrons, more, mic, eye, device types).
+- Verified: checks; headless sway against the real NetworkManager and
+  BlueZ, keyboard-driven: tiles, the scanned list, row actions, the
+  password prompt and cancelling it, back navigation, the Bluetooth page.
+  Gotcha: each `wtype` run unplugs its virtual keyboard on exit, which
+  drops the popout's focus; send a whole key sequence in one `wtype`.
+- Why: every state on screen is the system's, and the popouts work from
+  the keyboard.
+
 ---
 
 ## Legacy imports

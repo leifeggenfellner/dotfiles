@@ -8,8 +8,10 @@ import Quickshell.Bluetooth
 // objects (name, address, connected, paired, batteryAvailable,
 // battery) — property reads stay reactive.
 //
-//   state:    available, busy, error, mock, powered, devices[]
+//   state:    available, busy (adapter switching), error, mock,
+//             powered, devices[]
 //   commands: setPowered(on), connect(address), disconnect(address)
+//   helpers:  pending(device) (connecting or disconnecting)
 
 Item {
     id: bluetooth
@@ -17,7 +19,7 @@ Item {
     readonly property bool mock: false
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property bool available: adapter !== null
-    readonly property bool busy: false
+    readonly property bool busy: available && (adapter.state === BluetoothAdapterState.Enabling || adapter.state === BluetoothAdapterState.Disabling)
     property string error: ""
 
     readonly property bool powered: available ? adapter.enabled : false
@@ -25,6 +27,10 @@ Item {
         if (!available || !adapter.devices)
             return [];
         return adapter.devices.values.filter(d => d.paired || d.connected);
+    }
+
+    function pending(d) {
+        return d !== null && (d.state === BluetoothDeviceState.Connecting || d.state === BluetoothDeviceState.Disconnecting);
     }
 
     function setPowered(on) {

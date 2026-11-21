@@ -1450,5 +1450,13 @@ Concretized as D-087.
 
 - ✅ The login climb and hall removed; the fog lifts onto the desktop.
 - ✅ The built-in panel has a static Hyprland rule from the registry.
-- Next: corner ornaments (prototype), then brass-framed launcher,
-  dashboard and notifications.
+
+## Phase 74 — The control centre: controls and Wi-Fi ✅
+
+Concretized as D-088; phase 1 of `docs/design/control-centre.md`.
+
+- ✅ NetworkState on Quickshell.Networking (nmcli retired).
+- ✅ Shared controls; the control-centre home, Wi-Fi and Bluetooth pages.
+- ✅ Keyboard navigation through the popout.
+- Verified: checks, headless keyboard run on real NetworkManager/BlueZ.
+- Next: phase 2, Bluetooth discovery and pairing.

@@ -5,3 +5,12 @@ TrayGrid 1.0 TrayGrid.qml
 GaugeIcon 1.0 GaugeIcon.qml
 FadeIn 1.0 FadeIn.qml
 PlateFrame 1.0 PlateFrame.qml
+Spinner 1.0 Spinner.qml
+SignalBars 1.0 SignalBars.qml
+Toggle 1.0 Toggle.qml
+ToggleTile 1.0 ToggleTile.qml
+ValueSlider 1.0 ValueSlider.qml
+StateRow 1.0 StateRow.qml
+PasswordPrompt 1.0 PasswordPrompt.qml
+PageHeader 1.0 PageHeader.qml
+PageStack 1.0 PageStack.qml

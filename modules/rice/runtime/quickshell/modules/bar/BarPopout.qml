@@ -200,6 +200,8 @@ PanelWindow {
 
             Loader {
                 id: content
+                // Keys reach the content (control-centre pages, D-088).
+                focus: true
                 x: Theme.metrics.space.lg
                 y: Theme.metrics.space.lg
                 sourceComponent: host.active ? host.active.popout : null
