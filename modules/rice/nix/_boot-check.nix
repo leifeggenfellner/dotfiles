@@ -1,6 +1,7 @@
 # D-044 rebuild-time surfaces, for every bundled theme: the console
 # palette has 16 entries that stay readable on its own background, and
-# themes with `integration.boot` build a complete Plymouth script theme.
+# themes with `integration.boot` build a complete Plymouth script theme
+# and, with `integration.boot.menu`, a boot-menu wallpaper (D-092).
 { pkgs }:
 let
   inherit (pkgs) lib;
@@ -12,6 +13,10 @@ let
   splashes = lib.mapAttrsToList
     (themeName: theme: import ./_plymouth-theme.nix { inherit pkgs lib; } { inherit themeName theme; })
     (lib.filterAttrs (_: theme: theme ? integration.boot) themes);
+  menus = lib.mapAttrsToList
+    (themeName: theme: import ./_boot-menu.nix { inherit pkgs lib; } { inherit themeName theme; })
+    (lib.filterAttrs (_: theme: theme ? integration.boot.menu) themes);
+  menuWallpapers = lib.concatMap (style: style.wallpapers) menus;
 in
 pkgs.runCommand "rice-boot"
 {
@@ -56,6 +61,9 @@ pkgs.runCommand "rice-boot"
         test -s "$dir/$image.png"
       done
     done
+  done
+  for wallpaper in ${lib.escapeShellArgs menuWallpapers}; do
+    test -s "$wallpaper"
   done
   touch $out
 ''

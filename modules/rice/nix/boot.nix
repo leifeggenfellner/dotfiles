@@ -1,8 +1,11 @@
 # Rebuild-time system surfaces for the configured rice theme (D-044):
-# the Plymouth boot splash from `integration.boot`, and the Linux
+# the Plymouth boot splash from `integration.boot`, the Limine boot
+# menu from `integration.boot.menu` (D-092), and the Linux
 # virtual-console palette from `palette.legacy`. Both follow
 # `rice.theme` and its specialisations (each boot entry carries its own
-# initrd and kernel parameters); neither can follow `rice-switch`.
+# initrd and kernel parameters); neither can follow `rice-switch`. The
+# boot menu runs before any entry is chosen, so it wears the top-level
+# theme only, and only on hosts that boot with Limine.
 # Themes without `integration.boot` keep the host's existing splash.
 _: {
   flake.nixosModules.rice-boot =
@@ -30,6 +33,10 @@ _: {
           } // lib.optionalAttrs (boot ? font) {
             font = "${boot.font}";
           };
+        })
+        (lib.mkIf (boot ? menu && config.boot.loader.limine.enable) {
+          boot.loader.limine.style = assert validated;
+            import ./_boot-menu.nix { inherit pkgs lib; } { themeName = cfg.theme; inherit theme; };
         })
       ]);
     };

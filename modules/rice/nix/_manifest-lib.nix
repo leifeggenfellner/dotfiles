@@ -516,21 +516,32 @@ let
       ++ lib.optionals (theme.integration ? boot) (
         let
           boot = theme.integration.boot;
-          file = key: suffixes:
-            let v = boot.${key}; in
-            if !(builtins.isPath v) then fail "integration.boot.${key} must be a path"
-            else if !(builtins.pathExists v) then fail "integration.boot.${key} does not exist: ${toString v}"
+          menu = boot.menu;
+          fileIn = at: set: key: suffixes:
+            let v = set.${key}; in
+            if !(builtins.isPath v) then fail "${at}.${key} must be a path"
+            else if !(builtins.pathExists v) then fail "${at}.${key} does not exist: ${toString v}"
             else if !(lib.any (s: lib.hasSuffix s (lib.toLower (toString v))) suffixes)
-            then fail "integration.boot.${key} must be one of ${lib.concatStringsSep " " suffixes}"
+            then fail "${at}.${key} must be one of ${lib.concatStringsSep " " suffixes}"
             else true;
+          file = fileIn "integration.boot" boot;
         in
         [
-          (checkClosed "integration.boot" [ "sigil" "promptLabel" "font" ] boot)
+          (checkClosed "integration.boot" [ "sigil" "promptLabel" "font" "menu" ] boot)
           (if boot ? sigil then file "sigil" [ ".svg" ] else fail "integration.boot.sigil is required")
           (if !(boot ? promptLabel) || builtins.isString boot.promptLabel then true
           else fail "integration.boot.promptLabel must be a string")
         ]
         ++ lib.optional (boot ? font) (file "font" [ ".ttf" ".otf" ])
+        # Boot menu (D-092): Limine reads JPEG, PNG and BMP wallpapers.
+        ++ lib.optionals (boot ? menu) (
+          [ (checkClosed "integration.boot.menu" [ "wallpaper" "branding" ] menu) ]
+          ++ lib.optional (menu ? wallpaper)
+            (fileIn "integration.boot.menu" menu "wallpaper" [ ".jpg" ".jpeg" ".png" ])
+          ++ lib.optional (menu ? branding)
+            (if builtins.isString menu.branding then true
+            else fail "integration.boot.menu.branding must be a string")
+        )
       )
       ++ lib.optionals (theme.integration ? gtk) [
         (checkClosed "integration.gtk" [ "theme" "iconTheme" ] theme.integration.gtk)

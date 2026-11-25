@@ -841,6 +841,12 @@ in
       sigil = ./assets/pathways/fool.svg;
       promptLabel = "The Threshold asks";
       font = ./lockscreen/lotm/font/Cinzel-Bold.ttf;
+      # Boot menu (D-092): the Fool's chair above the gray fog, dimmed
+      # behind the entries; the title and countdown are the one gold.
+      menu = {
+        wallpaper = ./assets/wallpapers/klein_chair.jpg;
+        branding = "Above the Gray Fog";
+      };
     };
 
     # Terminal tools themed from these tokens (D-051): btop's meters run

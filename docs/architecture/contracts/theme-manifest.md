@@ -162,6 +162,10 @@ and exposes it exclusively through the `Theme` facade.
       sigil = ./assets/<file>.svg;   # required: single-colour SVG, recoloured to accent.primary
       promptLabel = "<copy>";        # optional: shown above the real passphrase prompt
       font = ./<file>.ttf;           # optional: Plymouth prompt font
+      menu = {                       # optional (D-092): Limine boot menu, Limine hosts only
+        wallpaper = ./<file>.jpg;    # optional: JPEG/PNG, dimmed at build
+        branding = "<copy>";         # optional: menu title, in accent.primary
+      };
     };
   };
 }

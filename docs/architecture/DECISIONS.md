@@ -797,7 +797,8 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 - Recovery: the splash never blocks unlock. Typed input reaches
   `systemd-ask-password` even if the script fails to draw, other boot
   entries (e.g. `rice-cyberpunk`) use the stock splash, and the
-  systemd-boot editor (`e`) accepts `plymouth.enable=0` for a text boot.
+  boot-menu editor (`e`; Limine since D-092) accepts `plymouth.enable=0`
+  for a text boot.
 - Why: the first and last thing a machine shows should already belong to the
   theme, and both surfaces are cheap, static, and fully known at rebuild.
 
@@ -2300,6 +2301,39 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   and `--dry-run` resolves.
 - Why: the user found the generated gate image too obviously AI-made
   and the opening doors gimmicky, and the centred layout looked broken.
+
+### D-092 — The boot menu wears the configured theme (Limine)
+
+- Date: 2026-11-25 · Status: active · Extends D-044
+- Hosts boot with Limine instead of systemd-boot (`hardware-base`),
+  since systemd-boot's menu cannot be styled. `maxGenerations = 5`
+  keeps the old `configurationLimit`, and the editor stays on so D-044's
+  `plymouth.enable=0` recovery still works.
+- Themes opt in with `integration.boot.menu = { wallpaper?; branding?; }`
+  (a JPEG/PNG path and a title string), validated by `mkThemeManifest`
+  and, like the rest of `integration.boot`, never copied into manifest
+  JSON. `rice-boot` turns it into `boot.loader.limine.style` through
+  `_boot-menu.nix`, only when the host enables Limine:
+  - the wallpaper is cropped to 1920×1200, washed 30 % toward
+    `bg.sunken` and vignetted at build time;
+  - the terminal palette is the console palette (D-044), the text is
+    `fg.primary` on a `bg.sunken` panel just over half opaque, with a
+    96 px margin fading over 48 px;
+  - the title and the countdown digit are `accent.primary`, the help
+    text `fg.muted`.
+- Limine draws the selected entry in reverse video, so the selection bar
+  is always the text colour (parchment with umber ink for LoTM). A gold
+  bar would mean gold text on every entry, so gold stays on the title
+  and countdown only.
+- The menu runs before any boot entry is picked, so it follows the
+  top-level `rice.theme` only; specialisations still carry their own
+  splash and console palette (D-044).
+- Verified: `rice-boot` and `rice-manifest-validation` checks (the check
+  now also builds every opted-in menu wallpaper); shitbox builds;
+  stickytop evaluates (it has no LoTM menu, so it gets Limine's NixOS
+  defaults); a mockup of the menu over the built wallpaper. Not yet
+  verified on a real boot.
+- Why: the user asked for a themed boot-option menu.
 
 ---
 

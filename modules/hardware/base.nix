@@ -66,9 +66,13 @@ _: {
             canTouchEfiVariables = true;
             efiSysMountPoint = "/boot/efi";
           };
-          systemd-boot = {
+          # Limine, not systemd-boot, so the boot menu can wear the rice
+          # theme (D-092). The editor stays on for recovery (D-044's
+          # `plymouth.enable=0`), as systemd-boot's was.
+          limine = {
             enable = true;
-            configurationLimit = 5;
+            maxGenerations = 5;
+            enableEditor = true;
           };
         };
         plymouth = {
