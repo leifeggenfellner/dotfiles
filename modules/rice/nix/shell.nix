@@ -292,6 +292,20 @@ _: {
             export RICE_LOCK_LOTM_THEME_PATH="${lotm-lockscreen-theme}"
             export RICE_LOCK_THEME_PATH="$RICE_LOCK_LOTM_THEME_PATH"
             [ -z "''${RICE_LOCK_CHIME:-}" ] && [ -n "''${RICE_LOTM_LOCK_CHIME:-}" ] && export RICE_LOCK_CHIME="$RICE_LOTM_LOCK_CHIME"
+            # The backdrop is the live desktop wallpaper (D-091); stills
+            # only, RICE_LOCK_IMAGE stands in otherwise.
+            if [ -z "''${RICE_LOTM_LOCK_WALLPAPER:-}" ] && [ -r "$HOME/.config/wallpaper/current" ]; then
+              live_wallpaper=$(head -n 1 "$HOME/.config/wallpaper/current")
+              case "$live_wallpaper" in
+                *.png|*.jpg|*.jpeg|*.webp|*.PNG|*.JPG|*.JPEG|*.WEBP)
+                  [ -f "$live_wallpaper" ] && export RICE_LOTM_LOCK_WALLPAPER="$live_wallpaper" ;;
+              esac
+            fi
+            prefs="''${XDG_STATE_HOME:-$HOME/.local/state}/rice/prefs.json"
+            if [ -z "''${RICE_LOCK_REDUCE_MOTION:-}" ] && [ -r "$prefs" ] \
+              && [ "$($JQ -r '.motion.reduce // false' "$prefs" 2>/dev/null)" = "true" ]; then
+              export RICE_LOCK_REDUCE_MOTION=1
+            fi
             # Export theme-driven colours for the LOTM lockscreen. Main.qml
             # falls back to its native LOTM literals when
             # these are unset, so unmanifested themes still look right.

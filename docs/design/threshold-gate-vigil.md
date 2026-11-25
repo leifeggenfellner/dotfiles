@@ -84,6 +84,9 @@ towering stone pillars, where the Tarot Club meets.
 
 ## 3. Chanis Gate: the lockscreen
 
+> Superseded by D-091 (2026-11-25): the lock now wears the desktop
+> wallpaper with a slow drift; the gate art and opening are removed.
+
 Locking closes Chanis Gate. It is named for Archbishop Chanis, who founded
 the modern Nighthawks, and it stands under the central Evernight cathedral
 of every major city. Behind it lie the sealed artifacts, the Keepers and

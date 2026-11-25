@@ -1476,3 +1476,12 @@ Concretized as D-090; phase 3 of `docs/design/control-centre.md`.
 - ✅ Live levels while the page is open.
 - Verified: checks, headless with a silent test stream.
 - Next: phase 4, power profiles, brightness and do-not-disturb.
+
+## Phase 77 — The lock wears the desktop wallpaper ✅
+
+Concretized as D-091; replaces phase 70's Chanis Gate.
+
+- ✅ The live wallpaper as the lock backdrop, with a slow drift and dust
+  motes, still under reduced motion.
+- ✅ The right-aligned clock and passphrase again; a quiet fade on unlock.
+- Verified: headless preview frames, lint, launcher build.

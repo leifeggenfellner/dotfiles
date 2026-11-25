@@ -20,12 +20,12 @@ Rectangle {
         return v && String(v).length > 0 ? String(v) : fallback;
     }
 
-    // Wayland Cursor Fix; movement also wakes the gate scene.
+    // Wayland Cursor Fix; movement also wakes the backdrop.
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.ArrowCursor
         hoverEnabled: true
-        onPositionChanged: gate.wake()
+        onPositionChanged: scene.wake()
         z: -1
     }
 
@@ -38,7 +38,7 @@ Rectangle {
     // Polish switches.
     // - RICE_LOTM_LOCK_FONT_FAMILY: swap the bundled Cinzel-Bold for a system family.
     // - RICE_LOTM_LOCK_POWER_ROW=off: hide REBOOT/SHUTDOWN (rice dashboard already exposes these).
-    // - RICE_LOTM_LOCK_OVERLAY=on: composite a subtle accent-tinted fog above the video, under the UI.
+    // - RICE_LOTM_LOCK_OVERLAY=on: composite a subtle accent-tinted fog above the backdrop, under the UI.
     readonly property string _fontFamily: {
         const override = _env("RICE_LOTM_LOCK_FONT_FAMILY", "");
         return override.length > 0 ? override : serifFont.name;
@@ -47,13 +47,14 @@ Rectangle {
         const v = _env("RICE_LOTM_LOCK_POWER_ROW", "on").toLowerCase();
         return ["off", "0", "false", "no", "hide"].indexOf(v) < 0;
     }
-    // Chanis Gate (D-084): the painted gate scene is the backdrop
-    // unless RICE_LOTM_LOCK_SCENE=video asks for the theme's video.
-    readonly property bool _gateEnabled: _env("RICE_LOTM_LOCK_SCENE", "gate").toLowerCase() !== "video"
-    readonly property bool gateMode: _gateEnabled && gate.ready
+    // The desktop wallpaper is the backdrop (D-091) unless
+    // RICE_LOTM_LOCK_SCENE=video asks for the theme's video.
+    readonly property bool _videoScene: _env("RICE_LOTM_LOCK_SCENE", "wallpaper").toLowerCase() === "video"
+    readonly property bool _reduceMotion: ["1", "on", "true", "yes"].indexOf(_env("RICE_LOCK_REDUCE_MOTION", "").toLowerCase()) >= 0
     // How long the host should hold the lock after success, so the
-    // gate can open before the desktop returns.
-    readonly property int unlockDuration: gateMode ? gate.openDuration : 0
+    // lock can fade out before the desktop returns.
+    readonly property int unlockDuration: _reduceMotion ? 0 : 450
+    property bool leaving: false
     readonly property bool _overlayEnabled: {
         const v = _env("RICE_LOTM_LOCK_OVERLAY", "off").toLowerCase();
         return ["on", "1", "true", "yes"].indexOf(v) >= 0;
@@ -160,42 +161,32 @@ Rectangle {
         z: -1000
     }
 
-    // Prefer the active theme's lockscreen video (rice manifest
-    // -> RICE_LOCK_VIDEO), then a LOTM-specific override. If no video
-    // is available, rice-lock-screen exports RICE_LOCK_IMAGE.
-    readonly property string _bgSource: {
-        if (root._gateEnabled)
-            return "";
-        const v = _env("RICE_LOCK_VIDEO", _env("RICE_LOTM_LOCK_BG", ""));
-        if (v.length === 0)
-            return "";
-        return v.startsWith("file://") || v.indexOf("://") > 0 ? v : "file://" + v;
-    }
-    readonly property string _fallbackImageSource: {
-        const v = _env("RICE_LOCK_IMAGE", "");
+    function _fileUrl(v) {
         if (v.length === 0)
             return "";
         return v.startsWith("file://") || v.indexOf("://") > 0 ? v : "file://" + v;
     }
 
-    Image {
+    // The theme's lockscreen video (rice manifest -> RICE_LOCK_VIDEO, or
+    // RICE_LOTM_LOCK_BG), only when RICE_LOTM_LOCK_SCENE=video.
+    readonly property string _bgSource: root._videoScene ? _fileUrl(_env("RICE_LOCK_VIDEO", _env("RICE_LOTM_LOCK_BG", ""))) : ""
+    // rice-lock-screen exports the live desktop wallpaper; the theme's
+    // lock image stands in when there is none or it fails to load.
+    readonly property string _fallbackImageSource: _fileUrl(_env("RICE_LOCK_IMAGE", ""))
+    readonly property string _wallpaperSource: {
+        const live = _fileUrl(_env("RICE_LOTM_LOCK_WALLPAPER", ""));
+        return live.length > 0 ? live : root._fallbackImageSource;
+    }
+
+    WallpaperScene {
+        id: scene
         anchors.fill: parent
-        source: root._fallbackImageSource
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        smooth: true
-        mipmap: true
-        visible: root._fallbackImageSource.length > 0 && !root.gateMode
+        visible: !root._videoScene
+        source: root._wallpaperSource
+        fallback: root._fallbackImageSource
+        reduceMotion: root._reduceMotion
+        leaving: root.leaving
         z: -600
-    }
-
-    GateScene {
-        id: gate
-        anchors.fill: parent
-        visible: root._gateEnabled
-        // Every medallion blazes as the gate opens.
-        lit: opening ? 7 : Math.min(root.passwordText.length, 7)
-        z: -550
     }
 
     MediaPlayer {
@@ -218,7 +209,6 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         z: -300
-        opacity: root.gateMode ? 0.45 : 1
         gradient: Gradient {
             GradientStop {
                 position: 0.0
@@ -231,9 +221,42 @@ Rectangle {
         }
     }
 
-    // Phase 4: subtle rice atmosphere layered over the video. Two
+    // The clock and the passphrase sit on the right: shade that side
+    // so they read over any wallpaper.
+    Rectangle {
+        anchors.fill: parent
+        z: -290
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop {
+                position: 0.45
+                color: "#00000000"
+            }
+            GradientStop {
+                position: 1.0
+                color: "#80000000"
+            }
+        }
+    }
+
+    // On unlock everything settles into black before the desktop returns.
+    Rectangle {
+        anchors.fill: parent
+        z: 5000
+        color: "#000000"
+        opacity: root.leaving ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: root.unlockDuration
+                easing.type: Easing.InOutSine
+            }
+        }
+    }
+
+    // Phase 4: subtle rice atmosphere layered over the backdrop. Two
     // slow-drifting accent-tinted bands, negligible cost, off by
-    // default. z sits above the video/gradient (-300) but below UI.
+    // default. z sits above the backdrop/gradient (-300) but below UI.
     Item {
         id: riceOverlay
         anchors.fill: parent
@@ -288,12 +311,6 @@ Rectangle {
     // Clock
     Item {
         id: clockWidget
-        opacity: gate.opening ? 0 : 1
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-            }
-        }
         anchors.right: parent.right
         anchors.rightMargin: 100 * s
         anchors.top: parent.top
@@ -435,22 +452,12 @@ Rectangle {
     }
 
     // Identity
-    // In gate mode the passphrase is spoken at the seal: centred under
-    // the lock plate. Otherwise bottom right.
     Column {
         id: identityStack
-        anchors.right: root.gateMode ? undefined : parent.right
+        anchors.right: parent.right
         anchors.rightMargin: 100 * s
-        anchors.bottom: root.gateMode ? undefined : parent.bottom
+        anchors.bottom: parent.bottom
         anchors.bottomMargin: 100 * s
-        anchors.horizontalCenter: root.gateMode ? parent.horizontalCenter : undefined
-        y: root.gateMode ? gate.plateBottom + 22 * s : 0
-        opacity: gate.opening ? 0 : 1
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-            }
-        }
         spacing: 12 * s
         width: 450 * s
 
@@ -483,11 +490,10 @@ Rectangle {
                 font.family: root._fontFamily
                 font.letterSpacing: 4 * s
                 color: (root.userMenuOpen || uMa.containsMouse) ? root.gold : root.fg
-                anchors.right: root.gateMode ? undefined : parent.right
-                anchors.horizontalCenter: root.gateMode ? parent.horizontalCenter : undefined
-                font.pixelSize: root.gateMode ? 30 * s : 48 * s
+                anchors.right: parent.right
+                font.pixelSize: 48 * s
                 scale: uMa.containsMouse ? 1.05 : 1.0
-                transformOrigin: root.gateMode ? Item.Center : Item.Right
+                transformOrigin: Item.Right
                 Behavior on color {
                     ColorAnimation {
                         duration: 250
@@ -623,7 +629,7 @@ Rectangle {
                 id: passInput
                 anchors.fill: parent
                 verticalAlignment: TextInput.AlignVCenter
-                horizontalAlignment: root.gateMode ? TextInput.AlignHCenter : TextInput.AlignRight
+                horizontalAlignment: TextInput.AlignRight
                 echoMode: TextInput.Password
                 passwordCharacter: "✦"
                 inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhSensitiveData | Qt.ImhNoAutoUppercase
@@ -661,16 +667,15 @@ Rectangle {
                 }
                 onTextChanged: {
                     typingAnim.restart();
-                    gate.wake();
+                    scene.wake();
                 }
                 onAccepted: doLogin()
 
                 Text {
-                    anchors.right: root.gateMode ? undefined : parent.right
+                    anchors.right: parent.right
                     anchors.rightMargin: root.authPending ? 44 * s : 0
-                    anchors.horizontalCenter: root.gateMode ? parent.horizontalCenter : undefined
                     anchors.verticalCenter: parent.verticalCenter
-                    text: root.authPending ? "V E R I F Y I N G" : (root.gateMode ? "S P E A K   T H E   W O R D" : "W A I T I N G   F O R   P A S S W O R D")
+                    text: root.authPending ? "V E R I F Y I N G" : "W A I T I N G   F O R   P A S S W O R D"
                     font.family: root._fontFamily
                     font.pixelSize: 12 * s
                     font.letterSpacing: 3 * s
@@ -775,7 +780,7 @@ Rectangle {
         Text {
             id: errText
             width: parent.width
-            horizontalAlignment: root.gateMode ? Text.AlignHCenter : Text.AlignRight
+            horizontalAlignment: Text.AlignRight
             height: 15 * s
             verticalAlignment: Text.AlignTop
             color: root.authPending ? root.gold : "#ff4444"
@@ -789,12 +794,6 @@ Rectangle {
 
     // Logistics
     Column {
-        opacity: gate.opening ? 0 : 1
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-            }
-        }
         anchors.left: parent.left
         anchors.leftMargin: 100 * s
         anchors.bottom: parent.bottom
@@ -1020,14 +1019,11 @@ Rectangle {
         function onLoginSucceeded() {
             root.setAuthPending(false);
             root.clearError();
-            if (root.gateMode)
-                gate.open();
+            root.leaving = true;
         }
         function onLoginFailed() {
             root.setAuthPending(false);
-            root.setErrorMessage(root.gateMode ? "THE GATE HOLDS" : "ACCESS DENIED");
-            if (root.gateMode)
-                gate.deny();
+            root.setErrorMessage("ACCESS DENIED");
             root.setPasswordText("");
             passInput.wasClicked = true;
             refocusPasswordInput();

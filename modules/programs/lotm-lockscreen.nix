@@ -42,7 +42,7 @@ _: {
           type = lib.types.bool;
           default = false;
           description = ''
-            Composite two slow accent-tinted fog bands above the video
+            Composite two slow accent-tinted fog bands above the backdrop
             (below the UI) for a subtle rice atmosphere.
           '';
         };

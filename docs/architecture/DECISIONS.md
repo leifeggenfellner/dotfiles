@@ -2045,7 +2045,7 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
 
 ### D-084 — The lock is Chanis Gate
 
-- Date: 2026-11-21 · Status: active · Extends D-037 · Phase 2 of the
+- Date: 2026-11-21 · Status: superseded by D-091 · Extends D-037 · Phase 2 of the
   Threshold, Gate and Vigil brief
 - The LoTM lock variant's backdrop is a painted scene, not a video: the
   user generated `lockscreen/lotm/gate/base.png` (2912×1632, Midjourney,
@@ -2270,6 +2270,36 @@ store` process. The Satchel surface opens on demand, refreshes history, copies
   icon and label, the live microphone level.
 - Why: switching to headphones or quieting one app should not need
   pavucontrol.
+
+### D-091 — The lock wears the desktop wallpaper
+
+- Date: 2026-11-25 · Status: active · Supersedes D-084 · Extends D-037
+- The LoTM lock's backdrop is the live desktop wallpaper
+  (`~/.config/wallpaper/current`, stills only), which `rice-lock-screen`
+  exports as `RICE_LOTM_LOCK_WALLPAPER`; the theme's lock image
+  (`RICE_LOCK_IMAGE`) stands in when it is missing or fails to load.
+  `RICE_LOTM_LOCK_SCENE=video` still brings back the theme's video.
+- `lockscreen/lotm/WallpaperScene.qml` animates it a little: a slow
+  drift (zoom 1.05→1.09 and a small pan, 80 s each way) and 22 dust
+  motes rising over 20–36 s. Motion pauses after 30 s without input
+  and stays off with `motion.reduce` in prefs (exported as
+  `RICE_LOCK_REDUCE_MOTION`).
+- The gate is gone: `GateScene.qml` and `gate/base.png` are removed,
+  with the medallions, the refusal rattle and the opening. A failed
+  word reads "ACCESS DENIED" again.
+- Main.qml returns to its right-aligned layout (clock top right, name
+  and passphrase bottom right). The gate's centred variant left the
+  dots left of centre and the rule and sigil to the right. A horizontal
+  shade darkens the right side so the text reads over any wallpaper.
+- Unlock: the picture eases in 2.5 % while the lock fades to black over
+  `unlockDuration` (450 ms, 0 with reduced motion); the host still holds
+  the session lock for it (D-084's `ThemeLock` mechanism stays).
+- Verified: headless preview (a FloatingWindow copy of the preview
+  host) over the current wallpaper: rest, drift between frames, a
+  refusal, the accepted word and the fade; lint; the launcher builds
+  and `--dry-run` resolves.
+- Why: the user found the generated gate image too obviously AI-made
+  and the opening doors gimmicky, and the centred layout looked broken.
 
 ---
 
