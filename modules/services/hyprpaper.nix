@@ -6,7 +6,9 @@ _: {
       awww = "${pkgs.awww}/bin/awww";
       wallpaper-apply = import ../rice/nix/_wallpaper-package.nix { inherit pkgs awww; };
 
-      # Boot-time wallpaper restore: persisted path, with rice-aware
+      # Boot-time wallpaper: on the first start after each boot, a random
+      # pick from the active rice theme's wallpapers. Otherwise the
+      # persisted path, with rice-aware
       # recovery when it went stale (store paths in the persist file
       # die on rebuild+GC — the assets hash changes whenever any theme
       # asset does; nh clean collects the old one). Recovery mirrors
@@ -33,21 +35,42 @@ _: {
           SAVED=$(cat "$PERSIST_FILE")
         fi
 
+        INDEX="$HOME/.config/rice/themes.json"
+        POINTER="''${XDG_STATE_HOME:-$HOME/.local/state}/rice/active"
+        PREFS="''${XDG_STATE_HOME:-$HOME/.local/state}/rice/prefs.json"
+        NAME=""
+        if [ -r "$INDEX" ]; then
+          [ -r "$POINTER" ] && NAME=$(cat "$POINTER")
+          if [ -z "$NAME" ] || ! $JQ -e --arg n "$NAME" '.themes[$n]' "$INDEX" >/dev/null 2>&1; then
+            NAME=$($JQ -r '.default // empty' "$INDEX")
+          fi
+        fi
+
+        # First start after a boot: a random wallpaper from the active
+        # theme's list, avoiding the last one when there is a choice.
+        # Later logins in the same boot keep it (keyed on the boot id).
         WP=""
-        if [ -n "$SAVED" ] && [ -f "$SAVED" ]; then
+        BOOT_FILE="$HOME/.config/wallpaper/boot-id"
+        BOOT_ID=$(cat /proc/sys/kernel/random/boot_id 2>/dev/null || true)
+        if [ -n "$NAME" ] && [ -n "$BOOT_ID" ] && [ "$(cat "$BOOT_FILE" 2>/dev/null || true)" != "$BOOT_ID" ]; then
+          mapfile -t CHOICES < <($JQ -r --arg n "$NAME" --arg cur "$SAVED" \
+            '($cur | split("/") | last) as $b | .themes[$n].wallpapers // [] | map(select((split("/") | last) != $b)) | .[]' "$INDEX" \
+            | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done)
+          if [ "''${#CHOICES[@]}" -gt 0 ]; then
+            WP="''${CHOICES[RANDOM % ''${#CHOICES[@]}]}"
+          fi
+          mkdir -p "$(dirname "$BOOT_FILE")"
+          printf '%s\n' "$BOOT_ID" > "$BOOT_FILE"
+        fi
+
+        if [ -n "$WP" ]; then
+          :
+        elif [ -n "$SAVED" ] && [ -f "$SAVED" ]; then
           WP="$SAVED"
         else
           # Persisted path is gone — recover through the rice state
           # (skipped gracefully on non-rice hosts: no index, no jq run).
-          INDEX="$HOME/.config/rice/themes.json"
-          POINTER="''${XDG_STATE_HOME:-$HOME/.local/state}/rice/active"
-          PREFS="''${XDG_STATE_HOME:-$HOME/.local/state}/rice/prefs.json"
           if [ -r "$INDEX" ]; then
-            NAME=""
-            [ -r "$POINTER" ] && NAME=$(cat "$POINTER")
-            if [ -z "$NAME" ] || ! $JQ -e --arg n "$NAME" '.themes[$n]' "$INDEX" >/dev/null 2>&1; then
-              NAME=$($JQ -r '.default // empty' "$INDEX")
-            fi
             if [ -n "$NAME" ]; then
               if [ -n "$SAVED" ]; then
                 WP=$($JQ -r --arg n "$NAME" --arg b "$(basename "$SAVED")" \
