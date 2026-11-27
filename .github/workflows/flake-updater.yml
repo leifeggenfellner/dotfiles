@@ -4,9 +4,6 @@ on:
   schedule:
     - cron: "0 2 * * 0"
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   generate_matrix:
     runs-on: ubuntu-latest
@@ -14,7 +11,7 @@ jobs:
       nixos_configurations: ${{ steps.gen_nixos_configurations.outputs.nixos_configurations }}
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: "${{ secrets.TEST_TOKEN }}"
       - name: Install nix
@@ -38,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: "${{ secrets.TEST_TOKEN }}"
       - name: Install nix
@@ -52,7 +49,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= leifeggenfellner.cachix.org-1:+eB88ym7mLK0BmusC9IXqGNOj4niilnp3EI1T7Yi6fY= hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=
           install_url: https://releases.nixos.org/nix/nix-2.25.0/install
       - name: Set up cachix
-        uses: cachix/cachix-action@v15
+        uses: cachix/cachix-action@v17
         with:
           name: leifeggenfellner
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
@@ -63,7 +60,7 @@ jobs:
       - name: Update the flake
         run: nix flake update
       - name: Store flake.lock
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flake_lock
           path: flake.lock
@@ -112,7 +109,7 @@ jobs:
           df -h
 
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: "${{ secrets.TEST_TOKEN }}"
       - name: Install nix
@@ -129,12 +126,12 @@ jobs:
             max-silent-time = 1800
           install_url: https://releases.nixos.org/nix/nix-2.25.0/install
       - name: Set up cachix
-        uses: cachix/cachix-action@v15
+        uses: cachix/cachix-action@v17
         with:
           name: leifeggenfellner
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Restore flake.lock
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: flake_lock
       - name: Build NixOS Configuration
@@ -165,7 +162,7 @@ jobs:
           df -h
 
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: "${{ secrets.TEST_TOKEN }}"
       - name: Install nix
@@ -179,12 +176,12 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= leifeggenfellner.cachix.org-1:+eB88ym7mLK0BmusC9IXqGNOj4niilnp3EI1T7Yi6fY= hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=
           install_url: https://releases.nixos.org/nix/nix-2.25.0/install
       - name: Set up cachix
-        uses: cachix/cachix-action@v15
+        uses: cachix/cachix-action@v17
         with:
           name: leifeggenfellner
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Restore flake.lock
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: flake_lock
       - name: Check flake
@@ -196,11 +193,11 @@ jobs:
     needs: [update_flake, build_flake, check_flake]
     steps:
       - name: Clone repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: "${{ secrets.TEST_TOKEN }}"
       - name: Restore flake.lock
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: flake_lock
       - name: Set up git
