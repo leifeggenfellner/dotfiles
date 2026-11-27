@@ -34,9 +34,6 @@ _: {
         enable = true;
         package = pkgs.waybar.overrideAttrs (oa: {
           mesonFlags = (oa.mesonFlags or [ ]) ++ [ "-Dexperimental=true" ];
-          # Hyprland's Lua config takes Lua for `dispatch`; waybar still
-          # sends `dispatch workspace N` on workspace clicks.
-          patches = (oa.patches or [ ]) ++ [ ./waybar-hyprland-lua-dispatch.patch ];
         });
         systemd.enable = true;
         settings.mainBar = {
