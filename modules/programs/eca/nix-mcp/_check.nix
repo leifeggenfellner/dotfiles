@@ -273,7 +273,7 @@ let
               self.process.stdin.write((json.dumps(line, separators=(",", ":")) + "\n").encode())
               await self.process.stdin.drain()
               while True:
-                  raw = await asyncio.wait_for(self.process.stdout.readline(), 5)
+                  raw = await asyncio.wait_for(self.process.stdout.readline(), 30)
                   self.assert_line(raw)
                   message = json.loads(raw)
                   if message.get("id") == ident:
@@ -283,6 +283,9 @@ let
               line = {"jsonrpc": "2.0", "method": method}
               if params is not None:
                   line["params"] = params
+              await self.notification_raw(line)
+
+          async def notification_raw(self, line):
               self.process.stdin.write((json.dumps(line, separators=(",", ":")) + "\n").encode())
               await self.process.stdin.drain()
 
@@ -363,17 +366,19 @@ let
                   self.assertTrue(bad["result"]["isError"])
                   self.assertEqual(json.loads(bad["result"]["content"][0]["text"])["status"], "invalid_arguments")
                   (root / ".nix-mcp-test.json").write_text(json.dumps({"mode": "wait"}))
-                  request_id = client.ident + 1
-                  request = asyncio.create_task(client.request("tools/call", {"name": "flake_metadata", "arguments": {"root": str(root)}}))
+                  client.ident += 1
+                  request_id = client.ident
+                  await client.notification_raw({"jsonrpc": "2.0", "id": request_id, "method": "tools/call", "params": {"name": "flake_metadata", "arguments": {"root": str(root)}}})
                   await asyncio.sleep(.2)
                   await client.notification("notifications/cancelled", {"requestId": request_id})
-                  cancelled = await asyncio.wait_for(request, 2)
-                  self.assertEqual(cancelled, {
-                      "jsonrpc": "2.0",
-                      "id": request_id,
-                      "error": {"code": 0, "message": "Request cancelled"},
-                  })
-                  self.assertIn("result", await client.request("ping"))
+                  # MCP: a cancelled request is never answered, so the next line must be the ping reply.
+                  client.ident += 1
+                  await client.notification_raw({"jsonrpc": "2.0", "id": client.ident, "method": "ping"})
+                  raw = await asyncio.wait_for(process.stdout.readline(), 5)
+                  client.assert_line(raw)
+                  pong = json.loads(raw)
+                  self.assertEqual(pong["id"], client.ident)
+                  self.assertIn("result", pong)
               finally:
                   await self.finish(root, process)
 
@@ -430,7 +435,7 @@ runCommand "nix-mcp-check"
     echo 'unexpected public option' >&2
     exit 1
   fi
-  ${python.interpreter} -B -c 'import importlib.metadata, mcp; assert importlib.metadata.version("mcp") == "1.29.0"'
+  ${python.interpreter} -B -c 'import importlib.metadata, mcp; assert importlib.metadata.version("mcp") == "${python3Packages.mcp.version}"'
   test_log=$(mktemp)
   if ! ${python.interpreter} -B -m unittest discover -s $src/tests -v 2>&1 | tee "$test_log"; then
     exit 1

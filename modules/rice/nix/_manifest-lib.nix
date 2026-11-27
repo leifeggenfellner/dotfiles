@@ -516,7 +516,7 @@ let
       ++ lib.optionals (theme.integration ? boot) (
         let
           boot = theme.integration.boot;
-          menu = boot.menu;
+          inherit (boot) menu;
           fileIn = at: set: key: suffixes:
             let v = set.${key}; in
             if !(builtins.isPath v) then fail "${at}.${key} must be a path"

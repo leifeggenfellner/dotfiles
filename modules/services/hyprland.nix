@@ -6,10 +6,6 @@
       hyprlandConfig = config.environment.desktop.hyprland.configPath;
     in
     {
-      imports = [
-        inputs.hyprland.nixosModules.default
-      ];
-
       config = lib.mkIf (config.environment.desktop.windowManager == "hyprland") {
         environment = {
           systemPackages = [
@@ -28,7 +24,6 @@
             withUWSM = true;
             package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
             portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-            plugins = [ ];
           };
 
           fish.loginShellInit = ''

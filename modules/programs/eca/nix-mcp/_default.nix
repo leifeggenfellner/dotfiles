@@ -21,7 +21,7 @@ let
 
       from mcp.server.lowlevel import Server
       from mcp.server.stdio import stdio_server
-      from mcp.types import CallToolResult, TextContent, Tool
+      from mcp.types import CallToolResult, ListToolsResult, TextContent, Tool
 
       ATTR = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*(\.[A-Za-z_][A-Za-z0-9_-]*)*$")
       SBT_TASK = re.compile(r"^([A-Za-z0-9_.-]+/)?(compile|test|testQuick|scalafixAll( --check)?|scalafmt|scalafmtAll|scalafmtCheckAll)$")
@@ -286,15 +286,13 @@ let
 
 
       def make_server(app):
-          server = Server("nix-mcp")
-          @server.list_tools()
-          async def list_tools():
-              return [Tool(name=t, description="Safe Nix operation", inputSchema=app.schema(t)) for t in TOOLS]
-          @server.call_tool(validate_input=False)
-          async def call_tool(name: str, arguments: dict):
-              result = app.envelope(name, status="invalid_arguments", error={"message": "unknown tool"}) if name not in TOOLS else await app.execute(name, arguments or {})
-              return CallToolResult(content=[TextContent(type="text", text=json.dumps(result, separators=(",", ":")))], isError=result["status"] != "ok")
-          return server
+          async def list_tools(ctx, params):
+              return ListToolsResult(tools=[Tool(name=t, description="Safe Nix operation", input_schema=app.schema(t)) for t in TOOLS])
+          async def call_tool(ctx, params):
+              name = params.name
+              result = app.envelope(name, status="invalid_arguments", error={"message": "unknown tool"}) if name not in TOOLS else await app.execute(name, params.arguments or {})
+              return CallToolResult(content=[TextContent(type="text", text=json.dumps(result, separators=(",", ":")))], is_error=result["status"] != "ok")
+          return Server("nix-mcp", on_list_tools=list_tools, on_call_tool=call_tool)
 
 
       async def main(config, nix):
